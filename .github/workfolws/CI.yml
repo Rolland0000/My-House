@@ -1,0 +1,10 @@
+name: CI pipeline
+
+on:
+  pull_request:
+    branches: [main]
+
+job:
+  ci-checks:
+    name: Run CI checks
+    runs-on: ubuntu-latest
