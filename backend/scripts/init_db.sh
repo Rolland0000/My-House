@@ -24,7 +24,7 @@ DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 
-# Launch postgres using Docker with maximum number of connection set 1000
+# Launch postgres using Docker with maximum number of connection pool set 1000
 docker run \
 -e POSTGRES_USER=${DB_USER} \
 -e POSTGRES_PASSWORD=${DB_PASSWORD} \
