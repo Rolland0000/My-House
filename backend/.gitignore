@@ -1,4 +1,2 @@
-# Rust / Backend
-/backend/target/
-/backend/**/*.rs.bk
-/backend/Cargo.lock
+target/
+Cargo.lock
