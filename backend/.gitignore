@@ -1,3 +1,2 @@
-
-backend/**/*.rs.bk
-backend/Cargo.lock
+target/
+/**/*.rs.bk
