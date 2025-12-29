@@ -5,7 +5,7 @@ on:
     branches: [main]
   push:
 
-job:
+jobs:
   ci-checks-format-build-doc-test:
     name: Run CI checks
     runs-on: ubuntu-latest
