@@ -1,0 +1,8 @@
+app_port: 0
+
+database:
+  db_username: "Rolland_0"
+  db_password: "m@vie_321"
+  db_port: 5434
+  db_host: "127.0.0.1"
+  db_name: "my_house"
