@@ -35,7 +35,16 @@ impl DatabaseSettings {
     /// let url = db_settings.get_database_url();
     /// assert_eq!(url, "postgres://user:pass@localhost:5432/mydb");
     /// ```
+    #[tracing::instrument(name = "Building database URL", skip(self))]
     pub fn get_database_url(&self) -> String {
+        tracing::debug!(
+            "Constructing database URL for {}@{}:{}/{}",
+            self.db_username,
+            self.db_host,
+            self.db_port,
+            self.db_name
+        );
+        
         format!(
             "postgres://{}:{}@{}:{}/{}",
             self.db_username, self.db_password, self.db_host, self.db_port, self.db_name
@@ -70,12 +79,26 @@ impl Settings {
     /// println!("App will run on port: {}", settings.app_port);
     /// 
     /// ```
+    #[tracing::instrument(name = "Loading configuration")]
     pub fn get_configs() -> Result<Settings, ConfigError> {
+        tracing::info!("Loading application configuration");
+        tracing::debug!("Reading from config/configuration file");
+        
         let settings = Config::builder()
             .add_source(File::with_name("config/configuration"))
             .add_source(Environment::with_prefix("DATABASE").separator("_"))
-            .build()?
-            .try_deserialize::<Settings>()?;
+            .build()
+            .map_err(|e| {
+                tracing::error!("Failed to build configuration: {:?}", e);
+                e
+            })?
+            .try_deserialize::<Settings>()
+            .map_err(|e| {
+                tracing::error!("Failed to deserialize configuration: {:?}", e);
+                e
+            })?;
+
+        tracing::info!("Configuration loaded successfully");
 
         Ok(settings)
     }
