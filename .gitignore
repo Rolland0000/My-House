@@ -1,0 +1,16 @@
+# Rust
+target/
+
+# Node
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Generated types and specs
+frontend/openapi.json
+frontend/src/shared/api/types.ts
