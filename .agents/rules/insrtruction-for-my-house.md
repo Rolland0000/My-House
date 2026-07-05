@@ -57,6 +57,7 @@ and validated. All phases are now in scope: architecture, code, tests, deploymen
 - typecrypt-react-prompt-rules.md
 - agent-react-typescrypt-rules.md
 - ticket-creation-rules.md
+By the end of the first prompt response of a new session, list all skills/rules and/or MCP include in the session
 
 ## Open Blockers
 

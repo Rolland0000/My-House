@@ -33,7 +33,9 @@ backend/
 ├── migrations/                        # sqlx migrate — fichiers horodatés .sql
 │   └── 0001_init.sql
 └── src/
-    ├── main.rs                        # Bootstrap, AppState, router global, DI, /health, graceful shutdown
+    ├── main.rs                        # Bootstrap, AppState, , DI
+    │
+    ├── app_server.rs                  # router global, /health, graceful shutdown
     │
     ├── config/
     │   └── mod.rs                     # AppConfig — chargement et validation des env vars
@@ -426,16 +428,16 @@ CREATE TRIGGER tg_owner_requests_updated_at
 
 ### 2.3 Notes de Conception
 
-| Décision                                 | Détail                                                                              |
-| ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| `users.first_name / last_name` nullable | Compte créé à la vérification OTP avant complétion du profil                    |
-| `users.phone` nullable                  | Renseigné lors de la demande owner — obligatoire pour le rôle owner               |
-| OTP non stocké en DB                     | Géré exclusivement dans moka (in-memory, TTL 10 min)                               |
-| `storage_key` vs `url`                | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé |
-| `is_cover` index partiel unique         | PostgreSQL garantit l'unicité de la cover sans contrainte applicative               |
-| `owner_requests` index partiel          | Bloque un second `pending` sans empêcher plusieurs demandes historiques           |
-| `identity_documents` JSONB              | Tableau de références storage — accès restreint admin, jamais exposé en statique (cf. ARCHITECTURE.md §7.3) |
-| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token `revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
+| Décision                                          | Détail                                                                                                                                                                                        |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users.first_name / last_name` nullable          | Compte créé à la vérification OTP avant complétion du profil                                                                                                                              |
+| `users.phone` nullable                           | Renseigné lors de la demande owner — obligatoire pour le rôle owner                                                                                                                         |
+| OTP non stocké en DB                              | Géré exclusivement dans moka (in-memory, TTL 10 min)                                                                                                                                         |
+| `storage_key` vs `url`                         | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé                                                                                                           |
+| `is_cover` index partiel unique                  | PostgreSQL garantit l'unicité de la cover sans contrainte applicative                                                                                                                         |
+| `owner_requests` index partiel                   | Bloque un second`pending` sans empêcher plusieurs demandes historiques                                                                                                                      |
+| `identity_documents` JSONB                       | Tableau de références storage — accès restreint admin, jamais exposé en statique (cf. ARCHITECTURE.md §7.3)                                                                              |
+| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token`revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
 
 ---
 
@@ -500,9 +502,9 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.0 Health Check
 
-| Méthode | Endpoint  | Auth | Description                                          |
-| -------- | --------- | ---- | ----------------------------------------------------- |
-| `GET`  | `/health` | Non  | Hors `/api/v1`. Vérifie la connectivité PostgreSQL. |
+| Méthode | Endpoint    | Auth | Description                                            |
+| -------- | ----------- | ---- | ------------------------------------------------------ |
+| `GET`  | `/health` | Non  | Hors`/api/v1`. Vérifie la connectivité PostgreSQL. |
 
 ```json
 // Response 200
@@ -516,12 +518,12 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.1 Auth
 
-| Méthode | Endpoint              | Auth | Description                                                                                                   |
-| -------- | --------------------- | ---- | ------------------------------------------------------------------------------------------------------------- |
-| `POST` | `/auth/otp/request` | Non  | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                         |
-| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. Crée le compte si nouvel email. Retourne `{ access_token, is_new_user }` + cookie `refresh_token`. |
-| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie, **révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
-| `POST` | `/auth/logout`      | JWT  | Révoque le refresh token courant et efface le cookie.                                                          |
+| Méthode | Endpoint              | Auth   | Description                                                                                                                                                                                                                            |
+| -------- | --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/auth/otp/request` | Non    | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                                                                                                                                                  |
+| `POST` | `/auth/otp/verify`  | Non    | Vérifie le code. Crée le compte si nouvel email. Retourne`{ access_token, is_new_user }` + cookie `refresh_token`.                                                                                                               |
+| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie,**révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
+| `POST` | `/auth/logout`      | JWT    | Révoque le refresh token courant et efface le cookie.                                                                                                                                                                                 |
 
 **`POST /auth/otp/request`**
 
@@ -559,13 +561,13 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.2 Users
 
-| Méthode   | Endpoint                    | Auth | Rôle      | Description                       |
-| ---------- | --------------------------- | ---- | ---------- | ---------------------------------- |
-| `GET`    | `/users/me`               | JWT  | tous       | Profil de l'utilisateur connecté |
-| `PUT`    | `/users/me`               | JWT  | tous       | Mise à jour du profil            |
+| Méthode   | Endpoint                    | Auth | Rôle      | Description                                                                         |
+| ---------- | --------------------------- | ---- | ---------- | ----------------------------------------------------------------------------------- |
+| `GET`    | `/users/me`               | JWT  | tous       | Profil de l'utilisateur connecté                                                   |
+| `PUT`    | `/users/me`               | JWT  | tous       | Mise à jour du profil                                                              |
 | `DELETE` | `/users/me`               | JWT  | tous       | Suppression du compte — cascade DB + nettoyage storage (listings, médias, avatar) |
-| `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage |
-| `GET`    | `/users/me/owner-request` | JWT  | `seeker` | Statut de la demande en cours     |
+| `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage      |
+| `GET`    | `/users/me/owner-request` | JWT  | `seeker` | Statut de la demande en cours                                                       |
 
 **`GET /users/me` — Response 200**
 
@@ -603,8 +605,8 @@ Mêmes contraintes de validation que les photos de listing (magic bytes, formats
 
 ### 4.2bis Owner Requests
 
-| Méthode | Endpoint           | Auth | Rôle      | Description                                          |
-| -------- | ------------------ | ---- | ---------- | ----------------------------------------------------- |
+| Méthode | Endpoint            | Auth | Rôle      | Description                                             |
+| -------- | ------------------- | ---- | ---------- | ------------------------------------------------------- |
 | `POST` | `/owner-requests` | JWT  | `seeker` | Soumet la demande complète en un seul appel (atomique) |
 
 **`POST /owner-requests`**
@@ -768,8 +770,8 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ### 4.6 Contact
 
-| Méthode | Endpoint                  | Auth | Rôle                 | Description                        |
-| -------- | ------------------------- | ---- | --------------------- | ---------------------------------- |
+| Méthode | Endpoint                  | Auth | Rôle                   | Description                        |
+| -------- | ------------------------- | ---- | ----------------------- | ---------------------------------- |
 | `GET`  | `/listings/:id/contact` | JWT  | `seeker` ou `owner` | Révèle le téléphone de l'owner |
 
 ```json
@@ -784,17 +786,17 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ### 4.7 Admin
 
-| Méthode   | Endpoint                      | Auth            | Description                                                |
-| ---------- | ----------------------------- | --------------- | ---------------------------------------------------------- |
-| `GET`    | `/admin/listings`           | JWT (`admin`) | Liste tous les biens. Query :`?status=&page=`            |
-| `PATCH`  | `/admin/listings/:id`       | JWT (`admin`) | Modifier statut d'un bien                                  |
-| `DELETE` | `/admin/listings/:id`       | JWT (`admin`) | Supprimer un bien                                          |
-| `GET`    | `/admin/users`              | JWT (`admin`) | Liste tous les utilisateurs. Query :`?role=&page=`       |
-| `PATCH`  | `/admin/users/:id`          | JWT (`admin`) | Suspendre / réactiver `{ is_active: bool }`             |
-| `DELETE` | `/admin/users/:id`          | JWT (`admin`) | Supprimer un compte                                        |
-| `GET`    | `/admin/owner-requests`     | JWT (`admin`) | Liste les demandes. Query :`?status=pending&page=`       |
+| Méthode   | Endpoint                                        | Auth            | Description                                                                                                                    |
+| ---------- | ----------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/admin/listings`                             | JWT (`admin`) | Liste tous les biens. Query :`?status=&page=`                                                                                |
+| `PATCH`  | `/admin/listings/:id`                         | JWT (`admin`) | Modifier statut d'un bien                                                                                                      |
+| `DELETE` | `/admin/listings/:id`                         | JWT (`admin`) | Supprimer un bien                                                                                                              |
+| `GET`    | `/admin/users`                                | JWT (`admin`) | Liste tous les utilisateurs. Query :`?role=&page=`                                                                           |
+| `PATCH`  | `/admin/users/:id`                            | JWT (`admin`) | Suspendre / réactiver`{ is_active: bool }`                                                                                  |
+| `DELETE` | `/admin/users/:id`                            | JWT (`admin`) | Supprimer un compte                                                                                                            |
+| `GET`    | `/admin/owner-requests`                       | JWT (`admin`) | Liste les demandes. Query :`?status=pending&page=`                                                                           |
 | `GET`    | `/admin/owner-requests/:id/documents/:doc_id` | JWT (`admin`) | Lecture contrôlée d'un document d'identité — proxie le storage (exception au principe no-proxy, cf. ARCHITECTURE.md §7.3) |
-| `PATCH`  | `/admin/owner-requests/:id` | JWT (`admin`) | Statuer `{ status: "approved"\|"rejected", admin_note? }` |
+| `PATCH`  | `/admin/owner-requests/:id`                   | JWT (`admin`) | Statuer`{ status: "approved"\|"rejected", admin_note? }`                                                                      |
 
 ---
 
@@ -841,15 +843,15 @@ Chaque module backend contient un fichier `tests.rs` déclaré dans `mod.rs` sou
 
 ### 6.3 Cas à Couvrir par Module
 
-| Module       | Cas critiques à tester                                                                          |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée |
+| Module       | Cas critiques à tester                                                                                                                                                                                                                                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte`is_active=false` rejeté sur route protégée                                                                     |
 | `users`    | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
-| `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                |
-| `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée |
-| `search`   | Recherche vide retourne feed complet, filtres combinés cohérents, pagination correcte          |
-| `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                   |
-| `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin |
+| `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                                                                                                                                                                                                             |
+| `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée                                                                                                                                                                        |
+| `search`   | Recherche vide retourne feed complet, filtres combinés cohérents, pagination correcte                                                                                                                                                                                                       |
+| `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                                                                                                                                                                                                                |
+| `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin                                                                                                                                                                                             |
 
 ---
 
@@ -1042,25 +1044,25 @@ SMTP_FROM=noreply@myhouse.app
 
 ## 9. Exclusions MVP
 
-| Feature                       | Module concerné         | Cible                  |
-| ----------------------------- | ------------------------ | ---------------------- |
-| Messagerie in-app             | `contact`              | V2                     |
-| Notifications push (FCM/APNs) | `notifications`        | V2                     |
-| Carte et géolocalisation     | `listings`, `search` | V2                     |
-| Favoris                       | Nouveau module           | V2                     |
-| OAuth (Google, Facebook)      | `auth`                 | V2                     |
-| Application mobile native     | —                       | V2                     |
-| Tableau de bord admin complet | `admin`                | V2                     |
-| Redis                         | `infra`                | V2 si moka insuffisant |
-| Stockage S3-compatible (MinIO/AWS S3) | `infra/storage` | V2 — `LocalFsStorage` au MVP |
-| Conformité RGPD complète    | Transverse               | Avant go-live EU       |
-| Analytics et reporting        | Nouveau module           | V2                     |
+| Feature                               | Module concerné         | Cible                          |
+| ------------------------------------- | ------------------------ | ------------------------------ |
+| Messagerie in-app                     | `contact`              | V2                             |
+| Notifications push (FCM/APNs)         | `notifications`        | V2                             |
+| Carte et géolocalisation             | `listings`, `search` | V2                             |
+| Favoris                               | Nouveau module           | V2                             |
+| OAuth (Google, Facebook)              | `auth`                 | V2                             |
+| Application mobile native             | —                       | V2                             |
+| Tableau de bord admin complet         | `admin`                | V2                             |
+| Redis                                 | `infra`                | V2 si moka insuffisant         |
+| Stockage S3-compatible (MinIO/AWS S3) | `infra/storage`        | V2 —`LocalFsStorage` au MVP |
+| Conformité RGPD complète            | Transverse               | Avant go-live EU               |
+| Analytics et reporting                | Nouveau module           | V2                             |
 
 ---
 
 ## Historique des Révisions
 
-| Version | Date      | Description                                                             |
-| ------- | --------- | ----------------------------------------------------------------------- |
-| 1.0     | Juin 2025 | Document initial — issu de la refactorisation ARCHITECTURE_MVP.md v2.0 |
-| 1.1     | Juin 2026 | Renommage `seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
+| Version | Date      | Description                                                                                                                                                                                                             |
+| ------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | Juin 2025 | Document initial — issu de la refactorisation ARCHITECTURE_MVP.md v2.0                                                                                                                                                 |
+| 1.1     | Juin 2026 | Renommage`seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
