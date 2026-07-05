@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 ---
 
 ## Project
@@ -19,9 +19,9 @@ Target markets: France + francophone Africa. Two-person team, web-first (mobile 
 
 Authoritative specs — defer to these over general best practices when they conflict:
 
-- `ARCHITECTURE.md` (arc42, v2.1) — modules, ADRs, deployment
-- `TECHNICAL_SPEC_MVP.md` (v1.1) — DDL, API contract, folder structure
-- `MyHouse_CahierDesCharges_v2_0.docx` — functional requirements (ISO 29148)
+- `docs/ARCHITECTURE.md` (arc42, v2.1) — modules, ADRs, deployment
+- `docs/TECHNICAL_SPEC_MVP.md` (v1.1) — DDL, API contract, folder structure
+- `docs/MyHouse_CahierDesCharges_v2_0.docx` — functional requirements (ISO 29148)
 
 ## Key Decisions Already Locked — Do Not Re-litigate
 
