@@ -44,6 +44,7 @@ impl std::error::Error for ConfigError {}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AppEnv {
     Development,
+    Staging,
     Production,
 }
 
@@ -51,10 +52,52 @@ impl AppEnv {
     fn parse(raw: &str) -> Result<Self, String> {
         match raw {
             "development" => Ok(AppEnv::Development),
+            "staging" => Ok(AppEnv::Staging),
             "production" => Ok(AppEnv::Production),
             other => Err(format!(
-                "expected \"development\" or \"production\", got \"{other}\""
+                "expected \"development\", \"staging\" or \"production\", got \"{other}\""
             )),
+        }
+    }
+    /// Returns `true` when running in local development mode.
+    ///
+    /// Use this guard to conditionalize dev-only logic that must never reach
+    /// staging or production (e.g. dotenvy loading, dev-only routes).
+    #[inline]
+    pub fn is_dev(&self) -> bool {
+        matches!(self, AppEnv::Development)
+    }
+    /// Read `APP_ENV` directly from the **real** process environment,
+    /// bypassing dotenvy.  Call this as the very first step in `main`.
+    ///
+    /// Defaults to `Dev` if the variable is absent — safe for local dev,
+    /// conservative for CI (CI should always set it explicitly).
+    pub fn from_real_env() -> Result<Self, ConfigError> {
+        match env::var("APP_ENV").as_deref() {
+            Ok("development") => Ok(AppEnv::Development),
+            Ok("staging") => Ok(AppEnv::Staging),
+            Ok("production")    => Ok(AppEnv::Production),
+            Err(_)        => {
+                // Absent → default to Dev so `cargo run` works out of the box
+                // without requiring developers to set it manually.
+                Ok(AppEnv::Development)
+            }
+            Ok(other) => Err(ConfigError::Invalid {
+                key: "APP_ENV".to_string(),
+                reason: format!(
+                    "expected \"development\", \"staging\", or \"production\", got \"{other}\""
+                ),
+            }),
+        }
+    }
+}
+
+impl fmt::Display for AppEnv {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AppEnv::Development => write!(f, "development"),
+            AppEnv::Staging => write!(f, "staging"),
+            AppEnv::Production => write!(f, "production"),
         }
     }
 }
