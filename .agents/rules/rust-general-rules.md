@@ -37,7 +37,7 @@ globs: ["**/*.rs", "Cargo.toml", "Cargo.lock"]
 - Propagate cancellation through futures rather than hiding it in detached tasks.
 
 ## Testing and Quality
-- Run `cargo check`, `cargo fmt` and `cargo clippy` before delivery.
+- Run `cargo check`, `cargo fmt` and `cargo clippy` before delivery (not cargo test or any other command that could take anough time).
 - Add unit tests for pure logic and integration tests for public behavior.
 - Use property tests for parsers, serializers, and state machines when useful.
 - Use benchmarks only after identifying a real performance question.

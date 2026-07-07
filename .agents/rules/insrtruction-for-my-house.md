@@ -59,6 +59,8 @@ and validated. All phases are now in scope: architecture, code, tests, deploymen
 - ticket-creation-rules.md
 By the end of the first prompt response of a new session, list all skills/rules and/or MCP include in the session
 
+## Implementation depending on environment conditions (dev, staging, prod)
+ Always make sure to respect implementaion depending of environment scope which is selected by the APP_ENV variable in .env. Code that will be always for local development phase, will always be selected when APP_ENV=development.
 ## Open Blockers
 
 - Monetization model undefined — flag if a decision depends on it

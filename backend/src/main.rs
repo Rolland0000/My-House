@@ -1,20 +1,66 @@
 use std::net::SocketAddr;
 
-use backend_my_house::{app_server::AppServer, app_state::AppState};
+use backend_my_house::{
+    app_server::AppServer,
+    app_state::AppState,
+    config::{AppConfig, AppEnv},
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[tokio::main]
 async fn main() {
-    // Initialise structured logging — level driven by RUST_LOG env var (default: info).
+    // ── 1. Resolve deployment phase from the REAL environment ─────────────────
+    //
+    // APP_ENV must be set by the OS / Docker / CI before the process
+    // starts.  It is the ONLY variable that is never loaded from a .env file.
+    //
+    //   APP_ENV=development      → developer machine  (loads .env)
+    //   APP_ENV=staging  → staging server      (no .env)
+    //   APP_ENV=prod     → production          (no .env)
+    //
+    // Absence defaults to `dev` so `cargo run` works without any extra setup.
+    let app_env = AppEnv::from_real_env().unwrap_or_else(|err| {
+        eprintln!("FATAL — APP_ENV: {err}");
+        std::process::exit(1);
+    });
+
+    // ── 2. Load .env ONLY in dev ──────────────────────────────────────────────
+    //
+    // In staging/prod, variables are injected by the orchestrator; loading a
+    // .env file would silently override them — a security and ops hazard.
+    //
+    // `dotenv_override` lets real env vars take precedence over .env values,
+    // which is the correct 12-factor behaviour when both sources are present.
+    if app_env.is_dev() {
+        match dotenvy::dotenv_override() {
+            Ok(path) => eprintln!("[dev] Loaded .env from {}", path.display()),
+            Err(e)   => eprintln!("[dev] No .env file found ({e}), using OS environment"),
+        }
+    }
+
+    // ── 3. Initialise structured logging ─────────────────────────────────────
+    //
+    // Logging is initialised after dotenvy so that RUST_LOG from .env is
+    // already in the environment when EnvFilter reads it.
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let state = AppState::new();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    // ── 4. Fail-fast config loading ───────────────────────────────────────────
+    //
+    // app_env is passed in so AppConfig stores it without a second env::var.
+    let config = AppConfig::from_env().unwrap_or_else(|err| {
+        eprintln!("FATAL — configuration error: {err}");
+        std::process::exit(1);
+    });
 
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.app_port));
+
+    // ── 5. Build shared state and start the server ────────────────────────────
+    let state = AppState::new(config);
     let server = AppServer::new(state, addr);
+
     if let Err(e) = server.run().await {
         eprintln!("Server failed: {e}");
         std::process::exit(1);
