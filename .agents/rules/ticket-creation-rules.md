@@ -18,7 +18,7 @@ Stack: [crate/lib names only — no selection rationale]
 Dependencies: MH-XX (if any)
 
 **Context**
-1-3 sentences: why this ticket exists, what it enables.
+1-3 sentences: why this ticket exists, what it enables. Clear and understandable description of the task the ticket handle.
 
 **Acceptance Criteria**
 - [ ] Concrete, testable outcome
