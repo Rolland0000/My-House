@@ -79,10 +79,10 @@ fn admin_router() -> Router<AppState> {
 /// `.layer()` on the final router so that they run for every request
 /// regardless of role.
 pub fn build_router(state: AppState) -> Router {
-    let public  = public_router();
-    let seeker  = seeker_router();
-    let owner   = owner_router();
-    let admin   = admin_router();
+    let public = public_router();
+    let seeker = seeker_router();
+    let owner = owner_router();
+    let admin = admin_router();
 
     Router::new()
         .merge(public)

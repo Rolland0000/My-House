@@ -4,6 +4,7 @@ use backend_my_house::{
     app_server::AppServer,
     app_state::AppState,
     config::{AppConfig, AppEnv},
+    infra::db,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
@@ -34,7 +35,7 @@ async fn main() {
     if app_env.is_dev() {
         match dotenvy::dotenv_override() {
             Ok(path) => eprintln!("[dev] Loaded .env from {}", path.display()),
-            Err(e)   => eprintln!("[dev] No .env file found ({e}), using OS environment"),
+            Err(e) => eprintln!("[dev] No .env file found ({e}), using OS environment"),
         }
     }
 
@@ -57,8 +58,17 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.app_port));
 
-    // ── 5. Build shared state and start the server ────────────────────────────
-    let state = AppState::new(config);
+    // ── 5. Connect to PostgreSQL and run pending migrations ──────────────────
+    let db_pool = db::connect_db(&config.database_url)
+        .await
+        .unwrap_or_else(|err| {
+            eprintln!("FATAL — database connection failed: {err}");
+            std::process::exit(1);
+        });
+    tracing::info!("Connected to PostgreSQL — migrations applied");
+
+    // ── 6. Build shared state and start the server ────────────────────────────
+    let state = AppState::new(config, db_pool);
     let server = AppServer::new(state, addr);
 
     if let Err(e) = server.run().await {

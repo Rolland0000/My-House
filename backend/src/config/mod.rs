@@ -76,8 +76,8 @@ impl AppEnv {
         match env::var("APP_ENV").as_deref() {
             Ok("development") => Ok(AppEnv::Development),
             Ok("staging") => Ok(AppEnv::Staging),
-            Ok("production")    => Ok(AppEnv::Production),
-            Err(_)        => {
+            Ok("production") => Ok(AppEnv::Production),
+            Err(_) => {
                 // Absent → default to Dev so `cargo run` works out of the box
                 // without requiring developers to set it manually.
                 Ok(AppEnv::Development)
@@ -116,9 +116,7 @@ impl StorageProvider {
         match raw {
             "local" => Ok(StorageProvider::Local),
             "s3" => Ok(StorageProvider::S3),
-            other => Err(format!(
-                "expected \"local\" or \"s3\", got \"{other}\""
-            )),
+            other => Err(format!("expected \"local\" or \"s3\", got \"{other}\"")),
         }
     }
 }
@@ -332,8 +330,14 @@ mod tests {
     fn set_valid_env() {
         env::set_var("APP_PORT", "3000");
         env::set_var("APP_ENV", "development");
-        env::set_var("DATABASE_URL", "postgresql://myhouse:myhouse@localhost:5432/myhouse");
-        env::set_var("JWT_SECRET", "a-super-secret-key-that-is-at-least-32-bytes-long!");
+        env::set_var(
+            "DATABASE_URL",
+            "postgresql://myhouse:myhouse@localhost:5432/myhouse",
+        );
+        env::set_var(
+            "JWT_SECRET",
+            "a-super-secret-key-that-is-at-least-32-bytes-long!",
+        );
         env::set_var("JWT_ACCESS_TTL_SECONDS", "900");
         env::set_var("JWT_REFRESH_TTL_DAYS", "30");
         env::set_var("OTP_TTL_SECONDS", "600");
