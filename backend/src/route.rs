@@ -1,6 +1,8 @@
+use axum::routing::get;
 use axum::Router;
 
 use crate::app_state::AppState;
+use crate::infra::health;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -20,6 +22,7 @@ use crate::app_state::AppState;
 /// Examples: OTP request/verify, public listing browse, health check.
 fn public_router() -> Router<AppState> {
     Router::new()
+        .route("/health", get(health::check))
     // TODO EP-02: .route("/api/v1/auth/otp/request", post(auth::request_otp))
     // TODO EP-02: .route("/api/v1/auth/otp/verify", post(auth::verify_otp))
     // TODO EP-03: .route("/api/v1/listings",         get(listings::list_public))
