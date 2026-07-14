@@ -3,57 +3,60 @@ trigger: manual
 ---
 
 ---
+
 description: "rules for code development with guidelines integration."
-globs: **/*
+globs:
 ---
-1. **Verify Information**: Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
 
-2. **File-by-File Changes**: Make changes file by file and give me a chance to spot mistakes.
+1. Verify Information: Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
 
-3. **No Apologies**: Never use apologies.
+2. File-by-File Changes: Make changes file by file and give me a chance to spot mistakes.
 
-4. **No Understanding Feedback**: Avoid giving feedback about understanding in comments or documentation.
+3. No Apologies: Never use apologies.
 
-5. **No Whitespace Suggestions**: Don't suggest whitespace changes.
+4. No Understanding Feedback: Avoid giving feedback about understanding in comments or documentation.
 
-6. **No Summaries**: Don't summarize changes made.
+5. No Whitespace Suggestions: Don't suggest whitespace changes.
 
-7. **No Inventions**: Don't invent changes other than what's explicitly requested.
+6. No Summaries: Don't summarize changes made.
 
-8. **No Unnecessary Confirmations**: Don't ask for confirmation of information already provided in the context.
+7. No Inventions: Don't invent changes other than what's explicitly requested.
 
-9. **Preserve Existing Code**: Don't remove unrelated code or functionalities. Pay attention to preserving existing structures.
+8. No Unnecessary Confirmations: Don't ask for confirmation of information already provided in the context.
 
-10. **Single Chunk Edits**: Provide all edits in a single chunk instead of multiple-step instructions or explanations for the same file.
+9. Preserve Existing Code: Don't remove unrelated code or functionalities. Pay attention to preserving existing structures.
 
-11. **No Implementation Checks**: Don't ask the user to verify implementations that are visible in the provided context.
+10. Single Chunk Edits: Provide all edits in a single chunk instead of multiple-step instructions or explanations for the same file.
 
-12. **No Unnecessary Updates**: Don't suggest updates or changes to files when there are no actual modifications needed.
+11. No Implementation Checks: Don't ask the user to verify implementations that are visible in the provided context.
 
-13. **Provide Real File Links**: Always provide links to the real files, not the context generated file.
+12. No Unnecessary Updates: Don't suggest updates or changes to files when there are no actual modifications needed.
 
-14. **No Current Implementation**: Don't show or discuss the current implementation unless specifically requested.
+13. Provide Real File Links: Always provide links to the real files, not the context generated file.
 
-15. **Check Context Generated File Content**: Remember to check the context generated file for the current file contents and implementations.
+14. No Current Implementation: Don't show or discuss the current implementation unless specifically requested.
 
-16. **Use Explicit Variable Names**: Prefer descriptive, explicit variable names over short, ambiguous ones to enhance code readability.
+15. Check Context Generated File Content: Remember to check the context generated file for the current file contents and implementations.
 
-17. **Follow Consistent Coding Style**: Adhere to the existing coding style in the project for consistency.
+16. Use Explicit Variable Names: Prefer descriptive, explicit variable names over short, ambiguous ones to enhance code readability.
 
-18. **Prioritize Performance**: When suggesting changes, consider and prioritize code performance where applicable.
+17. Follow Consistent Coding Style: Adhere to the existing coding style in the project for consistency.
 
-19. **Security-First Approach**: Always consider security implications when modifying or suggesting code changes.
+18. Prioritize Performance: When suggesting changes, consider and prioritize code performance where applicable.
 
-20. **Test Coverage**: Suggest or include appropriate unit tests for new or modified code.
+19. Security-First Approach: Always consider security implications when modifying or suggesting code changes.
 
-21. **Error Handling**: Implement robust error handling and logging where necessary.
+20. Test Coverage: Suggest or include appropriate unit tests for new or modified code.
 
-22. **Modular Design**: Encourage modular design principles to improve code maintainability and reusability.
+21. Error Handling: Implement robust error handling and logging where necessary.
 
-23. **Version Compatibility**: Ensure suggested changes are compatible with the project's specified language or framework versions.
+22. Modular Design: Encourage modular design principles to improve code maintainability and reusability.
 
-24. **Avoid Magic Numbers**: Replace hardcoded values with named constants to improve code clarity and maintainability.
+23. Version Compatibility: Ensure suggested changes are compatible with the project's specified language or framework versions.
 
-25. **Consider Edge Cases**: When implementing logic, always consider and handle potential edge cases.
+24. Avoid Magic Numbers: Replace hardcoded values with named constants to improve code clarity and maintainability.
 
-26. **Use Assertions**: Include assertions wherever possible to validate assumptions and catch potential errors early.
+25. Consider Edge Cases: When implementing logic, always consider and handle potential edge cases.
+
+26. Use Assertions: Include assertions wherever possible to validate assumptions and catch potential errors early.
+27. Code comment: when coding, just add necessary comment where the code really need it, avoid to be verbose in comments.

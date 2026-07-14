@@ -73,20 +73,15 @@ impl AppEnv {
     /// Defaults to `Dev` if the variable is absent — safe for local dev,
     /// conservative for CI (CI should always set it explicitly).
     pub fn from_real_env() -> Result<Self, ConfigError> {
-        match env::var("APP_ENV").as_deref() {
-            Ok("development") => Ok(AppEnv::Development),
-            Ok("staging") => Ok(AppEnv::Staging),
-            Ok("production")    => Ok(AppEnv::Production),
-            Err(_)        => {
+        match env::var("APP_ENV") {
+            Err(_) => {
                 // Absent → default to Dev so `cargo run` works out of the box
                 // without requiring developers to set it manually.
                 Ok(AppEnv::Development)
             }
-            Ok(other) => Err(ConfigError::Invalid {
+            Ok(raw) => Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
                 key: "APP_ENV".to_string(),
-                reason: format!(
-                    "expected \"development\", \"staging\", or \"production\", got \"{other}\""
-                ),
+                reason,
             }),
         }
     }
@@ -116,9 +111,7 @@ impl StorageProvider {
         match raw {
             "local" => Ok(StorageProvider::Local),
             "s3" => Ok(StorageProvider::S3),
-            other => Err(format!(
-                "expected \"local\" or \"s3\", got \"{other}\""
-            )),
+            other => Err(format!("expected \"local\" or \"s3\", got \"{other}\"")),
         }
     }
 }
@@ -250,13 +243,18 @@ impl AppConfig {
     /// **Must be called after `dotenvy::dotenv_override()`** (or equivalent)
     /// so that `.env` values are already populated in the process environment.
     ///
+    /// `app_env` is resolved once by the caller (via [`AppEnv::from_real_env`])
+    /// and passed in here rather than being re-parsed from `APP_ENV`, so that
+    /// a single value is used consistently instead of two independent reads
+    /// that could observe different environment states (e.g. before/after
+    /// dotenvy loads a `.env` file).
+    ///
     /// # Errors
     /// Returns the **first** validation error encountered. The caller is
     /// expected to print the error and exit; there is no partial configuration.
-    pub fn from_env() -> Result<Self, ConfigError> {
+    pub fn from_env(app_env: AppEnv) -> Result<Self, ConfigError> {
         // ── Application ───────────────────────────────────────────────────────
         let app_port = optional_u16_or("APP_PORT", 3000)?;
-        let app_env = require_parsed("APP_ENV", AppEnv::parse)?;
 
         // ── Database ──────────────────────────────────────────────────────────
         let database_url = require("DATABASE_URL")?;
@@ -332,8 +330,14 @@ mod tests {
     fn set_valid_env() {
         env::set_var("APP_PORT", "3000");
         env::set_var("APP_ENV", "development");
-        env::set_var("DATABASE_URL", "postgresql://myhouse:myhouse@localhost:5432/myhouse");
-        env::set_var("JWT_SECRET", "a-super-secret-key-that-is-at-least-32-bytes-long!");
+        env::set_var(
+            "DATABASE_URL",
+            "postgresql://myhouse:myhouse@localhost:5432/myhouse",
+        );
+        env::set_var(
+            "JWT_SECRET",
+            "a-super-secret-key-that-is-at-least-32-bytes-long!",
+        );
         env::set_var("JWT_ACCESS_TTL_SECONDS", "900");
         env::set_var("JWT_REFRESH_TTL_DAYS", "30");
         env::set_var("OTP_TTL_SECONDS", "600");
@@ -352,7 +356,7 @@ mod tests {
     fn loads_valid_config() {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
-        let cfg = AppConfig::from_env().expect("should load without error");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
         assert_eq!(cfg.app_port, 3000);
         assert_eq!(cfg.app_env, AppEnv::Development);
         assert_eq!(cfg.jwt_access_ttl_seconds, 900);
@@ -368,7 +372,8 @@ mod tests {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
         env::set_var("JWT_SECRET", "tooshort");
-        let err = AppConfig::from_env().expect_err("should fail on short secret");
+        let err =
+            AppConfig::from_env(AppEnv::Development).expect_err("should fail on short secret");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "JWT_SECRET"));
     }
 
@@ -377,7 +382,8 @@ mod tests {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
         env::remove_var("DATABASE_URL");
-        let err = AppConfig::from_env().expect_err("should fail on missing DATABASE_URL");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on missing DATABASE_URL");
         assert!(matches!(err, ConfigError::Missing(key) if key == "DATABASE_URL"));
     }
 
@@ -385,8 +391,8 @@ mod tests {
     fn rejects_invalid_app_env() {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
-        env::set_var("APP_ENV", "staging");
-        let err = AppConfig::from_env().expect_err("should fail on unknown APP_ENV");
+        env::set_var("APP_ENV", "unknown");
+        let err = AppEnv::from_real_env().expect_err("should fail on unknown APP_ENV");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "APP_ENV"));
     }
 
@@ -395,7 +401,8 @@ mod tests {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
         env::set_var("SMTP_PORT", "not-a-port");
-        let err = AppConfig::from_env().expect_err("should fail on invalid SMTP_PORT");
+        let err =
+            AppConfig::from_env(AppEnv::Development).expect_err("should fail on invalid SMTP_PORT");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "SMTP_PORT"));
     }
 
@@ -404,7 +411,7 @@ mod tests {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
         env::remove_var("APP_PORT");
-        let cfg = AppConfig::from_env().expect("should load with default port");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load with default port");
         assert_eq!(cfg.app_port, 3000);
     }
 }

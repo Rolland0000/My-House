@@ -1,0 +1,2 @@
+-- Baseline migration: validates the sqlx migration pipeline end-to-end.
+-- No schema changes — intentionally empty.
