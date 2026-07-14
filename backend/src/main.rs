@@ -51,7 +51,7 @@ async fn main() {
     // ── 4. Fail-fast config loading ───────────────────────────────────────────
     //
     // app_env is passed in so AppConfig stores it without a second env::var.
-    let config = AppConfig::from_env().unwrap_or_else(|err| {
+    let config = AppConfig::from_env(app_env).unwrap_or_else(|err| {
         eprintln!("FATAL — configuration error: {err}");
         std::process::exit(1);
     });
