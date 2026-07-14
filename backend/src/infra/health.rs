@@ -34,3 +34,27 @@ pub async fn check(State(state): State<AppState>) -> (StatusCode, Json<HealthSta
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use utoipa_axum::routes;
+
+    /// Pins the `#[utoipa::path]` annotation on `check` to what the OpenAPI
+    /// generation pipeline is expected to produce: `GET /health` with 200/503
+    /// responses backed by the `HealthStatus` schema. Pure metadata
+    /// inspection — no router, no state, no DB.
+    #[test]
+    fn openapi_schema_reflects_health_check() {
+        let (schemas, paths, _method_router) = routes!(super::check);
+
+        let operation = paths
+            .paths
+            .get("/health")
+            .and_then(|item| item.get.as_ref())
+            .expect("GET /health should be registered in the OpenAPI schema");
+
+        assert!(operation.responses.responses.contains_key("200"));
+        assert!(operation.responses.responses.contains_key("503"));
+        assert!(schemas.iter().any(|(name, _)| name == "HealthStatus"));
+    }
+}

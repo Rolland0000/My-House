@@ -20,6 +20,8 @@ utoipa = "5.5"
 # Pinned to 0.1.x: 0.2+ requires axum 0.8, this project is locked to axum 0.7.
 utoipa-axum = "0.1.3"
 # Capped below 8.1.1/9.x: those require axum 0.8, this project is locked to axum 0.7.
-utoipa-swagger-ui = { version = ">=8.0.3, <8.1.1", features = ["axum"] }
+# `vendored` bundles the Swagger UI assets as a crates.io dependency instead
+# of downloading a zip from GitHub in build.rs — required for hermetic/offline builds.
+utoipa-swagger-ui = { version = ">=8.0.3, <8.1.1", features = ["axum", "vendored"] }
 
 [dev-dependencies]
