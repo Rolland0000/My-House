@@ -75,8 +75,6 @@ impl AppEnv {
     pub fn from_real_env() -> Result<Self, ConfigError> {
         match env::var("APP_ENV") {
             Err(_) => {
-                // Absent → default to Dev so `cargo run` works out of the box
-                // without requiring developers to set it manually.
                 Ok(AppEnv::Development)
             }
             Ok(raw) => Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
