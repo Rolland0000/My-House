@@ -117,33 +117,35 @@ impl AppError {
     fn status_and_code(&self) -> (StatusCode, &'static str) {
         match self {
             // 400
-            Self::BadRequest(_)       => (StatusCode::BAD_REQUEST,             "BAD_REQUEST"),
-            Self::InvalidQueryParam(_)=> (StatusCode::BAD_REQUEST,             "INVALID_QUERY_PARAM"),
+            Self::BadRequest(_) => (StatusCode::BAD_REQUEST, "BAD_REQUEST"),
+            Self::InvalidQueryParam(_) => (StatusCode::BAD_REQUEST, "INVALID_QUERY_PARAM"),
             // 401
-            Self::OtpInvalid          => (StatusCode::UNAUTHORIZED,            "OTP_INVALID"),
-            Self::Unauthorized        => (StatusCode::UNAUTHORIZED,            "UNAUTHORIZED"),
-            Self::TokenExpired        => (StatusCode::UNAUTHORIZED,            "TOKEN_EXPIRED"),
+            Self::OtpInvalid => (StatusCode::UNAUTHORIZED, "OTP_INVALID"),
+            Self::Unauthorized => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED"),
+            Self::TokenExpired => (StatusCode::UNAUTHORIZED, "TOKEN_EXPIRED"),
             // 403
-            Self::AccountInactive     => (StatusCode::FORBIDDEN,               "ACCOUNT_INACTIVE"),
-            Self::Forbidden           => (StatusCode::FORBIDDEN,               "FORBIDDEN"),
+            Self::AccountInactive => (StatusCode::FORBIDDEN, "ACCOUNT_INACTIVE"),
+            Self::Forbidden => (StatusCode::FORBIDDEN, "FORBIDDEN"),
             // 404
-            Self::UserNotFound        => (StatusCode::NOT_FOUND,               "USER_NOT_FOUND"),
-            Self::ListingNotFound     => (StatusCode::NOT_FOUND,               "LISTING_NOT_FOUND"),
-            Self::MediaNotFound       => (StatusCode::NOT_FOUND,               "MEDIA_NOT_FOUND"),
-            Self::OwnerRequestNotFound=> (StatusCode::NOT_FOUND,               "OWNER_REQUEST_NOT_FOUND"),
+            Self::UserNotFound => (StatusCode::NOT_FOUND, "USER_NOT_FOUND"),
+            Self::ListingNotFound => (StatusCode::NOT_FOUND, "LISTING_NOT_FOUND"),
+            Self::MediaNotFound => (StatusCode::NOT_FOUND, "MEDIA_NOT_FOUND"),
+            Self::OwnerRequestNotFound => (StatusCode::NOT_FOUND, "OWNER_REQUEST_NOT_FOUND"),
             // 409
-            Self::OwnerRequestAlreadyPending => (StatusCode::CONFLICT,         "OWNER_REQUEST_ALREADY_PENDING"),
+            Self::OwnerRequestAlreadyPending => {
+                (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_PENDING")
+            }
             // 422
-            Self::InvalidDocument     => (StatusCode::UNPROCESSABLE_ENTITY,    "INVALID_DOCUMENT"),
-            Self::InvalidFile         => (StatusCode::UNPROCESSABLE_ENTITY,    "INVALID_FILE"),
-            Self::MediaQuotaExceeded  => (StatusCode::UNPROCESSABLE_ENTITY,    "MEDIA_QUOTA_EXCEEDED"),
-            Self::CoverPhotoRequired  => (StatusCode::UNPROCESSABLE_ENTITY,    "COVER_PHOTO_REQUIRED"),
+            Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
+            Self::InvalidFile => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_FILE"),
+            Self::MediaQuotaExceeded => (StatusCode::UNPROCESSABLE_ENTITY, "MEDIA_QUOTA_EXCEEDED"),
+            Self::CoverPhotoRequired => (StatusCode::UNPROCESSABLE_ENTITY, "COVER_PHOTO_REQUIRED"),
             // 429
-            Self::OtpRateLimited      => (StatusCode::TOO_MANY_REQUESTS,       "OTP_RATE_LIMITED"),
+            Self::OtpRateLimited => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             // 500
-            Self::Internal            => (StatusCode::INTERNAL_SERVER_ERROR,   "INTERNAL_SERVER_ERROR"),
-            Self::Database(_)         => (StatusCode::INTERNAL_SERVER_ERROR,   "DATABASE_ERROR"),
-            Self::Storage(_)          => (StatusCode::INTERNAL_SERVER_ERROR,   "STORAGE_ERROR"),
+            Self::Internal => (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
+            Self::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR"),
+            Self::Storage(_) => (StatusCode::INTERNAL_SERVER_ERROR, "STORAGE_ERROR"),
         }
     }
 }
@@ -152,15 +154,20 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, code) = self.status_and_code();
 
-        // Log server-side errors with context before the message is consumed.
-        if status.is_server_error() {
+        // Server errors may carry internal detail (DB/storage/IO messages) that
+        // must never reach the client; log the real cause and respond with a
+        // generic message instead. Client errors (4xx) are safe to echo back.
+        let message = if status.is_server_error() {
             tracing::error!(error = %self, status = status.as_u16(), "server error");
-        }
+            "Internal server error.".to_string()
+        } else {
+            self.to_string()
+        };
 
         let body = ErrorEnvelope {
             error: ErrorBody {
                 code,
-                message: self.to_string(),
+                message,
                 status: status.as_u16(),
             },
         };
@@ -202,7 +209,7 @@ mod tests {
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
         let json = parse_envelope(response).await;
-        assert_eq!(json["error"]["code"],   "LISTING_NOT_FOUND");
+        assert_eq!(json["error"]["code"], "LISTING_NOT_FOUND");
         assert_eq!(json["error"]["status"], 404);
     }
 

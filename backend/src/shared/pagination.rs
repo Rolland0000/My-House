@@ -45,8 +45,7 @@ impl PaginationMeta {
         let total_pages = if total == 0 {
             0
         } else {
-            // Ceiling division without overflow.
-            ((total as u64 + per_page as u64 - 1) / per_page as u64) as u32
+            total.div_ceil(per_page as u64) as u32
         };
 
         let page = raw_page.unwrap_or(1).max(1);
