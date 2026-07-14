@@ -74,9 +74,7 @@ impl AppEnv {
     /// conservative for CI (CI should always set it explicitly).
     pub fn from_real_env() -> Result<Self, ConfigError> {
         match env::var("APP_ENV") {
-            Err(_) => {
-                Ok(AppEnv::Development)
-            }
+            Err(_) => Ok(AppEnv::Development),
             Ok(raw) => Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
                 key: "APP_ENV".to_string(),
                 reason,

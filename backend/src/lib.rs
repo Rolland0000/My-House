@@ -1,3 +1,4 @@
+pub mod api_doc;
 pub mod app_server;
 pub mod app_state;
 pub mod config;

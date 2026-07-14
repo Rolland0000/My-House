@@ -1,7 +1,12 @@
-use axum::routing::get;
 use axum::Router;
+use utoipa::OpenApi;
+use utoipa_axum::router::OpenApiRouter;
+use utoipa_axum::routes;
+use utoipa_swagger_ui::SwaggerUi;
 
+use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
+use crate::config::AppEnv;
 use crate::infra::health;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,12 +25,15 @@ use crate::infra::health;
 /// Routes accessible without authentication.
 ///
 /// Examples: OTP request/verify, public listing browse, health check.
-fn public_router() -> Router<AppState> {
-    Router::new()
-        .route("/health", get(health::check))
-    // TODO EP-02: .route("/api/v1/auth/otp/request", post(auth::request_otp))
-    // TODO EP-02: .route("/api/v1/auth/otp/verify", post(auth::verify_otp))
-    // TODO EP-03: .route("/api/v1/listings",         get(listings::list_public))
+///
+/// Built as an [`OpenApiRouter`] so every handler carrying a `#[utoipa::path]`
+/// annotation is automatically collected into the OpenAPI schema served at
+/// `/api/docs/openapi.json` — no manual schema maintenance required.
+fn public_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().routes(routes!(health::check))
+    // TODO EP-02: .routes(routes!(auth::request_otp))
+    // TODO EP-02: .routes(routes!(auth::verify_otp))
+    // TODO EP-03: .routes(routes!(listings::list_public))
 }
 
 /// Routes requiring a valid session (any authenticated user — seeker by default).
@@ -81,17 +89,32 @@ fn admin_router() -> Router<AppState> {
 /// Global layers (tracing, CORS, request-id, …) are applied here via
 /// `.layer()` on the final router so that they run for every request
 /// regardless of role.
+///
+/// The merged [`OpenApiRouter`] is split into the plain Axum router and the
+/// generated [`utoipa::openapi::OpenApi`] schema. The Swagger UI (which also
+/// serves the raw schema at `/api/docs/openapi.json`) is mounted everywhere
+/// except production — the API surface must not be discoverable by anyone
+/// probing a public deployment.
 pub fn build_router(state: AppState) -> Router {
     let public = public_router();
-    let seeker = seeker_router();
-    let owner = owner_router();
-    let admin = admin_router();
+    let seeker = OpenApiRouter::from(seeker_router());
+    let owner = OpenApiRouter::from(owner_router());
+    let admin = OpenApiRouter::from(admin_router());
 
-    Router::new()
+    let (router, openapi) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .merge(public)
         .merge(seeker)
         .merge(owner)
         .merge(admin)
+        .split_for_parts();
+
+    let router = if state.config().app_env == AppEnv::Production {
+        router
+    } else {
+        router.merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", openapi))
+    };
+
+    router
         // TODO EP-01: .layer(TraceLayer::new_for_http())
         // TODO EP-01: .layer(CorsLayer::permissive())   ← tighten in prod
         .with_state(state)
