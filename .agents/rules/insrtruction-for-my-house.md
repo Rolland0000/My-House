@@ -1,7 +1,6 @@
 ---
 trigger: always_on
 ---
-
 ## Project
 
 MyHouse — real estate rental matching platform (owners ↔ seekers).
@@ -13,15 +12,16 @@ Target markets: France + francophone Africa. Two-person team, web-first (mobile 
 - Frontend: React / TypeScript
 - Database: PostgreSQL
 - Storage: LocalFsStorage (MVP) → MinIO/S3 (V2), behind `StorageProvider` trait
+- Cache: moka (in-memory) — no Redis at MVP
 - Infra: Docker / docker-compose
 
 ## Reference Documents
 
 Authoritative specs — defer to these over general best practices when they conflict:
 
-- `docs/ARCHITECTURE.md` (arc42, v2.1) — modules, ADRs, deployment
-- `docs/TECHNICAL_SPEC_MVP.md` (v1.1) — DDL, API contract, folder structure
-- `docs/MyHouse_CahierDesCharges_v2_0.docx` — functional requirements (ISO 29148)
+- `docs/ARCHITECTURE.md` (arc42, v2.1) — modules, ADRs, ADRs, runtime flows, deployment. Read before any cross-module or architectural change.
+- `docs/TECHNICAL_SPEC_MVP.md` (v1.1) — DDL, API contract, folder structure. Read before touching schema, endpoints, or module layout.
+- `docs/MyHouse_CahierDesCharges_v2_0.docx` — functional requirements (ISO 29148). Source of truth for feature scope.
 
 ## Key Decisions Already Locked — Do Not Re-litigate
 
@@ -29,14 +29,11 @@ Authoritative specs — defer to these over general best practices when they con
 - Roles: `seeker` (default) → `owner` (admin-validated request) → `admin`
 - Owner upgrade: single atomic multipart submission, no draft/two-step
 - Refresh tokens: rotating, 30-day sliding TTL, httpOnly/Secure/SameSite=Strict cookie
+- File type validation via magic bytes (`infer` crate), never by extension or declared Content-Type
+- Uploaded filenames are ALWAYS server-generated (UUID), never derived from client input (path-traversal prevention)
 - `is_active` re-verified on every authenticated request (`AuthUser` extractor)
 - Backend never proxies public file reads (listings/avatars served directly by nginx)
 - Integration tests deferred to a dedicated end-of-roadmap epic — do not suggest adding them earlier
-
-## Current Phase
-
-EP-02 (Users module) — active implementation. Ticket decomposition for EP-00/EP-01 complete
-and validated. All phases are now in scope: architecture, code, tests, deployment.
 
 ## Project-Specific Conventions
 
@@ -48,19 +45,24 @@ and validated. All phases are now in scope: architecture, code, tests, deploymen
 - Validate structure in chat before generating any document artifact
 
 ## Available skills/rules and MCP (identify and invoke as needed for the specific task — do not load everything by default)
+
 - general-code-guideline.md
-- docker-rules.md
-- readme-file-rules.md
 - agent-react-typescrypt-rules.md
 - database-rules.md
 - rust-general-rules.md
-- typecrypt-react-prompt-rules.md
-- agent-react-typescrypt-rules.md
-- ticket-creation-rules.md
+
 By the end of the first prompt response of a new session, list all skills/rules and/or MCP include in the session
 
+## Architecture invariants
+
+* Modular monolith: modules interact only via service traits (in `shared/`) or bootstrap injection. A module never imports another module's concrete impl.
+* Layering per module: `handler` (HTTP, no business logic) → `service` (business logic, no Axum) → `repository` (data access, trait). Respect these boundaries.
+* Errors converge to a central `AppError` → structured HTTP response.
+
 ## Implementation depending on environment conditions (dev, staging, prod)
+
  Always make sure to respect implementaion depending of environment scope which is selected by the APP_ENV variable in .env. Code that will be always for local development phase, will always be selected when APP_ENV=development.
+
 ## Open Blockers
 
 - Monetization model undefined — flag if a decision depends on it

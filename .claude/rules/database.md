@@ -1,8 +1,3 @@
----
-trigger: manual
----
----
-
 
 **Scope:** `backend/migrations/**`, `backend/src/**/repository.rs`, `**/*.sql`
 

@@ -1,10 +1,12 @@
----
-trigger: manual
----
 
+---
+name: github-ticket
+description: Use this skill whenever decomposing a MyHouse epic into GitHub tickets, drafting a single ticket from a feature or spec section, or the user asks for "tickets", "MH-XX", or epic breakdown. Always follow this exact format and workflow — don't freestyle ticket structure, vertical slicing, or estimates.
+---
 # Skill: GitHub Ticket Generation (MyHouse)
 
 ## When to use
+
 Decomposing an epic into tickets, or drafting a single ticket from a feature/spec.
 
 ## Ticket format
@@ -31,19 +33,19 @@ Omit this section if nothing beyond the spec needs saying.
 
 ## Rules
 
-- **Vertical slicing**: if a ticket needs both BE and FE work, split into `MH-XX-BE` and 
-  `MH-XX-FE` under the same parent number. Never split a ticket by technical layer alone 
+- **Vertical slicing**: if a ticket needs both BE and FE work, split into `MH-XX-BE` and
+  `MH-XX-FE` under the same parent number. Never split a ticket by technical layer alone
   (e.g. never "handler.rs ticket" + "service.rs ticket").
-- **One atomic outcome per ticket.** If acceptance criteria need "and" to connect two unrelated 
+- **One atomic outcome per ticket.** If acceptance criteria need "and" to connect two unrelated
   behaviors, split the ticket.
 - **Two-digit epic padding** from EP-01 onward (MH-01 → MH-99 per epic namespace, not global).
 - **English only** — title, context, AC, notes.
-- **No library justification** in the ticket — crate name + one-line purpose only 
+- **No library justification** in the ticket — crate name + one-line purpose only
   (e.g. `sqlx — Postgres async driver`, not why it was chosen over alternatives).
-- Reference `ARCHITECTURE.md` / `TECHNICAL_SPEC_MVP.md` for schema, endpoints, and module 
-  boundaries — don't restate their content, cite the section if needed 
+- Reference `ARCHITECTURE.md` / `TECHNICAL_SPEC_MVP.md` for schema, endpoints, and module
+  boundaries — don't restate their content, cite the section if needed
   (e.g. "see §4.2bis Owner Requests").
-- Do not add integration tests as acceptance criteria — deferred to the dedicated test epic 
+- Do not add integration tests as acceptance criteria — deferred to the dedicated test epic
   (per project instructions).
 
 ## Output when decomposing an epic
