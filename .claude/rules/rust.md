@@ -44,9 +44,25 @@ globs: ["**/*.rs", "Cargo.toml", "Cargo.lock"]
 ## Testing and Quality
 
 - Run `cargo check`, `cargo fmt` and `cargo clippy` before delivery (not cargo test or any other command that could take anough time).
-- Add unit tests for pure logic and integration tests for public behavior.
+- Add unit tests for pure logic and integration tests (*Integration tests deferred to a dedicated end-of-roadmap epic*) for public behavior.
 - Use property tests for parsers, serializers, and state machines when useful.
 - Use benchmarks only after identifying a real performance question.
+
+## MCP usage policy
+
+- **GitHub MCP** — use for ticket creation, PR review, issue lookup. Never push or merge
+  without explicit user confirmation for that specific action.
+- **PostgreSQL MCP** — consult before writing/modifying a query touching `listings` or
+  `search` to check existing indexes and schema state (see .claude/rules/database.md).
+  Read-only exploration by default; never run destructive statements (DROP/TRUNCATE/DELETE
+  without WHERE) without explicit confirmation.
+- **Git MCP** — status/diff/log/branch only. NEVER commit or push automatically, even if a
+  task seems complete — always stop and let the user commit.
+- **Context7** — consult when working with Axum, sqlx, or React APIs where version-specific
+  behavior matters (e.g. sqlx macro syntax, Axum extractor signatures) — don't rely on
+  training-data memory for library APIs that change across versions.
+- **Filesystem MCP vs. native file tools** — prefer native tools for MyHouse repo files
+  unless a task specifically requires the Filesystem MCP's capabilities.
 
 ## Common Mistakes
 
