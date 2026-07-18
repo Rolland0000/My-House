@@ -1,7 +1,4 @@
----
-trigger: always_on
----
-## Project
+# Project
 
 MyHouse — real estate rental matching platform (owners ↔ seekers).
 Target markets: France + francophone Africa. Two-person team, web-first (mobile is V2).
@@ -62,6 +59,27 @@ By the end of the first prompt response of a new session, list all skills/rules 
 ## Implementation depending on environment conditions (dev, staging, prod)
 
  Always make sure to respect implementaion depending of environment scope which is selected by the APP_ENV variable in .env. Code that will be always for local development phase, will always be selected when APP_ENV=development.
+
+## MCP usage policy
+
+- **GitHub MCP** — use for ticket creation, PR review, issue lookup. Never push or merge
+  without explicit user confirmation for that specific action.
+- **PostgreSQL MCP** — consult before writing/modifying a query touching `listings` or
+  `search` to check existing indexes and schema state (see .claude/rules/database.md).
+  Read-only exploration by default; never run destructive statements (DROP/TRUNCATE/DELETE
+  without WHERE) without explicit confirmation.
+- **Git MCP** — status/diff/log/branch only. NEVER commit or push automatically, even if a
+  task seems complete — always stop and let the user commit.
+- **Context7** — consult when working with Axum, sqlx, or React APIs where version-specific
+  behavior matters (e.g. sqlx macro syntax, Axum extractor signatures) — don't rely on
+  training-data memory for library APIs that change across versions.
+- **Filesystem MCP vs. native file tools** — prefer native tools for MyHouse repo files
+  unless a task specifically requires the Filesystem MCP's capabilities.
+
+- **Sequential Thinking MCP** — use only for genuinely multi-step architectural decisions
+  (e.g. planning the atomic owner-request flow, refresh token rotation edge cases). Cap at
+  ~8-10 thoughts; if a chain isn't converging, stop and ask the user instead of continuing.
+  Never use it for simple/single-step tasks (routine CRUD, small bugfixes).
 
 ## Open Blockers
 

@@ -60,23 +60,15 @@ impl AppEnv {
         }
     }
     /// Returns `true` when running in local development mode.
-    ///
-    /// Use this guard to conditionalize dev-only logic that must never reach
-    /// staging or production (e.g. dotenvy loading, dev-only routes).
     #[inline]
     pub fn is_dev(&self) -> bool {
         matches!(self, AppEnv::Development)
     }
     /// Read `APP_ENV` directly from the **real** process environment,
     /// bypassing dotenvy.  Call this as the very first step in `main`.
-    ///
-    /// Defaults to `Dev` if the variable is absent — safe for local dev,
-    /// conservative for CI (CI should always set it explicitly).
     pub fn from_real_env() -> Result<Self, ConfigError> {
         match env::var("APP_ENV") {
-            Err(_) => {
-                Ok(AppEnv::Development)
-            }
+            Err(_) => Ok(AppEnv::Development),
             Ok(raw) => Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
                 key: "APP_ENV".to_string(),
                 reason,
@@ -119,9 +111,6 @@ impl StorageProvider {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Full application configuration, populated once at startup from env vars.
-///
-/// All fields are intentionally **public** so that downstream modules (infra,
-/// middleware, handlers) can read them without indirection via getters.
 #[derive(Debug, Clone)]
 pub struct AppConfig {
     // ── Application ─────────────────────────────────────────────────────────
