@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1
 
-# ── Builder ───────────────────────────────────────────────────────────────────
+# ── Builder ────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY frontend/docs-frontend/openapi.json ./
 RUN npm ci
 
 # `src/shared/api/types.ts` is generated from the live backend's OpenAPI
@@ -17,7 +18,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# ── Runtime ───────────────────────────────────────────────────────────────────
+# ── Runtime ──────
 FROM nginx:stable-alpine AS runtime
 
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -28,7 +29,7 @@ EXPOSE 80
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
     CMD wget -q --spider http://localhost/ || exit 1
 
-# ── Dev ───────────────────────────────────────────────────────────────────────
+# ── Dev ────────
 # Toolchain only — no source is copied in. docker-compose bind-mounts the
 # frontend/ directory over /app in the dev profile; node_modules is kept in a
 # named volume so the host bind mount doesn't shadow container-installed

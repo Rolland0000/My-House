@@ -36,7 +36,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "0:3000"
     volumes:
       - ./backend:/app
       - backend_cargo_registry:/usr/local/cargo/registry

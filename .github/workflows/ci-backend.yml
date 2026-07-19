@@ -13,22 +13,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend (fmt · clippy · test · audit · docker build)
+  backend_fmt:
+    name: Backend Format
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
+          components: rustfmt
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
 
-      - name: Cache cargo registry and build artifacts
+  backend_clippy:
+    name: Backend Clippy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - name: Cache cargo
         uses: actions/cache@v4
         with:
           path: |
@@ -36,29 +46,171 @@ jobs:
             ~/.cargo/git
             backend/target
           key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
-
-      # Cheapest checks first so a broken PR fails in seconds, not minutes.
-      - name: cargo fmt --check
-        run: cargo fmt --all -- --check
-
+          restore-keys: cargo-${{ runner.os }}-
       - name: cargo clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      # Unit tests only — no `integration` feature exists yet, so this never
-      # touches a real database (see .claude/rules/database.md).
-      - name: cargo test
-        run: cargo test --all-features
+  backend_deny:
+    name: Backend Deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: backend/Cargo.toml
 
+  backend_audit:
+    name: Backend Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Cache cargo-audit
+        id: cache-cargo-audit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-audit
+          key: ${{ runner.os }}-cargo-audit-v1
+      - name: Install cargo-audit
+        if: steps.cache-cargo-audit.outputs.cache-hit != 'true'
+        run: cargo install cargo-audit --locked
       - name: cargo audit
+        run: cargo audit
+        working-directory: backend
+
+  backend_build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+      - name: cargo build
+        run: cargo build --verbose
+
+  backend_doc:
+    name: Backend Documentation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: cargo doc
+        run: cargo doc --no-deps --verbose
+
+  backend_coverage:
+    name: Backend Coverage
+    runs-on: ubuntu-latest
+    needs: [backend_build]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+      - name: Cache cargo-llvm-cov
+        id: cache-llvm-cov
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-llvm-cov
+          key: ${{ runner.os }}-cargo-llvm-cov-v1
+      - name: Install cargo-llvm-cov
+        if: steps.cache-llvm-cov.outputs.cache-hit != 'true'
+        run: cargo install cargo-llvm-cov --locked
+      - name: Install cargo-nextest
+        run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
+      - name: Clean coverage artifacts
+        run: cargo llvm-cov clean --workspace
+      - name: Run tests with coverage instrumentation
+        run: cargo llvm-cov --no-report nextest --verbose
+      - name: Run doc tests
+        run: cargo test --doc --verbose
+      - name: Generate HTML coverage report
+        # Seuil cible : 50% — le fail-under-lines sera activé quand la couverture sera établie.
+        run: cargo llvm-cov report --html --output-dir target/coverage/html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-backend
+          path: |
+            backend/target/coverage/html/**/*.html
+            backend/target/coverage/html/**/*.css
+            backend/target/coverage/html/**/*.js
+          retention-days: 3
+
+  backend_openapi:
+    name: Backend OpenAPI Drift Check
+    runs-on: ubuntu-latest
+    needs: [backend_build]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+      # No database or HTTP server involved — the schema is collected purely
+      # from route annotations (see route::openapi_spec / src/bin/gen_openapi.rs).
+      - name: Generate OpenAPI spec
+        run: cargo run --bin gen_openapi -- /tmp/openapi-fresh.json
+      - name: Check OpenAPI drift
         run: |
-          cargo install cargo-audit --locked
-          cargo audit
+          if [ -f ../frontend/docs-frontend/openapi.json ]; then
+            jq --sort-keys . ../frontend/docs-frontend/openapi.json > /tmp/expected.json
+            jq --sort-keys . /tmp/openapi-fresh.json > /tmp/actual.json
+            if ! diff -u /tmp/expected.json /tmp/actual.json; then
+              echo "::error::docs/openapi.json est désynchronisé — lancer 'cargo run --bin gen_openapi -- ../frontend/docs-frontend/openapi.json' dans backend/ et committer le fichier."
+              exit 1
+            fi
+            echo "OpenAPI spec à jour."
+          else
+            echo "::warning::docs/openapi.json introuvable — committer le fichier généré pour activer la détection de dérive."
+            cp /tmp/openapi-fresh.json ../frontend/docs-frontend/openapi.json
+          fi
+      - name: Upload generated OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: /tmp/openapi-fresh.json
+          retention-days: 7
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+  backend_docker:
+    name: Backend Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend_fmt, backend_clippy, backend_coverage]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
       - name: Build backend Docker image
         uses: docker/build-push-action@v6
         with:
