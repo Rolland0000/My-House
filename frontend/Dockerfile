@@ -27,3 +27,19 @@ EXPOSE 80
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
     CMD wget -q --spider http://localhost/ || exit 1
+
+# ── Dev ───────────────────────────────────────────────────────────────────────
+# Toolchain only — no source is copied in. docker-compose bind-mounts the
+# frontend/ directory over /app in the dev profile; node_modules is kept in a
+# named volume so the host bind mount doesn't shadow container-installed
+# deps. Vite runs with HMR, bound to 0.0.0.0 so it's reachable from the host.
+FROM node:22-alpine AS dev
+
+WORKDIR /app
+
+EXPOSE 5173
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=5 \
+    CMD wget -q --spider http://localhost:5173/ || exit 1
+
+CMD ["sh", "-c", "npm install && npm run dev -- --host 0.0.0.0 --port 5173"]

@@ -46,3 +46,23 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=5 \
     CMD curl -f "http://localhost:${APP_PORT:-3000}/health" || exit 1
 
 CMD ["./backend-my-house"]
+
+# ── Dev ───────────────────────────────────────────────────────────────────────
+# Toolchain only — no source is copied in. docker-compose bind-mounts the
+# backend/ directory over /app in the dev profile; cargo-watch rebuilds and
+# restarts the server on every save.
+FROM rust:1-slim-bookworm AS dev
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential pkg-config curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && cargo install cargo-watch --locked
+
+WORKDIR /app
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=5 \
+    CMD curl -f "http://localhost:${APP_PORT:-3000}/health" || exit 1
+
+CMD ["cargo", "watch", "-x", "run"]

@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "generate:types": "openapi-typescript http://localhost:${APP_PORT:-3000}/api/docs/openapi.json -o src/shared/api/types.ts"
+    "generate:types": "openapi-typescript http://${API_HOST:-localhost}:${APP_PORT:-3000}/api/docs/openapi.json -o src/shared/api/types.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",

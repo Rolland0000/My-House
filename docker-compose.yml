@@ -16,10 +16,13 @@ services:
       timeout: 5s
       retries: 10
 
-  backend:
+  # ── dev — hot-reload: source bind-mounted, cargo-watch / vite dev server ──────
+  backend-dev:
+    profiles: ["dev"]
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: dev
     restart: unless-stopped
     env_file:
       - ./backend/.env
@@ -35,15 +38,64 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      - ./backend:/app
+      - backend_cargo_registry:/usr/local/cargo/registry
+      - backend_target:/app/target
       - storage_data:/app/storage
 
-  frontend:
+  frontend-dev:
+    profiles: ["dev"]
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    environment:
+      # generate:types (run via the `predev` hook) fetches the OpenAPI schema
+      # from this host:port instead of localhost — inside the compose network
+      # the backend is only reachable at its service name.
+      API_HOST: backend-dev
+      APP_PORT: "3000"
+    depends_on:
+      backend-dev:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+
+  # ── prod — built images: release binary, static assets served by nginx ───────
+  backend-prod:
+    profiles: ["prod"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      APP_ENV: production
+      # See backend-dev — same reasoning, "postgres" not "localhost".
+      DATABASE_URL: postgresql://myhouse:myhouse@postgres:5432/myhouse
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - storage_data:/app/storage
+
+  frontend-prod:
+    profiles: ["prod"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runtime
     restart: unless-stopped
     depends_on:
-      backend:
+      backend-prod:
         condition: service_healthy
     ports:
       - "80:80"
@@ -53,3 +105,6 @@ services:
 volumes:
   postgres_data:
   storage_data:
+  backend_cargo_registry:
+  backend_target:
+  frontend_node_modules:
