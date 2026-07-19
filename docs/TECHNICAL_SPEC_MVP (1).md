@@ -32,6 +32,7 @@ backend/
 ├── .env.example
 ├── migrations/                        # sqlx migrate — fichiers horodatés .sql
 │   └── 0001_init.sql
+├── docs-frontend/
 └── src/
     ├── main.rs                        # Bootstrap, AppState, , DI
     │
@@ -151,7 +152,8 @@ frontend/
 ├── tsconfig.json
 ├── Dockerfile
 ├── nginx.conf
-├── openapi.json                       # Généré depuis utoipa — ne pas committer (gitignore)
+├── docs-frontend/
+├	└── openapi.json                   # Généré depuis utoipa — ne pas committer (gitignore)
 └── src/
     ├── main.tsx
     ├── App.tsx

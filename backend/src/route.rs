@@ -80,33 +80,42 @@ fn admin_router() -> Router<AppState> {
 // Root router
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Assembles all sub-routers and applies global middleware layers.
+/// Merges all sub-routers and returns both the assembled router and the
+/// collected OpenAPI schema.
 ///
 /// Merge order does not affect routing precedence in Axum (routes are matched
 /// by specificity, not insertion order), but keep it consistent for readability:
 /// public → seeker → owner → admin.
 ///
-/// Global layers (tracing, CORS, request-id, …) are applied here via
-/// `.layer()` on the final router so that they run for every request
-/// regardless of role.
-///
-/// The merged [`OpenApiRouter`] is split into the plain Axum router and the
-/// generated [`utoipa::openapi::OpenApi`] schema. The Swagger UI (which also
-/// serves the raw schema at `/api/docs/openapi.json`) is mounted everywhere
-/// except production — the API surface must not be discoverable by anyone
-/// probing a public deployment.
-pub fn build_router(state: AppState) -> Router {
+/// Building this graph never touches `AppState` — only `.with_state()` at the
+/// call site does — so [`openapi_spec`] can reuse it to produce the schema
+/// without a database or a running server.
+fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
     let public = public_router();
     let seeker = OpenApiRouter::from(seeker_router());
     let owner = OpenApiRouter::from(owner_router());
     let admin = OpenApiRouter::from(admin_router());
 
-    let (router, openapi) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+    OpenApiRouter::with_openapi(ApiDoc::openapi())
         .merge(public)
         .merge(seeker)
         .merge(owner)
         .merge(admin)
-        .split_for_parts();
+        .split_for_parts()
+}
+
+/// Assembles all sub-routers and applies global middleware layers.
+///
+/// Global layers (tracing, CORS, request-id, …) are applied here via
+/// `.layer()` on the final router so that they run for every request
+/// regardless of role.
+///
+/// The Swagger UI (which also serves the raw schema at
+/// `/api/docs/openapi.json`) is mounted everywhere except production — the
+/// API surface must not be discoverable by anyone probing a public
+/// deployment.
+pub fn build_router(state: AppState) -> Router {
+    let (router, openapi) = merged_router();
 
     let router = if state.config().app_env == AppEnv::Production {
         router
@@ -118,4 +127,12 @@ pub fn build_router(state: AppState) -> Router {
         // TODO EP-01: .layer(TraceLayer::new_for_http())
         // TODO EP-01: .layer(CorsLayer::permissive())   ← tighten in prod
         .with_state(state)
+}
+
+/// Returns the OpenAPI schema without booting a database or HTTP server.
+///
+/// Backs `src/bin/gen_openapi.rs`, which CI uses to detect drift between
+/// `docs/openapi.json` and the router's route annotations.
+pub fn openapi_spec() -> utoipa::openapi::OpenApi {
+    merged_router().1
 }

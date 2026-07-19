@@ -30,10 +30,11 @@ async fn main() {
     // In staging/prod, variables are injected by the orchestrator; loading a
     // .env file would silently override them — a security and ops hazard.
     //
-    // `dotenv_override` lets real env vars take precedence over .env values,
-    // which is the correct 12-factor behaviour when both sources are present.
+    // `dotenv` (non-overriding) lets real env vars take precedence over .env
+    // values, which is the correct 12-factor behaviour when both sources are
+    // present — it only fills in variables that aren't already set.
     if app_env.is_dev() {
-        match dotenvy::dotenv_override() {
+        match dotenvy::dotenv() {
             Ok(path) => eprintln!("[dev] Loaded .env from {}", path.display()),
             Err(e) => eprintln!("[dev] No .env file found ({e}), using OS environment"),
         }
