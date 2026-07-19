@@ -6,7 +6,6 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-COPY frontend/docs-frontend/openapi.json ./
 RUN npm ci
 
 # `src/shared/api/types.ts` is generated from the live backend's OpenAPI

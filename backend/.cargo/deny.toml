@@ -1,6 +1,13 @@
 [advisories]
 version = 2
-ignore = []
+ignore = [
+    # No fixed upgrade available yet (transitive via sqlx-mysql, not reachable
+    # at runtime since only the "postgres" sqlx feature is enabled).
+    "RUSTSEC-2023-0071",
+    # `paste` (via utoipa-axum) is archived/unmaintained with no safe
+    # replacement drop-in yet; revisit when utoipa-axum drops the dependency.
+    "RUSTSEC-2024-0436",
+]
 
 [licenses]
 version = 2
@@ -16,7 +23,9 @@ allow = [
     "CC0-1.0",
     "MPL-2.0",
     "OpenSSL",
+    "Zlib",
 ]
+private = { ignore = true }
 
 [bans]
 multiple-versions = "warn"

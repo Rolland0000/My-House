@@ -2,6 +2,7 @@
 name = "backend-my-house"
 version = "0.1.0"
 edition = "2021"
+publish = false
 # `cargo run`/`cargo watch -x run` (dev Docker CMD) would otherwise be
 # ambiguous now that `src/bin/gen_openapi.rs` adds a second binary.
 default-run = "backend-my-house"
