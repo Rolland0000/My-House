@@ -3,8 +3,10 @@
 # ── Builder ───────────────────────────────────────────────────────────────────
 FROM rust:1-slim-bookworm AS builder
 
+# ca-certificates + curl: utoipa-swagger-ui's build.rs downloads the Swagger UI
+# release archive over HTTPS via the `curl` system binary at compile time.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential pkg-config \
+    && apt-get install -y --no-install-recommends build-essential pkg-config ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
