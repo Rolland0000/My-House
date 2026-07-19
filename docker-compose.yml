@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: myhouse
+      POSTGRES_PASSWORD: myhouse
+      POSTGRES_DB: myhouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myhouse -d myhouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      APP_ENV: development
+      # Overrides env_file: inside the compose network the DB is reachable at
+      # the "postgres" service hostname, not "localhost" (which backend/.env
+      # correctly uses for a bare `cargo run` on the host instead).
+      DATABASE_URL: postgresql://myhouse:myhouse@postgres:5432/myhouse
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - storage_data:/app/storage
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - storage_data:/usr/share/nginx/media:ro
+
+volumes:
+  postgres_data:
+  storage_data:
