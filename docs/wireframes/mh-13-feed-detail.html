@@ -1,0 +1,1313 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MH-13 — Wireframes: Feed public + Détail du bien</title>
+<style>
+  :root {
+    --paper: #f5f4f0;
+    --paper-raised: #ffffff;
+    --ink: #201f1c;
+    --ink-soft: #57544c;
+    --line: #cdc9bf;
+    --line-strong: #a39d8e;
+    --accent: #a8380f;
+    --accent-soft: #f0ded4;
+    --warn: #8a5a00;
+    --warn-soft: #f2e4c4;
+    --error: #a3241d;
+    --error-soft: #f3dcd9;
+    --focus: #1d4ed8;
+    --radius-s: 3px;
+    --radius-m: 6px;
+    font-synthesis: none;
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1c1b18;
+    --paper-raised: #26241f;
+    --ink: #ece8df;
+    --ink-soft: #a8a297;
+    --line: #43403a;
+    --line-strong: #5b574d;
+    --accent: #e2794a;
+    --accent-soft: #3a2a1f;
+    --warn: #d9ab4a;
+    --warn-soft: #3a2f16;
+    --error: #e08076;
+    --error-soft: #3a2321;
+    --focus: #6f9bff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c1b18;
+      --paper-raised: #26241f;
+      --ink: #ece8df;
+      --ink-soft: #a8a297;
+      --line: #43403a;
+      --line-strong: #5b574d;
+      --accent: #e2794a;
+      --accent-soft: #3a2a1f;
+      --warn: #d9ab4a;
+      --warn-soft: #3a2f16;
+      --error: #e08076;
+      --error-soft: #3a2321;
+      --focus: #6f9bff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.45;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  }
+
+  .app {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .masthead .eyebrow {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 0;
+    max-width: 74ch;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  .swatch.placeholder { border: 1.5px dashed var(--line-strong); background: transparent; }
+  .swatch.component { border: 1.5px solid var(--ink-soft); background: var(--paper-raised); }
+  .swatch.error { background: var(--error-soft); border: 1.5px solid var(--error); }
+  .swatch.warn { background: var(--warn-soft); border: 1.5px solid var(--warn); }
+  .swatch.skeleton { background: repeating-linear-gradient(90deg, var(--line) 0 8px, var(--paper) 8px 16px); border: 1px solid var(--line); }
+
+  /* ---------- Stepper ---------- */
+
+  .stepper {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0;
+    margin-bottom: 14px;
+  }
+
+  .stepper button {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 4px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stepper button .num {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+  }
+
+  .stepper button:hover { color: var(--ink); }
+
+  .stepper button.is-active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  .stepper button.is-active .num {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .stepper .sep {
+    color: var(--line-strong);
+    align-self: center;
+    font-size: 12px;
+    padding: 0 2px;
+  }
+
+  /* ---------- State chips ---------- */
+
+  .state-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 20px;
+  }
+
+  .state-tabs button {
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+  }
+
+  .state-tabs button:hover { border-color: var(--line-strong); color: var(--ink); }
+
+  .state-tabs button.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ---------- Stage layout ---------- */
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(620px, 860px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 1100px) {
+    .stage { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Canvas / device frame ---------- */
+
+  .canvas { position: relative; min-width: 0; }
+
+  .frame {
+    display: none;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    overflow-x: auto;
+  }
+
+  .frame.is-active { display: block; }
+
+  .page-inner { max-width: 780px; margin: 0 auto; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .ph-logo {
+    width: 96px;
+    height: 26px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius-s);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+
+  .top-bar h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .back-link {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ---------- Filter bar ---------- */
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filter-input {
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    width: 180px;
+  }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .chip {
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+  }
+
+  .chip.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .filter-reset {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--focus);
+  }
+
+  /* ---------- Feed grid ---------- */
+
+  .feed-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  .feed-card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+  }
+
+  .feed-card .cover {
+    aspect-ratio: 4 / 3;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .cover-ph {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background:
+      repeating-linear-gradient(135deg, transparent 0 10px, rgba(0,0,0,0.02) 10px 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--line-strong);
+  }
+
+  .cover-ph::before {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius-s);
+  }
+
+  .type-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+  }
+
+  .feed-card .body { padding: 12px 14px 14px; }
+
+  .feed-card .title {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feed-card .loc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+
+  .feed-card .price {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  /* skeleton bars for loading state */
+  .bar {
+    height: 11px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 8px, var(--paper) 8px 16px);
+  }
+  .bar + .bar { margin-top: 8px; }
+  .bar.w60 { width: 60%; }
+  .bar.w40 { width: 40%; }
+  .bar.w80 { width: 80%; }
+
+  /* ---------- Pagination ---------- */
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 26px;
+  }
+
+  .page-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--line-strong);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+  }
+
+  .page-btn.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .page-btn.is-disabled { opacity: 0.45; }
+
+  .page-meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ---------- Empty state ---------- */
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 64px 20px;
+    gap: 10px;
+  }
+
+  .empty-icon {
+    width: 56px;
+    height: 56px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--line-strong);
+    margin-bottom: 6px;
+  }
+
+  .empty-state h3 { margin: 0; font-size: 17px; }
+  .empty-state p { margin: 0; max-width: 42ch; color: var(--ink-soft); font-size: 13.5px; }
+
+  .link-btn {
+    appearance: none;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--focus);
+    margin-top: 4px;
+  }
+
+  /* ---------- Gallery (detail) ---------- */
+
+  .gallery-row {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+
+  .gallery-photo {
+    flex: none;
+    width: 240px;
+    height: 200px;
+    border-radius: var(--radius-m);
+    position: relative;
+  }
+
+  .gallery-photo:last-child { width: 60px; opacity: 0.5; }
+
+  .gallery-photo .cover-ph { border-radius: var(--radius-m); }
+
+  .gallery-dots { display: flex; gap: 5px; justify-content: center; margin-bottom: 22px; }
+  .gallery-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line-strong);
+  }
+  .gallery-dots span:first-child { background: var(--accent); width: 16px; border-radius: 3px; }
+
+  /* ---------- Detail content ---------- */
+
+  .detail-head { margin-bottom: 4px; }
+  .detail-head .row-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .detail-head h2 { margin: 0; font-size: 22px; font-weight: 700; }
+
+  .detail-meta {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+
+  .price-block { display: flex; align-items: baseline; gap: 10px; margin-bottom: 22px; }
+  .price-block .price { font-size: 24px; font-weight: 700; }
+  .price-block .stats { font-size: 13px; color: var(--ink-soft); }
+
+  .section-title {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+
+  .description-block { margin-bottom: 26px; }
+  .description-block p { margin: 0; font-size: 14px; color: var(--ink); }
+
+  .owner-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    margin-bottom: 18px;
+  }
+
+  .avatar-ph {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px dashed var(--line-strong);
+    flex: none;
+  }
+
+  .owner-card .name { font-weight: 700; font-size: 14px; }
+  .owner-card .role { font-size: 12px; color: var(--ink-soft); }
+
+  .contact-block { margin-top: 4px; }
+
+  .phone-reveal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    background: var(--paper-raised);
+  }
+
+  .phone-reveal .num {
+    font-family: ui-monospace, monospace;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .phone-reveal .tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  .field { margin-bottom: 16px; }
+
+  .box-input {
+    width: 100%;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    background: var(--paper);
+    font-family: inherit;
+  }
+
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-s);
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn.disabled { opacity: 0.5; }
+  .btn.secondary { background: var(--paper-raised); color: var(--ink); border: 1.5px solid var(--line-strong); }
+
+  /* banners */
+  .banner {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-radius: var(--radius-s);
+    padding: 11px 12px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    border: 1px solid;
+  }
+
+  .banner.error {
+    background: var(--error-soft);
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  .banner.warn {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .banner .glyph {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    flex: none;
+  }
+
+  .banner .txt { color: var(--ink); }
+
+  /* ---------- Annotations panel ---------- */
+
+  .notes { position: relative; }
+
+  .note-block { display: none; }
+  .note-block.is-active { display: block; }
+
+  .note-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+
+  .note-card h3 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .note-card .endpoint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: ui-monospace, monospace;
+    font-size: 12.5px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 6px 10px;
+    margin-bottom: 12px;
+  }
+
+  .note-card .endpoint .verb {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .note-card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .note-card li { margin-bottom: 7px; }
+  .note-card li:last-child { margin-bottom: 0; }
+
+  .note-card li .status {
+    font-family: ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .status.s-200 { background: var(--accent-soft); color: var(--accent); }
+  .status.s-401, .status.s-404, .status.s-500 { background: var(--error-soft); color: var(--error); }
+  .status.s-429 { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- Decisions footer ---------- */
+
+  .decisions {
+    margin-top: 36px;
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+  }
+
+  .decisions h3 {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+
+  .decisions .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .decisions .item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 13px 15px;
+    background: var(--paper-raised);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .decisions .item strong {
+    display: block;
+    color: var(--ink);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .decisions .item.flag {
+    border-color: var(--warn);
+    background: var(--warn-soft);
+  }
+
+  .decisions .item.flag strong { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <span class="eyebrow">MH-13 · Wireframes low-fi</span>
+    <h1>Feed public + Détail du bien</h1>
+    <p>Structure et hiérarchie des écrans, pas un design visuel final. Objectif : débloquer l'implémentation frontend (<span class="mono">features/listings</span>) et valider les états de chargement, vide et pagination avec le contrat <span class="mono">TECHNICAL_SPEC_MVP.md §4.3</span> et les exigences <span class="mono">FEED-01..05</span> / <span class="mono">DET-01..03</span> du cahier des charges.</p>
+    <div class="legend">
+      <span><span class="swatch placeholder"></span>zone média non définie</span>
+      <span><span class="swatch component"></span>composant interactif</span>
+      <span><span class="swatch skeleton"></span>squelette de chargement</span>
+      <span><span class="swatch error"></span>état erreur / vide</span>
+      <span><span class="swatch warn"></span>état avertissement</span>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper"></nav>
+  <nav class="state-tabs" id="stateTabs"></nav>
+
+  <main class="stage">
+    <div class="canvas" id="canvas">
+
+      <!-- ===== SCREEN 1 — FEED ===== -->
+
+      <div class="frame" data-screen="feed" data-state="default">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Découvrez des logements</h2>
+          </div>
+
+          <div class="filter-bar">
+            <input class="filter-input" placeholder="Ville (toutes)" disabled>
+            <div class="chip-group">
+              <span class="chip is-active">Tous</span>
+              <span class="chip">Appartement</span>
+              <span class="chip">Studio</span>
+              <span class="chip">Maison</span>
+              <span class="chip">Chambre</span>
+              <span class="chip">Villa</span>
+              <span class="chip">Autre</span>
+            </div>
+          </div>
+
+          <div class="feed-grid">
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Studio</span></div>
+              <div class="body">
+                <p class="title">Studio meublé Plateau</p>
+                <p class="loc">Dakar · Plateau</p>
+                <p class="price">150 000 FCFA</p>
+              </div>
+            </div>
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Appartement</span></div>
+              <div class="body">
+                <p class="title">Appartement 3 pièces Riviera</p>
+                <p class="loc">Abidjan · Riviera</p>
+                <p class="price">320 000 FCFA</p>
+              </div>
+            </div>
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Villa</span></div>
+              <div class="body">
+                <p class="title">Villa avec piscine Almadies</p>
+                <p class="loc">Dakar · Almadies</p>
+                <p class="price">850 000 FCFA</p>
+              </div>
+            </div>
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Chambre</span></div>
+              <div class="body">
+                <p class="title">Chambre meublée Adjamé</p>
+                <p class="loc">Abidjan · Adjamé</p>
+                <p class="price">45 000 FCFA</p>
+              </div>
+            </div>
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Maison</span></div>
+              <div class="body">
+                <p class="title">Maison familiale Sacré-Cœur</p>
+                <p class="loc">Dakar · Sacré-Cœur</p>
+                <p class="price">400 000 FCFA</p>
+              </div>
+            </div>
+            <div class="feed-card">
+              <div class="cover"><div class="cover-ph">PHOTO</div><span class="type-tag">Studio</span></div>
+              <div class="body">
+                <p class="title">Studio cosy Yopougon</p>
+                <p class="loc">Abidjan · Yopougon</p>
+                <p class="price">90 000 FCFA</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pagination">
+            <span class="page-btn is-disabled">‹ Précédent</span>
+            <span class="page-btn is-active">1</span>
+            <span class="page-btn">2</span>
+            <span class="page-btn">3</span>
+            <span class="page-btn">Suivant ›</span>
+          </div>
+          <p class="page-meta">47 biens · page 1 / 3</p>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="feed" data-state="loading">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Découvrez des logements</h2>
+          </div>
+
+          <div class="filter-bar">
+            <input class="filter-input" placeholder="Ville (toutes)" disabled>
+            <div class="chip-group">
+              <span class="chip is-active">Tous</span>
+              <span class="chip">Appartement</span>
+              <span class="chip">Studio</span>
+              <span class="chip">Maison</span>
+              <span class="chip">Chambre</span>
+              <span class="chip">Villa</span>
+              <span class="chip">Autre</span>
+            </div>
+          </div>
+
+          <div class="feed-grid">
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+            <div class="feed-card"><div class="cover"><div class="cover-ph">&nbsp;</div></div><div class="body"><div class="bar w80"></div><div class="bar w40"></div><div class="bar w60"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="feed" data-state="empty">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Découvrez des logements</h2>
+          </div>
+
+          <div class="filter-bar">
+            <input class="filter-input" value="Lomé">
+            <div class="chip-group">
+              <span class="chip">Tous</span>
+              <span class="chip">Appartement</span>
+              <span class="chip">Studio</span>
+              <span class="chip">Maison</span>
+              <span class="chip">Chambre</span>
+              <span class="chip is-active">Villa</span>
+              <span class="chip">Autre</span>
+            </div>
+            <span class="filter-reset">Réinitialiser</span>
+          </div>
+
+          <div class="empty-state">
+            <div class="empty-icon">⌂</div>
+            <h3>Aucun résultat pour ces filtres</h3>
+            <p>Aucune villa disponible à Lomé pour le moment. Essayez une autre ville ou un autre type de bien.</p>
+            <button class="link-btn">Réinitialiser les filtres</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCREEN 2 — DETAIL ===== -->
+
+      <div class="frame" data-screen="detail" data-state="default">
+        <div class="page-inner">
+          <span class="back-link">← Retour au feed</span>
+
+          <div class="gallery-row">
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 1</div></div>
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 2</div></div>
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 3</div></div>
+            <div class="gallery-photo"><div class="cover-ph"></div></div>
+          </div>
+          <div class="gallery-dots"><span></span><span></span><span></span><span></span></div>
+
+          <div class="detail-head">
+            <div class="row-top">
+              <h2>Studio meublé Plateau</h2>
+              <span class="type-tag" style="position:static;">Studio</span>
+            </div>
+            <p class="detail-meta">Dakar · Plateau</p>
+          </div>
+
+          <div class="price-block">
+            <span class="price">150 000 FCFA</span>
+            <span class="stats">35 m² · 1 pièce</span>
+          </div>
+
+          <div class="description-block">
+            <p class="section-title">Description</p>
+            <p>Studio entièrement meublé et rénové, idéalement situé au cœur du Plateau, à deux pas des commerces et transports. Cuisine équipée, salle d'eau privative, fibre optique installée. Immeuble sécurisé avec gardien. Disponible immédiatement, bail d'un an minimum.</p>
+          </div>
+
+          <p class="section-title">Propriétaire</p>
+          <div class="owner-card">
+            <div class="avatar-ph"></div>
+            <div>
+              <p class="name">Moussa Diallo</p>
+              <p class="role">Propriétaire</p>
+            </div>
+          </div>
+
+          <div class="banner warn">
+            <span class="glyph">!</span>
+            <span class="txt">Restez vigilant : ne versez jamais d'argent ni de caution avant d'avoir visité le bien en personne. MyHouse met en relation les utilisateurs mais n'intervient pas dans les transactions ni les paiements.</span>
+          </div>
+
+          <div class="contact-block">
+            <button class="btn">Contacter le propriétaire</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="detail" data-state="loading">
+        <div class="page-inner">
+          <span class="back-link">← Retour au feed</span>
+
+          <div class="gallery-row">
+            <div class="gallery-photo"><div class="cover-ph">&nbsp;</div></div>
+            <div class="gallery-photo"><div class="cover-ph">&nbsp;</div></div>
+            <div class="gallery-photo"><div class="cover-ph">&nbsp;</div></div>
+          </div>
+
+          <div class="bar w60" style="height:20px; margin: 18px 0 10px;"></div>
+          <div class="bar w40" style="margin-bottom:22px;"></div>
+          <div class="bar w80" style="margin-bottom:6px;"></div>
+          <div class="bar w80" style="margin-bottom:6px;"></div>
+          <div class="bar w60" style="margin-bottom:22px;"></div>
+
+          <div class="owner-card">
+            <div class="avatar-ph"></div>
+            <div>
+              <div class="bar w60" style="width:110px;"></div>
+              <div class="bar w40" style="width:70px; margin-top:6px;"></div>
+            </div>
+          </div>
+
+          <button class="btn disabled">Chargement…</button>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="detail" data-state="contact-revealed">
+        <div class="page-inner">
+          <span class="back-link">← Retour au feed</span>
+
+          <div class="gallery-row">
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 1</div></div>
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 2</div></div>
+            <div class="gallery-photo"><div class="cover-ph">PHOTO 3</div></div>
+            <div class="gallery-photo"><div class="cover-ph"></div></div>
+          </div>
+          <div class="gallery-dots"><span></span><span></span><span></span><span></span></div>
+
+          <div class="detail-head">
+            <div class="row-top">
+              <h2>Studio meublé Plateau</h2>
+              <span class="type-tag" style="position:static;">Studio</span>
+            </div>
+            <p class="detail-meta">Dakar · Plateau</p>
+          </div>
+
+          <div class="price-block">
+            <span class="price">150 000 FCFA</span>
+            <span class="stats">35 m² · 1 pièce</span>
+          </div>
+
+          <div class="description-block">
+            <p class="section-title">Description</p>
+            <p>Studio entièrement meublé et rénové, idéalement situé au cœur du Plateau, à deux pas des commerces et transports. Cuisine équipée, salle d'eau privative, fibre optique installée. Immeuble sécurisé avec gardien. Disponible immédiatement, bail d'un an minimum.</p>
+          </div>
+
+          <p class="section-title">Propriétaire</p>
+          <div class="owner-card">
+            <div class="avatar-ph"></div>
+            <div>
+              <p class="name">Moussa Diallo</p>
+              <p class="role">Propriétaire</p>
+            </div>
+          </div>
+
+          <div class="banner warn">
+            <span class="glyph">!</span>
+            <span class="txt">Restez vigilant : ne versez jamais d'argent ni de caution avant d'avoir visité le bien en personne. MyHouse met en relation les utilisateurs mais n'intervient pas dans les transactions ni les paiements.</span>
+          </div>
+
+          <div class="contact-block">
+            <p class="section-title">Contact</p>
+            <div class="phone-reveal">
+              <span class="num">+221 77 123 45 67</span>
+              <span class="tag">Révélé</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="detail" data-state="notfound">
+        <div class="page-inner">
+          <span class="back-link">← Retour au feed</span>
+          <div class="empty-state">
+            <div class="empty-icon">✕</div>
+            <h3>Ce bien n'est plus disponible</h3>
+            <p>Il a peut-être été supprimé par le propriétaire ou son statut est passé à « non disponible ».</p>
+            <button class="link-btn">Retour au feed</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="notes" id="notes">
+
+      <!-- feed -->
+      <div class="note-block" data-screen="feed" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">GET</span> /listings</div>
+          <ul>
+            <li>Query params : <span class="mono">city</span>, <span class="mono">type</span>, <span class="mono">owner_id</span>, <span class="mono">page</span>, <span class="mono">per_page</span> (FEED-05).</li>
+            <li>Chaque carte affiche <span class="mono">cover_photo_url</span>, <span class="mono">title</span>, <span class="mono">city</span> + <span class="mono">neighborhood</span>, <span class="mono">price</span>, <span class="mono">type</span> (FEED-02).</li>
+            <li>Clic sur une carte → navigation vers <span class="mono">/listings/:id</span> (FEED-03).</li>
+            <li>Filtres ville/type déclenchent un nouvel appel avec les query params correspondants. <span class="mono">owner_id</span> n'est pas exposé en filtre visible ici — réservé à un usage interne (ex. page profil propriétaire).</li>
+            <li>Pagination illustrée avec <span class="mono">per_page = 30</span> — voir flag ci-dessous sur l'incohérence de spec.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="feed" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Squelette affiché pendant l'appel réseau initial, un changement de filtre, ou un changement de page.</li>
+            <li>La barre de filtres reste interactive pendant le chargement (pas de verrouillage) — à confirmer avec le produit si ce n'est pas le comportement souhaité.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="feed" data-state="empty">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li><span class="mono">pagination.total = 0</span> dans la réponse → état vide, pas de composant pagination affiché.</li>
+            <li>Deux variantes de copy à prévoir côté FE : « Aucun résultat pour ces filtres » (filtres actifs, illustré ici) vs « Aucun bien disponible pour le moment » (feed complet vide, aucun filtre).</li>
+            <li>« Réinitialiser les filtres » relance <span class="mono">GET /listings</span> sans query params.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- detail -->
+      <div class="note-block" data-screen="detail" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">GET</span> /listings/:id</div>
+          <ul>
+            <li>Endpoint public, aucune auth requise. Champs : <span class="mono">media[]</span> (galerie), <span class="mono">description</span>, <span class="mono">price</span>, <span class="mono">surface_m2</span>, <span class="mono">rooms</span>, <span class="mono">city</span>/<span class="mono">neighborhood</span>, <span class="mono">owner{first_name,last_name,avatar_url}</span> — jamais <span class="mono">phone</span> (DET-02).</li>
+            <li>Galerie scrollable horizontalement, tri par <span class="mono">media[].position</span> (DET-01).</li>
+            <li>Bouton « Contacter » visible même non authentifié. Le clic déclenche <span class="mono">GET /listings/:id/contact</span>, qui nécessite un JWT (<span class="mono">seeker</span> ou <span class="mono">owner</span>) — si non connecté, hypothèse de redirection vers le flow d'auth (MH-12, écran Email) avant reveal. Ce comportement n'est pas documenté dans le contrat API, à valider en dev.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="detail" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Squelette pendant l'appel <span class="mono">GET /listings/:id</span>. Bouton de contact désactivé tant que les données ne sont pas chargées.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="detail" data-state="contact-revealed">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">GET</span> /listings/:id/contact</div>
+          <ul>
+            <li><span class="status s-200">200</span> → <span class="mono">{ phone }</span> affiché à la place du bouton, remplace la zone de contact.</li>
+            <li><span class="status s-404">404</span> <span class="mono">LISTING_NOT_FOUND</span> → le bien a pu être supprimé/désactivé entre le chargement de la page et le clic (race condition) ; prévoir un fallback vers l'état « not-found ».</li>
+            <li>Le message d'avertissement (DET-01) reste visible même après reveal — il concerne la transaction, pas seulement l'obtention du numéro.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="detail" data-state="notfound">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li><span class="status s-404">404</span> sur <span class="mono">GET /listings/:id</span> — bien supprimé ou statut non disponible (même code d'erreur que sur <span class="mono">/contact</span>, cf. table de tests <span class="mono">TECHNICAL_SPEC_MVP.md</span>).</li>
+            <li>CTA de retour vers le feed plutôt qu'un rechargement de la même URL.</li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <section class="decisions">
+    <h3>Décisions &amp; hypothèses prises pendant cette session</h3>
+    <div class="grid">
+      <div class="item flag">
+        <strong>⚠ Incohérence de pagination entre spec fonctionnelle et technique</strong>
+        Le cahier des charges (<span class="mono">FEED-04</span>, Must) impose 30 résultats/page par défaut. <span class="mono">TECHNICAL_SPEC_MVP.md §4.3</span> documente un défaut de 20 (max 50) pour <span class="mono">GET /listings</span>. Wireframe illustré avec 30 conformément au Must fonctionnel — à trancher avant implémentation FE/BE, pas une décision silencieuse de ce wireframe.
+      </div>
+      <div class="item">
+        <strong>Texte du message d'avertissement contact (DET-01) illustratif</strong>
+        Le cahier des charges demande seulement « un petit message d'avertissement concernant tout échange et transaction » sans texte précis. Le wording affiché ici est une proposition, à valider par le produit/légal avant dev — même logique que les valeurs de rate-limit illustratives dans MH-12.
+      </div>
+      <div class="item">
+        <strong>Redirection vers l'auth flow si « Contacter » sans être connecté</strong>
+        <span class="mono">/listings/:id/contact</span> exige un JWT ; le comportement pour un visiteur non authentifié n'est pas documenté dans le contrat API. Hypothèse prise en session : redirection vers l'écran Email du flow OTP (MH-12), à confirmer.
+      </div>
+      <div class="item">
+        <strong>Barre de filtres ville + type ajoutée (FEED-05)</strong>
+        Ajoutée sur demande explicite de cette session. Le filtre <span class="mono">owner_id</span> reste volontairement absent de l'UI générique du feed — c'est un paramètre technique utilisé quand on arrive depuis la page d'un propriétaire, pas un filtre que le seeker manipule directement.
+      </div>
+      <div class="item">
+        <strong>Devise affichée en FCFA dans les exemples</strong>
+        Illustratif pour le marché Afrique francophone (cohérent avec MH-12 : indicatif +225/+221). Le format d'affichage prix pour le marché France (€) n'est pas encore défini — lié au blocker monétisation déjà noté dans <span class="mono">CLAUDE.md</span>.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const SCREENS = [
+    {
+      id: "feed",
+      label: "Feed",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Chargement" },
+        { id: "empty", label: "Vide (filtres actifs)" }
+      ]
+    },
+    {
+      id: "detail",
+      label: "Détail du bien",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Chargement" },
+        { id: "contact-revealed", label: "Contact révélé" },
+        { id: "notfound", label: "Introuvable (404)" }
+      ]
+    }
+  ];
+
+  let currentScreen = "feed";
+  let currentState = "default";
+
+  const stepperEl = document.getElementById("stepper");
+  const stateTabsEl = document.getElementById("stateTabs");
+
+  function renderStepper() {
+    stepperEl.innerHTML = "";
+    SCREENS.forEach((screen, i) => {
+      const btn = document.createElement("button");
+      btn.className = screen.id === currentScreen ? "is-active" : "";
+      btn.innerHTML = '<span class="num">' + (i + 1) + '</span>' + screen.label;
+      btn.addEventListener("click", () => {
+        currentScreen = screen.id;
+        currentState = SCREENS[i].states[0].id;
+        renderAll();
+      });
+      stepperEl.appendChild(btn);
+      if (i < SCREENS.length - 1) {
+        const sep = document.createElement("span");
+        sep.className = "sep";
+        sep.textContent = "→";
+        stepperEl.appendChild(sep);
+      }
+    });
+  }
+
+  function renderStateTabs() {
+    stateTabsEl.innerHTML = "";
+    const screen = SCREENS.find(s => s.id === currentScreen);
+    screen.states.forEach(state => {
+      const btn = document.createElement("button");
+      btn.className = state.id === currentState ? "is-active" : "";
+      btn.textContent = state.label;
+      btn.addEventListener("click", () => {
+        currentState = state.id;
+        renderAll();
+      });
+      stateTabsEl.appendChild(btn);
+    });
+  }
+
+  function renderFrames() {
+    document.querySelectorAll(".frame").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+    document.querySelectorAll(".note-block").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+  }
+
+  function renderAll() {
+    renderStepper();
+    renderStateTabs();
+    renderFrames();
+  }
+
+  renderAll();
+</script>
+
+</body>
+</html>
