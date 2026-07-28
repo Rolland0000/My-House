@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* MH-17 design tokens — docs/wireframes/DESIGN_TOKENS.md */
+@theme {
+  --font-sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-lg: 1.5rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+
+  --color-bg: #f5f4f0;
+  --color-surface: #ffffff;
+  --color-text: #201f1c;
+  --color-text-muted: #57544c;
+  --color-border: #cdc9bf;
+  --color-border-strong: #a39d8e;
+  --color-primary: #a8380f;
+  --color-primary-soft: #f0ded4;
+  --color-success: #3f6b2e;
+  --color-success-soft: #dfe8d5;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #f2e4c4;
+  --color-error: #a3241d;
+  --color-error-soft: #f3dcd9;
+  --color-focus: #1d4ed8;
+}
+
+/* Dark values override the same custom properties in place, so components
+   never need `dark:` variants — see docs/wireframes/DESIGN_TOKENS.md */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1c1b18;
+    --color-surface: #26241f;
+    --color-text: #ece8df;
+    --color-text-muted: #a8a297;
+    --color-border: #43403a;
+    --color-border-strong: #5b574d;
+    --color-primary: #e2794a;
+    --color-primary-soft: #3a2a1f;
+    --color-success: #8fbf6d;
+    --color-success-soft: #223a1c;
+    --color-warning: #d9ab4a;
+    --color-warning-soft: #3a2f16;
+    --color-error: #e08076;
+    --color-error-soft: #3a2321;
+    --color-focus: #6f9bff;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans;
+  }
+}

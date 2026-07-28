@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MH-14 — Wireframes: Gestion des biens (Owner)</title>
+<style>
+  :root {
+    --paper: #f5f4f0;
+    --paper-raised: #ffffff;
+    --ink: #201f1c;
+    --ink-soft: #57544c;
+    --line: #cdc9bf;
+    --line-strong: #a39d8e;
+    --accent: #a8380f;
+    --accent-soft: #f0ded4;
+    --warn: #8a5a00;
+    --warn-soft: #f2e4c4;
+    --error: #a3241d;
+    --error-soft: #f3dcd9;
+    --focus: #1d4ed8;
+    --radius-s: 3px;
+    --radius-m: 6px;
+    font-synthesis: none;
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1c1b18;
+    --paper-raised: #26241f;
+    --ink: #ece8df;
+    --ink-soft: #a8a297;
+    --line: #43403a;
+    --line-strong: #5b574d;
+    --accent: #e2794a;
+    --accent-soft: #3a2a1f;
+    --warn: #d9ab4a;
+    --warn-soft: #3a2f16;
+    --error: #e08076;
+    --error-soft: #3a2321;
+    --focus: #6f9bff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c1b18;
+      --paper-raised: #26241f;
+      --ink: #ece8df;
+      --ink-soft: #a8a297;
+      --line: #43403a;
+      --line-strong: #5b574d;
+      --accent: #e2794a;
+      --accent-soft: #3a2a1f;
+      --warn: #d9ab4a;
+      --warn-soft: #3a2f16;
+      --error: #e08076;
+      --error-soft: #3a2321;
+      --focus: #6f9bff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.45;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  }
+
+  .app {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+
+  .masthead .eyebrow {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .masthead h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+
+  .masthead p { margin: 0; max-width: 74ch; color: var(--ink-soft); font-size: 14.5px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 4px; font-size: 12.5px; color: var(--ink-soft); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 14px; height: 14px; border-radius: 2px; flex: none; }
+  .swatch.placeholder { border: 1.5px dashed var(--line-strong); background: transparent; }
+  .swatch.component { border: 1.5px solid var(--ink-soft); background: var(--paper-raised); }
+  .swatch.error { background: var(--error-soft); border: 1.5px solid var(--error); }
+  .swatch.warn { background: var(--warn-soft); border: 1.5px solid var(--warn); }
+  .swatch.skeleton { background: repeating-linear-gradient(90deg, var(--line) 0 8px, var(--paper) 8px 16px); border: 1px solid var(--line); }
+
+  /* ---------- Stepper ---------- */
+
+  .stepper { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+
+  .stepper button {
+    appearance: none; background: transparent; border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-soft); font-family: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 10px 4px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+
+  .stepper button .num {
+    font-family: ui-monospace, monospace; font-size: 11px; width: 18px; height: 18px;
+    border-radius: 50%; border: 1.5px solid var(--line-strong);
+    display: inline-flex; align-items: center; justify-content: center; color: var(--ink-soft);
+  }
+
+  .stepper button:hover { color: var(--ink); }
+  .stepper button.is-active { color: var(--ink); border-bottom-color: var(--accent); }
+  .stepper button.is-active .num { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .stepper .sep { color: var(--line-strong); align-self: center; font-size: 12px; padding: 0 2px; }
+
+  /* ---------- State chips ---------- */
+
+  .state-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
+
+  .state-tabs button {
+    appearance: none; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--paper-raised); color: var(--ink-soft);
+  }
+
+  .state-tabs button:hover { border-color: var(--line-strong); color: var(--ink); }
+  .state-tabs button.is-active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  /* ---------- Stage layout ---------- */
+
+  .stage { display: grid; grid-template-columns: minmax(620px, 860px) 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } }
+
+  .canvas { position: relative; min-width: 0; }
+
+  .frame {
+    display: none; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-m);
+    padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow-x: auto;
+  }
+  .frame.is-active { display: block; }
+
+  .page-inner { max-width: 780px; margin: 0 auto; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .top-bar h2 { margin: 0; font-size: 18px; font-weight: 700; }
+
+  .ph-logo {
+    width: 96px; height: 26px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-s);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-soft);
+  }
+
+  .back-link { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 16px; display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ---------- Step header (create/edit flow) ---------- */
+
+  .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+  .step-pill {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-soft);
+  }
+  .step-pill.is-active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .step-pill.is-locked { opacity: 0.5; }
+  .step-sep { color: var(--line-strong); font-size: 12px; }
+
+  /* ---------- Fields ---------- */
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase;
+    color: var(--ink-soft); margin-bottom: 6px;
+  }
+  .field .required { color: var(--accent); }
+  .field .optional-tag { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--ink-soft); font-size: 11px; }
+
+  .field-row { display: flex; gap: 14px; }
+  .field-row .field { flex: 1; }
+
+  .box-input {
+    width: 100%; border: 1.5px solid var(--line-strong); border-radius: var(--radius-s);
+    padding: 10px 12px; font-size: 14px; color: var(--ink-soft); background: var(--paper-raised); font-family: inherit;
+  }
+  .box-input.filled { color: var(--ink); }
+  .box-input.textarea { min-height: 84px; }
+  .box-input.error-field { border-color: var(--error); }
+  .box-input.select { display: flex; align-items: center; justify-content: space-between; cursor: default; }
+  .box-input.select .chev { color: var(--ink-soft); font-size: 11px; }
+  .box-input.unit { display: flex; align-items: center; justify-content: space-between; }
+  .box-input.unit .u { color: var(--ink-soft); font-size: 12px; font-weight: 700; }
+
+  .field-error { font-size: 12px; color: var(--error); margin-top: 5px; }
+  .helper { font-size: 12px; color: var(--ink-soft); margin-top: 5px; }
+
+  .btn {
+    border: none; border-radius: var(--radius-s); padding: 12px 20px; font-family: inherit; font-size: 14px;
+    font-weight: 700; background: var(--ink); color: var(--paper); cursor: default;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn.full { width: 100%; }
+  .btn.disabled { opacity: 0.5; }
+  .btn.secondary { background: var(--paper-raised); color: var(--ink); border: 1.5px solid var(--line-strong); }
+
+  .form-actions { display: flex; gap: 10px; margin-top: 22px; }
+
+  /* banners */
+  .banner {
+    display: flex; gap: 10px; align-items: flex-start; border-radius: var(--radius-s); padding: 11px 12px;
+    font-size: 12.5px; margin-bottom: 16px; border: 1px solid;
+  }
+  .banner.error { background: var(--error-soft); border-color: var(--error); color: var(--error); }
+  .banner.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .banner .glyph { font-family: ui-monospace, monospace; font-weight: 700; flex: none; }
+  .banner .txt { color: var(--ink); }
+
+  /* ---------- Photo grid ---------- */
+
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 6px; }
+
+  .photo-tile {
+    width: 140px; height: 140px; border-radius: var(--radius-m); border: 1.5px solid var(--line);
+    position: relative; overflow: hidden; background: var(--paper-raised);
+  }
+
+  .cover-ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--line-strong);
+    background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(0,0,0,0.02) 10px 20px);
+    position: relative;
+  }
+  .cover-ph::before {
+    content: ""; position: absolute; inset: 8px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-s);
+  }
+
+  .drag-handle {
+    position: absolute; bottom: 6px; left: 6px; width: 22px; height: 22px; border-radius: 4px;
+    background: var(--paper-raised); border: 1px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-soft);
+  }
+
+  .delete-x {
+    position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--paper-raised); border: 1px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-soft);
+  }
+
+  .cover-ribbon {
+    position: absolute; top: 6px; left: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; padding: 3px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+  }
+
+  .add-tile {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    border: 1.5px dashed var(--line-strong); color: var(--ink-soft); font-size: 11.5px; font-weight: 600;
+  }
+  .add-tile .plus { font-size: 20px; line-height: 1; }
+
+  .upload-progress {
+    position: absolute; left: 8px; right: 8px; bottom: 8px; height: 4px; border-radius: 2px;
+    background: var(--line); overflow: hidden;
+  }
+  .upload-progress > span { display: block; height: 100%; width: 62%; background: var(--accent); }
+  .upload-label {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--ink-soft); background: rgba(0,0,0,0.02);
+  }
+
+  .dropzone {
+    border: 1.5px dashed var(--line-strong); border-radius: var(--radius-m); padding: 48px 20px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+    background: var(--paper-raised);
+  }
+  .dropzone .icon { font-size: 26px; color: var(--line-strong); }
+  .dropzone h3 { margin: 0; font-size: 15px; }
+  .dropzone p { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+  /* ---------- Owner listings ---------- */
+
+  .listing-row {
+    display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--line);
+    border-radius: var(--radius-m); background: var(--paper-raised); margin-bottom: 12px; flex-wrap: wrap;
+  }
+
+  .thumb-ph {
+    width: 64px; height: 64px; flex: none; border-radius: var(--radius-s);
+    border: 1.5px dashed var(--line-strong); background: var(--paper);
+  }
+
+  .listing-info { flex: 1; min-width: 160px; }
+  .listing-info .title { font-weight: 700; font-size: 14px; margin: 0 0 2px; }
+  .listing-info .meta { font-size: 12.5px; color: var(--ink-soft); margin: 0; }
+  .listing-info .reminder {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 11.5px; font-weight: 600;
+    color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 999px; padding: 3px 9px;
+  }
+
+  .status-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; overflow: hidden; flex: none; }
+  .status-toggle span { padding: 6px 13px; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+  .status-toggle span.is-active.available { background: var(--accent-soft); color: var(--accent); }
+  .status-toggle span.is-active.unavailable { background: var(--line); color: var(--ink); }
+
+  .row-actions { display: flex; gap: 8px; flex: none; }
+  .row-actions .link-btn { font-size: 12.5px; font-weight: 700; color: var(--focus); }
+  .row-actions .link-btn.danger { color: var(--error); }
+
+  .link-btn { appearance: none; background: none; border: none; font-family: inherit; }
+
+  /* skeleton bars */
+  .bar { height: 11px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--line) 0 8px, var(--paper) 8px 16px); }
+  .bar + .bar { margin-top: 8px; }
+  .bar.w40 { width: 40%; } .bar.w60 { width: 60%; } .bar.w80 { width: 80%; }
+
+  /* ---------- Empty state ---------- */
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; text-align: center; padding: 64px 20px; gap: 10px;
+  }
+  .empty-icon {
+    width: 56px; height: 56px; border: 1.5px dashed var(--line-strong); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--line-strong); margin-bottom: 6px;
+  }
+  .empty-state h3 { margin: 0; font-size: 17px; }
+  .empty-state p { margin: 0; max-width: 42ch; color: var(--ink-soft); font-size: 13.5px; }
+
+  /* ---------- Annotations panel ---------- */
+
+  .notes { position: relative; }
+  .note-block { display: none; }
+  .note-block.is-active { display: block; }
+
+  .note-card {
+    border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--paper-raised);
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .note-card h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  .note-card .endpoint {
+    display: inline-flex; align-items: center; gap: 8px; font-family: ui-monospace, monospace; font-size: 12.5px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 6px 10px; margin-bottom: 12px;
+  }
+  .note-card .endpoint .verb { font-weight: 700; color: var(--accent); }
+  .note-card ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink); }
+  .note-card li { margin-bottom: 7px; }
+  .note-card li:last-child { margin-bottom: 0; }
+  .note-card li .status { font-family: ui-monospace, monospace; font-size: 11.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+  .status.s-200, .status.s-201 { background: var(--accent-soft); color: var(--accent); }
+  .status.s-401, .status.s-403, .status.s-404, .status.s-422, .status.s-500 { background: var(--error-soft); color: var(--error); }
+  .status.s-429 { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- Decisions footer ---------- */
+
+  .decisions { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 22px; }
+  .decisions h3 { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 12px; }
+  .decisions .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .decisions .item {
+    border: 1px solid var(--line); border-radius: var(--radius-m); padding: 13px 15px; background: var(--paper-raised);
+    font-size: 12.5px; color: var(--ink-soft);
+  }
+  .decisions .item strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 4px; }
+  .decisions .item.flag { border-color: var(--warn); background: var(--warn-soft); }
+  .decisions .item.flag strong { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <span class="eyebrow">MH-14 · Wireframes low-fi</span>
+    <h1>Gestion des biens (Owner)</h1>
+    <p>Structure et hiérarchie des écrans, pas un design visuel final. Objectif : débloquer l'implémentation frontend (<span class="mono">features/owner-listings</span>) pour le formulaire de création/édition, l'upload/réorganisation/sélection de couverture des photos, et la liste « Mes biens » avec bascule de statut — cf. <span class="mono">LIST-01..07</span> du cahier des charges et <span class="mono">TECHNICAL_SPEC_MVP.md §4.3 / §4.5</span>.</p>
+    <div class="legend">
+      <span><span class="swatch placeholder"></span>zone média non définie</span>
+      <span><span class="swatch component"></span>composant interactif</span>
+      <span><span class="swatch skeleton"></span>squelette de chargement</span>
+      <span><span class="swatch error"></span>état erreur / vide</span>
+      <span><span class="swatch warn"></span>état avertissement</span>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper"></nav>
+  <nav class="state-tabs" id="stateTabs"></nav>
+
+  <main class="stage">
+    <div class="canvas" id="canvas">
+
+      <!-- ===== SCREEN 1 — FORMULAIRE ===== -->
+
+      <div class="frame" data-screen="form" data-state="create">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Publier un bien</h2>
+          </div>
+
+          <div class="step-header">
+            <span class="step-pill is-active">① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-locked">🔒 ② Photos</span>
+          </div>
+
+          <div class="field">
+            <label>Titre <span class="required">*</span></label>
+            <div class="box-input">Ex. Studio meublé Plateau</div>
+          </div>
+          <div class="field">
+            <label>Description <span class="required">*</span></label>
+            <div class="box-input textarea">Décrivez le bien : équipements, quartier, disponibilité…</div>
+          </div>
+          <div class="field">
+            <label>Type de bien <span class="required">*</span></label>
+            <div class="box-input select">Sélectionner un type <span class="chev">⌄</span></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Prix <span class="required">*</span></label>
+              <div class="box-input unit">0 <span class="u">FCFA</span></div>
+            </div>
+            <div class="field">
+              <label>Surface <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input unit">— <span class="u">m²</span></div>
+            </div>
+            <div class="field">
+              <label>Pièces <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input">—</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Ville <span class="required">*</span></label>
+              <div class="box-input">Ex. Dakar</div>
+            </div>
+            <div class="field">
+              <label>Quartier <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input">Ex. Plateau</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn">Enregistrer et continuer vers les photos</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="form" data-state="edit">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Modifier le bien</h2>
+          </div>
+
+          <div class="step-header">
+            <span class="step-pill is-active">① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill">② Photos</span>
+          </div>
+
+          <div class="field">
+            <label>Titre <span class="required">*</span></label>
+            <div class="box-input filled">Studio meublé Plateau</div>
+          </div>
+          <div class="field">
+            <label>Description <span class="required">*</span></label>
+            <div class="box-input textarea filled">Studio entièrement meublé et rénové, idéalement situé au cœur du Plateau, à deux pas des commerces et transports.</div>
+          </div>
+          <div class="field">
+            <label>Type de bien <span class="required">*</span></label>
+            <div class="box-input select filled">Studio <span class="chev">⌄</span></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Prix <span class="required">*</span></label>
+              <div class="box-input unit filled">150 000 <span class="u">FCFA</span></div>
+            </div>
+            <div class="field">
+              <label>Surface <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input unit filled">35 <span class="u">m²</span></div>
+            </div>
+            <div class="field">
+              <label>Pièces <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input filled">1</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Ville <span class="required">*</span></label>
+              <div class="box-input filled">Dakar</div>
+            </div>
+            <div class="field">
+              <label>Quartier <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input filled">Plateau</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn">Enregistrer les modifications</button>
+            <button class="btn secondary">Annuler</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="form" data-state="loading">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Publier un bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill is-active">① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-locked">🔒 ② Photos</span>
+          </div>
+          <div class="field">
+            <label>Titre <span class="required">*</span></label>
+            <div class="box-input filled" style="opacity:.55;">Studio meublé Plateau</div>
+          </div>
+          <div class="field">
+            <label>Description <span class="required">*</span></label>
+            <div class="box-input textarea filled" style="opacity:.55;">Studio entièrement meublé et rénové, idéalement situé au cœur du Plateau.</div>
+          </div>
+          <div class="field">
+            <label>Type de bien <span class="required">*</span></label>
+            <div class="box-input select filled" style="opacity:.55;">Studio <span class="chev">⌄</span></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Prix <span class="required">*</span></label><div class="box-input unit filled" style="opacity:.55;">150 000 <span class="u">FCFA</span></div></div>
+            <div class="field"><label>Surface <span class="optional-tag">(facultatif)</span></label><div class="box-input unit filled" style="opacity:.55;">35 <span class="u">m²</span></div></div>
+            <div class="field"><label>Pièces <span class="optional-tag">(facultatif)</span></label><div class="box-input filled" style="opacity:.55;">1</div></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn disabled">⟳ Enregistrement…</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="form" data-state="error">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Publier un bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill is-active">① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-locked">🔒 ② Photos</span>
+          </div>
+          <div class="banner error">
+            <span class="glyph">×</span>
+            <span class="txt">Certains champs sont invalides. Corrigez-les avant de continuer.</span>
+          </div>
+          <div class="field">
+            <label>Titre <span class="required">*</span></label>
+            <div class="box-input error-field"></div>
+            <p class="field-error">Ce champ est requis.</p>
+          </div>
+          <div class="field">
+            <label>Description <span class="required">*</span></label>
+            <div class="box-input textarea filled">Sympa</div>
+            <p class="field-error">La description doit contenir au moins 20 caractères.</p>
+          </div>
+          <div class="field">
+            <label>Type de bien <span class="required">*</span></label>
+            <div class="box-input select">Sélectionner un type <span class="chev">⌄</span></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Prix <span class="required">*</span></label>
+              <div class="box-input unit error-field filled">-500 <span class="u">FCFA</span></div>
+              <p class="field-error">Le prix doit être supérieur à 0.</p>
+            </div>
+            <div class="field"><label>Surface <span class="optional-tag">(facultatif)</span></label><div class="box-input unit">— <span class="u">m²</span></div></div>
+            <div class="field"><label>Pièces <span class="optional-tag">(facultatif)</span></label><div class="box-input">—</div></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Ville <span class="required">*</span></label>
+              <div class="box-input">Ex. Dakar</div>
+            </div>
+            <div class="field">
+              <label>Quartier <span class="optional-tag">(facultatif)</span></label>
+              <div class="box-input">Ex. Plateau</div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn">Enregistrer et continuer vers les photos</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCREEN 2 — PHOTOS ===== -->
+
+      <div class="frame" data-screen="photos" data-state="empty">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Photos du bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill">✓ ① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-active">② Photos</span>
+          </div>
+          <div class="dropzone">
+            <span class="icon">⤒</span>
+            <h3>Glissez vos photos ici, ou cliquez pour parcourir</h3>
+            <p>JPEG, PNG ou WebP · 5 Mo max par photo · 5 photos maximum</p>
+          </div>
+          <p class="helper" style="margin-top:14px;">La première photo ajoutée est désignée couverture par défaut ; vous pourrez en choisir une autre ensuite.</p>
+          <div class="form-actions">
+            <button class="btn disabled">Terminer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="photos" data-state="default">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Photos du bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill">✓ ① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-active">② Photos</span>
+          </div>
+          <div class="photo-grid">
+            <div class="photo-tile">
+              <div class="cover-ph">PHOTO 1</div>
+              <span class="cover-ribbon">Couverture</span>
+              <span class="drag-handle">⠿</span>
+              <span class="delete-x">×</span>
+            </div>
+            <div class="photo-tile">
+              <div class="cover-ph">PHOTO 2</div>
+              <span class="drag-handle">⠿</span>
+              <span class="delete-x">×</span>
+            </div>
+            <div class="photo-tile">
+              <div class="cover-ph">PHOTO 3</div>
+              <span class="drag-handle">⠿</span>
+              <span class="delete-x">×</span>
+            </div>
+            <div class="photo-tile add-tile">
+              <span class="plus">+</span>
+              <span>Ajouter</span>
+            </div>
+          </div>
+          <p class="helper">Glissez une photo par sa poignée <span class="mono">⠿</span> pour réordonner. Cliquez sur une photo puis « Définir comme couverture » pour changer la couverture.</p>
+          <div class="form-actions">
+            <button class="btn">Terminer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="photos" data-state="uploading">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Photos du bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill">✓ ① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-active">② Photos</span>
+          </div>
+          <div class="photo-grid">
+            <div class="photo-tile">
+              <div class="cover-ph">PHOTO 1</div>
+              <span class="cover-ribbon">Couverture</span>
+              <span class="drag-handle">⠿</span>
+              <span class="delete-x">×</span>
+            </div>
+            <div class="photo-tile">
+              <div class="cover-ph">PHOTO 2</div>
+              <span class="drag-handle">⠿</span>
+              <span class="delete-x">×</span>
+            </div>
+            <div class="photo-tile">
+              <div class="cover-ph" style="opacity:.5;">PHOTO 3</div>
+              <div class="upload-label">Envoi… 62%</div>
+              <div class="upload-progress"><span></span></div>
+            </div>
+          </div>
+          <p class="helper">Le bouton « Terminer » reste désactivé tant qu'un envoi est en cours.</p>
+          <div class="form-actions">
+            <button class="btn disabled">Terminer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="photos" data-state="max">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Photos du bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill">✓ ① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-active">② Photos</span>
+          </div>
+          <div class="photo-grid">
+            <div class="photo-tile"><div class="cover-ph">PHOTO 1</div><span class="cover-ribbon">Couverture</span><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile"><div class="cover-ph">PHOTO 2</div><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile"><div class="cover-ph">PHOTO 3</div><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile"><div class="cover-ph">PHOTO 4</div><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile"><div class="cover-ph">PHOTO 5</div><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+          </div>
+          <p class="helper">Limite de 5 photos atteinte — supprimez-en une pour en ajouter une autre.</p>
+          <div class="form-actions">
+            <button class="btn">Terminer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="photos" data-state="error">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Photos du bien</h2>
+          </div>
+          <div class="step-header">
+            <span class="step-pill">✓ ① Informations</span>
+            <span class="step-sep">—</span>
+            <span class="step-pill is-active">② Photos</span>
+          </div>
+          <div class="banner error">
+            <span class="glyph">×</span>
+            <span class="txt">« plan.pdf » n'a pas pu être ajouté : format non supporté (JPEG, PNG, WebP uniquement) ou fichier de plus de 5 Mo.</span>
+          </div>
+          <div class="photo-grid">
+            <div class="photo-tile"><div class="cover-ph">PHOTO 1</div><span class="cover-ribbon">Couverture</span><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile"><div class="cover-ph">PHOTO 2</div><span class="drag-handle">⠿</span><span class="delete-x">×</span></div>
+            <div class="photo-tile add-tile"><span class="plus">+</span><span>Ajouter</span></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn">Terminer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCREEN 3 — MES BIENS ===== -->
+
+      <div class="frame" data-screen="mylistings" data-state="default">
+        <div class="page-inner">
+          <div class="top-bar">
+            <h2>Mes biens</h2>
+            <button class="btn">+ Publier un bien</button>
+          </div>
+
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info">
+              <p class="title">Studio meublé Plateau</p>
+              <p class="meta">Dakar · Plateau — 150 000 FCFA</p>
+              <span class="reminder">⚠ Mis à jour il y a 34 jours — vérifiez la disponibilité</span>
+            </div>
+            <div class="status-toggle">
+              <span class="is-active available">Disponible</span>
+              <span>Non disponible</span>
+            </div>
+            <div class="row-actions">
+              <button class="link-btn">Modifier</button>
+              <button class="link-btn danger">Supprimer</button>
+            </div>
+          </div>
+
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info">
+              <p class="title">Appartement 3 pièces Riviera</p>
+              <p class="meta">Abidjan · Riviera — 320 000 FCFA</p>
+            </div>
+            <div class="status-toggle">
+              <span class="is-active available">Disponible</span>
+              <span>Non disponible</span>
+            </div>
+            <div class="row-actions">
+              <button class="link-btn">Modifier</button>
+              <button class="link-btn danger">Supprimer</button>
+            </div>
+          </div>
+
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info">
+              <p class="title">Chambre meublée Adjamé</p>
+              <p class="meta">Abidjan · Adjamé — 45 000 FCFA</p>
+            </div>
+            <div class="status-toggle">
+              <span>Disponible</span>
+              <span class="is-active unavailable">Non disponible</span>
+            </div>
+            <div class="row-actions">
+              <button class="link-btn">Modifier</button>
+              <button class="link-btn danger">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="mylistings" data-state="empty">
+        <div class="page-inner">
+          <div class="top-bar">
+            <h2>Mes biens</h2>
+            <button class="btn disabled">+ Publier un bien</button>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">⌂</div>
+            <h3>Vous n'avez pas encore de bien</h3>
+            <p>Publiez votre premier bien pour qu'il apparaisse dans le feed public.</p>
+            <button class="btn" style="margin-top:8px;">Publier votre premier bien</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="mylistings" data-state="loading">
+        <div class="page-inner">
+          <div class="top-bar">
+            <h2>Mes biens</h2>
+            <button class="btn disabled">+ Publier un bien</button>
+          </div>
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info"><div class="bar w60"></div><div class="bar w40" style="margin-top:8px;"></div></div>
+          </div>
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info"><div class="bar w60"></div><div class="bar w40" style="margin-top:8px;"></div></div>
+          </div>
+          <div class="listing-row">
+            <div class="thumb-ph"></div>
+            <div class="listing-info"><div class="bar w60"></div><div class="bar w40" style="margin-top:8px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="notes" id="notes">
+
+      <!-- form -->
+      <div class="note-block" data-screen="form" data-state="create">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /listings</div>
+          <ul>
+            <li>Champs requis (NOT NULL en DB) : titre, description, type, ville, prix (LIST-01). Surface, pièces et quartier sont nullables en base — traités comme facultatifs ici, même si LIST-01 les liste sans distinction.</li>
+            <li>Étape 2 « Photos » verrouillée : <span class="mono">POST /media/upload</span> exige un <span class="mono">listing_id</span> existant, donc l'annonce doit d'abord être créée.</li>
+            <li><span class="status s-200">200</span>/<span class="status s-201">201</span> → déverrouille l'étape 2 et y navigue automatiquement.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="form" data-state="edit">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">PUT</span> /listings/:id</div>
+          <ul>
+            <li>Le <span class="mono">listing_id</span> existe déjà : les deux étapes (Informations / Photos) sont librement accessibles, pas de verrouillage.</li>
+            <li>LIST-02 : modification réservée au propriétaire du bien — l'API doit vérifier <span class="mono">owner_id = current_user.id</span>, sinon <span class="status s-403">403</span>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="form" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Tous les champs verrouillés pendant l'enregistrement (création ou édition).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="form" data-state="error">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li><span class="status s-422">422</span> validation → erreurs inline sous chaque champ concerné, plus une bannière générale en tête de formulaire.</li>
+            <li>Règles de validation précises (longueur min description, bornes prix/surface) non détaillées dans <span class="mono">TECHNICAL_SPEC_MVP.md</span> — valeurs illustratives ici, à confirmer côté backend.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- photos -->
+      <div class="note-block" data-screen="photos" data-state="empty">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /media/upload</div>
+          <ul>
+            <li><span class="mono">multipart/form-data</span> avec <span class="mono">listing_id</span> + <span class="mono">file</span>. Validation par magic bytes (crate <span class="mono">infer</span>), jamais par extension déclarée (voir <span class="mono">CLAUDE.md</span>).</li>
+            <li>« Terminer » désactivé tant qu'aucune photo n'est présente (LIST-04 : 1 à 5 photos requises).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="photos" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">PATCH</span> /listings/:id/cover</div>
+          <ul>
+            <li>LIST-05 : une couverture est obligatoire ; la première photo uploadée l'est par défaut (contrainte DB : index unique <span class="mono">idx_listing_media_one_cover</span>).</li>
+            <li>⚠ Aucun endpoint de réorganisation (<span class="mono">position</span>) n'existe dans le contrat actuel — voir flag en bas de page.</li>
+            <li>Suppression de la photo de couverture bloquée tant qu'une autre n'a pas été désignée couverture au préalable (règle explicite §4.5).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="photos" data-state="uploading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Chaque photo s'uploade indépendamment (une requête <span class="mono">POST /media/upload</span> par fichier) ; la progression est locale au FE, pas de endpoint de progress côté contrat.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="photos" data-state="max">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>LIST-04 : maximum 5 photos par bien — la tuile « Ajouter » disparaît une fois la limite atteinte.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="photos" data-state="error">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Rejet local (avant appel réseau) si le type MIME détecté ou la taille ne respectent pas les contraintes LIST-04 ; sinon <span class="status s-422">422</span> renvoyé par le backend après vérification magic bytes.</li>
+            <li>Les photos déjà uploadées restent inchangées — l'erreur ne concerne que le fichier rejeté.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- mylistings -->
+      <div class="note-block" data-screen="mylistings" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">GET</span> /users/me/listings</div>
+          <ul>
+            <li>LIST-06 : liste des biens du propriétaire connecté, quel que soit leur statut.</li>
+            <li>Bascule de statut → <span class="mono">PATCH /listings/:id/status</span> (LIST-03), optimiste côté FE avec rollback si erreur.</li>
+            <li>Badge de rappel (illustré sur la 1ʳᵉ ligne) : extrapolation UI de la notification « 1 mois » de LIST-03 — voir flag ci-dessous.</li>
+            <li>« Supprimer » nécessite une confirmation (modal non représentée dans ce wireframe).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="mylistings" data-state="empty">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Aucun bien pour cet owner → CTA direct vers le formulaire de création.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="mylistings" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Squelette pendant <span class="mono">GET /users/me/listings</span>.</li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <section class="decisions">
+    <h3>Décisions &amp; hypothèses prises pendant cette session</h3>
+    <div class="grid">
+      <div class="item flag">
+        <strong>⚠ Pas d'endpoint de réorganisation des photos</strong>
+        Le contrat API expose <span class="mono">POST /media/upload</span>, <span class="mono">DELETE /media/:id</span> et <span class="mono">PATCH /listings/:id/cover</span>, mais aucun moyen de persister un nouvel ordre (<span class="mono">position</span>). Le drag-to-reorder est dessiné ici car demandé par le ticket, mais nécessite un nouvel endpoint (ex. <span class="mono">PATCH /listings/:id/media/reorder</span>) — à créer côté backend ou à retirer du scope FE si non prioritaire.
+      </div>
+      <div class="item">
+        <strong>Flow de création en 2 étapes (Informations → Photos)</strong>
+        Imposé par une contrainte technique, pas un choix produit arbitraire : <span class="mono">POST /media/upload</span> exige un <span class="mono">listing_id</span> existant. En édition, les deux étapes restent librement accessibles puisque le bien existe déjà.
+      </div>
+      <div class="item">
+        <strong>Champs requis alignés sur les contraintes DB, pas sur le libellé du cahier des charges</strong>
+        <span class="mono">listings</span> (DDL) : titre/description/type/ville/prix en <span class="mono">NOT NULL</span> ; surface, pièces et quartier nullables. LIST-01 les cite tous sans distinction — le wireframe suit la DB comme source de vérité, même logique que le champ téléphone dans MH-12.
+      </div>
+      <div class="item">
+        <strong>Badge de rappel « mis à jour il y a X jours » illustratif</strong>
+        LIST-03 décrit une notification envoyée à l'owner après 1 mois si le bien reste « disponible ». Le badge dans la liste « Mes biens » est une extrapolation UI pour rendre ce rappel visible aussi in-app — non explicitement demandé par le contrat, à valider avec le produit.
+      </div>
+      <div class="item">
+        <strong>Suppression d'un bien sans modal de confirmation dans ce wireframe</strong>
+        Le bouton « Supprimer » est représenté tel quel ; la confirmation (modal/dialog) est un composant partagé hors périmètre de ce wireframe bas-fidélité.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const SCREENS = [
+    {
+      id: "form",
+      label: "Formulaire",
+      states: [
+        { id: "create", label: "Création (vide)" },
+        { id: "edit", label: "Édition (pré-rempli)" },
+        { id: "loading", label: "Chargement" },
+        { id: "error", label: "Erreur validation" }
+      ]
+    },
+    {
+      id: "photos",
+      label: "Photos",
+      states: [
+        { id: "empty", label: "Vide" },
+        { id: "default", label: "Défaut (réorg. + cover)" },
+        { id: "uploading", label: "Envoi en cours" },
+        { id: "max", label: "Limite atteinte (5/5)" },
+        { id: "error", label: "Erreur (format/taille)" }
+      ]
+    },
+    {
+      id: "mylistings",
+      label: "Mes biens",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "empty", label: "Vide" },
+        { id: "loading", label: "Chargement" }
+      ]
+    }
+  ];
+
+  let currentScreen = "form";
+  let currentState = "create";
+
+  const stepperEl = document.getElementById("stepper");
+  const stateTabsEl = document.getElementById("stateTabs");
+
+  function renderStepper() {
+    stepperEl.innerHTML = "";
+    SCREENS.forEach((screen, i) => {
+      const btn = document.createElement("button");
+      btn.className = screen.id === currentScreen ? "is-active" : "";
+      btn.innerHTML = '<span class="num">' + (i + 1) + '</span>' + screen.label;
+      btn.addEventListener("click", () => {
+        currentScreen = screen.id;
+        currentState = SCREENS[i].states[0].id;
+        renderAll();
+      });
+      stepperEl.appendChild(btn);
+      if (i < SCREENS.length - 1) {
+        const sep = document.createElement("span");
+        sep.className = "sep";
+        sep.textContent = "→";
+        stepperEl.appendChild(sep);
+      }
+    });
+  }
+
+  function renderStateTabs() {
+    stateTabsEl.innerHTML = "";
+    const screen = SCREENS.find(s => s.id === currentScreen);
+    screen.states.forEach(state => {
+      const btn = document.createElement("button");
+      btn.className = state.id === currentState ? "is-active" : "";
+      btn.textContent = state.label;
+      btn.addEventListener("click", () => {
+        currentState = state.id;
+        renderAll();
+      });
+      stateTabsEl.appendChild(btn);
+    });
+  }
+
+  function renderFrames() {
+    document.querySelectorAll(".frame").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+    document.querySelectorAll(".note-block").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+  }
+
+  function renderAll() {
+    renderStepper();
+    renderStateTabs();
+    renderFrames();
+  }
+
+  renderAll();
+</script>
+
+</body>
+</html>

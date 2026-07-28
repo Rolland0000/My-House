@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MH-15 — Wireframes: Demande de passage Owner</title>
+<style>
+  :root {
+    --paper: #f5f4f0;
+    --paper-raised: #ffffff;
+    --ink: #201f1c;
+    --ink-soft: #57544c;
+    --line: #cdc9bf;
+    --line-strong: #a39d8e;
+    --accent: #a8380f;
+    --accent-soft: #f0ded4;
+    --warn: #8a5a00;
+    --warn-soft: #f2e4c4;
+    --error: #a3241d;
+    --error-soft: #f3dcd9;
+    --focus: #1d4ed8;
+    --radius-s: 3px;
+    --radius-m: 6px;
+    font-synthesis: none;
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1c1b18;
+    --paper-raised: #26241f;
+    --ink: #ece8df;
+    --ink-soft: #a8a297;
+    --line: #43403a;
+    --line-strong: #5b574d;
+    --accent: #e2794a;
+    --accent-soft: #3a2a1f;
+    --warn: #d9ab4a;
+    --warn-soft: #3a2f16;
+    --error: #e08076;
+    --error-soft: #3a2321;
+    --focus: #6f9bff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c1b18;
+      --paper-raised: #26241f;
+      --ink: #ece8df;
+      --ink-soft: #a8a297;
+      --line: #43403a;
+      --line-strong: #5b574d;
+      --accent: #e2794a;
+      --accent-soft: #3a2a1f;
+      --warn: #d9ab4a;
+      --warn-soft: #3a2f16;
+      --error: #e08076;
+      --error-soft: #3a2321;
+      --focus: #6f9bff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.45;
+  }
+
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace; }
+
+  .app { max-width: 1440px; margin: 0 auto; padding: 28px 20px 56px; }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+  .masthead .eyebrow {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 12px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .masthead h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  .masthead p { margin: 0; max-width: 74ch; color: var(--ink-soft); font-size: 14.5px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 4px; font-size: 12.5px; color: var(--ink-soft); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 14px; height: 14px; border-radius: 2px; flex: none; }
+  .swatch.placeholder { border: 1.5px dashed var(--line-strong); background: transparent; }
+  .swatch.component { border: 1.5px solid var(--ink-soft); background: var(--paper-raised); }
+  .swatch.error { background: var(--error-soft); border: 1.5px solid var(--error); }
+  .swatch.warn { background: var(--warn-soft); border: 1.5px solid var(--warn); }
+  .swatch.ok { background: var(--accent-soft); border: 1.5px solid var(--accent); }
+
+  /* ---------- Stepper ---------- */
+
+  .stepper { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  .stepper button {
+    appearance: none; background: transparent; border: none; border-bottom: 2px solid transparent;
+    color: var(--ink-soft); font-family: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 10px 4px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+  .stepper button .num {
+    font-family: ui-monospace, monospace; font-size: 11px; width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid var(--line-strong); display: inline-flex; align-items: center; justify-content: center; color: var(--ink-soft);
+  }
+  .stepper button:hover { color: var(--ink); }
+  .stepper button.is-active { color: var(--ink); border-bottom-color: var(--accent); }
+  .stepper button.is-active .num { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .stepper .sep { color: var(--line-strong); align-self: center; font-size: 12px; padding: 0 2px; }
+
+  /* ---------- State chips ---------- */
+
+  .state-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
+  .state-tabs button {
+    appearance: none; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper-raised); color: var(--ink-soft);
+  }
+  .state-tabs button:hover { border-color: var(--line-strong); color: var(--ink); }
+  .state-tabs button.is-active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  /* ---------- Stage layout ---------- */
+
+  .stage { display: grid; grid-template-columns: minmax(560px, 720px) 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 1020px) { .stage { grid-template-columns: 1fr; } }
+
+  .canvas { position: relative; min-width: 0; }
+
+  .frame {
+    display: none; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-m);
+    padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); overflow-x: auto;
+  }
+  .frame.is-active { display: block; }
+
+  .page-inner { max-width: 620px; margin: 0 auto; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .top-bar h2 { margin: 0; font-size: 18px; font-weight: 700; }
+
+  .ph-logo {
+    width: 96px; height: 26px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-s);
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-soft);
+  }
+
+  .back-link { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 16px; display: inline-flex; align-items: center; gap: 4px; }
+
+  .section-title {
+    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);
+    margin: 26px 0 12px; padding-top: 18px; border-top: 1px solid var(--line);
+  }
+  .section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  /* ---------- Fields ---------- */
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase;
+    color: var(--ink-soft); margin-bottom: 6px;
+  }
+  .field .required { color: var(--accent); }
+
+  .box-input {
+    width: 100%; border: 1.5px solid var(--line-strong); border-radius: var(--radius-s);
+    padding: 10px 12px; font-size: 14px; color: var(--ink-soft); background: var(--paper-raised); font-family: inherit;
+  }
+  .box-input.filled { color: var(--ink); }
+  .box-input.error-field { border-color: var(--error); }
+  .box-input.select { display: flex; align-items: center; justify-content: space-between; cursor: default; }
+  .box-input.select .chev { color: var(--ink-soft); font-size: 11px; }
+
+  .field-error { font-size: 12px; color: var(--error); margin-top: 5px; }
+  .helper { font-size: 12px; color: var(--ink-soft); margin-top: 5px; }
+
+  .btn {
+    border: none; border-radius: var(--radius-s); padding: 12px 20px; font-family: inherit; font-size: 14px;
+    font-weight: 700; background: var(--ink); color: var(--paper); cursor: default;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn.full { width: 100%; }
+  .btn.disabled { opacity: 0.5; }
+  .btn.secondary { background: var(--paper-raised); color: var(--ink); border: 1.5px solid var(--line-strong); }
+
+  /* banners */
+  .banner {
+    display: flex; gap: 10px; align-items: flex-start; border-radius: var(--radius-s); padding: 11px 12px;
+    font-size: 12.5px; margin-bottom: 16px; border: 1px solid;
+  }
+  .banner.error { background: var(--error-soft); border-color: var(--error); color: var(--error); }
+  .banner.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .banner .glyph { font-family: ui-monospace, monospace; font-weight: 700; flex: none; }
+  .banner .txt { color: var(--ink); }
+
+  /* ---------- Document upload ---------- */
+
+  .dropzone {
+    border: 1.5px dashed var(--line-strong); border-radius: var(--radius-m); padding: 30px 20px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;
+    background: var(--paper-raised); margin-bottom: 12px;
+  }
+  .dropzone .icon { font-size: 22px; color: var(--line-strong); }
+  .dropzone h3 { margin: 0; font-size: 14px; }
+  .dropzone p { margin: 0; font-size: 12px; color: var(--ink-soft); }
+
+  .doc-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .doc-chip {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line);
+    border-radius: var(--radius-s); background: var(--paper-raised); font-size: 12.5px;
+  }
+  .doc-chip .file-icon {
+    width: 26px; height: 26px; flex: none; border-radius: 4px; border: 1px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-soft);
+  }
+  .doc-chip .name { flex: 1; font-weight: 600; }
+  .doc-chip .size { color: var(--ink-soft); font-size: 11.5px; }
+  .doc-chip .remove {
+    width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--paper);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-soft); flex: none;
+  }
+  .doc-chip.err { border-color: var(--error); }
+  .doc-chip.err .file-icon { border-color: var(--error); color: var(--error); }
+
+  .privacy-note {
+    display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--ink-soft);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 10px 12px; margin-top: 4px;
+  }
+
+  /* ---------- Status view ---------- */
+
+  .status-card {
+    border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--paper-raised); padding: 24px;
+  }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .status-badge.pending { background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); }
+  .status-badge.approved { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .status-badge.rejected { background: var(--error-soft); color: var(--error); border: 1px solid var(--error); }
+
+  .status-card h2 { margin: 0 0 8px; font-size: 19px; }
+  .status-card p.desc { margin: 0 0 18px; font-size: 13.5px; color: var(--ink-soft); }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .summary-item { border: 1px solid var(--line); border-radius: var(--radius-s); padding: 10px 12px; background: var(--paper); }
+  .summary-item .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); margin: 0 0 4px; }
+  .summary-item .v { font-size: 13.5px; font-weight: 700; margin: 0; }
+
+  .admin-note {
+    border-left: 3px solid var(--error); background: var(--error-soft); border-radius: 0 var(--radius-s) var(--radius-s) 0;
+    padding: 10px 12px; font-size: 13px; color: var(--ink); margin-bottom: 18px;
+  }
+  .admin-note .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--error); margin: 0 0 4px; font-weight: 700; }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px; gap: 10px;
+  }
+  .empty-icon {
+    width: 56px; height: 56px; border: 1.5px dashed var(--line-strong); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--line-strong); margin-bottom: 6px;
+  }
+  .empty-state h3 { margin: 0; font-size: 17px; }
+  .empty-state p { margin: 0; max-width: 42ch; color: var(--ink-soft); font-size: 13.5px; }
+
+  /* ---------- Annotations panel ---------- */
+
+  .notes { position: relative; }
+  .note-block { display: none; }
+  .note-block.is-active { display: block; }
+
+  .note-card {
+    border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--paper-raised);
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .note-card h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  .note-card .endpoint {
+    display: inline-flex; align-items: center; gap: 8px; font-family: ui-monospace, monospace; font-size: 12.5px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 6px 10px; margin-bottom: 12px;
+  }
+  .note-card .endpoint .verb { font-weight: 700; color: var(--accent); }
+  .note-card ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink); }
+  .note-card li { margin-bottom: 7px; }
+  .note-card li:last-child { margin-bottom: 0; }
+  .note-card li .status-tag { font-family: ui-monospace, monospace; font-size: 11.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; }
+  .status-tag.s-200, .status-tag.s-201 { background: var(--accent-soft); color: var(--accent); }
+  .status-tag.s-401, .status-tag.s-403, .status-tag.s-404, .status-tag.s-422 { background: var(--error-soft); color: var(--error); }
+  .status-tag.s-409 { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- Decisions footer ---------- */
+
+  .decisions { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 22px; }
+  .decisions h3 { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 12px; }
+  .decisions .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .decisions .item {
+    border: 1px solid var(--line); border-radius: var(--radius-m); padding: 13px 15px; background: var(--paper-raised);
+    font-size: 12.5px; color: var(--ink-soft);
+  }
+  .decisions .item strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 4px; }
+  .decisions .item.flag { border-color: var(--warn); background: var(--warn-soft); }
+  .decisions .item.flag strong { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <span class="eyebrow">MH-15 · Wireframes low-fi</span>
+    <h1>Demande de passage Owner</h1>
+    <p>Structure et hiérarchie des écrans, pas un design visuel final. Objectif : débloquer l'implémentation frontend (<span class="mono">features/owner-request</span>) du formulaire de demande en soumission unique (téléphone, données d'identité, documents) et de la vue de statut affichée dans le profil — cf. <span class="mono">OWN-01..07</span> du cahier des charges et <span class="mono">TECHNICAL_SPEC_MVP.md §4.2bis</span>.</p>
+    <div class="legend">
+      <span><span class="swatch placeholder"></span>zone média non définie</span>
+      <span><span class="swatch component"></span>composant interactif</span>
+      <span><span class="swatch ok"></span>état positif (approuvée)</span>
+      <span><span class="swatch error"></span>état erreur / rejetée</span>
+      <span><span class="swatch warn"></span>état attente / avertissement</span>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper"></nav>
+  <nav class="state-tabs" id="stateTabs"></nav>
+
+  <main class="stage">
+    <div class="canvas" id="canvas">
+
+      <!-- ===== SCREEN 1 — FORMULAIRE ===== -->
+
+      <div class="frame" data-screen="form" data-state="default">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Devenir propriétaire</h2>
+          </div>
+          <p class="helper" style="margin-bottom:20px;">Un seul formulaire, une seule soumission. Une fois envoyée, votre demande est examinée par notre équipe — vous ne pouvez pas la modifier après l'envoi.</p>
+
+          <p class="section-title">Coordonnées</p>
+          <div class="field">
+            <label>Téléphone <span class="required">*</span></label>
+            <div class="box-input">+225 07 00 00 00 00</div>
+          </div>
+
+          <p class="section-title">Informations d'identité</p>
+          <div class="field">
+            <label>Nom complet <span class="required">*</span></label>
+            <div class="box-input">Tel qu'indiqué sur votre pièce d'identité</div>
+          </div>
+          <div class="field">
+            <label>Type de pièce <span class="required">*</span></label>
+            <div class="box-input select">Sélectionner un type <span class="chev">⌄</span></div>
+          </div>
+          <div class="field">
+            <label>Numéro de la pièce <span class="required">*</span></label>
+            <div class="box-input">Ex. CI0123456789</div>
+          </div>
+
+          <p class="section-title">Documents justificatifs</p>
+          <div class="dropzone">
+            <span class="icon">⤒</span>
+            <h3>Glissez vos documents ici, ou cliquez pour parcourir</h3>
+            <p>JPEG, PNG ou PDF · 5 Mo max par fichier</p>
+          </div>
+          <div class="privacy-note">
+            <span>🔒</span>
+            <span>Vos documents sont transmis de façon sécurisée et ne sont accessibles qu'à l'équipe d'administration, pour vérification uniquement.</span>
+          </div>
+
+          <div style="margin-top:22px;">
+            <button class="btn full">Soumettre ma demande</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="form" data-state="loading">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Devenir propriétaire</h2>
+          </div>
+          <p class="section-title">Coordonnées</p>
+          <div class="field">
+            <label>Téléphone <span class="required">*</span></label>
+            <div class="box-input filled" style="opacity:.55;">+225 07 12 34 56 78</div>
+          </div>
+          <p class="section-title">Informations d'identité</p>
+          <div class="field">
+            <label>Nom complet <span class="required">*</span></label>
+            <div class="box-input filled" style="opacity:.55;">Aïcha Koné</div>
+          </div>
+          <div class="field">
+            <label>Type de pièce <span class="required">*</span></label>
+            <div class="box-input select filled" style="opacity:.55;">Carte nationale d'identité <span class="chev">⌄</span></div>
+          </div>
+          <div class="field">
+            <label>Numéro de la pièce <span class="required">*</span></label>
+            <div class="box-input filled" style="opacity:.55;">CI0123456789</div>
+          </div>
+          <p class="section-title">Documents justificatifs</p>
+          <div class="doc-list">
+            <div class="doc-chip" style="opacity:.7;"><span class="file-icon">JPG</span><span class="name">cni-recto.jpg</span><span class="size">1,2 Mo</span></div>
+            <div class="doc-chip" style="opacity:.7;"><span class="file-icon">JPG</span><span class="name">cni-verso.jpg</span><span class="size">1,0 Mo</span></div>
+          </div>
+          <div style="margin-top:22px;">
+            <button class="btn full disabled">⟳ Envoi en cours… n'actualisez pas la page</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="form" data-state="error">
+        <div class="page-inner">
+          <div class="top-bar">
+            <div class="ph-logo">MYHOUSE</div>
+            <h2>Devenir propriétaire</h2>
+          </div>
+          <div class="banner error">
+            <span class="glyph">×</span>
+            <span class="txt">Certains champs sont invalides ou un document n'a pas pu être envoyé. La demande n'a pas été soumise — rien n'est enregistré tant qu'elle n'est pas valide (soumission atomique).</span>
+          </div>
+          <p class="section-title">Coordonnées</p>
+          <div class="field">
+            <label>Téléphone <span class="required">*</span></label>
+            <div class="box-input error-field"></div>
+            <p class="field-error">Ce champ est requis.</p>
+          </div>
+          <p class="section-title">Informations d'identité</p>
+          <div class="field">
+            <label>Nom complet <span class="required">*</span></label>
+            <div class="box-input filled">Aïcha Koné</div>
+          </div>
+          <div class="field">
+            <label>Type de pièce <span class="required">*</span></label>
+            <div class="box-input select filled">Carte nationale d'identité <span class="chev">⌄</span></div>
+          </div>
+          <div class="field">
+            <label>Numéro de la pièce <span class="required">*</span></label>
+            <div class="box-input error-field"></div>
+            <p class="field-error">Ce champ est requis.</p>
+          </div>
+          <p class="section-title">Documents justificatifs</p>
+          <div class="doc-list">
+            <div class="doc-chip"><span class="file-icon">JPG</span><span class="name">cni-recto.jpg</span><span class="size">1,2 Mo</span><span class="remove">×</span></div>
+            <div class="doc-chip err"><span class="file-icon">!</span><span class="name">cni-verso.pdf</span><span class="size">8,4 Mo — trop volumineux</span><span class="remove">×</span></div>
+          </div>
+          <p class="field-error" style="margin-bottom:12px;">« cni-verso.pdf » dépasse 5 Mo — remplacez ce fichier avant de soumettre à nouveau.</p>
+          <div style="margin-top:10px;">
+            <button class="btn full">Soumettre ma demande</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCREEN 2 — STATUT ===== -->
+
+      <div class="frame" data-screen="status" data-state="no-request">
+        <div class="page-inner">
+          <span class="back-link">← Retour au profil</span>
+          <div class="status-card">
+            <div class="empty-state" style="padding:20px;">
+              <div class="empty-icon">🏠</div>
+              <h3>Devenez propriétaire</h3>
+              <p>Publiez vos biens et gérez vos annonces en devenant Owner. Il vous suffit de fournir votre téléphone, une pièce d'identité et de soumettre votre demande.</p>
+              <button class="btn" style="margin-top:10px;">Faire une demande</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="status" data-state="pending">
+        <div class="page-inner">
+          <span class="back-link">← Retour au profil</span>
+          <div class="status-card">
+            <span class="status-badge pending">⏳ En attente</span>
+            <h2>Votre demande est en cours d'examen</h2>
+            <p class="desc">Notre équipe vérifie vos informations. Vous serez notifié·e par email et dans l'application dès qu'une décision sera prise — généralement sous quelques jours ouvrés.</p>
+            <div class="summary-grid">
+              <div class="summary-item"><p class="k">Soumise le</p><p class="v">3 juin 2026</p></div>
+              <div class="summary-item"><p class="k">Téléphone</p><p class="v">+225 07 12 34 56 78</p></div>
+              <div class="summary-item"><p class="k">Type de pièce</p><p class="v">Carte nationale d'identité</p></div>
+              <div class="summary-item"><p class="k">Documents</p><p class="v">2 fichiers envoyés</p></div>
+            </div>
+            <p class="helper">Une seule demande peut être active à la fois — vous ne pouvez pas en soumettre une nouvelle tant que celle-ci est en attente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="status" data-state="approved">
+        <div class="page-inner">
+          <span class="back-link">← Retour au profil</span>
+          <div class="status-card">
+            <span class="status-badge approved">✓ Approuvée</span>
+            <h2>Votre demande a été approuvée</h2>
+            <p class="desc">Félicitations ! Votre compte a été mis à niveau vers le rôle Propriétaire le 5 juin 2026. Vous pouvez dès maintenant publier vos biens.</p>
+            <div class="summary-grid">
+              <div class="summary-item"><p class="k">Soumise le</p><p class="v">3 juin 2026</p></div>
+              <div class="summary-item"><p class="k">Décision le</p><p class="v">5 juin 2026</p></div>
+            </div>
+            <button class="btn">Publier mon premier bien</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame" data-screen="status" data-state="rejected">
+        <div class="page-inner">
+          <span class="back-link">← Retour au profil</span>
+          <div class="status-card">
+            <span class="status-badge rejected">✕ Rejetée</span>
+            <h2>Votre demande n'a pas été retenue</h2>
+            <p class="desc">Notre équipe n'a pas pu valider votre demande. Vous pouvez la soumettre à nouveau après avoir corrigé le point ci-dessous.</p>
+            <div class="admin-note">
+              <p class="k">Motif indiqué par l'équipe</p>
+              <p>Le numéro de la pièce d'identité fournie ne correspond pas au document envoyé. Merci de vérifier et de renvoyer une photo lisible.</p>
+            </div>
+            <div class="summary-grid">
+              <div class="summary-item"><p class="k">Soumise le</p><p class="v">28 mai 2026</p></div>
+              <div class="summary-item"><p class="k">Décision le</p><p class="v">30 mai 2026</p></div>
+            </div>
+            <button class="btn">Faire une nouvelle demande</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="notes" id="notes">
+
+      <!-- form -->
+      <div class="note-block" data-screen="form" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /owner-requests</div>
+          <ul>
+            <li>Soumission atomique en un seul appel <span class="mono">multipart/form-data</span> (<span class="mono">phone</span>, <span class="mono">identity_data</span> en JSON, <span class="mono">documents[]</span>) — décision déjà verrouillée dans <span class="mono">CLAUDE.md</span> : pas de brouillon, pas de flow en plusieurs étapes (contrairement à MH-14 pour les biens).</li>
+            <li>Cet écran n'est atteignable que si l'utilisateur n'a pas déjà de demande <span class="mono">pending</span> — sinon la vue Statut (écran 2) est affichée à la place (OWN-02).</li>
+            <li><span class="status-tag s-201">201</span> → navigation directe vers l'écran Statut, état « En attente ».</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="form" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Tous les champs verrouillés pendant l'envoi. Message explicite anti-fermeture de page pendant l'upload multi-fichiers (peut prendre plusieurs secondes).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="form" data-state="error">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li><span class="status-tag s-422">422</span> <span class="mono">INVALID_DOCUMENT</span> → erreur inline sur le fichier concerné (format/taille), le reste du formulaire reste rempli.</li>
+            <li>Erreurs de validation de champ (téléphone, numéro de pièce requis) traitées côté FE avant l'appel réseau quand possible.</li>
+            <li><span class="status-tag s-409">409</span> <span class="mono">OWNER_REQUEST_ALREADY_PENDING</span> — cas limite (double clic, autre onglet) : rediriger vers l'écran Statut plutôt qu'afficher une erreur de formulaire.</li>
+            <li>Soumission atomique confirmée par le contrat : si un document échoue, rien n'est persisté côté serveur — cohérent avec le message affiché.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- status -->
+      <div class="note-block" data-screen="status" data-state="no-request">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">GET</span> /users/me/owner-request</div>
+          <ul>
+            <li>Réponse vide/absence de demande (forme exacte non spécifiée dans le contrat — 404 ou <span class="mono">data: null</span> supposé) → affichage du CTA d'entrée vers le formulaire.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="status" data-state="pending">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Le résumé (téléphone, type de pièce, nombre de documents) est une reconstruction à partir des colonnes de <span class="mono">owner_requests</span> — aucun exemple JSON de réponse fourni dans le contrat pour cet endpoint, à valider avec le backend.</li>
+            <li>Pas de CTA d'annulation ni de nouvelle soumission ici — cohérent avec OWN-02 (une seule demande active à la fois).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="status" data-state="approved">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>OWN-06 : le rôle est mis à jour automatiquement côté backend à l'approbation ; le prochain <span class="mono">GET /users/me</span> (ou refresh de session) doit refléter <span class="mono">role: "owner"</span>.</li>
+            <li>Le CTA « Publier mon premier bien » renvoie vers le formulaire de création (MH-14).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="status" data-state="rejected">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li><span class="mono">admin_note</span> optionnelle (OWN-05) — si absente, remplacer le bloc par un message générique invitant à contacter le support.</li>
+            <li>Un rejet ne bloque pas une nouvelle soumission : l'index unique ne concerne que le statut <span class="mono">pending</span>. Le CTA relance donc l'écran Formulaire, vide.</li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <section class="decisions">
+    <h3>Décisions &amp; hypothèses prises pendant cette session</h3>
+    <div class="grid">
+      <div class="item flag">
+        <strong>⚠ Liste des types de pièce d'identité non spécifiée</strong>
+        <span class="mono">identity_data</span> est un champ JSONB libre (<span class="mono">{ full_name, id_type, id_number }</span>) — aucune énumération canonique de <span class="mono">id_type</span> n'existe dans le contrat. Les options illustrées (CNI, Passeport, Permis de conduire) sont une proposition à valider, notamment pour couvrir les deux marchés (France + Afrique francophone).
+      </div>
+      <div class="item flag">
+        <strong>⚠ Contraintes de format/taille des documents extrapolées</strong>
+        Contrairement aux photos de listing et à l'avatar (JPEG/PNG/WebP, 5 Mo, explicitement documentés), <span class="mono">§4.2bis</span> ne précise pas les formats ni la taille max acceptés pour les documents d'identité. Le wireframe reprend par cohérence JPEG/PNG/PDF, 5 Mo — à confirmer côté backend avant implémentation.
+      </div>
+      <div class="item">
+        <strong>Soumission unique atomique (pas de step comme MH-14)</strong>
+        Contrairement au flow de création de bien (MH-14, en 2 étapes à cause de la contrainte <span class="mono">listing_id</span>), la demande Owner est un seul formulaire avec un seul bouton d'envoi — décision déjà verrouillée dans <span class="mono">CLAUDE.md</span>, pas une invention de cette session.
+      </div>
+      <div class="item">
+        <strong>Forme de la réponse <span class="mono">GET /users/me/owner-request</span> reconstruite</strong>
+        Aucun exemple JSON n'est fourni dans le contrat pour cet endpoint. Les champs affichés dans la vue Statut (téléphone, type de pièce, nombre de documents, dates) sont déduits des colonnes de la table <span class="mono">owner_requests</span> (DDL), à confirmer avec le backend.
+      </div>
+      <div class="item">
+        <strong>Portée limitée au parcours Seeker</strong>
+        OWN-04 (notification admin) et OWN-05 (écran de décision admin) concernent le dashboard Admin, hors périmètre de ce wireframe qui couvre uniquement le formulaire et la vue de statut côté utilisateur.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const SCREENS = [
+    {
+      id: "form",
+      label: "Formulaire",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Envoi en cours" },
+        { id: "error", label: "Erreur (validation + document)" }
+      ]
+    },
+    {
+      id: "status",
+      label: "Statut (profil)",
+      states: [
+        { id: "no-request", label: "Aucune demande" },
+        { id: "pending", label: "En attente" },
+        { id: "approved", label: "Approuvée" },
+        { id: "rejected", label: "Rejetée" }
+      ]
+    }
+  ];
+
+  let currentScreen = "form";
+  let currentState = "default";
+
+  const stepperEl = document.getElementById("stepper");
+  const stateTabsEl = document.getElementById("stateTabs");
+
+  function renderStepper() {
+    stepperEl.innerHTML = "";
+    SCREENS.forEach((screen, i) => {
+      const btn = document.createElement("button");
+      btn.className = screen.id === currentScreen ? "is-active" : "";
+      btn.innerHTML = '<span class="num">' + (i + 1) + '</span>' + screen.label;
+      btn.addEventListener("click", () => {
+        currentScreen = screen.id;
+        currentState = SCREENS[i].states[0].id;
+        renderAll();
+      });
+      stepperEl.appendChild(btn);
+      if (i < SCREENS.length - 1) {
+        const sep = document.createElement("span");
+        sep.className = "sep";
+        sep.textContent = "→";
+        stepperEl.appendChild(sep);
+      }
+    });
+  }
+
+  function renderStateTabs() {
+    stateTabsEl.innerHTML = "";
+    const screen = SCREENS.find(s => s.id === currentScreen);
+    screen.states.forEach(state => {
+      const btn = document.createElement("button");
+      btn.className = state.id === currentState ? "is-active" : "";
+      btn.textContent = state.label;
+      btn.addEventListener("click", () => {
+        currentState = state.id;
+        renderAll();
+      });
+      stateTabsEl.appendChild(btn);
+    });
+  }
+
+  function renderFrames() {
+    document.querySelectorAll(".frame").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+    document.querySelectorAll(".note-block").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+  }
+
+  function renderAll() {
+    renderStepper();
+    renderStateTabs();
+    renderFrames();
+  }
+
+  renderAll();
+</script>
+
+</body>
+</html>

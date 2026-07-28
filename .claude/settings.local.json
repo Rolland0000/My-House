@@ -3,7 +3,8 @@
     "allow": [
       "mcp__plugin_context7_context7__query-docs",
       "Bash(npm install *)",
-      "Bash(ruby -ryaml -e \"YAML.load_file\\('docker-compose.yml'\\); puts 'docker-compose.yml YAML OK'\")"
+      "Bash(ruby -ryaml -e \"YAML.load_file\\('docker-compose.yml'\\); puts 'docker-compose.yml YAML OK'\")",
+      "mcp__figma__use_figma"
     ]
   },
   "hooks": {

@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MH-12 — Wireframes: Auth Flow</title>
+<style>
+  :root {
+    --paper: #f5f4f0;
+    --paper-raised: #ffffff;
+    --ink: #201f1c;
+    --ink-soft: #57544c;
+    --line: #cdc9bf;
+    --line-strong: #a39d8e;
+    --accent: #a8380f;
+    --accent-soft: #f0ded4;
+    --warn: #8a5a00;
+    --warn-soft: #f2e4c4;
+    --error: #a3241d;
+    --error-soft: #f3dcd9;
+    --focus: #1d4ed8;
+    --radius-s: 3px;
+    --radius-m: 6px;
+    font-synthesis: none;
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1c1b18;
+    --paper-raised: #26241f;
+    --ink: #ece8df;
+    --ink-soft: #a8a297;
+    --line: #43403a;
+    --line-strong: #5b574d;
+    --accent: #e2794a;
+    --accent-soft: #3a2a1f;
+    --warn: #d9ab4a;
+    --warn-soft: #3a2f16;
+    --error: #e08076;
+    --error-soft: #3a2321;
+    --focus: #6f9bff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c1b18;
+      --paper-raised: #26241f;
+      --ink: #ece8df;
+      --ink-soft: #a8a297;
+      --line: #43403a;
+      --line-strong: #5b574d;
+      --accent: #e2794a;
+      --accent-soft: #3a2a1f;
+      --warn: #d9ab4a;
+      --warn-soft: #3a2f16;
+      --error: #e08076;
+      --error-soft: #3a2321;
+      --focus: #6f9bff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.45;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  }
+
+  .app {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .masthead .eyebrow {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .masthead h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  .swatch.placeholder { border: 1.5px dashed var(--line-strong); background: transparent; }
+  .swatch.component { border: 1.5px solid var(--ink-soft); background: var(--paper-raised); }
+  .swatch.error { background: var(--error-soft); border: 1.5px solid var(--error); }
+  .swatch.warn { background: var(--warn-soft); border: 1.5px solid var(--warn); }
+
+  /* ---------- Stepper ---------- */
+
+  .stepper {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0;
+    margin-bottom: 14px;
+  }
+
+  .stepper button {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 4px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stepper button .num {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+  }
+
+  .stepper button:hover { color: var(--ink); }
+
+  .stepper button.is-active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  .stepper button.is-active .num {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .stepper .sep {
+    color: var(--line-strong);
+    align-self: center;
+    font-size: 12px;
+    padding: 0 2px;
+  }
+
+  /* ---------- State chips ---------- */
+
+  .state-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 20px;
+  }
+
+  .state-tabs button {
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+  }
+
+  .state-tabs button:hover { border-color: var(--line-strong); color: var(--ink); }
+
+  .state-tabs button.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ---------- Stage layout ---------- */
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(320px, 400px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .stage { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Canvas / device frame ---------- */
+
+  .canvas {
+    position: relative;
+  }
+
+  .frame {
+    display: none;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 28px 22px 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .frame.is-active { display: block; }
+
+  .ph-logo {
+    width: 96px;
+    height: 26px;
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius-s);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin: 0 auto 22px;
+  }
+
+  .frame h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+    font-weight: 700;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .frame .sub {
+    margin: 0 0 22px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .frame .sub .val {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .back-link {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .field { margin-bottom: 16px; }
+
+  .field label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .field .required { color: var(--accent); }
+
+  .field .optional-tag {
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+    font-size: 11px;
+  }
+
+  .box-input {
+    width: 100%;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    background: var(--paper);
+    font-family: inherit;
+  }
+
+  .box-input.filled { color: var(--ink); }
+
+  .box-input.disabled {
+    opacity: 0.55;
+    background: var(--paper);
+  }
+
+  .box-input.readonly {
+    background: var(--paper);
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  .box-input.error-field { border-color: var(--error); }
+
+  .field-error {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: 5px;
+  }
+
+  .helper {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 5px;
+  }
+
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-s);
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn.disabled {
+    opacity: 0.5;
+  }
+
+  .footnote {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+
+  .footnote a { color: var(--ink-soft); }
+
+  /* spinner */
+  .spinner {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: var(--paper);
+    animation: spin 0.8s linear infinite;
+    flex: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* banners */
+  .banner {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-radius: var(--radius-s);
+    padding: 11px 12px;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    border: 1px solid;
+  }
+
+  .banner.error {
+    background: var(--error-soft);
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  .banner.warn {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .banner .glyph {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    flex: none;
+  }
+
+  .banner .txt { color: var(--ink); }
+  .banner.error .txt strong,
+  .banner.warn .txt strong { color: inherit; }
+
+  .countdown {
+    font-family: ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  /* OTP digit boxes */
+  .otp-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .otp-digit {
+    width: 40px;
+    height: 48px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-s);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, monospace;
+    font-size: 18px;
+    color: var(--ink);
+    background: var(--paper);
+  }
+
+  .otp-digit.disabled { opacity: 0.55; }
+  .otp-digit.err { border-color: var(--error); color: var(--error); }
+  .otp-digit.empty { color: var(--line-strong); }
+
+  .resend-row {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .resend-row .link {
+    color: var(--focus);
+    font-weight: 600;
+  }
+
+  .resend-row .link.is-disabled {
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  /* ---------- Annotations panel ---------- */
+
+  .notes { position: relative; }
+
+  .note-block { display: none; }
+  .note-block.is-active { display: block; }
+
+  .note-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+
+  .note-card h3 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .note-card .endpoint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: ui-monospace, monospace;
+    font-size: 12.5px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 6px 10px;
+    margin-bottom: 12px;
+  }
+
+  .note-card .endpoint .verb {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .note-card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .note-card li { margin-bottom: 7px; }
+  .note-card li:last-child { margin-bottom: 0; }
+
+  .note-card li .status {
+    font-family: ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .status.s-200 { background: var(--accent-soft); color: var(--accent); }
+  .status.s-401, .status.s-500 { background: var(--error-soft); color: var(--error); }
+  .status.s-429 { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- Decisions footer ---------- */
+
+  .decisions {
+    margin-top: 36px;
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+  }
+
+  .decisions h3 {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+
+  .decisions .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .decisions .item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 13px 15px;
+    background: var(--paper-raised);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .decisions .item strong {
+    display: block;
+    color: var(--ink);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .decisions .item.flag {
+    border-color: var(--warn);
+    background: var(--warn-soft);
+  }
+
+  .decisions .item.flag strong { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="masthead">
+    <span class="eyebrow">MH-12 · Wireframes low-fi</span>
+    <h1>Auth flow — email, code OTP, complétion de profil</h1>
+    <p>Structure et hiérarchie des écrans, pas un design visuel final. Objectif : débloquer l'implémentation frontend (<span class="mono">features/auth/components</span>) et valider les états de chargement, d'erreur et de rate-limit avec le contrat <span class="mono">TECHNICAL_SPEC_MVP.md §4.1</span>.</p>
+    <div class="legend">
+      <span><span class="swatch placeholder"></span>zone média non définie</span>
+      <span><span class="swatch component"></span>composant interactif</span>
+      <span><span class="swatch error"></span>état erreur</span>
+      <span><span class="swatch warn"></span>état rate-limit / attente</span>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper"></nav>
+  <nav class="state-tabs" id="stateTabs"></nav>
+
+  <main class="stage">
+    <div class="canvas" id="canvas">
+
+      <!-- ===== SCREEN 1 — EMAIL ===== -->
+
+      <div class="frame" data-screen="email" data-state="default">
+        <div class="ph-logo">MYHOUSE</div>
+        <h2>Trouvez votre prochain logement</h2>
+        <p class="sub">Entrez votre email, on vous envoie un code à 6 chiffres. Pas de mot de passe.</p>
+        <div class="field">
+          <label>Adresse email</label>
+          <div class="box-input">vous@exemple.com</div>
+        </div>
+        <button class="btn">Recevoir le code</button>
+        <p class="footnote">En continuant, vous acceptez les CGU de MyHouse.</p>
+      </div>
+
+      <div class="frame" data-screen="email" data-state="loading">
+        <div class="ph-logo">MYHOUSE</div>
+        <h2>Trouvez votre prochain logement</h2>
+        <p class="sub">Entrez votre email, on vous envoie un code à 6 chiffres. Pas de mot de passe.</p>
+        <div class="field">
+          <label>Adresse email</label>
+          <div class="box-input disabled filled">moussa.diallo@exemple.com</div>
+        </div>
+        <button class="btn disabled"><span class="spinner"></span>Envoi en cours…</button>
+        <p class="footnote">En continuant, vous acceptez les CGU de MyHouse.</p>
+      </div>
+
+      <div class="frame" data-screen="email" data-state="ratelimit">
+        <div class="ph-logo">MYHOUSE</div>
+        <h2>Trouvez votre prochain logement</h2>
+        <p class="sub">Entrez votre email, on vous envoie un code à 6 chiffres. Pas de mot de passe.</p>
+        <div class="field">
+          <label>Adresse email</label>
+          <div class="box-input disabled filled">moussa.diallo@exemple.com</div>
+        </div>
+        <div class="banner warn">
+          <span class="glyph">!</span>
+          <span class="txt">Trop de demandes. Réessayez dans <span class="countdown">04:12</span>.</span>
+        </div>
+        <button class="btn disabled">Réessayer dans <span class="countdown">&nbsp;04:12</span></button>
+        <p class="footnote">En continuant, vous acceptez les CGU de MyHouse.</p>
+      </div>
+
+      <!-- ===== SCREEN 2 — OTP ===== -->
+
+      <div class="frame" data-screen="otp" data-state="default">
+        <span class="back-link">← Modifier l'email</span>
+        <h2>Vérifiez votre boîte mail</h2>
+        <p class="sub">Code envoyé à <span class="val mono">moussa.diallo@exemple.com</span></p>
+        <div class="otp-row">
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+        </div>
+        <button class="btn" style="margin-bottom:16px;">Vérifier</button>
+        <p class="resend-row">Rien reçu ? <span class="link is-disabled">Renvoyer le code (00:45)</span></p>
+      </div>
+
+      <div class="frame" data-screen="otp" data-state="loading">
+        <span class="back-link">← Modifier l'email</span>
+        <h2>Vérifiez votre boîte mail</h2>
+        <p class="sub">Code envoyé à <span class="val mono">moussa.diallo@exemple.com</span></p>
+        <div class="otp-row">
+          <div class="otp-digit disabled">4</div>
+          <div class="otp-digit disabled">8</div>
+          <div class="otp-digit disabled">2</div>
+          <div class="otp-digit disabled">9</div>
+          <div class="otp-digit disabled">1</div>
+          <div class="otp-digit disabled">0</div>
+        </div>
+        <button class="btn disabled" style="margin-bottom:16px;"><span class="spinner"></span>Vérification…</button>
+        <p class="resend-row">Rien reçu ? <span class="link is-disabled">Renvoyer le code</span></p>
+      </div>
+
+      <div class="frame" data-screen="otp" data-state="error">
+        <span class="back-link">← Modifier l'email</span>
+        <h2>Vérifiez votre boîte mail</h2>
+        <p class="sub">Code envoyé à <span class="val mono">moussa.diallo@exemple.com</span></p>
+        <div class="banner error">
+          <span class="glyph">×</span>
+          <span class="txt">Code invalide ou expiré. Vérifiez le code reçu par email ou demandez-en un nouveau.</span>
+        </div>
+        <div class="otp-row">
+          <div class="otp-digit err empty">·</div>
+          <div class="otp-digit err empty">·</div>
+          <div class="otp-digit err empty">·</div>
+          <div class="otp-digit err empty">·</div>
+          <div class="otp-digit err empty">·</div>
+          <div class="otp-digit err empty">·</div>
+        </div>
+        <button class="btn" style="margin-bottom:16px;">Vérifier</button>
+        <p class="resend-row">Rien reçu ? <span class="link">Renvoyer le code</span></p>
+      </div>
+
+      <div class="frame" data-screen="otp" data-state="ratelimit">
+        <span class="back-link">← Modifier l'email</span>
+        <h2>Vérifiez votre boîte mail</h2>
+        <p class="sub">Code envoyé à <span class="val mono">moussa.diallo@exemple.com</span></p>
+        <div class="otp-row">
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+          <div class="otp-digit empty">·</div>
+        </div>
+        <button class="btn" style="margin-bottom:16px;">Vérifier</button>
+        <div class="banner warn">
+          <span class="glyph">!</span>
+          <span class="txt">Trop de demandes de renvoi. Réessayez dans <span class="countdown">02:30</span>.</span>
+        </div>
+        <p class="resend-row"><span class="link is-disabled">Renvoyer le code (02:30)</span></p>
+      </div>
+
+      <!-- ===== SCREEN 3 — PROFILE ===== -->
+
+      <div class="frame" data-screen="profile" data-state="default">
+        <h2>Complétez votre profil</h2>
+        <p class="sub">Dernière étape avant de commencer.</p>
+        <div class="field">
+          <label>Prénom <span class="required">*</span></label>
+          <div class="box-input">Moussa</div>
+        </div>
+        <div class="field">
+          <label>Nom <span class="required">*</span></label>
+          <div class="box-input">Diallo</div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <div class="box-input readonly">moussa.diallo@exemple.com <span class="badge">vérifié</span></div>
+        </div>
+        <div class="field">
+          <label>Téléphone <span class="optional-tag">(facultatif)</span></label>
+          <div class="box-input">+225 07 00 00 00 00</div>
+          <p class="helper">Vous pourrez aussi le renseigner plus tard, lors d'une demande propriétaire.</p>
+        </div>
+        <button class="btn">Terminer</button>
+      </div>
+
+      <div class="frame" data-screen="profile" data-state="loading">
+        <h2>Complétez votre profil</h2>
+        <p class="sub">Dernière étape avant de commencer.</p>
+        <div class="field">
+          <label>Prénom <span class="required">*</span></label>
+          <div class="box-input disabled filled">Moussa</div>
+        </div>
+        <div class="field">
+          <label>Nom <span class="required">*</span></label>
+          <div class="box-input disabled filled">Diallo</div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <div class="box-input readonly">moussa.diallo@exemple.com <span class="badge">vérifié</span></div>
+        </div>
+        <div class="field">
+          <label>Téléphone <span class="optional-tag">(facultatif)</span></label>
+          <div class="box-input disabled filled">+225 07 00 00 00 00</div>
+        </div>
+        <button class="btn disabled"><span class="spinner"></span>Enregistrement…</button>
+      </div>
+
+      <div class="frame" data-screen="profile" data-state="error">
+        <h2>Complétez votre profil</h2>
+        <p class="sub">Dernière étape avant de commencer.</p>
+        <div class="field">
+          <label>Prénom <span class="required">*</span></label>
+          <div class="box-input error-field"></div>
+          <p class="field-error">Ce champ est requis.</p>
+        </div>
+        <div class="field">
+          <label>Nom <span class="required">*</span></label>
+          <div class="box-input filled">Diallo</div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <div class="box-input readonly">moussa.diallo@exemple.com <span class="badge">vérifié</span></div>
+        </div>
+        <div class="field">
+          <label>Téléphone <span class="optional-tag">(facultatif)</span></label>
+          <div class="box-input">+225 07 00 00 00 00</div>
+        </div>
+        <button class="btn">Terminer</button>
+      </div>
+
+    </div>
+
+    <aside class="notes" id="notes">
+
+      <!-- email -->
+      <div class="note-block" data-screen="email" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /api/v1/auth/otp/request</div>
+          <ul>
+            <li>Un seul champ : email. Aucune distinction visuelle "connexion" vs "inscription" — l'API traite les deux cas de façon transparente (AUTH-02 / AUTH-03).</li>
+            <li>Validation basique du format email côté client avant l'appel (non spécifiée dans le contrat, à la charge du FE).</li>
+            <li><span class="status s-200">200</span> → navigation vers l'écran Code OTP, email transmis en state (pas en query string).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="email" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Champ email et bouton désactivés pendant l'appel réseau — empêche la double soumission.</li>
+            <li>Pas de timeout défini dans le contrat : prévoir un état d'échec réseau générique côté FE (hors périmètre visuel de ce ticket).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="email" data-state="ratelimit">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /api/v1/auth/otp/request</div>
+          <ul>
+            <li><span class="status s-429">429</span> <span class="mono">OTP_RATE_LIMITED</span> → bannière + bouton désactivé avec compte à rebours.</li>
+            <li>Durée exacte du cooldown non précisée dans <span class="mono">TECHNICAL_SPEC_MVP.md</span> — logique exacte (TTL, nombre de tentatives) laissée au backend, à concevoir dans le ticket dédié.</li>
+            <li>L'email saisi reste visible (grisé) pour laisser le contexte visible à l'utilisateur.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- otp -->
+      <div class="note-block" data-screen="otp" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /api/v1/auth/otp/verify</div>
+          <ul>
+            <li>6 champs de saisie séparés (chiffres) — auto-focus séquentiel et soumission auto au 6ᵉ chiffre à prévoir en FE.</li>
+            <li>Lien de renvoi désactivé avec un cooldown initial (ex. 45s) pour limiter le spam avant même d'atteindre le rate-limit serveur.</li>
+            <li>"Modifier l'email" ramène à l'écran 1 avec le champ pré-rempli.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="otp" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Les 6 champs et le bouton sont verrouillés pendant la vérification.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="otp" data-state="error">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /api/v1/auth/otp/verify</div>
+          <ul>
+            <li><span class="status s-401">401</span> <span class="mono">OTP_INVALID</span> → message générique unique. Le contrat API ne distingue pas "invalide" de "expiré" (même code erreur) : impossible d'afficher un message différencié sans changement backend.</li>
+            <li>Les 6 champs sont vidés et repassent en focus sur le premier, pour ressaisie immédiate.</li>
+            <li>Nombre d'essais avant blocage et logique de rate-limit : géré côté backend, à concevoir dans le ticket dédié.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="otp" data-state="ratelimit">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">POST</span> /api/v1/auth/otp/request</div>
+          <ul>
+            <li>Déclenché par un clic sur "Renvoyer le code" — réutilise le même endpoint que l'écran 1, donc peut aussi renvoyer <span class="status s-429">429</span> <span class="mono">OTP_RATE_LIMITED</span>.</li>
+            <li>Le code déjà reçu reste vérifiable : les champs de saisie ne sont pas verrouillés par cette bannière.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- profile -->
+      <div class="note-block" data-screen="profile" data-state="default">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <div class="endpoint"><span class="verb">PUT</span> /api/v1/users/me</div>
+          <ul>
+            <li>Affiché uniquement quand <span class="mono">is_new_user = true</span> dans la réponse de <span class="mono">/otp/verify</span> (PROF-02).</li>
+            <li>Email en lecture seule, pré-rempli depuis l'écran 1 — le changer nécessiterait un nouveau flow OTP, hors périmètre.</li>
+            <li>Prénom / nom requis. Téléphone facultatif à cette étape.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="profile" data-state="loading">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Tous les champs verrouillés pendant l'enregistrement. Succès → redirection vers le feed (hors périmètre MH-12).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note-block" data-screen="profile" data-state="error">
+        <div class="note-card">
+          <h3>Comportement</h3>
+          <ul>
+            <li>Erreur de validation : message inline sous le champ concerné (ex. prénom vide) plutôt qu'une bannière générale — feedback localisé.</li>
+            <li>Une bannière générique ("Une erreur est survenue, réessayez.") reste à prévoir pour un échec serveur (<span class="status s-500">500</span>), non représentée séparément ici.</li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <section class="decisions">
+    <h3>Décisions &amp; hypothèses prises pendant cette session</h3>
+    <div class="grid">
+      <div class="item">
+        <strong>Email en lecture seule à l'étape profil</strong>
+        Pré-rempli depuis l'écran 1, non modifiable — évite de réintroduire un flow OTP à cette étape.
+      </div>
+      <div class="item flag">
+        <strong>Téléphone ajouté en saisie manuelle facultative</strong>
+        Écarte l'hypothèse d'un auto-remplissage (l'endpoint <span class="mono">/otp/request</span> ne collecte pas de téléphone). Décision produit prise en session — nuance la règle "téléphone renseigné uniquement lors de la demande owner" (<span class="mono">database.md</span>). Persiste via <span class="mono">PUT /users/me</span> existant, sans nouvel endpoint.
+      </div>
+      <div class="item">
+        <strong>Un seul message d'erreur pour code invalide / expiré</strong>
+        Le contrat API renvoie un unique <span class="mono">401 OTP_INVALID</span> — aucune distinction possible côté FE sans évolution backend.
+      </div>
+      <div class="item">
+        <strong>Rate-limit (durée, tentatives) laissé au backend</strong>
+        Les valeurs de compte à rebours affichées (04:12, 02:30…) sont illustratives. La logique exacte (TTL, nombre de tentatives avant blocage) sera conçue dans le ticket backend dédié, pas dans ce wireframe.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const SCREENS = [
+    {
+      id: "email",
+      label: "Email",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Chargement" },
+        { id: "ratelimit", label: "Rate-limit" }
+      ]
+    },
+    {
+      id: "otp",
+      label: "Code OTP",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Chargement" },
+        { id: "error", label: "Erreur (code invalide/expiré)" },
+        { id: "ratelimit", label: "Rate-limit (renvoi)" }
+      ]
+    },
+    {
+      id: "profile",
+      label: "Profil",
+      states: [
+        { id: "default", label: "Défaut" },
+        { id: "loading", label: "Chargement" },
+        { id: "error", label: "Erreur (validation)" }
+      ]
+    }
+  ];
+
+  let currentScreen = "email";
+  let currentState = "default";
+
+  const stepperEl = document.getElementById("stepper");
+  const stateTabsEl = document.getElementById("stateTabs");
+
+  function renderStepper() {
+    stepperEl.innerHTML = "";
+    SCREENS.forEach((screen, i) => {
+      const btn = document.createElement("button");
+      btn.className = screen.id === currentScreen ? "is-active" : "";
+      btn.innerHTML = '<span class="num">' + (i + 1) + '</span>' + screen.label;
+      btn.addEventListener("click", () => {
+        currentScreen = screen.id;
+        currentState = SCREENS[i].states[0].id;
+        renderAll();
+      });
+      stepperEl.appendChild(btn);
+      if (i < SCREENS.length - 1) {
+        const sep = document.createElement("span");
+        sep.className = "sep";
+        sep.textContent = "→";
+        stepperEl.appendChild(sep);
+      }
+    });
+  }
+
+  function renderStateTabs() {
+    stateTabsEl.innerHTML = "";
+    const screen = SCREENS.find(s => s.id === currentScreen);
+    screen.states.forEach(state => {
+      const btn = document.createElement("button");
+      btn.className = state.id === currentState ? "is-active" : "";
+      btn.textContent = state.label;
+      btn.addEventListener("click", () => {
+        currentState = state.id;
+        renderAll();
+      });
+      stateTabsEl.appendChild(btn);
+    });
+  }
+
+  function renderFrames() {
+    document.querySelectorAll(".frame").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+    document.querySelectorAll(".note-block").forEach(el => {
+      el.classList.toggle(
+        "is-active",
+        el.dataset.screen === currentScreen && el.dataset.state === currentState
+      );
+    });
+  }
+
+  function renderAll() {
+    renderStepper();
+    renderStateTabs();
+    renderFrames();
+  }
+
+  renderAll();
+</script>
+
+</body>
+</html>
