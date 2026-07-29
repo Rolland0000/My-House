@@ -11,6 +11,7 @@ frontend/dist/
 !.env.example
 backend/.env
 frontend/.env
+.envrc
 
 # Generated types and specs
 frontend/openapi.json
