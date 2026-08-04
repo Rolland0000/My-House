@@ -1,0 +1,15 @@
+title = "My House gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''^graphify-out/''',
+  '''^\.env$''',
+  '''^\.env\.example$''',
+  '''^\.env\.prod\.example$''',
+  '''^backend/\.env$''',
+  '''^backend/\.env\.example$''',
+  '''^frontend/\.env\.example$''',
+]

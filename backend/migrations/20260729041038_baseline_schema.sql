@@ -56,7 +56,7 @@ CREATE TABLE owner_requests (
     identity_documents  JSONB                NOT NULL DEFAULT '[]', -- [{ "storage_key", "original_filename" }]
     status              owner_request_status NOT NULL DEFAULT 'pending',
     admin_note          TEXT,
-    reviewed_by         UUID                 REFERENCES users(id),
+    reviewed_by         UUID                 REFERENCES users(id) ON DELETE SET NULL,
     reviewed_at         TIMESTAMPTZ,
     created_at          TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ          NOT NULL DEFAULT NOW()
@@ -81,6 +81,7 @@ CREATE TABLE listings (
     city          VARCHAR(100)   NOT NULL,
     neighborhood  VARCHAR(100),
     price         NUMERIC(12,2)  NOT NULL,
+    currency      CHAR(3)        NOT NULL,   -- ISO 4217 (ex: EUR, XOF, XAF)
     surface_m2    INTEGER,
     rooms         INTEGER,
     search_vector TSVECTOR,
@@ -91,6 +92,7 @@ CREATE TABLE listings (
 CREATE INDEX idx_listings_search ON listings USING GIN(search_vector);
 CREATE INDEX idx_listings_owner  ON listings(owner_id);
 CREATE INDEX idx_listings_city   ON listings(city);
+CREATE INDEX idx_listings_city_normalized ON listings(lower(unaccent(city)));
 CREATE INDEX idx_listings_status ON listings(status);
 CREATE INDEX idx_listings_type   ON listings(type);
 

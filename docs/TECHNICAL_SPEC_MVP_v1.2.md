@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.1
+> **Version :** 1.2
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v2.1 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v2.2 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -12,12 +12,13 @@
 1. [Structure du Projet](#1-structure-du-projet)
 2. [Modèle de Données](#2-modèle-de-données)
 3. [Abstraction Storage](#3-abstraction-storage)
-4. [Contrat API](#4-contrat-api)
-5. [Génération des Types TypeScript](#5-génération-des-types-typescript)
-6. [Stratégie de Tests](#6-stratégie-de-tests)
-7. [Infrastructure Docker](#7-infrastructure-docker)
-8. [Variables d&#39;Environnement](#8-variables-denvironnement)
-9. [Exclusions MVP](#9-exclusions-mvp)
+4. [Stack de Notification](#3bis-stack-de-notification)
+5. [Contrat API](#4-contrat-api)
+6. [Génération des Types TypeScript](#5-génération-des-types-typescript)
+7. [Stratégie de Tests](#6-stratégie-de-tests)
+8. [Infrastructure Docker](#7-infrastructure-docker)
+9. [Variables d&#39;Environnement](#8-variables-denvironnement)
+10. [Exclusions MVP](#9-exclusions-mvp)
 
 ---
 
@@ -32,11 +33,8 @@ backend/
 ├── .env.example
 ├── migrations/                        # sqlx migrate — fichiers horodatés .sql
 │   └── 0001_init.sql
-├── docs-frontend/
 └── src/
-    ├── main.rs                        # Bootstrap, AppState, , DI
-    │
-    ├── app_server.rs                  # router global, /health, graceful shutdown
+    ├── main.rs                        # Bootstrap, AppState, router global, DI, /health, graceful shutdown
     │
     ├── config/
     │   └── mod.rs                     # AppConfig — chargement et validation des env vars
@@ -152,8 +150,7 @@ frontend/
 ├── tsconfig.json
 ├── Dockerfile
 ├── nginx.conf
-├── docs-frontend/
-├	└── openapi.json                   # Généré depuis utoipa — ne pas committer (gitignore)
+├── openapi.json                       # Généré depuis utoipa — ne pas committer (gitignore)
 └── src/
     ├── main.tsx
     ├── App.tsx
@@ -430,16 +427,16 @@ CREATE TRIGGER tg_owner_requests_updated_at
 
 ### 2.3 Notes de Conception
 
-| Décision                                          | Détail                                                                                                                                                                                        |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `users.first_name / last_name` nullable          | Compte créé à la vérification OTP avant complétion du profil                                                                                                                              |
-| `users.phone` nullable                           | Renseigné lors de la demande owner — obligatoire pour le rôle owner                                                                                                                         |
-| OTP non stocké en DB                              | Géré exclusivement dans moka (in-memory, TTL 10 min)                                                                                                                                         |
-| `storage_key` vs `url`                         | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé                                                                                                           |
-| `is_cover` index partiel unique                  | PostgreSQL garantit l'unicité de la cover sans contrainte applicative                                                                                                                         |
-| `owner_requests` index partiel                   | Bloque un second`pending` sans empêcher plusieurs demandes historiques                                                                                                                      |
-| `identity_documents` JSONB                       | Tableau de références storage — accès restreint admin, jamais exposé en statique (cf. ARCHITECTURE.md §7.3)                                                                              |
-| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token`revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
+| Décision                                 | Détail                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| `users.first_name / last_name` nullable | Compte créé à la vérification OTP avant complétion du profil                    |
+| `users.phone` nullable                  | Renseigné lors de la demande owner — obligatoire pour le rôle owner               |
+| OTP non stocké en DB                     | Géré exclusivement dans moka (in-memory, TTL 10 min)                               |
+| `storage_key` vs `url`                | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé |
+| `is_cover` index partiel unique         | PostgreSQL garantit l'unicité de la cover sans contrainte applicative               |
+| `owner_requests` index partiel          | Bloque un second `pending` sans empêcher plusieurs demandes historiques           |
+| `identity_documents` JSONB              | Tableau de références storage — accès restreint admin, jamais exposé en statique (cf. ARCHITECTURE.md §7.3) |
+| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token `revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
 
 ---
 
@@ -483,6 +480,55 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ---
 
+## 3bis. Stack de Notification
+
+Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jusqu'à la boîte mail de l'utilisateur. Cette section consolide ce qui était implicite dans `modules/notifications/` et clarifie ce qui est **in** vs **hors** périmètre MVP.
+
+### 3bis.1 Chaîne technique (MVP)
+
+```
+Événement métier (ex: owner_request créée)
+   → Handler du module concerné (ex: users::handler)
+   → Service du module (ex: users::service) déclenche l'envoi
+   → notifications::service::send_xxx_email(...)
+   → Rendu du template HTML (modules/notifications/templates/*.html)
+   → infra/mailer.rs (client SMTP — crate lettre)
+   → Serveur SMTP configuré (SMTP_HOST / SMTP_PORT / SMTP_FROM)
+   → Boîte mail du destinataire
+```
+
+**Caractéristiques MVP :**
+
+| Aspect | Détail |
+| --- | --- |
+| Transport | SMTP uniquement (`lettre`), pas d'API transactionnelle tierce (SES/Postmark) au MVP — cf. R-03 ARCHITECTURE.md |
+| Synchronicité | Envoi **synchrone** dans le flux de la requête HTTP qui le déclenche — pas de file d'attente, pas de retry automatique |
+| Échec d'envoi | Un échec SMTP **ne fait pas échouer** la requête métier (ex: `POST /owner-requests` reste `201` même si l'email de notification admin échoue) — l'envoi est best-effort, journalisé via `tracing`, jamais bloquant pour l'écriture DB |
+| Notification in-app | **Aucune** au MVP — pas de table `notifications`, pas d'endpoint de liste, pas de badge. Le seul canal est l'email. L'admin consulte l'état des demandes directement via `GET /admin/owner-requests?status=pending` (pas de flux de notifications séparé) |
+| Rappel planifié (LIST-03) | **Hors scope MVP** — cf. ARCHITECTURE.md §6.2 et R-10. Aucune tâche planifiée n'existe dans le binaire backend au MVP |
+
+### 3bis.2 Événements déclencheurs (MVP)
+
+| Événement | Déclenché par | Destinataire | Template |
+| --- | --- | --- | --- |
+| Envoi OTP | `POST /auth/otp/request` | Utilisateur | `otp.html` |
+| Bienvenue (nouveau compte) | `POST /auth/otp/verify` (is_new_user=true) | Utilisateur | `welcome.html` |
+| Nouvelle demande owner | `POST /owner-requests` | Admin (email fixe, configuré) | `owner_request_received.html` |
+| Demande owner approuvée | `PATCH /admin/owner-requests/:id` (approved) | Utilisateur | `owner_request_approved.html` |
+| Demande owner rejetée | `PATCH /admin/owner-requests/:id` (rejected) | Utilisateur | `owner_request_rejected.html` |
+
+**Note — email admin fixe :** l'admin étant unique au MVP (cf. ARCHITECTURE.md §8.1), l'adresse destinataire des notifications admin (`owner_request_received.html`) est une variable de configuration (`ADMIN_NOTIFICATION_EMAIL`) plutôt qu'une requête dynamique sur la table `users` — il n'existe qu'un seul destinataire possible. À faire évoluer en V2 avec le rôle superviseur (notification à tous les superviseurs actifs).
+
+### 3bis.3 Hors scope MVP (déféré V2)
+
+- Notifications in-app (table, endpoint, badge de lecture)
+- Notifications push (FCM/APNs)
+- File d'attente / retry automatique sur échec d'envoi
+- Rappel mensuel de disponibilité (LIST-03) — tâche planifiée
+- Provider transactionnel tiers (SES/Postmark) — SMTP direct au MVP
+
+---
+
 ## 4. Contrat API
 
 ### Préfixe global : `/api/v1`
@@ -504,9 +550,9 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.0 Health Check
 
-| Méthode | Endpoint    | Auth | Description                                            |
-| -------- | ----------- | ---- | ------------------------------------------------------ |
-| `GET`  | `/health` | Non  | Hors`/api/v1`. Vérifie la connectivité PostgreSQL. |
+| Méthode | Endpoint  | Auth | Description                                          |
+| -------- | --------- | ---- | ----------------------------------------------------- |
+| `GET`  | `/health` | Non  | Hors `/api/v1`. Vérifie la connectivité PostgreSQL. |
 
 ```json
 // Response 200
@@ -520,12 +566,12 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.1 Auth
 
-| Méthode | Endpoint              | Auth   | Description                                                                                                                                                                                                                            |
-| -------- | --------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `POST` | `/auth/otp/request` | Non    | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                                                                                                                                                  |
-| `POST` | `/auth/otp/verify`  | Non    | Vérifie le code. Crée le compte si nouvel email. Retourne`{ access_token, is_new_user }` + cookie `refresh_token`.                                                                                                               |
-| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie,**révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
-| `POST` | `/auth/logout`      | JWT    | Révoque le refresh token courant et efface le cookie.                                                                                                                                                                                 |
+| Méthode | Endpoint              | Auth | Description                                                                                                   |
+| -------- | --------------------- | ---- | ------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/auth/otp/request` | Non  | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                         |
+| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. Crée le compte si nouvel email. Retourne `{ access_token, is_new_user }` + cookie `refresh_token`. |
+| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie, **révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
+| `POST` | `/auth/logout`      | JWT  | Révoque le refresh token courant et efface le cookie.                                                          |
 
 **`POST /auth/otp/request`**
 
@@ -563,13 +609,13 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 ### 4.2 Users
 
-| Méthode   | Endpoint                    | Auth | Rôle      | Description                                                                         |
-| ---------- | --------------------------- | ---- | ---------- | ----------------------------------------------------------------------------------- |
-| `GET`    | `/users/me`               | JWT  | tous       | Profil de l'utilisateur connecté                                                   |
-| `PUT`    | `/users/me`               | JWT  | tous       | Mise à jour du profil                                                              |
+| Méthode   | Endpoint                    | Auth | Rôle      | Description                       |
+| ---------- | --------------------------- | ---- | ---------- | ---------------------------------- |
+| `GET`    | `/users/me`               | JWT  | tous       | Profil de l'utilisateur connecté |
+| `PUT`    | `/users/me`               | JWT  | tous       | Mise à jour du profil            |
 | `DELETE` | `/users/me`               | JWT  | tous       | Suppression du compte — cascade DB + nettoyage storage (listings, médias, avatar) |
-| `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage      |
-| `GET`    | `/users/me/owner-request` | JWT  | `seeker` | Statut de la demande en cours                                                       |
+| `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage |
+| `GET`    | `/users/me/owner-request` | JWT  | `seeker` | Statut de la demande en cours     |
 
 **`GET /users/me` — Response 200**
 
@@ -607,8 +653,8 @@ Mêmes contraintes de validation que les photos de listing (magic bytes, formats
 
 ### 4.2bis Owner Requests
 
-| Méthode | Endpoint            | Auth | Rôle      | Description                                             |
-| -------- | ------------------- | ---- | ---------- | ------------------------------------------------------- |
+| Méthode | Endpoint           | Auth | Rôle      | Description                                          |
+| -------- | ------------------ | ---- | ---------- | ----------------------------------------------------- |
 | `POST` | `/owner-requests` | JWT  | `seeker` | Soumet la demande complète en un seul appel (atomique) |
 
 **`POST /owner-requests`**
@@ -677,7 +723,7 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
       "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo" }
     }
   ],
-  "pagination": { "page": 1, "per_page": 30, "total": 47, "total_pages": 3 }
+  "pagination": { "page": 1, "per_page": 20, "total": 47, "total_pages": 3 }
 }
 ```
 
@@ -761,10 +807,15 @@ Body: { listing_id: uuid, file: <binary> }
 ```
 
 Contraintes : formats JPEG / PNG / WebP validés par **magic bytes** (crate `infer`, pas par extension ni `Content-Type` déclaré), taille max 5 MB, max 5 photos par listing. Le nom de fichier stocké est toujours généré côté serveur (UUID) — jamais dérivé du nom fourni par le client.
+
+**Sélection automatique de la cover :** la première photo uploadée sur un listing (`listing_media` vide pour ce `listing_id`) est automatiquement marquée `is_cover = true`. Les uploads suivants sont `is_cover = false` par défaut. L'owner peut ensuite désigner une autre photo existante comme cover via `PATCH /listings/:id/cover` (§4.3) — aucune action manuelle n'est requise pour qu'un listing ait une cover dès sa première photo.
 La cover ne peut pas être supprimée sans en avoir désigné une autre au préalable.
 
 ```json
-// Response 201
+// Response 201 — première photo du listing (cover automatique)
+{ "data": { "id": "uuid", "url": "https://...", "is_cover": true, "position": 0 } }
+
+// Response 201 — photo suivante
 { "data": { "id": "uuid", "url": "https://...", "is_cover": false, "position": 2 } }
 ```
 
@@ -772,8 +823,8 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ### 4.6 Contact
 
-| Méthode | Endpoint                  | Auth | Rôle                   | Description                        |
-| -------- | ------------------------- | ---- | ----------------------- | ---------------------------------- |
+| Méthode | Endpoint                  | Auth | Rôle                 | Description                        |
+| -------- | ------------------------- | ---- | --------------------- | ---------------------------------- |
 | `GET`  | `/listings/:id/contact` | JWT  | `seeker` ou `owner` | Révèle le téléphone de l'owner |
 
 ```json
@@ -788,17 +839,17 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ### 4.7 Admin
 
-| Méthode   | Endpoint                                        | Auth            | Description                                                                                                                    |
-| ---------- | ----------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/admin/listings`                             | JWT (`admin`) | Liste tous les biens. Query :`?status=&page=`                                                                                |
-| `PATCH`  | `/admin/listings/:id`                         | JWT (`admin`) | Modifier statut d'un bien                                                                                                      |
-| `DELETE` | `/admin/listings/:id`                         | JWT (`admin`) | Supprimer un bien                                                                                                              |
-| `GET`    | `/admin/users`                                | JWT (`admin`) | Liste tous les utilisateurs. Query :`?role=&page=`                                                                           |
-| `PATCH`  | `/admin/users/:id`                            | JWT (`admin`) | Suspendre / réactiver`{ is_active: bool }`                                                                                  |
-| `DELETE` | `/admin/users/:id`                            | JWT (`admin`) | Supprimer un compte                                                                                                            |
-| `GET`    | `/admin/owner-requests`                       | JWT (`admin`) | Liste les demandes. Query :`?status=pending&page=`                                                                           |
+| Méthode   | Endpoint                      | Auth            | Description                                                |
+| ---------- | ----------------------------- | --------------- | ---------------------------------------------------------- |
+| `GET`    | `/admin/listings`           | JWT (`admin`) | Liste tous les biens. Query :`?status=&page=`            |
+| `PATCH`  | `/admin/listings/:id`       | JWT (`admin`) | Modifier statut d'un bien                                  |
+| `DELETE` | `/admin/listings/:id`       | JWT (`admin`) | Supprimer un bien                                          |
+| `GET`    | `/admin/users`              | JWT (`admin`) | Liste tous les utilisateurs. Query :`?role=&page=`       |
+| `PATCH`  | `/admin/users/:id`          | JWT (`admin`) | Suspendre / réactiver `{ is_active: bool }`             |
+| `DELETE` | `/admin/users/:id`          | JWT (`admin`) | Supprimer un compte                                        |
+| `GET`    | `/admin/owner-requests`     | JWT (`admin`) | Liste les demandes. Query :`?status=pending&page=`       |
 | `GET`    | `/admin/owner-requests/:id/documents/:doc_id` | JWT (`admin`) | Lecture contrôlée d'un document d'identité — proxie le storage (exception au principe no-proxy, cf. ARCHITECTURE.md §7.3) |
-| `PATCH`  | `/admin/owner-requests/:id`                   | JWT (`admin`) | Statuer`{ status: "approved"\|"rejected", admin_note? }`                                                                      |
+| `PATCH`  | `/admin/owner-requests/:id` | JWT (`admin`) | Statuer `{ status: "approved"\|"rejected", admin_note? }` |
 
 ---
 
@@ -845,15 +896,15 @@ Chaque module backend contient un fichier `tests.rs` déclaré dans `mod.rs` sou
 
 ### 6.3 Cas à Couvrir par Module
 
-| Module       | Cas critiques à tester                                                                                                                                                                                                                                                                       |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte`is_active=false` rejeté sur route protégée                                                                     |
+| Module       | Cas critiques à tester                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée |
 | `users`    | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
-| `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                                                                                                                                                                                                             |
-| `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée                                                                                                                                                                        |
-| `search`   | Recherche vide retourne feed complet, filtres combinés cohérents, pagination correcte                                                                                                                                                                                                       |
-| `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                                                                                                                                                                                                                |
-| `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin                                                                                                                                                                                             |
+| `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                |
+| `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée, 1ère photo d'un listing marquée `is_cover=true` automatiquement, uploads suivants `is_cover=false` |
+| `search`   | Recherche vide retourne feed complet, filtres combinés cohérents, pagination correcte          |
+| `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                   |
+| `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin |
 
 ---
 
@@ -1023,11 +1074,13 @@ OTP_MAX_ATTEMPTS=3
 OTP_RATE_LIMIT_SECONDS=60     # 1 demande OTP / 60s par email
 
 # ── Storage ──────────────────────────────────────────────────
-STORAGE_PROVIDER=local         # local (MVP) | s3 (V2 — non implémenté)
+STORAGE_PROVIDER=local         # LocalFsStorage au MVP ; trait StorageProvider permet de brancher
+                                # un autre provider object storage (ex. MinIO, AWS S3) en V2 sans
+                                # changer le code métier — s3 (V2, non implémenté au MVP)
 LOCAL_STORAGE_PATH=/app/storage
 PUBLIC_MEDIA_BASE_URL=http://localhost/media   # base des URLs publiques générées (listings, avatars)
 
-# AWS S3 — réservé V2, non utilisé tant que STORAGE_PROVIDER=local
+# Object Storage V2 — réservé, non utilisé tant que STORAGE_PROVIDER=local
 AWS_REGION=eu-west-1
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
@@ -1040,31 +1093,39 @@ COOKIE_DOMAIN=localhost        # domaine du cookie refresh_token (httpOnly, Secu
 SMTP_HOST=localhost
 SMTP_PORT=1025
 SMTP_FROM=noreply@myhouse.app
+ADMIN_NOTIFICATION_EMAIL=admin@myhouse.app     # destinataire fixe — admin unique au MVP (cf. §3bis.2)
+
+# ── Admin Bootstrap ──────────────────────────────────────────
+ADMIN_BOOTSTRAP_EMAIL=          # email du compte admin unique, créé au démarrage si absent en DB
+ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, vérifie/crée le compte admin au boot (idempotent)
 ```
 
 ---
 
 ## 9. Exclusions MVP
 
-| Feature                               | Module concerné         | Cible                          |
-| ------------------------------------- | ------------------------ | ------------------------------ |
-| Messagerie in-app                     | `contact`              | V2                             |
-| Notifications push (FCM/APNs)         | `notifications`        | V2                             |
-| Carte et géolocalisation             | `listings`, `search` | V2                             |
-| Favoris                               | Nouveau module           | V2                             |
-| OAuth (Google, Facebook)              | `auth`                 | V2                             |
-| Application mobile native             | —                       | V2                             |
-| Tableau de bord admin complet         | `admin`                | V2                             |
-| Redis                                 | `infra`                | V2 si moka insuffisant         |
-| Stockage S3-compatible (MinIO/AWS S3) | `infra/storage`        | V2 —`LocalFsStorage` au MVP |
-| Conformité RGPD complète            | Transverse               | Avant go-live EU               |
-| Analytics et reporting                | Nouveau module           | V2                             |
+| Feature                       | Module concerné         | Cible                  |
+| ----------------------------- | ------------------------ | ---------------------- |
+| Messagerie in-app             | `contact`              | V2                     |
+| Notifications push (FCM/APNs) | `notifications`        | V2                     |
+| Carte et géolocalisation     | `listings`, `search` | V2                     |
+| Favoris                       | Nouveau module           | V2                     |
+| OAuth (Google, Facebook)      | `auth`                 | V2                     |
+| Application mobile native     | —                       | V2                     |
+| Tableau de bord admin complet | `admin`                | V2                     |
+| Redis                         | `infra`                | V2 si moka insuffisant |
+| Stockage S3-compatible (MinIO/AWS S3) | `infra/storage` | V2 — `LocalFsStorage` au MVP |
+| Conformité RGPD complète    | Transverse               | Avant go-live EU       |
+| Analytics et reporting        | Nouveau module           | V2                     |
+| Rappel mensuel disponibilité (LIST-03) | `listings`, `notifications` | V2 — nécessite tâche planifiée, hors scope MVP (cf. ARCHITECTURE.md R-10) |
+| Notifications in-app           | `notifications`         | V2 — email uniquement au MVP (cf. §3bis) |
 
 ---
 
 ## Historique des Révisions
 
-| Version | Date      | Description                                                                                                                                                                                                             |
-| ------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | Juin 2025 | Document initial — issu de la refactorisation ARCHITECTURE_MVP.md v2.0                                                                                                                                                 |
-| 1.1     | Juin 2026 | Renommage`seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
+| Version | Date      | Description                                                             |
+| ------- | --------- | ----------------------------------------------------------------------- |
+| 1.0     | Juin 2025 | Document initial — issu de la refactorisation ARCHITECTURE_MVP.md v2.0 |
+| 1.1     | Juin 2026 | Renommage `seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
+| 1.2     | Août 2026 | Correction pagination feed (20/page uniforme), sélection automatique de la cover photo au premier upload, nouvelle section Stack de Notification (§3bis) bout-en-bout, admin unique + bootstrap documentés, rappel mensuel disponibilité (LIST-03) formellement différé en V2 |
