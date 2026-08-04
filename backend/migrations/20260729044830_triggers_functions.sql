@@ -1,27 +1,37 @@
 -- MH-20: Database triggers & functions
--- Follow-up to MH-19 (baseline schema): search_vector maintenance,
--- owner-name cascade invalidation, and generic updated_at auto-update.
 
 -- ============================================================
 -- Triggers
 -- ============================================================
 
 -- search_vector : mis à jour à chaque INSERT/UPDATE sur listings
--- Inclut le nom de l'owner (pondéré B) pour permettre la recherche par propriétaire
+-- Inclut le nom de l'owner et le libellé français du type de bien (pondérés B)
+-- pour permettre la recherche par propriétaire et par label de bien
 CREATE OR REPLACE FUNCTION fn_update_listing_search_vector()
 RETURNS TRIGGER AS $$
 DECLARE
     v_owner_name TEXT;
+    v_type_label TEXT;
 BEGIN
     SELECT COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')
         INTO v_owner_name
         FROM users WHERE id = NEW.owner_id;
+
+    v_type_label := CASE NEW.type
+        WHEN 'apartment' THEN 'appartement'
+        WHEN 'studio'    THEN 'studio'
+        WHEN 'house'     THEN 'maison'
+        WHEN 'room'      THEN 'chambre'
+        WHEN 'villa'     THEN 'villa'
+        WHEN 'other'     THEN 'autre'
+    END;
 
     NEW.search_vector :=
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.title, ''))),        'A') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.city, ''))),          'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.neighborhood, ''))),  'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(v_owner_name, ''))),      'B') ||
+        setweight(to_tsvector('french', unaccent(COALESCE(v_type_label, ''))),      'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.description, ''))),   'C');
     RETURN NEW;
 END;

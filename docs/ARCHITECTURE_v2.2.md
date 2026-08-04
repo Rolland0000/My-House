@@ -1,9 +1,9 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 2.1
+> **Version :** 2.2
 > **Statut :** Validé
-> **Dernière mise à jour :** Juin 2026
+> **Dernière mise à jour :** Août 2026
 
 ---
 
@@ -362,6 +362,10 @@ sequenceDiagram
     AdminModule-->>Frontend: 200 OK
 ```
 
+**Note — Admin unique au MVP :** un seul compte `admin` existe au MVP, créé par un script de bootstrap au démarrage (pas de self-service, pas d'endpoint de création d'admin). Ce compte unique traite l'intégralité de la modération (biens, utilisateurs, demandes owner) depuis le back-office. Le modèle V2 introduira un rôle **superviseur** intermédiaire, notamment pour distribuer la charge de validation des demandes owner entre plusieurs opérateurs — hors périmètre MVP (cf. §11, R-09).
+
+**Note — Rappel mensuel de disponibilité (LIST-03 du cahier des charges) :** le CDC prévoit qu'un owner dont un bien reste marqué `available` sans mise à jour depuis un mois reçoive un rappel automatique. Ce mécanisme est **différé en V2** : il nécessite soit une tâche planifiée in-process (`tokio::time::interval`), soit un déclencheur externe (cron), et un suivi de dernière notification par listing — aucune de ces briques n'existe au MVP. Documenté comme dette produit/technique en §11 (R-10).
+
 ### 6.3 Core Loop — Publication et Découverte d'un Bien
 
 ```mermaid
@@ -385,8 +389,10 @@ sequenceDiagram
     Media->>Media: Valide format (magic bytes) + taille + quota
     Media->>StorageProvider: upload(key, bytes)
     StorageProvider-->>Media: storage_key
-    Media->>DB: INSERT listing_media (storage_key, url calculée)
+    Media->>DB: INSERT listing_media (storage_key, url calculée,\nis_cover=true si 1ère photo du listing, sinon false)
 
+    Note over Owner,DB: Changement manuel ultérieur (optionnel)
+    Owner->>Frontend: Choisit une autre photo comme cover
     Frontend->>Listings: PATCH /listings/:id/cover { media_id }
     Listings->>DB: UPDATE listing_media SET is_cover=true
 
@@ -488,6 +494,7 @@ Aucun code métier n'est modifié lors de la migration V2 — seule l'implément
 | Rate limiting | 1 demande OTP / 60s par email, 3 tentatives max par code                                        |
 | Autorisation  | Rôles portés dans le JWT claims — vérifiés par extracteur Axum sur chaque route protégée |
 | Compte actif  | `is_active` revérifié en base par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login) — une suspension admin prend effet immédiatement, y compris sur une session déjà active |
+| Compte admin  | **Un seul compte `admin` au MVP**, créé par un script de bootstrap (variables d'environnement ou commande CLI dédiée) au déploiement initial — aucune route d'auto-inscription ou de promotion vers `admin` n'existe. Le rôle `admin` n'est jamais atteignable via `POST /owner-requests` ni via aucun endpoint utilisateur |
 
 **Modèle de rôles et transitions :**
 
@@ -625,6 +632,9 @@ Qualité Système
 | R-05 | **Charge pics sur le feed** (images lourdes)                                      | Faible                     | Moyen                         | CDN devant S3 en V2, lazy loading côté frontend dès le MVP                      |
 | R-06 | **Storage filesystem non partagé** entre instances backend (volume local au conteneur) | Faible (MVP mono-instance) | Élevé si scaling horizontal | Migration vers S3-compatible via le trait `StorageProvider` — changement localisé à `infra/storage/`, déjà prévu en V2 |
 | R-07 | **Absence d'index sur `listings.price`** alors que `price_min`/`price_max` sont des filtres actifs | Faible au volume MVP | Faible | Ajouter un index B-tree sur `price` si le volume de listings augmente significativement |
+| R-08 | **Trigger `fn_update_listing_search_vector` exécute un `SELECT` sur `users` par ligne** modifiée — un changement de nom d'owner avec N listings déclenche N requêtes dans le trigger de cascade | Faible au volume MVP | Faible | Acceptable au MVP ; à revisiter (dénormalisation ou recalcul batch) si le volume de listings par owner augmente significativement |
+| R-09 | **Un seul compte admin** — aucune redondance opérationnelle ; indisponibilité de l'admin bloque toute validation owner et toute modération | Faible (MVP, équipe réduite) | Moyen | Rôle superviseur (charge de validation distribuée) prévu en V2 |
+| R-10 | **Rappel mensuel de disponibilité (LIST-03 du CDC) non implémenté au MVP** — exigence `Must` du cahier des charges différée faute de mécanisme de tâche planifiée | Certaine (déjà connu) | Faible produit / Moyen conformité contractuelle | Implémenter en V2 via tâche planifiée in-process ou cron externe ; amendement explicite du CDC en attendant (cf. CDC v2.1 §6.3) |
 
 ---
 
@@ -637,7 +647,7 @@ Qualité Système
 | **Admin**            | Opérateur interne. Modère la plateforme et valide les demandes owner.                                    |
 | **OTP**              | One-Time Password — code à 6 chiffres envoyé par email, valable 10 minutes, usage unique.               |
 | **Listing**          | Annonce immobilière publiée par un owner (bien, description, photos, localisation, prix).                |
-| **Cover photo**      | Photo mise en avant d'un listing, choisie par l'owner, affichée dans le feed public.                      |
+| **Cover photo**      | Photo mise en avant d'un listing, affichée dans le feed public. Sélectionnée automatiquement à la première photo uploadée sur le listing ; modifiable ensuite par l'owner parmi les photos existantes (`PATCH /listings/:id/cover`). |
 | **Feed**             | Page d'accueil présentant les annonces sous forme de grille de cover photos scrollable.                   |
 | **StorageProvider**  | Trait Rust abstraisant le stockage fichiers — implémenté par `LocalFsStorage` (MVP) et `AwsS3Storage` (V2). |
 | **LocalFsStorage**   | Implémentation `StorageProvider` au MVP — écrit sur un volume Docker local, servi en statique par nginx. |
