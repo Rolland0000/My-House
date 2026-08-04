@@ -12,7 +12,8 @@ frontend/dist/
 backend/.env
 frontend/.env
 .envrc
-
+graphify-out/cache
+graphify-out/cost.json
 # Generated types and specs
 frontend/openapi.json
 frontend/src/shared/api/types.ts
