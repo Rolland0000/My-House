@@ -12,7 +12,7 @@ frontend/dist/
 backend/.env
 frontend/.env
 .envrc
-
+graphify-out/cache
 # Generated types and specs
 frontend/openapi.json
 frontend/src/shared/api/types.ts
