@@ -1217,6 +1217,325 @@
       "norm_label": "infra/mod.rs"
     },
     {
+      "label": "local_fs.rs",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "local_fs.rs"
+    },
+    {
+      "label": "LocalFsStorage",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "localfsstorage"
+    },
+    {
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "pathbuf",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "pathbuf"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_string",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "string"
+    },
+    {
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".new()"
+    },
+    {
+      "label": "Into",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "into",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "into"
+    },
+    {
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_self",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "self"
+    },
+    {
+      "label": ".resolve()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".resolve()"
+    },
+    {
+      "label": ".public_url()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_public_url",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".public_url()"
+    },
+    {
+      "label": "StorageProvider",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_storageprovider",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "storageprovider"
+    },
+    {
+      "label": ".upload()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".upload()"
+    },
+    {
+      "label": "Bytes",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_bytes",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "bytes"
+    },
+    {
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_result",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "result"
+    },
+    {
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L74",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".read()"
+    },
+    {
+      "label": ".delete()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L80",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".delete()"
+    },
+    {
+      "label": ".presigned_url()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".presigned_url()"
+    },
+    {
+      "label": "Duration",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_duration",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "duration"
+    },
+    {
+      "label": "storage()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L106",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_storage",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "storage()"
+    },
+    {
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_rs_path",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "path"
+    },
+    {
+      "label": "upload_on_public_prefix_returns_computed_url()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_upload_on_public_prefix_returns_computed_url",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "upload_on_public_prefix_returns_computed_url()"
+    },
+    {
+      "label": "upload_on_owner_requests_prefix_returns_key_only()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L125",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_upload_on_owner_requests_prefix_returns_key_only",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "upload_on_owner_requests_prefix_returns_key_only()"
+    },
+    {
+      "label": "read_returns_previously_uploaded_bytes()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L139",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "read_returns_previously_uploaded_bytes()"
+    },
+    {
+      "label": "delete_removes_existing_file()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L154",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "delete_removes_existing_file()"
+    },
+    {
+      "label": "delete_on_missing_key_returns_typed_error_not_panic()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L169",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_delete_on_missing_key_returns_typed_error_not_panic",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "delete_on_missing_key_returns_typed_error_not_panic()"
+    },
+    {
+      "label": "presigned_url_returns_not_implemented_error()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L179",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_presigned_url_returns_not_implemented_error",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "presigned_url_returns_not_implemented_error()"
+    },
+    {
+      "label": "TempDir",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L192",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_tempdir",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "tempdir"
+    },
+    {
+      "label": ".path()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L195",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_tempdir_path",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".path()"
+    },
+    {
+      "label": "Drop",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "drop",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": "drop"
+    },
+    {
+      "label": ".drop()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L201",
+      "_origin": "ast",
+      "id": "backend_src_infra_storage_local_fs_tempdir_drop",
+      "community": 10,
+      "community_name": "AppError",
+      "norm_label": ".drop()"
+    },
+    {
       "label": "storage/mod.rs",
       "file_type": "code",
       "source_file": "backend/src/infra/storage/mod.rs",
@@ -1231,7 +1550,7 @@
       "label": "build_storage_provider()",
       "file_type": "code",
       "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "backend_src_infra_storage_mod_build_storage_provider",
       "community": 1,
@@ -1255,7 +1574,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "storageprovider",
+      "id": "backend_src_infra_storage_mod_rs_storageprovider",
       "community": 1,
       "community_name": "config/mod.rs",
       "norm_label": "storageprovider"
@@ -1332,7 +1651,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "bytes",
+      "id": "backend_src_infra_storage_provider_rs_bytes",
       "community": 10,
       "community_name": "AppError",
       "norm_label": "bytes"
@@ -1398,7 +1717,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "duration",
+      "id": "backend_src_infra_storage_provider_rs_duration",
       "community": 10,
       "community_name": "AppError",
       "norm_label": "duration"
@@ -1696,8 +2015,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "handler.rs"
     },
     {
@@ -1707,8 +2026,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_list",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "list()"
     },
     {
@@ -1718,8 +2037,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_state",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "state"
     },
     {
@@ -1729,8 +2048,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "query",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "query"
     },
     {
@@ -1740,8 +2059,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_result",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "result"
     },
     {
@@ -1751,8 +2070,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_json",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "json"
     },
     {
@@ -1762,8 +2081,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_get_by_id",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "get_by_id()"
     },
     {
@@ -1772,9 +2091,9 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "path",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "id": "backend_src_modules_listings_handler_rs_path",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "path"
     },
     {
@@ -1784,8 +2103,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_uuid",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "uuid"
     },
     {
@@ -1905,8 +2224,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "repository.rs"
     },
     {
@@ -1916,8 +2235,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_listingfilters",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "listingfilters"
     },
     {
@@ -1927,8 +2246,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_option",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "option"
     },
     {
@@ -1938,8 +2257,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_uuid",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "uuid"
     },
     {
@@ -1949,8 +2268,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_string",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "string"
     },
     {
@@ -1960,8 +2279,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_listingtype",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "listingtype"
     },
     {
@@ -1971,8 +2290,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_push_filters",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "push_filters()"
     },
     {
@@ -1982,8 +2301,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "querybuilder",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "querybuilder"
     },
     {
@@ -1993,8 +2312,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "postgres",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "postgres"
     },
     {
@@ -2004,8 +2323,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_count_listings",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "count_listings()"
     },
     {
@@ -2015,8 +2334,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_pgpool",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "pgpool"
     },
     {
@@ -2026,8 +2345,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_result",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "result"
     },
     {
@@ -2037,8 +2356,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_list_listings",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "list_listings()"
     },
     {
@@ -2048,8 +2367,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_rs_vec",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "vec"
     },
     {
@@ -2059,8 +2378,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_find_listing_by_id",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "find_listing_by_id()"
     },
     {
@@ -2070,8 +2389,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "backend_src_modules_listings_repository_find_media_for_listing",
-      "community": 10,
-      "community_name": "AppError",
+      "community": 43,
+      "community_name": "ListingDetailDto",
       "norm_label": "find_media_for_listing()"
     },
     {
@@ -3555,8 +3874,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "app.tsx"
     },
     {
@@ -3566,8 +3885,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_app",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "app()"
     },
     {
@@ -3621,8 +3940,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "rootlayout.tsx"
     },
     {
@@ -3632,8 +3951,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout_rootlayout",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "rootlayout()"
     },
     {
@@ -3643,8 +3962,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_providers",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providers.tsx"
     },
     {
@@ -3654,8 +3973,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_providers_queryclient",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "queryclient"
     },
     {
@@ -3665,8 +3984,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providersprops",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providersprops"
     },
     {
@@ -3676,8 +3995,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providers",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providers()"
     },
     {
@@ -3687,8 +4006,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_router",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "router.tsx"
     },
     {
@@ -3698,8 +4017,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingfeed",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "listingfeed"
     },
     {
@@ -3709,8 +4028,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingdetail",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "listingdetail"
     },
     {
@@ -3720,8 +4039,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_src_app_router_withsuspense",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "withsuspense()"
     },
     {
@@ -3731,8 +4050,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "frontend_src_app_router_router",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "router"
     },
     {
@@ -4138,8 +4457,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_main",
-      "community": 16,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "main.tsx"
     },
     {
@@ -5517,8 +5836,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "myhouse database rules (sqlx/postgresql)",
-      "id": "agents_rules_database_rules_myhouse_db_rules",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_myhouse_db_rules"
     },
     {
       "label": "Migration Conventions",
@@ -5531,8 +5850,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "migration conventions",
-      "id": "agents_rules_database_rules_migrations",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_migrations"
     },
     {
       "label": "sqlx Query Conventions (query!/query_as!)",
@@ -5545,8 +5864,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "sqlx query conventions (query!/query_as!)",
-      "id": "agents_rules_database_rules_query_conventions",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_query_conventions"
     },
     {
       "label": "Schema Conventions (UUID PK, timestamps, enums, partial unique indexes)",
@@ -5559,8 +5878,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "schema conventions (uuid pk, timestamps, enums, partial unique indexes)",
-      "id": "agents_rules_database_rules_schema_conventions",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_schema_conventions"
     },
     {
       "label": "Cascade and Filesystem Cleanup Ordering",
@@ -5573,8 +5892,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "cascade and filesystem cleanup ordering",
-      "id": "agents_rules_database_rules_cascade_cleanup",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_cascade_cleanup"
     },
     {
       "label": "Listings/Search Index Performance Rules",
@@ -5587,8 +5906,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "listings/search index performance rules",
-      "id": "agents_rules_database_rules_performance",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_performance"
     },
     {
       "label": "SQL Injection Prevention / Sensitive Column Exclusion",
@@ -5601,8 +5920,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "sql injection prevention / sensitive column exclusion",
-      "id": "agents_rules_database_rules_security",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_security"
     },
     {
       "label": "Repository Test Transaction Rollback Pattern",
@@ -5615,8 +5934,8 @@
       "contributor": null,
       "community": 20,
       "norm_label": "repository test transaction rollback pattern",
-      "id": "agents_rules_database_rules_testing",
-      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)"
+      "community_name": "MyHouse Database Rules (sqlx/PostgreSQL)",
+      "id": "agents_rules_database_rules_testing"
     },
     {
       "label": "General Coding Guidelines (Agents)",
@@ -5629,8 +5948,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "general coding guidelines (agents)",
-      "id": "agents_rules_general_code_guideline_myhouse_general_guidelines",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "agents_rules_general_code_guideline_myhouse_general_guidelines"
     },
     {
       "label": "MyHouse Project Instructions (Agents)",
@@ -5643,8 +5962,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "myhouse project instructions (agents)",
-      "id": "agents_rules_insrtruction_for_my_house_project_instructions",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "agents_rules_insrtruction_for_my_house_project_instructions"
     },
     {
       "label": "Locked Tech Stack (Rust/Axum/React/Postgres/moka/Docker)",
@@ -5657,8 +5976,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "locked tech stack (rust/axum/react/postgres/moka/docker)",
-      "id": "agents_rules_insrtruction_for_my_house_stack_locked",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "agents_rules_insrtruction_for_my_house_stack_locked"
     },
     {
       "label": "Key Locked Decisions (OTP auth, roles, refresh tokens, upload security)",
@@ -5671,8 +5990,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "key locked decisions (otp auth, roles, refresh tokens, upload security)",
-      "id": "agents_rules_insrtruction_for_my_house_key_decisions_locked",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "agents_rules_insrtruction_for_my_house_key_decisions_locked"
     },
     {
       "label": "Architecture Invariants (modular monolith, layering, AppError)",
@@ -5685,8 +6004,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "architecture invariants (modular monolith, layering, apperror)",
-      "id": "agents_rules_insrtruction_for_my_house_architecture_invariants",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "agents_rules_insrtruction_for_my_house_architecture_invariants"
     },
     {
       "label": "MH-XXX Ticket Conventions",
@@ -5699,8 +6018,8 @@
       "contributor": null,
       "community": 33,
       "norm_label": "mh-xxx ticket conventions",
-      "id": "agents_rules_insrtruction_for_my_house_ticket_conventions",
-      "community_name": "MH-XXX Ticket Conventions"
+      "community_name": "MH-XXX Ticket Conventions",
+      "id": "agents_rules_insrtruction_for_my_house_ticket_conventions"
     },
     {
       "label": "APP_ENV Environment Scoping Rule",
@@ -5713,8 +6032,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "app_env environment scoping rule",
-      "id": "agents_rules_insrtruction_for_my_house_env_scoping",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "agents_rules_insrtruction_for_my_house_env_scoping"
     },
     {
       "label": "React/TypeScript Rules (Agents)",
@@ -5727,8 +6046,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "react/typescript rules (agents)",
-      "id": "agents_rules_react_typecrypt_myhouse_react_ts_rules",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "agents_rules_react_typecrypt_myhouse_react_ts_rules"
     },
     {
       "label": "Locked Frontend Folder Structure (app/features/shared)",
@@ -5741,8 +6060,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "locked frontend folder structure (app/features/shared)",
-      "id": "agents_rules_react_typecrypt_folder_structure",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "agents_rules_react_typecrypt_folder_structure"
     },
     {
       "label": "Functional Component Conventions (no React.FC)",
@@ -5755,8 +6074,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "functional component conventions (no react.fc)",
-      "id": "agents_rules_react_typecrypt_component_conventions",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "agents_rules_react_typecrypt_component_conventions"
     },
     {
       "label": "api.ts Single Fetch Entry Point Rule",
@@ -5769,8 +6088,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "api.ts single fetch entry point rule",
-      "id": "agents_rules_react_typecrypt_data_fetching_rule",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "agents_rules_react_typecrypt_data_fetching_rule"
     },
     {
       "label": "Rust General Rules (Agents)",
@@ -5783,8 +6102,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "rust general rules (agents)",
-      "id": "agents_rules_rust_general_rules_myhouse_rust_rules",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "agents_rules_rust_general_rules_myhouse_rust_rules"
     },
     {
       "label": "Ownership and Types Conventions",
@@ -5797,8 +6116,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "ownership and types conventions",
-      "id": "agents_rules_rust_general_rules_ownership_types",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "agents_rules_rust_general_rules_ownership_types"
     },
     {
       "label": "Error Handling (thiserror/anyhow)",
@@ -5811,8 +6130,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "error handling (thiserror/anyhow)",
-      "id": "agents_rules_rust_general_rules_error_handling",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "agents_rules_rust_general_rules_error_handling"
     },
     {
       "label": "Concurrency and Async Rules (no blocking locks across await)",
@@ -5825,8 +6144,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "concurrency and async rules (no blocking locks across await)",
-      "id": "agents_rules_rust_general_rules_concurrency_async",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "agents_rules_rust_general_rules_concurrency_async"
     },
     {
       "label": "Testing and Quality Gates (cargo check/fmt/clippy)",
@@ -5839,8 +6158,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "testing and quality gates (cargo check/fmt/clippy)",
-      "id": "agents_rules_rust_general_rules_testing_quality",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "agents_rules_rust_general_rules_testing_quality"
     },
     {
       "label": "graphify Slash Command Trigger (.claude/CLAUDE.md)",
@@ -5853,8 +6172,8 @@
       "contributor": null,
       "community": 56,
       "norm_label": "graphify slash command trigger (.claude/claude.md)",
-      "id": "claude_claude_md_graphify_trigger",
-      "community_name": "graphify Slash Command Trigger (.claude/CLAUDE.md)"
+      "community_name": "graphify Slash Command Trigger (.claude/CLAUDE.md)",
+      "id": "claude_claude_md_graphify_trigger"
     },
     {
       "label": "Database Rules (Claude, sqlx/PostgreSQL)",
@@ -5867,8 +6186,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "database rules (claude, sqlx/postgresql)",
-      "id": "claude_rules_database_myhouse_db_rules",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_myhouse_db_rules"
     },
     {
       "label": "Migration Conventions (Claude rules)",
@@ -5881,8 +6200,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "migration conventions (claude rules)",
-      "id": "claude_rules_database_migrations",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_migrations"
     },
     {
       "label": "sqlx Query Conventions (Claude rules)",
@@ -5895,8 +6214,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "sqlx query conventions (claude rules)",
-      "id": "claude_rules_database_query_conventions",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_query_conventions"
     },
     {
       "label": "Schema Conventions (Claude rules)",
@@ -5909,8 +6228,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "schema conventions (claude rules)",
-      "id": "claude_rules_database_schema_conventions",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_schema_conventions"
     },
     {
       "label": "Cascade and Filesystem Cleanup Ordering (Claude rules)",
@@ -5923,8 +6242,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "cascade and filesystem cleanup ordering (claude rules)",
-      "id": "claude_rules_database_cascade_cleanup",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_cascade_cleanup"
     },
     {
       "label": "Listings/Search Index Performance Rules (Claude rules)",
@@ -5937,8 +6256,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "listings/search index performance rules (claude rules)",
-      "id": "claude_rules_database_performance",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_performance"
     },
     {
       "label": "SQL Injection Prevention / Sensitive Column Exclusion (Claude rules)",
@@ -5951,8 +6270,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "sql injection prevention / sensitive column exclusion (claude rules)",
-      "id": "claude_rules_database_security",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_security"
     },
     {
       "label": "Repository Test Transaction Rollback Pattern (Claude rules)",
@@ -5965,8 +6284,8 @@
       "contributor": null,
       "community": 22,
       "norm_label": "repository test transaction rollback pattern (claude rules)",
-      "id": "claude_rules_database_testing",
-      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)"
+      "community_name": "Database Rules (Claude, sqlx/PostgreSQL)",
+      "id": "claude_rules_database_testing"
     },
     {
       "label": "General Coding Guidelines (Claude rules)",
@@ -5979,8 +6298,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "general coding guidelines (claude rules)",
-      "id": "claude_rules_general_coding_myhouse_general_guidelines",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "claude_rules_general_coding_myhouse_general_guidelines"
     },
     {
       "label": "React/TypeScript Rules (Claude rules)",
@@ -5993,8 +6312,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "react/typescript rules (claude rules)",
-      "id": "claude_rules_react_typecrypt_myhouse_react_ts_rules",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_rules_react_typecrypt_myhouse_react_ts_rules"
     },
     {
       "label": "Locked Frontend Folder Structure (Claude rules)",
@@ -6007,8 +6326,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "locked frontend folder structure (claude rules)",
-      "id": "claude_rules_react_typecrypt_folder_structure",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_rules_react_typecrypt_folder_structure"
     },
     {
       "label": "Functional Component Conventions (Claude rules)",
@@ -6021,8 +6340,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "functional component conventions (claude rules)",
-      "id": "claude_rules_react_typecrypt_component_conventions",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_rules_react_typecrypt_component_conventions"
     },
     {
       "label": "api.ts Single Fetch Entry Point Rule (Claude rules)",
@@ -6035,8 +6354,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "api.ts single fetch entry point rule (claude rules)",
-      "id": "claude_rules_react_typecrypt_data_fetching_rule",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_rules_react_typecrypt_data_fetching_rule"
     },
     {
       "label": "Rust General Rules (Claude rules)",
@@ -6049,8 +6368,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "rust general rules (claude rules)",
-      "id": "claude_rules_rust_myhouse_rust_rules",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "claude_rules_rust_myhouse_rust_rules"
     },
     {
       "label": "Ownership and Types Conventions (Claude rules)",
@@ -6063,8 +6382,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "ownership and types conventions (claude rules)",
-      "id": "claude_rules_rust_ownership_types",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "claude_rules_rust_ownership_types"
     },
     {
       "label": "Error Handling (thiserror/anyhow) (Claude rules)",
@@ -6077,8 +6396,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "error handling (thiserror/anyhow) (claude rules)",
-      "id": "claude_rules_rust_error_handling",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "claude_rules_rust_error_handling"
     },
     {
       "label": "Concurrency and Async Rules (Claude rules)",
@@ -6091,8 +6410,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "concurrency and async rules (claude rules)",
-      "id": "claude_rules_rust_concurrency_async",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "claude_rules_rust_concurrency_async"
     },
     {
       "label": "MCP Usage Policy (GitHub/PostgreSQL/Git/Context7/Filesystem)",
@@ -6105,8 +6424,8 @@
       "contributor": null,
       "community": 18,
       "norm_label": "mcp usage policy (github/postgresql/git/context7/filesystem)",
-      "id": "claude_rules_rust_mcp_usage_policy",
-      "community_name": "Rust General Rules (Agents)"
+      "community_name": "Rust General Rules (Agents)",
+      "id": "claude_rules_rust_mcp_usage_policy"
     },
     {
       "label": "Code Review Backend Skill (Rust/Axum/MyHouse)",
@@ -6119,8 +6438,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "code review backend skill (rust/axum/myhouse)",
-      "id": "claude_skills_code_review_backend_skill_backend_review_skill",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "claude_skills_code_review_backend_skill_backend_review_skill"
     },
     {
       "label": "Four-Phase Backend Review Process",
@@ -6133,8 +6452,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "four-phase backend review process",
-      "id": "claude_skills_code_review_backend_skill_four_phase_process",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "claude_skills_code_review_backend_skill_four_phase_process"
     },
     {
       "label": "Backend Review Severity Labels (blocking/important/nit/suggestion)",
@@ -6147,8 +6466,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "backend review severity labels (blocking/important/nit/suggestion)",
-      "id": "claude_skills_code_review_backend_skill_severity_labels",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "claude_skills_code_review_backend_skill_severity_labels"
     },
     {
       "label": "MyHouse Backend Invariants (auth, refresh tokens, storage keys)",
@@ -6161,8 +6480,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "myhouse backend invariants (auth, refresh tokens, storage keys)",
-      "id": "claude_skills_code_review_backend_skill_myhouse_invariants",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "claude_skills_code_review_backend_skill_myhouse_invariants"
     },
     {
       "label": "Backend Review Checklist Reference",
@@ -6175,8 +6494,8 @@
       "contributor": null,
       "community": 27,
       "norm_label": "backend review checklist reference",
-      "id": "code_review_backend_reference_checklist_backend_checklist",
-      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)"
+      "community_name": "Code Review Backend Skill (Rust/Axum/MyHouse)",
+      "id": "code_review_backend_reference_checklist_backend_checklist"
     },
     {
       "label": "Code Review Frontend Skill (React/TypeScript/MyHouse)",
@@ -6189,8 +6508,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "code review frontend skill (react/typescript/myhouse)",
-      "id": "claude_skills_code_review_frontend_skill_frontend_review_skill",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_skills_code_review_frontend_skill_frontend_review_skill"
     },
     {
       "label": "Four-Phase Frontend Review Process",
@@ -6203,8 +6522,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "four-phase frontend review process",
-      "id": "claude_skills_code_review_frontend_skill_four_phase_process",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_skills_code_review_frontend_skill_four_phase_process"
     },
     {
       "label": "Frontend Review Severity Labels (blocking/important/nit/suggestion)",
@@ -6217,8 +6536,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "frontend review severity labels (blocking/important/nit/suggestion)",
-      "id": "claude_skills_code_review_frontend_skill_severity_labels",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_skills_code_review_frontend_skill_severity_labels"
     },
     {
       "label": "MyHouse Frontend Invariants (media urls, refresh token, is_new_user)",
@@ -6231,8 +6550,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "myhouse frontend invariants (media urls, refresh token, is_new_user)",
-      "id": "claude_skills_code_review_frontend_skill_myhouse_invariants",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_skills_code_review_frontend_skill_myhouse_invariants"
     },
     {
       "label": "Frontend Review Checklist Reference",
@@ -6245,8 +6564,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "frontend review checklist reference",
-      "id": "code_review_frontend_reference_checklist_frontend_checklist",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "code_review_frontend_reference_checklist_frontend_checklist"
     },
     {
       "label": "MyHouse Frontend Project Structure Map",
@@ -6259,8 +6578,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "myhouse frontend project structure map",
-      "id": "code_review_frontend_reference_checklist_myhouse_structure_map",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "code_review_frontend_reference_checklist_myhouse_structure_map"
     },
     {
       "label": "Docker Rules Skill (MyHouse)",
@@ -6273,8 +6592,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "docker rules skill (myhouse)",
-      "id": "claude_skills_docker_skill_docker_rules_skill",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "claude_skills_docker_skill_docker_rules_skill"
     },
     {
       "label": "Dockerfile Security Rules (non-root, pinned versions, no secrets)",
@@ -6287,8 +6606,8 @@
       "contributor": null,
       "community": 21,
       "norm_label": "dockerfile security rules (non-root, pinned versions, no secrets)",
-      "id": "claude_skills_docker_skill_dockerfile_security_rules",
-      "community_name": "MyHouse Project Instructions (Agents)"
+      "community_name": "MyHouse Project Instructions (Agents)",
+      "id": "claude_skills_docker_skill_dockerfile_security_rules"
     },
     {
       "label": "GitHub Ticket Generation Skill (MyHouse)",
@@ -6301,8 +6620,8 @@
       "contributor": null,
       "community": 33,
       "norm_label": "github ticket generation skill (myhouse)",
-      "id": "claude_skills_github_ticket_skill_ticket_generation_skill",
-      "community_name": "MH-XXX Ticket Conventions"
+      "community_name": "MH-XXX Ticket Conventions",
+      "id": "claude_skills_github_ticket_skill_ticket_generation_skill"
     },
     {
       "label": "MH-XX Ticket Format Template",
@@ -6315,8 +6634,8 @@
       "contributor": null,
       "community": 33,
       "norm_label": "mh-xx ticket format template",
-      "id": "claude_skills_github_ticket_skill_ticket_format",
-      "community_name": "MH-XXX Ticket Conventions"
+      "community_name": "MH-XXX Ticket Conventions",
+      "id": "claude_skills_github_ticket_skill_ticket_format"
     },
     {
       "label": "Vertical Slicing Rule (BE/FE sub-tickets)",
@@ -6329,8 +6648,8 @@
       "contributor": null,
       "community": 33,
       "norm_label": "vertical slicing rule (be/fe sub-tickets)",
-      "id": "claude_skills_github_ticket_skill_vertical_slicing_rule",
-      "community_name": "MH-XXX Ticket Conventions"
+      "community_name": "MH-XXX Ticket Conventions",
+      "id": "claude_skills_github_ticket_skill_vertical_slicing_rule"
     },
     {
       "label": "README Writing Rules (MyHouse)",
@@ -6343,8 +6662,8 @@
       "contributor": null,
       "community": 14,
       "norm_label": "readme writing rules (myhouse)",
-      "id": "claude_skills_readme_skill_readme_writing_rules",
-      "community_name": "React/TypeScript Rules (Agents)"
+      "community_name": "React/TypeScript Rules (Agents)",
+      "id": "claude_skills_readme_skill_readme_writing_rules"
     },
     {
       "label": "/graphify command",
@@ -6357,8 +6676,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "/graphify command",
-      "id": "claude_skills_graphify_skill_graphify_command",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_skill_graphify_command"
     },
     {
       "label": "Step 0 - GitHub repos and multi-path merge",
@@ -6371,8 +6690,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "step 0 - github repos and multi-path merge",
-      "id": "claude_skills_graphify_skill_step0_github_merge",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_skill_step0_github_merge"
     },
     {
       "label": "Step 1 - Ensure graphify is installed",
@@ -6385,8 +6704,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "step 1 - ensure graphify is installed",
-      "id": "claude_skills_graphify_skill_step1_ensure_installed",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_skill_step1_ensure_installed"
     },
     {
       "label": "Step 2 - Detect files",
@@ -6399,8 +6718,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "step 2 - detect files",
-      "id": "claude_skills_graphify_skill_step2_detect_files",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_skill_step2_detect_files"
     },
     {
       "label": "Step 2.5 - Video and audio detection",
@@ -6413,8 +6732,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "step 2.5 - video and audio detection",
-      "id": "claude_skills_graphify_skill_step2_5_video_audio",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_skill_step2_5_video_audio"
     },
     {
       "label": "Step 3 - Extract entities and relationships",
@@ -6427,8 +6746,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "step 3 - extract entities and relationships",
-      "id": "claude_skills_graphify_skill_step3_extract_entities",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_step3_extract_entities"
     },
     {
       "label": "Part A - Structural extraction for code files (AST)",
@@ -6441,8 +6760,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "part a - structural extraction for code files (ast)",
-      "id": "claude_skills_graphify_skill_part_a_structural_extraction",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_part_a_structural_extraction"
     },
     {
       "label": "Part B - Semantic extraction (parallel subagents)",
@@ -6455,8 +6774,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "part b - semantic extraction (parallel subagents)",
-      "id": "claude_skills_graphify_skill_part_b_semantic_extraction",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_part_b_semantic_extraction"
     },
     {
       "label": "Step B0 - Check extraction cache first",
@@ -6469,8 +6788,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "step b0 - check extraction cache first",
-      "id": "claude_skills_graphify_skill_step_b0_check_cache",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_step_b0_check_cache"
     },
     {
       "label": "Step B1 - Split into chunks",
@@ -6483,8 +6802,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "step b1 - split into chunks",
-      "id": "claude_skills_graphify_skill_step_b1_split_chunks",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_step_b1_split_chunks"
     },
     {
       "label": "Step B2 - Dispatch ALL subagents in a single message",
@@ -6497,8 +6816,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "step b2 - dispatch all subagents in a single message",
-      "id": "claude_skills_graphify_skill_step_b2_dispatch_subagents",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_step_b2_dispatch_subagents"
     },
     {
       "label": "Step B3 - Collect, cache, and merge",
@@ -6511,8 +6830,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "step b3 - collect, cache, and merge",
-      "id": "claude_skills_graphify_skill_step_b3_collect_cache_merge",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_step_b3_collect_cache_merge"
     },
     {
       "label": "Part C - Merge AST + semantic into final extraction",
@@ -6525,8 +6844,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "part c - merge ast + semantic into final extraction",
-      "id": "claude_skills_graphify_skill_part_c_merge_ast_semantic",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_skill_part_c_merge_ast_semantic"
     },
     {
       "label": "Step 4 - Build graph, cluster, analyze, generate outputs",
@@ -6539,8 +6858,8 @@
       "contributor": null,
       "community": 31,
       "norm_label": "step 4 - build graph, cluster, analyze, generate outputs",
-      "id": "claude_skills_graphify_skill_step4_build_cluster_analyze",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs"
+      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "id": "claude_skills_graphify_skill_step4_build_cluster_analyze"
     },
     {
       "label": "Shrink-guard (#479)",
@@ -6554,8 +6873,8 @@
       "rationale": "to_json returns False (writing nothing) when the new graph is smaller than the existing graph.json, so GRAPH_REPORT.md and the analysis sidecar are only written when the graph was actually written, preventing them from describing a graph that graph.json doesn't contain.",
       "community": 31,
       "norm_label": "shrink-guard (#479)",
-      "id": "claude_skills_graphify_skill_shrink_guard_479",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs"
+      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "id": "claude_skills_graphify_skill_shrink_guard_479"
     },
     {
       "label": "Step 4.5 - Graph health check",
@@ -6568,8 +6887,8 @@
       "contributor": null,
       "community": 31,
       "norm_label": "step 4.5 - graph health check",
-      "id": "claude_skills_graphify_skill_step4_5_graph_health_check",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs"
+      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "id": "claude_skills_graphify_skill_step4_5_graph_health_check"
     },
     {
       "label": "Step 5 - Label communities",
@@ -6582,8 +6901,8 @@
       "contributor": null,
       "community": 31,
       "norm_label": "step 5 - label communities",
-      "id": "claude_skills_graphify_skill_step5_label_communities",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs"
+      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "id": "claude_skills_graphify_skill_step5_label_communities"
     },
     {
       "label": "Step 6 - Generate Obsidian vault and HTML",
@@ -6596,8 +6915,8 @@
       "contributor": null,
       "community": 31,
       "norm_label": "step 6 - generate obsidian vault and html",
-      "id": "claude_skills_graphify_skill_step6_obsidian_html",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs"
+      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "id": "claude_skills_graphify_skill_step6_obsidian_html"
     },
     {
       "label": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
@@ -6610,8 +6929,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "steps 6b-8 - wiki, neo4j, falkordb, svg, graphml, mcp, benchmark",
-      "id": "claude_skills_graphify_skill_steps6b_8_exports",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_skill_steps6b_8_exports"
     },
     {
       "label": "Step 9 - Save manifest, update cost tracker, clean up, and report",
@@ -6624,8 +6943,8 @@
       "contributor": null,
       "community": 30,
       "norm_label": "step 9 - save manifest, update cost tracker, clean up, and report",
-      "id": "claude_skills_graphify_skill_step9_manifest_cost_cleanup",
-      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report"
+      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "id": "claude_skills_graphify_skill_step9_manifest_cost_cleanup"
     },
     {
       "label": "Stamped manifest files guard (#2015)",
@@ -6639,8 +6958,8 @@
       "rationale": "Only stamp semantic files that actually produced output; a detected file whose chunk failed or was omitted must stay unstamped so the next --update re-queues it, otherwise it is marked done and its content is lost forever.",
       "community": 30,
       "norm_label": "stamped manifest files guard (#2015)",
-      "id": "claude_skills_graphify_skill_stamped_manifest_files_2015",
-      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report"
+      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "id": "claude_skills_graphify_skill_stamped_manifest_files_2015"
     },
     {
       "label": "Interpreter guard for subcommands",
@@ -6653,8 +6972,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "interpreter guard for subcommands",
-      "id": "claude_skills_graphify_skill_interpreter_guard",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "claude_skills_graphify_skill_interpreter_guard"
     },
     {
       "label": "For --update and --cluster-only (section pointer)",
@@ -6667,8 +6986,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "for --update and --cluster-only (section pointer)",
-      "id": "claude_skills_graphify_skill_update_and_cluster_only_section",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "claude_skills_graphify_skill_update_and_cluster_only_section"
     },
     {
       "label": "For /graphify query (section pointer)",
@@ -6681,8 +7000,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "for /graphify query (section pointer)",
-      "id": "claude_skills_graphify_skill_query_section",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_skill_query_section"
     },
     {
       "label": "For /graphify add and --watch (section pointer)",
@@ -6695,8 +7014,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "for /graphify add and --watch (section pointer)",
-      "id": "claude_skills_graphify_skill_add_watch_section",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "claude_skills_graphify_skill_add_watch_section"
     },
     {
       "label": "For the commit hook and native CLAUDE.md integration (section pointer)",
@@ -6709,8 +7028,8 @@
       "contributor": null,
       "community": 34,
       "norm_label": "for the commit hook and native claude.md integration (section pointer)",
-      "id": "claude_skills_graphify_skill_hooks_section",
-      "community_name": "git commit hook (graphify hook install)"
+      "community_name": "git commit hook (graphify hook install)",
+      "id": "claude_skills_graphify_skill_hooks_section"
     },
     {
       "label": "Honesty Rules",
@@ -6724,8 +7043,8 @@
       "rationale": "Never invent an edge (use AMBIGUOUS if unsure); never skip the corpus check warning; always show token cost; never hide cohesion scores; never run HTML viz on >5000 nodes without warning \u2014 these constraints exist to keep the graph's audit trail honest and prevent silent data loss or misleading visualization.",
       "community": 30,
       "norm_label": "honesty rules",
-      "id": "claude_skills_graphify_skill_honesty_rules",
-      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report"
+      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "id": "claude_skills_graphify_skill_honesty_rules"
     },
     {
       "label": "/graphify add <url>",
@@ -6738,8 +7057,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "/graphify add <url>",
-      "id": "claude_skills_graphify_references_add_watch_graphify_add",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "claude_skills_graphify_references_add_watch_graphify_add"
     },
     {
       "label": "graphify.ingest.ingest()",
@@ -6752,8 +7071,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "graphify.ingest.ingest()",
-      "id": "claude_skills_graphify_references_add_watch_ingest_function",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "claude_skills_graphify_references_add_watch_ingest_function"
     },
     {
       "label": "--watch flag",
@@ -6766,8 +7085,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "--watch flag",
-      "id": "claude_skills_graphify_references_add_watch_watch_flag",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "claude_skills_graphify_references_add_watch_watch_flag"
     },
     {
       "label": "Debounce mechanism (default 3s)",
@@ -6781,8 +7100,8 @@
       "rationale": "Waits until file activity stops before triggering a rebuild, so a wave of parallel agent writes doesn't trigger a rebuild per file.",
       "community": 25,
       "norm_label": "debounce mechanism (default 3s)",
-      "id": "claude_skills_graphify_references_add_watch_debounce_mechanism",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "claude_skills_graphify_references_add_watch_debounce_mechanism"
     },
     {
       "label": "Step 6b - Wiki export",
@@ -6795,8 +7114,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 6b - wiki export",
-      "id": "claude_skills_graphify_references_exports_step6b_wiki",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step6b_wiki"
     },
     {
       "label": "Step 7 - Neo4j export",
@@ -6809,8 +7128,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7 - neo4j export",
-      "id": "claude_skills_graphify_references_exports_step7_neo4j",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step7_neo4j"
     },
     {
       "label": "Step 7a - FalkorDB export",
@@ -6823,8 +7142,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7a - falkordb export",
-      "id": "claude_skills_graphify_references_exports_step7a_falkordb",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step7a_falkordb"
     },
     {
       "label": "Step 7b - SVG export",
@@ -6837,8 +7156,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7b - svg export",
-      "id": "claude_skills_graphify_references_exports_step7b_svg",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step7b_svg"
     },
     {
       "label": "Step 7c - GraphML export",
@@ -6851,8 +7170,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7c - graphml export",
-      "id": "claude_skills_graphify_references_exports_step7c_graphml",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step7c_graphml"
     },
     {
       "label": "Step 7d - MCP server (graphify.serve)",
@@ -6865,8 +7184,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7d - mcp server (graphify.serve)",
-      "id": "claude_skills_graphify_references_exports_step7d_mcp_server",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step7d_mcp_server"
     },
     {
       "label": "Step 8 - Token reduction benchmark",
@@ -6879,8 +7198,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 8 - token reduction benchmark",
-      "id": "claude_skills_graphify_references_exports_step8_benchmark",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "claude_skills_graphify_references_exports_step8_benchmark"
     },
     {
       "label": "Extraction subagent prompt (full)",
@@ -6893,8 +7212,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "extraction subagent prompt (full)",
-      "id": "claude_skills_graphify_references_extraction_spec_subagent_prompt",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_references_extraction_spec_subagent_prompt"
     },
     {
       "label": "EXTRACTED/INFERRED/AMBIGUOUS confidence rubric",
@@ -6908,8 +7227,8 @@
       "rationale": "Models follow discrete rubrics better than continuous ranges; the bimodal distribution observed in production (>50% at 0.5, >40% at 0.85+) shows range guidance is being collapsed to a binary, so fixed discrete values (0.95/0.85/0.75/0.65/0.55) replace a free continuous scale.",
       "community": 15,
       "norm_label": "extracted/inferred/ambiguous confidence rubric",
-      "id": "claude_skills_graphify_references_extraction_spec_confidence_edge_types",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_references_extraction_spec_confidence_edge_types"
     },
     {
       "label": "Node ID format rule ({stem}_{entity})",
@@ -6923,8 +7242,8 @@
       "rationale": "Using the full repo-relative path (every directory level, not just immediate parent) keeps same-named files in different directories distinct and matches the AST extractor's ID scheme; using only filename or immediate parent creates orphan ghost-duplicate nodes.",
       "community": 15,
       "norm_label": "node id format rule ({stem}_{entity})",
-      "id": "claude_skills_graphify_references_extraction_spec_node_id_format",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_references_extraction_spec_node_id_format"
     },
     {
       "label": "Extraction JSON schema",
@@ -6937,8 +7256,8 @@
       "contributor": null,
       "community": 15,
       "norm_label": "extraction json schema",
-      "id": "claude_skills_graphify_references_extraction_spec_json_schema",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_references_extraction_spec_json_schema"
     },
     {
       "label": "source_file verbatim rule",
@@ -6952,8 +7271,8 @@
       "rationale": "Keeps the full build and incremental --update on the same base, so build_merge's replace-on-re-extract matches the existing node instead of accumulating a duplicate.",
       "community": 15,
       "norm_label": "source_file verbatim rule",
-      "id": "claude_skills_graphify_references_extraction_spec_source_file_rule",
-      "community_name": "Extraction subagent prompt (full)"
+      "community_name": "Extraction subagent prompt (full)",
+      "id": "claude_skills_graphify_references_extraction_spec_source_file_rule"
     },
     {
       "label": "Step 0 - Clone GitHub repo(s)",
@@ -6966,8 +7285,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "step 0 - clone github repo(s)",
-      "id": "claude_skills_graphify_references_github_and_merge_step0_clone",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_references_github_and_merge_step0_clone"
     },
     {
       "label": "Multiple repos cross-repo graph merge",
@@ -6980,8 +7299,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "multiple repos cross-repo graph merge",
-      "id": "claude_skills_graphify_references_github_and_merge_multi_repo_merge",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_references_github_and_merge_multi_repo_merge"
     },
     {
       "label": "Multiple local subfolders (monorepo) flow",
@@ -6994,8 +7313,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "multiple local subfolders (monorepo) flow",
-      "id": "claude_skills_graphify_references_github_and_merge_monorepo_flow",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_references_github_and_merge_monorepo_flow"
     },
     {
       "label": "git commit hook (graphify hook install)",
@@ -7008,8 +7327,8 @@
       "contributor": null,
       "community": 34,
       "norm_label": "git commit hook (graphify hook install)",
-      "id": "claude_skills_graphify_references_hooks_git_commit_hook",
-      "community_name": "git commit hook (graphify hook install)"
+      "community_name": "git commit hook (graphify hook install)",
+      "id": "claude_skills_graphify_references_hooks_git_commit_hook"
     },
     {
       "label": "Native CLAUDE.md integration (graphify claude install)",
@@ -7022,8 +7341,8 @@
       "contributor": null,
       "community": 34,
       "norm_label": "native claude.md integration (graphify claude install)",
-      "id": "claude_skills_graphify_references_hooks_claude_md_integration",
-      "community_name": "git commit hook (graphify hook install)"
+      "community_name": "git commit hook (graphify hook install)",
+      "id": "claude_skills_graphify_references_hooks_claude_md_integration"
     },
     {
       "label": "Step 0 - Constrained query expansion",
@@ -7036,8 +7355,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "step 0 - constrained query expansion",
-      "id": "claude_skills_graphify_references_query_query_expansion",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_query_expansion"
     },
     {
       "label": "Step 1 - Traversal (BFS/DFS)",
@@ -7050,8 +7369,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "step 1 - traversal (bfs/dfs)",
-      "id": "claude_skills_graphify_references_query_traversal",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_traversal"
     },
     {
       "label": "save-result feedback loop",
@@ -7064,8 +7383,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "save-result feedback loop",
-      "id": "claude_skills_graphify_references_query_save_result",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_save_result"
     },
     {
       "label": "Work memory outcome tags (useful/dead_end/corrected)",
@@ -7079,8 +7398,8 @@
       "rationale": "Closes a self-improving feedback loop: cited nodes marked useful become preferred sources, dead_end paths are skipped next time, and corrected answers store the right answer so future sessions learn from prior mistakes.",
       "community": 19,
       "norm_label": "work memory outcome tags (useful/dead_end/corrected)",
-      "id": "claude_skills_graphify_references_query_work_memory_outcomes",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_work_memory_outcomes"
     },
     {
       "label": "/graphify path",
@@ -7093,8 +7412,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "/graphify path",
-      "id": "claude_skills_graphify_references_query_graphify_path",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_graphify_path"
     },
     {
       "label": "/graphify explain",
@@ -7107,8 +7426,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "/graphify explain",
-      "id": "claude_skills_graphify_references_query_graphify_explain",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "claude_skills_graphify_references_query_graphify_explain"
     },
     {
       "label": "Step 2.5 - Transcribe video/audio files",
@@ -7121,8 +7440,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "step 2.5 - transcribe video/audio files",
-      "id": "claude_skills_graphify_references_transcribe_step2_5_transcribe",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_references_transcribe_step2_5_transcribe"
     },
     {
       "label": "Whisper domain-hint prompt strategy",
@@ -7136,8 +7455,8 @@
       "rationale": "The agent itself composes a one-sentence domain hint from god node labels (no separate API call needed) and passes it to Whisper as the initial prompt to improve transcription accuracy for domain-specific vocabulary.",
       "community": 23,
       "norm_label": "whisper domain-hint prompt strategy",
-      "id": "claude_skills_graphify_references_transcribe_whisper_prompt_strategy",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "claude_skills_graphify_references_transcribe_whisper_prompt_strategy"
     },
     {
       "label": "--update (incremental re-extraction)",
@@ -7150,8 +7469,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "--update (incremental re-extraction)",
-      "id": "claude_skills_graphify_references_update_incremental_update",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "claude_skills_graphify_references_update_incremental_update"
     },
     {
       "label": "graphify.build.build_merge()",
@@ -7164,8 +7483,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "graphify.build.build_merge()",
-      "id": "claude_skills_graphify_references_update_build_merge",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_references_update_build_merge"
     },
     {
       "label": "Replace-on-re-extract dedup fix (#1344/#1178)",
@@ -7179,8 +7498,8 @@
       "rationale": "prune_sources is only for genuinely deleted files; changed/re-extracted files are handled by build_merge dropping every source_file in new_chunks from the base before merge, so old/stale nodes don't survive without needing a separate dedup pass.",
       "community": 26,
       "norm_label": "replace-on-re-extract dedup fix (#1344/#1178)",
-      "id": "claude_skills_graphify_references_update_replace_on_reextract_1344",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "claude_skills_graphify_references_update_replace_on_reextract_1344"
     },
     {
       "label": "--cluster-only",
@@ -7193,8 +7512,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "--cluster-only",
-      "id": "claude_skills_graphify_references_update_cluster_only",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "claude_skills_graphify_references_update_cluster_only"
     },
     {
       "label": "/graphify command (Codex variant)",
@@ -7207,8 +7526,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "/graphify command (codex variant)",
-      "id": "codex_skills_graphify_skill_graphify_command",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "codex_skills_graphify_skill_graphify_command"
     },
     {
       "label": "Step B2 - Dispatch ALL subagents (Codex spawn_agent)",
@@ -7221,8 +7540,8 @@
       "contributor": null,
       "community": 32,
       "norm_label": "step b2 - dispatch all subagents (codex spawn_agent)",
-      "id": "codex_skills_graphify_skill_step_b2_dispatch_subagents_codex",
-      "community_name": "Extraction subagent prompt (compact)"
+      "community_name": "Extraction subagent prompt (compact)",
+      "id": "codex_skills_graphify_skill_step_b2_dispatch_subagents_codex"
     },
     {
       "label": "spawn_agent / wait_agent / close_agent mechanism",
@@ -7236,8 +7555,8 @@
       "rationale": "Codex has no Agent tool with disk-based chunk files; it collects agent results in memory via wait_agent/close_agent, so per-chunk success is judged by valid JSON output rather than a chunk file existing on disk, and requires multi_agent=true in ~/.codex/config.toml.",
       "community": 32,
       "norm_label": "spawn_agent / wait_agent / close_agent mechanism",
-      "id": "codex_skills_graphify_skill_spawn_agent_mechanism",
-      "community_name": "Extraction subagent prompt (compact)"
+      "community_name": "Extraction subagent prompt (compact)",
+      "id": "codex_skills_graphify_skill_spawn_agent_mechanism"
     },
     {
       "label": "Step 9 - Save manifest, update cost tracker, clean up (Codex)",
@@ -7250,8 +7569,8 @@
       "contributor": null,
       "community": 30,
       "norm_label": "step 9 - save manifest, update cost tracker, clean up (codex)",
-      "id": "codex_skills_graphify_skill_step9_manifest_cost_cleanup",
-      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report"
+      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "id": "codex_skills_graphify_skill_step9_manifest_cost_cleanup"
     },
     {
       "label": "Honesty Rules (Codex)",
@@ -7265,8 +7584,8 @@
       "rationale": "Same honesty constraints as the Claude variant: never invent an edge, never skip corpus warnings, always show token cost, never hide cohesion scores, warn before large HTML viz.",
       "community": 30,
       "norm_label": "honesty rules (codex)",
-      "id": "codex_skills_graphify_skill_honesty_rules",
-      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report"
+      "community_name": "Step 9 - Save manifest, update cost tracker, clean up, and report",
+      "id": "codex_skills_graphify_skill_honesty_rules"
     },
     {
       "label": "/graphify add <url> (Codex)",
@@ -7279,8 +7598,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "/graphify add <url> (codex)",
-      "id": "codex_skills_graphify_references_add_watch_graphify_add",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "codex_skills_graphify_references_add_watch_graphify_add"
     },
     {
       "label": "--watch flag (Codex)",
@@ -7293,8 +7612,8 @@
       "contributor": null,
       "community": 25,
       "norm_label": "--watch flag (codex)",
-      "id": "codex_skills_graphify_references_add_watch_watch_flag",
-      "community_name": "/graphify add <url>"
+      "community_name": "/graphify add <url>",
+      "id": "codex_skills_graphify_references_add_watch_watch_flag"
     },
     {
       "label": "Step 6b - Wiki export (Codex)",
@@ -7307,8 +7626,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 6b - wiki export (codex)",
-      "id": "codex_skills_graphify_references_exports_step6b_wiki",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "codex_skills_graphify_references_exports_step6b_wiki"
     },
     {
       "label": "Step 7d - MCP server (Codex)",
@@ -7321,8 +7640,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 7d - mcp server (codex)",
-      "id": "codex_skills_graphify_references_exports_step7d_mcp_server",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "codex_skills_graphify_references_exports_step7d_mcp_server"
     },
     {
       "label": "Step 8 - Token reduction benchmark (Codex)",
@@ -7335,8 +7654,8 @@
       "contributor": null,
       "community": 17,
       "norm_label": "step 8 - token reduction benchmark (codex)",
-      "id": "codex_skills_graphify_references_exports_step8_benchmark",
-      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
+      "community_name": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
+      "id": "codex_skills_graphify_references_exports_step8_benchmark"
     },
     {
       "label": "Extraction subagent prompt (compact)",
@@ -7349,8 +7668,8 @@
       "contributor": null,
       "community": 32,
       "norm_label": "extraction subagent prompt (compact)",
-      "id": "codex_skills_graphify_references_extraction_spec_subagent_prompt_compact",
-      "community_name": "Extraction subagent prompt (compact)"
+      "community_name": "Extraction subagent prompt (compact)",
+      "id": "codex_skills_graphify_references_extraction_spec_subagent_prompt_compact"
     },
     {
       "label": "Compact prompt rationale (return inline, no CHUNK_PATH)",
@@ -7364,8 +7683,8 @@
       "rationale": "The Codex variant compresses the same rules into a denser prompt because agents return results inline via wait_agent rather than writing chunk files to disk, so the CHUNK_PATH/Write-tool instructions are dropped and replaced by 'return the JSON inline'.",
       "community": 32,
       "norm_label": "compact prompt rationale (return inline, no chunk_path)",
-      "id": "codex_skills_graphify_references_extraction_spec_compact_rationale",
-      "community_name": "Extraction subagent prompt (compact)"
+      "community_name": "Extraction subagent prompt (compact)",
+      "id": "codex_skills_graphify_references_extraction_spec_compact_rationale"
     },
     {
       "label": "Step 0 - Clone GitHub repo(s) (Codex)",
@@ -7378,8 +7697,8 @@
       "contributor": null,
       "community": 26,
       "norm_label": "step 0 - clone github repo(s) (codex)",
-      "id": "codex_skills_graphify_references_github_and_merge_step0_clone",
-      "community_name": "Multiple repos cross-repo graph merge"
+      "community_name": "Multiple repos cross-repo graph merge",
+      "id": "codex_skills_graphify_references_github_and_merge_step0_clone"
     },
     {
       "label": "git commit hook (Codex)",
@@ -7392,8 +7711,8 @@
       "contributor": null,
       "community": 34,
       "norm_label": "git commit hook (codex)",
-      "id": "codex_skills_graphify_references_hooks_git_commit_hook",
-      "community_name": "git commit hook (graphify hook install)"
+      "community_name": "git commit hook (graphify hook install)",
+      "id": "codex_skills_graphify_references_hooks_git_commit_hook"
     },
     {
       "label": "Step 0 - Constrained query expansion (Codex)",
@@ -7406,8 +7725,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "step 0 - constrained query expansion (codex)",
-      "id": "codex_skills_graphify_references_query_query_expansion",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "codex_skills_graphify_references_query_query_expansion"
     },
     {
       "label": "/graphify path (Codex)",
@@ -7420,8 +7739,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "/graphify path (codex)",
-      "id": "codex_skills_graphify_references_query_graphify_path",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "codex_skills_graphify_references_query_graphify_path"
     },
     {
       "label": "/graphify explain (Codex)",
@@ -7434,8 +7753,8 @@
       "contributor": null,
       "community": 19,
       "norm_label": "/graphify explain (codex)",
-      "id": "codex_skills_graphify_references_query_graphify_explain",
-      "community_name": "save-result feedback loop"
+      "community_name": "save-result feedback loop",
+      "id": "codex_skills_graphify_references_query_graphify_explain"
     },
     {
       "label": "Step 2.5 - Transcribe video/audio files (Codex)",
@@ -7448,8 +7767,8 @@
       "contributor": null,
       "community": 23,
       "norm_label": "step 2.5 - transcribe video/audio files (codex)",
-      "id": "codex_skills_graphify_references_transcribe_step2_5_transcribe",
-      "community_name": "/graphify command"
+      "community_name": "/graphify command",
+      "id": "codex_skills_graphify_references_transcribe_step2_5_transcribe"
     },
     {
       "label": "--update (incremental re-extraction) (Codex)",
@@ -7462,8 +7781,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "--update (incremental re-extraction) (codex)",
-      "id": "codex_skills_graphify_references_update_incremental_update",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "codex_skills_graphify_references_update_incremental_update"
     },
     {
       "label": "--cluster-only (Codex)",
@@ -7476,8 +7795,8 @@
       "contributor": null,
       "community": 28,
       "norm_label": "--cluster-only (codex)",
-      "id": "codex_skills_graphify_references_update_cluster_only",
-      "community_name": "--update (incremental re-extraction)"
+      "community_name": "--update (incremental re-extraction)",
+      "id": "codex_skills_graphify_references_update_cluster_only"
     },
     {
       "label": "multi_agent feature flag (~/.codex/config.toml)",
@@ -7490,8 +7809,8 @@
       "contributor": null,
       "community": 32,
       "norm_label": "multi_agent feature flag (~/.codex/config.toml)",
-      "id": "multi_agent_feature_flag_config_toml",
-      "community_name": "Extraction subagent prompt (compact)"
+      "community_name": "Extraction subagent prompt (compact)",
+      "id": "multi_agent_feature_flag_config_toml"
     },
     {
       "label": "CI Backend Workflow",
@@ -7504,8 +7823,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "ci backend workflow",
-      "id": "github_workflows_ci_backend_yml",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml"
     },
     {
       "label": "backend_fmt job",
@@ -7518,8 +7837,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_fmt job",
-      "id": "github_workflows_ci_backend_yml_backend_fmt",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_fmt"
     },
     {
       "label": "backend_clippy job",
@@ -7532,8 +7851,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_clippy job",
-      "id": "github_workflows_ci_backend_yml_backend_clippy",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_clippy"
     },
     {
       "label": "backend_deny job (cargo-deny)",
@@ -7546,8 +7865,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_deny job (cargo-deny)",
-      "id": "github_workflows_ci_backend_yml_backend_deny",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_deny"
     },
     {
       "label": "backend_audit job (cargo-audit)",
@@ -7560,8 +7879,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_audit job (cargo-audit)",
-      "id": "github_workflows_ci_backend_yml_backend_audit",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_audit"
     },
     {
       "label": "backend_build job",
@@ -7574,8 +7893,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_build job",
-      "id": "github_workflows_ci_backend_yml_backend_build",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_build"
     },
     {
       "label": "backend_doc job (cargo doc)",
@@ -7588,8 +7907,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_doc job (cargo doc)",
-      "id": "github_workflows_ci_backend_yml_backend_doc",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_doc"
     },
     {
       "label": "backend_coverage job (cargo-llvm-cov + nextest)",
@@ -7602,8 +7921,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_coverage job (cargo-llvm-cov + nextest)",
-      "id": "github_workflows_ci_backend_yml_backend_coverage",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_coverage"
     },
     {
       "label": "backend_openapi job (OpenAPI drift check)",
@@ -7616,8 +7935,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_openapi job (openapi drift check)",
-      "id": "github_workflows_ci_backend_yml_backend_openapi",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_openapi"
     },
     {
       "label": "backend_docker job",
@@ -7630,8 +7949,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend_docker job",
-      "id": "github_workflows_ci_backend_yml_backend_docker",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_backend_docker"
     },
     {
       "label": "gen_openapi binary (src/bin/gen_openapi.rs)",
@@ -7644,8 +7963,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "gen_openapi binary (src/bin/gen_openapi.rs)",
-      "id": "github_workflows_ci_backend_yml_gen_openapi_bin",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_backend_yml_gen_openapi_bin"
     },
     {
       "label": "CI Frontend Workflow",
@@ -7658,8 +7977,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "ci frontend workflow",
-      "id": "github_workflows_ci_frontend_yml",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml"
     },
     {
       "label": "frontend_install job",
@@ -7672,8 +7991,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_install job",
-      "id": "github_workflows_ci_frontend_yml_frontend_install",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_install"
     },
     {
       "label": "frontend_codegen job (OpenAPI TS codegen)",
@@ -7686,8 +8005,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_codegen job (openapi ts codegen)",
-      "id": "github_workflows_ci_frontend_yml_frontend_codegen",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_codegen"
     },
     {
       "label": "frontend_lint job (ESLint)",
@@ -7700,8 +8019,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_lint job (eslint)",
-      "id": "github_workflows_ci_frontend_yml_frontend_lint",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_lint"
     },
     {
       "label": "frontend_prettier job",
@@ -7714,8 +8033,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_prettier job",
-      "id": "github_workflows_ci_frontend_yml_frontend_prettier",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_prettier"
     },
     {
       "label": "frontend_typescript job (tsc check)",
@@ -7728,8 +8047,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_typescript job (tsc check)",
-      "id": "github_workflows_ci_frontend_yml_frontend_typescript",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_typescript"
     },
     {
       "label": "frontend_build job",
@@ -7742,8 +8061,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_build job",
-      "id": "github_workflows_ci_frontend_yml_frontend_build",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_build"
     },
     {
       "label": "frontend_docker job",
@@ -7756,8 +8075,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend_docker job",
-      "id": "github_workflows_ci_frontend_yml_frontend_docker",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "github_workflows_ci_frontend_yml_frontend_docker"
     },
     {
       "label": "src/shared/api/types.ts (generated OpenAPI types)",
@@ -7770,8 +8089,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "src/shared/api/types.ts (generated openapi types)",
-      "id": "frontend_src_shared_api_types_ts",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "frontend_src_shared_api_types_ts"
     },
     {
       "label": "CodeQL Advanced Workflow",
@@ -7784,8 +8103,8 @@
       "contributor": null,
       "community": 35,
       "norm_label": "codeql advanced workflow",
-      "id": "github_workflows_codeql_yml",
-      "community_name": "analyze job (rust + javascript-typescript matrix)"
+      "community_name": "analyze job (rust + javascript-typescript matrix)",
+      "id": "github_workflows_codeql_yml"
     },
     {
       "label": "analyze job (rust + javascript-typescript matrix)",
@@ -7798,8 +8117,8 @@
       "contributor": null,
       "community": 35,
       "norm_label": "analyze job (rust + javascript-typescript matrix)",
-      "id": "github_workflows_codeql_yml_analyze",
-      "community_name": "analyze job (rust + javascript-typescript matrix)"
+      "community_name": "analyze job (rust + javascript-typescript matrix)",
+      "id": "github_workflows_codeql_yml_analyze"
     },
     {
       "label": "Gitleaks Secret Scan Workflow",
@@ -7812,8 +8131,8 @@
       "contributor": null,
       "community": 35,
       "norm_label": "gitleaks secret scan workflow",
-      "id": "github_workflows_gitleaks_yml",
-      "community_name": "analyze job (rust + javascript-typescript matrix)"
+      "community_name": "analyze job (rust + javascript-typescript matrix)",
+      "id": "github_workflows_gitleaks_yml"
     },
     {
       "label": "gitleaks job (secret scan)",
@@ -7826,8 +8145,8 @@
       "contributor": null,
       "community": 35,
       "norm_label": "gitleaks job (secret scan)",
-      "id": "github_workflows_gitleaks_yml_gitleaks",
-      "community_name": "analyze job (rust + javascript-typescript matrix)"
+      "community_name": "analyze job (rust + javascript-typescript matrix)",
+      "id": "github_workflows_gitleaks_yml_gitleaks"
     },
     {
       "label": "AGENTS.md \u2014 graphify trigger instructions",
@@ -7840,8 +8159,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "agents.md \u2014 graphify trigger instructions",
-      "id": "agents_md",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "agents_md"
     },
     {
       "label": "CLAUDE.md \u2014 MyHouse project instructions",
@@ -7854,8 +8173,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "claude.md \u2014 myhouse project instructions",
-      "id": "claude_md_root",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "claude_md_root"
     },
     {
       "label": "Locked Stack Decision (Rust/Axum, React/TS, PostgreSQL, moka, Docker)",
@@ -7868,8 +8187,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "locked stack decision (rust/axum, react/ts, postgresql, moka, docker)",
-      "id": "claude_md_root_stack_locked",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "claude_md_root_stack_locked"
     },
     {
       "label": "Key Decisions Already Locked (OTP auth, role model, refresh token cookie, etc.)",
@@ -7882,8 +8201,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "key decisions already locked (otp auth, role model, refresh token cookie, etc.)",
-      "id": "claude_md_root_key_decisions_locked",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "claude_md_root_key_decisions_locked"
     },
     {
       "label": "Architecture Invariants (modular monolith, handler\u2192service\u2192repository, AppError)",
@@ -7896,8 +8215,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "architecture invariants (modular monolith, handler\u2192service\u2192repository, apperror)",
-      "id": "claude_md_root_architecture_invariants",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "claude_md_root_architecture_invariants"
     },
     {
       "label": "MCP Usage Policy (GitHub, PostgreSQL, Git, Context7, Filesystem, Sequential Thinking)",
@@ -7910,8 +8229,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "mcp usage policy (github, postgresql, git, context7, filesystem, sequential thinking)",
-      "id": "claude_md_root_mcp_usage_policy",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "claude_md_root_mcp_usage_policy"
     },
     {
       "label": "README.md \u2014 Project Overview and Setup",
@@ -7924,8 +8243,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "readme.md \u2014 project overview and setup",
-      "id": "readme_md",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "readme_md"
     },
     {
       "label": "Trunk-based development branching strategy",
@@ -7938,8 +8257,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "trunk-based development branching strategy",
-      "id": "readme_md_trunk_based_development",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "readme_md_trunk_based_development"
     },
     {
       "label": "Conventional Commits convention",
@@ -7952,8 +8271,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "conventional commits convention",
-      "id": "readme_md_conventional_commits",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "readme_md_conventional_commits"
     },
     {
       "label": "docker-compose.yml (root)",
@@ -7966,8 +8285,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "docker-compose.yml (root)",
-      "id": "docker_compose_yml",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml"
     },
     {
       "label": "postgres service",
@@ -7980,8 +8299,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "postgres service",
-      "id": "docker_compose_yml_postgres",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml_postgres"
     },
     {
       "label": "backend-dev service (dev profile, cargo-watch)",
@@ -7994,8 +8313,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend-dev service (dev profile, cargo-watch)",
-      "id": "docker_compose_yml_backend_dev",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml_backend_dev"
     },
     {
       "label": "frontend-dev service (dev profile, vite dev server)",
@@ -8008,8 +8327,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend-dev service (dev profile, vite dev server)",
-      "id": "docker_compose_yml_frontend_dev",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml_frontend_dev"
     },
     {
       "label": "backend-prod service (prod profile, release binary)",
@@ -8022,8 +8341,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend-prod service (prod profile, release binary)",
-      "id": "docker_compose_yml_backend_prod",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml_backend_prod"
     },
     {
       "label": "frontend-prod service (prod profile, nginx static)",
@@ -8036,8 +8355,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend-prod service (prod profile, nginx static)",
-      "id": "docker_compose_yml_frontend_prod",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docker_compose_yml_frontend_prod"
     },
     {
       "label": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
@@ -8050,8 +8369,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "architecture_v1.2.md \u2014 arc42 software architecture document",
-      "id": "docs_architecture_v1_2_md",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md"
     },
     {
       "label": "Modular Monolith architectural pattern",
@@ -8064,8 +8383,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "modular monolith architectural pattern",
-      "id": "docs_architecture_v1_2_md_modular_monolith",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_architecture_v1_2_md_modular_monolith"
     },
     {
       "label": "auth module (OTP passwordless, JWT access+refresh, rate limiting)",
@@ -8078,8 +8397,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "auth module (otp passwordless, jwt access+refresh, rate limiting)",
-      "id": "docs_architecture_v1_2_md_module_auth",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_auth"
     },
     {
       "label": "users module (profiles, owner upgrade request, account management)",
@@ -8092,8 +8411,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "users module (profiles, owner upgrade request, account management)",
-      "id": "docs_architecture_v1_2_md_module_users",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_users"
     },
     {
       "label": "listings module (CRUD, status, cover photo)",
@@ -8106,8 +8425,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "listings module (crud, status, cover photo)",
-      "id": "docs_architecture_v1_2_md_module_listings",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_listings"
     },
     {
       "label": "search module (PostgreSQL full-text, combined filters, pagination)",
@@ -8120,8 +8439,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "search module (postgresql full-text, combined filters, pagination)",
-      "id": "docs_architecture_v1_2_md_module_search",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_search"
     },
     {
       "label": "media module (upload, StorageProvider abstraction, magic-byte validation)",
@@ -8134,8 +8453,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "media module (upload, storageprovider abstraction, magic-byte validation)",
-      "id": "docs_architecture_v1_2_md_module_media",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_media"
     },
     {
       "label": "contact module (owner phone reveal)",
@@ -8148,8 +8467,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "contact module (owner phone reveal)",
-      "id": "docs_architecture_v1_2_md_module_contact",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_contact"
     },
     {
       "label": "notifications module (email OTP, email notifications)",
@@ -8162,8 +8481,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "notifications module (email otp, email notifications)",
-      "id": "docs_architecture_v1_2_md_module_notifications",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_notifications"
     },
     {
       "label": "admin module (moderation, owner request validation)",
@@ -8176,8 +8495,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "admin module (moderation, owner request validation)",
-      "id": "docs_architecture_v1_2_md_module_admin",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_admin"
     },
     {
       "label": "shared module (errors, types, pagination, extractors)",
@@ -8190,8 +8509,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "shared module (errors, types, pagination, extractors)",
-      "id": "docs_architecture_v1_2_md_module_shared",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_module_shared"
     },
     {
       "label": "StorageProvider trait",
@@ -8204,8 +8523,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "storageprovider trait",
-      "id": "docs_architecture_v1_2_md_storageprovider_trait",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_architecture_v1_2_md_storageprovider_trait"
     },
     {
       "label": "LocalFsStorage implementation",
@@ -8218,8 +8537,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "localfsstorage implementation",
-      "id": "docs_architecture_v1_2_md_localfsstorage",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_architecture_v1_2_md_localfsstorage"
     },
     {
       "label": "OTP Login/Signup Runtime Flow (\u00a76.1)",
@@ -8232,8 +8551,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "otp login/signup runtime flow (\u00a76.1)",
-      "id": "docs_architecture_v1_2_md_otp_flow",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_architecture_v1_2_md_otp_flow"
     },
     {
       "label": "Owner Request and Validation Runtime Flow (\u00a76.2)",
@@ -8246,8 +8565,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "owner request and validation runtime flow (\u00a76.2)",
-      "id": "docs_architecture_v1_2_md_owner_request_flow",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_architecture_v1_2_md_owner_request_flow"
     },
     {
       "label": "Core Loop \u2014 Listing Publication and Discovery Flow (\u00a76.3)",
@@ -8260,8 +8579,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "core loop \u2014 listing publication and discovery flow (\u00a76.3)",
-      "id": "docs_architecture_v1_2_md_core_loop_flow",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_core_loop_flow"
     },
     {
       "label": "No-proxy principle for public file reads (\u00a77.3)",
@@ -8274,8 +8593,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "no-proxy principle for public file reads (\u00a77.3)",
-      "id": "docs_architecture_v1_2_md_no_proxy_principle",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_architecture_v1_2_md_no_proxy_principle"
     },
     {
       "label": "Owner-requests documents proxy exception (admin-only read)",
@@ -8288,8 +8607,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "owner-requests documents proxy exception (admin-only read)",
-      "id": "docs_architecture_v1_2_md_owner_requests_proxy_exception",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_architecture_v1_2_md_owner_requests_proxy_exception"
     },
     {
       "label": "Authentication and Authorization concepts (\u00a78.1)",
@@ -8302,8 +8621,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "authentication and authorization concepts (\u00a78.1)",
-      "id": "docs_architecture_v1_2_md_auth_authz",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_architecture_v1_2_md_auth_authz"
     },
     {
       "label": "AppError centralized error type (\u00a78.2)",
@@ -8316,8 +8635,8 @@
       "contributor": null,
       "community": 60,
       "norm_label": "apperror centralized error type (\u00a78.2)",
-      "id": "docs_architecture_v1_2_md_apperror",
-      "community_name": "AppError centralized error type (\u00a78.2)"
+      "community_name": "AppError centralized error type (\u00a78.2)",
+      "id": "docs_architecture_v1_2_md_apperror"
     },
     {
       "label": "Pagination standard (\u00a78.3)",
@@ -8330,8 +8649,8 @@
       "contributor": null,
       "community": 62,
       "norm_label": "pagination standard (\u00a78.3)",
-      "id": "docs_architecture_v1_2_md_pagination_standard",
-      "community_name": "Pagination standard (\u00a78.3)"
+      "community_name": "Pagination standard (\u00a78.3)",
+      "id": "docs_architecture_v1_2_md_pagination_standard"
     },
     {
       "label": "Health Check and Graceful Shutdown (\u00a78.7)",
@@ -8344,8 +8663,8 @@
       "contributor": null,
       "community": 61,
       "norm_label": "health check and graceful shutdown (\u00a78.7)",
-      "id": "docs_architecture_v1_2_md_health_graceful_shutdown",
-      "community_name": "Health Check and Graceful Shutdown (\u00a78.7)"
+      "community_name": "Health Check and Graceful Shutdown (\u00a78.7)",
+      "id": "docs_architecture_v1_2_md_health_graceful_shutdown"
     },
     {
       "label": "ADR-01: Modular Monolith over Microservices",
@@ -8358,8 +8677,8 @@
       "contributor": null,
       "community": 57,
       "norm_label": "adr-01: modular monolith over microservices",
-      "id": "docs_architecture_v1_2_md_adr01_modular_monolith",
-      "community_name": "ADR-01: Modular Monolith over Microservices"
+      "community_name": "ADR-01: Modular Monolith over Microservices",
+      "id": "docs_architecture_v1_2_md_adr01_modular_monolith"
     },
     {
       "label": "ADR-02: OTP Passwordless over Password/OAuth",
@@ -8372,8 +8691,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "adr-02: otp passwordless over password/oauth",
-      "id": "docs_architecture_v1_2_md_adr02_otp_passwordless",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_architecture_v1_2_md_adr02_otp_passwordless"
     },
     {
       "label": "ADR-03: PostgreSQL full-text over Meilisearch/Elasticsearch",
@@ -8386,8 +8705,8 @@
       "contributor": null,
       "community": 58,
       "norm_label": "adr-03: postgresql full-text over meilisearch/elasticsearch",
-      "id": "docs_architecture_v1_2_md_adr03_postgresql_fulltext",
-      "community_name": "ADR-03: PostgreSQL full-text over Meilisearch/Elasticsearch"
+      "community_name": "ADR-03: PostgreSQL full-text over Meilisearch/Elasticsearch",
+      "id": "docs_architecture_v1_2_md_adr03_postgresql_fulltext"
     },
     {
       "label": "ADR-04: moka in-memory over Redis",
@@ -8400,8 +8719,8 @@
       "contributor": null,
       "community": 39,
       "norm_label": "adr-04: moka in-memory over redis",
-      "id": "docs_architecture_v1_2_md_adr04_moka_in_memory",
-      "community_name": "ADR-04: moka in-memory over Redis"
+      "community_name": "ADR-04: moka in-memory over Redis",
+      "id": "docs_architecture_v1_2_md_adr04_moka_in_memory"
     },
     {
       "label": "ADR-05: StorageProvider trait + LocalFsStorage over S3-at-MVP",
@@ -8414,8 +8733,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "adr-05: storageprovider trait + localfsstorage over s3-at-mvp",
-      "id": "docs_architecture_v1_2_md_adr05_storageprovider_localfs",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_architecture_v1_2_md_adr05_storageprovider_localfs"
     },
     {
       "label": "ADR-06: utoipa + openapi-typescript over manual TS types",
@@ -8428,8 +8747,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "adr-06: utoipa + openapi-typescript over manual ts types",
-      "id": "docs_architecture_v1_2_md_adr06_utoipa_openapi_typescript",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docs_architecture_v1_2_md_adr06_utoipa_openapi_typescript"
     },
     {
       "label": "ADR-07: seeker default role over role choice at signup",
@@ -8442,8 +8761,8 @@
       "contributor": null,
       "community": 59,
       "norm_label": "adr-07: seeker default role over role choice at signup",
-      "id": "docs_architecture_v1_2_md_adr07_seeker_default_role",
-      "community_name": "ADR-07: seeker default role over role choice at signup"
+      "community_name": "ADR-07: seeker default role over role choice at signup",
+      "id": "docs_architecture_v1_2_md_adr07_seeker_default_role"
     },
     {
       "label": "ADR-08: Single OTP endpoint over separate login/register",
@@ -8456,8 +8775,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "adr-08: single otp endpoint over separate login/register",
-      "id": "docs_architecture_v1_2_md_adr08_single_otp_endpoint",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_architecture_v1_2_md_adr08_single_otp_endpoint"
     },
     {
       "label": "ADR-09: Refresh token rotation on each use",
@@ -8470,8 +8789,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "adr-09: refresh token rotation on each use",
-      "id": "docs_architecture_v1_2_md_adr09_refresh_token_rotation",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_architecture_v1_2_md_adr09_refresh_token_rotation"
     },
     {
       "label": "ADR-10: Refresh token httpOnly+SameSite=Strict cookie over JSON body",
@@ -8484,8 +8803,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "adr-10: refresh token httponly+samesite=strict cookie over json body",
-      "id": "docs_architecture_v1_2_md_adr10_refresh_token_cookie",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_architecture_v1_2_md_adr10_refresh_token_cookie"
     },
     {
       "label": "R-01: moka not shareable across backend instances",
@@ -8498,8 +8817,8 @@
       "contributor": null,
       "community": 39,
       "norm_label": "r-01: moka not shareable across backend instances",
-      "id": "docs_architecture_v1_2_md_r01_moka_not_shareable",
-      "community_name": "ADR-04: moka in-memory over Redis"
+      "community_name": "ADR-04: moka in-memory over Redis",
+      "id": "docs_architecture_v1_2_md_r01_moka_not_shareable"
     },
     {
       "label": "R-06: Filesystem storage not shared across instances",
@@ -8512,8 +8831,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "r-06: filesystem storage not shared across instances",
-      "id": "docs_architecture_v1_2_md_r06_storage_not_shared",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_architecture_v1_2_md_r06_storage_not_shared"
     },
     {
       "label": "R-07: Absence of index on listings.price",
@@ -8526,8 +8845,8 @@
       "contributor": null,
       "community": 63,
       "norm_label": "r-07: absence of index on listings.price",
-      "id": "docs_architecture_v1_2_md_r07_no_price_index",
-      "community_name": "R-07: Absence of index on listings.price"
+      "community_name": "R-07: Absence of index on listings.price",
+      "id": "docs_architecture_v1_2_md_r07_no_price_index"
     },
     {
       "label": "R-08: fn_update_listing_search_vector trigger SELECT-per-row cost",
@@ -8540,8 +8859,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "r-08: fn_update_listing_search_vector trigger select-per-row cost",
-      "id": "docs_architecture_v1_2_md_r08_trigger_select_per_row",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_architecture_v1_2_md_r08_trigger_select_per_row"
     },
     {
       "label": "R-09: Single admin account, no operational redundancy",
@@ -8554,8 +8873,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "r-09: single admin account, no operational redundancy",
-      "id": "docs_architecture_v1_2_md_r09_single_admin_account",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_architecture_v1_2_md_r09_single_admin_account"
     },
     {
       "label": "R-10: Monthly availability reminder (LIST-03) deferred to V2",
@@ -8568,8 +8887,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "r-10: monthly availability reminder (list-03) deferred to v2",
-      "id": "docs_architecture_v1_2_md_r10_monthly_reminder_deferred",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_architecture_v1_2_md_r10_monthly_reminder_deferred"
     },
     {
       "label": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
@@ -8582,8 +8901,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "technical_spec_mvp_v1.2.md \u2014 technical specification mvp",
-      "id": "docs_technical_spec_mvp_v1_2_md",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md"
     },
     {
       "label": "users table",
@@ -8596,8 +8915,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "users table",
-      "id": "docs_technical_spec_mvp_v1_2_md_users_table",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_users_table"
     },
     {
       "label": "refresh_tokens table",
@@ -8610,8 +8929,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "refresh_tokens table",
-      "id": "docs_technical_spec_mvp_v1_2_md_refresh_tokens_table",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_refresh_tokens_table"
     },
     {
       "label": "owner_requests table",
@@ -8624,8 +8943,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "owner_requests table",
-      "id": "docs_technical_spec_mvp_v1_2_md_owner_requests_table",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_owner_requests_table"
     },
     {
       "label": "listings table",
@@ -8638,8 +8957,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "listings table",
-      "id": "docs_technical_spec_mvp_v1_2_md_listings_table",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_listings_table"
     },
     {
       "label": "listing_media table",
@@ -8652,8 +8971,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "listing_media table",
-      "id": "docs_technical_spec_mvp_v1_2_md_listing_media_table",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_listing_media_table"
     },
     {
       "label": "fn_update_listing_search_vector() trigger function",
@@ -8666,8 +8985,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "fn_update_listing_search_vector() trigger function",
-      "id": "docs_technical_spec_mvp_v1_2_md_fn_update_listing_search_vector",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_fn_update_listing_search_vector"
     },
     {
       "label": "fn_cascade_owner_name_to_listings() trigger function",
@@ -8680,8 +8999,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "fn_cascade_owner_name_to_listings() trigger function",
-      "id": "docs_technical_spec_mvp_v1_2_md_fn_cascade_owner_name_to_listings",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_fn_cascade_owner_name_to_listings"
     },
     {
       "label": "fn_set_updated_at() trigger function",
@@ -8694,8 +9013,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "fn_set_updated_at() trigger function",
-      "id": "docs_technical_spec_mvp_v1_2_md_fn_set_updated_at",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_fn_set_updated_at"
     },
     {
       "label": "StorageProvider trait interface (upload/read/delete/presigned_url)",
@@ -8708,8 +9027,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "storageprovider trait interface (upload/read/delete/presigned_url)",
-      "id": "docs_technical_spec_mvp_v1_2_md_storageprovider_interface",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_technical_spec_mvp_v1_2_md_storageprovider_interface"
     },
     {
       "label": "Notification Stack (\u00a73bis) \u2014 SMTP synchronous, best-effort email",
@@ -8722,8 +9041,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "notification stack (\u00a73bis) \u2014 smtp synchronous, best-effort email",
-      "id": "docs_technical_spec_mvp_v1_2_md_notification_stack",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_technical_spec_mvp_v1_2_md_notification_stack"
     },
     {
       "label": "POST /auth/otp/request endpoint",
@@ -8736,8 +9055,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "post /auth/otp/request endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_otp_request",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_otp_request"
     },
     {
       "label": "POST /auth/otp/verify endpoint",
@@ -8750,8 +9069,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "post /auth/otp/verify endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_otp_verify",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_otp_verify"
     },
     {
       "label": "POST /auth/refresh endpoint",
@@ -8764,8 +9083,8 @@
       "contributor": null,
       "community": 64,
       "norm_label": "post /auth/refresh endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_refresh",
-      "community_name": "POST /auth/refresh endpoint"
+      "community_name": "POST /auth/refresh endpoint",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_auth_refresh"
     },
     {
       "label": "POST /owner-requests endpoint",
@@ -8778,8 +9097,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "post /owner-requests endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_owner_requests",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_owner_requests"
     },
     {
       "label": "GET/POST /listings endpoints",
@@ -8792,8 +9111,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "get/post /listings endpoints",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_listings",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_listings"
     },
     {
       "label": "GET /search endpoint",
@@ -8806,8 +9125,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "get /search endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_search",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_search"
     },
     {
       "label": "POST /media/upload endpoint",
@@ -8820,8 +9139,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "post /media/upload endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_media_upload",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_media_upload"
     },
     {
       "label": "GET /listings/:id/contact endpoint",
@@ -8834,8 +9153,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "get /listings/:id/contact endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_contact_reveal",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_contact_reveal"
     },
     {
       "label": "GET /admin/owner-requests/:id/documents/:doc_id endpoint",
@@ -8848,8 +9167,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "get /admin/owner-requests/:id/documents/:doc_id endpoint",
-      "id": "docs_technical_spec_mvp_v1_2_md_api_admin_owner_request_docs",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_technical_spec_mvp_v1_2_md_api_admin_owner_request_docs"
     },
     {
       "label": "TypeScript type generation pipeline (utoipa \u2192 openapi-typescript \u2192 types.ts)",
@@ -8862,8 +9181,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "typescript type generation pipeline (utoipa \u2192 openapi-typescript \u2192 types.ts)",
-      "id": "docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline"
     },
     {
       "label": "Test Strategy (\u00a76) \u2014 service/repository/handler/dto layering",
@@ -8876,8 +9195,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "test strategy (\u00a76) \u2014 service/repository/handler/dto layering",
-      "id": "docs_technical_spec_mvp_v1_2_md_test_strategy",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "docs_technical_spec_mvp_v1_2_md_test_strategy"
     },
     {
       "label": "backend/Dockerfile (multi-stage build)",
@@ -8890,8 +9209,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "backend/dockerfile (multi-stage build)",
-      "id": "docs_technical_spec_mvp_v1_2_md_backend_dockerfile",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docs_technical_spec_mvp_v1_2_md_backend_dockerfile"
     },
     {
       "label": "frontend/Dockerfile (multi-stage build)",
@@ -8904,8 +9223,8 @@
       "contributor": null,
       "community": 3,
       "norm_label": "frontend/dockerfile (multi-stage build)",
-      "id": "docs_technical_spec_mvp_v1_2_md_frontend_dockerfile",
-      "community_name": "CI Backend Workflow"
+      "community_name": "CI Backend Workflow",
+      "id": "docs_technical_spec_mvp_v1_2_md_frontend_dockerfile"
     },
     {
       "label": "frontend/nginx.conf (SPA fallback, /media/ static, /api proxy)",
@@ -8918,8 +9237,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "frontend/nginx.conf (spa fallback, /media/ static, /api proxy)",
-      "id": "docs_technical_spec_mvp_v1_2_md_nginx_conf",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_technical_spec_mvp_v1_2_md_nginx_conf"
     },
     {
       "label": "Backend Environment Variables (.env.example)",
@@ -8932,8 +9251,8 @@
       "contributor": null,
       "community": 82,
       "norm_label": "backend environment variables (.env.example)",
-      "id": "docs_technical_spec_mvp_v1_2_md_env_vars",
-      "community_name": "StorageProvider trait"
+      "community_name": "StorageProvider trait",
+      "id": "docs_technical_spec_mvp_v1_2_md_env_vars"
     },
     {
       "label": "MVP Exclusions (\u00a79) \u2014 messaging, push, map, favorites, OAuth, mobile, Redis, S3, GDPR, analytics",
@@ -8946,8 +9265,8 @@
       "contributor": null,
       "community": 7,
       "norm_label": "mvp exclusions (\u00a79) \u2014 messaging, push, map, favorites, oauth, mobile, redis, s3, gdpr, analytics",
-      "id": "docs_technical_spec_mvp_v1_2_md_mvp_exclusions",
-      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document"
+      "community_name": "ARCHITECTURE_v1.2.md \u2014 arc42 Software Architecture Document",
+      "id": "docs_technical_spec_mvp_v1_2_md_mvp_exclusions"
     },
     {
       "label": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
@@ -8960,8 +9279,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "design_tokens.md (mh-17) \u2014 design token set",
-      "id": "docs_wireframes_design_tokens_md",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_design_tokens_md"
     },
     {
       "label": "Color tokens (color-bg, color-primary, color-success, etc.)",
@@ -8974,8 +9293,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "color tokens (color-bg, color-primary, color-success, etc.)",
-      "id": "docs_wireframes_design_tokens_md_color_tokens",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_design_tokens_md_color_tokens"
     },
     {
       "label": "Typography tokens (font-sans, font-mono, text-sm/base/lg)",
@@ -8988,8 +9307,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "typography tokens (font-sans, font-mono, text-sm/base/lg)",
-      "id": "docs_wireframes_design_tokens_md_typography_tokens",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_design_tokens_md_typography_tokens"
     },
     {
       "label": "Spacing scale (Tailwind default 4px-based)",
@@ -9002,8 +9321,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "spacing scale (tailwind default 4px-based)",
-      "id": "docs_wireframes_design_tokens_md_spacing_scale",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_design_tokens_md_spacing_scale"
     },
     {
       "label": "Border radius tokens (radius-sm/md/full)",
@@ -9016,8 +9335,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "border radius tokens (radius-sm/md/full)",
-      "id": "docs_wireframes_design_tokens_md_border_radius_tokens",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_design_tokens_md_border_radius_tokens"
     },
     {
       "label": "mh-12-auth-flow.html wireframe",
@@ -9030,8 +9349,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "mh-12-auth-flow.html wireframe",
-      "id": "docs_wireframes_mh_12_auth_flow_html",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_wireframes_mh_12_auth_flow_html"
     },
     {
       "label": "Email entry step page",
@@ -9044,8 +9363,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "email entry step page",
-      "id": "docs_wireframes_mh_12_auth_flow_html_email_step",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_wireframes_mh_12_auth_flow_html_email_step"
     },
     {
       "label": "OTP code verification step page",
@@ -9058,8 +9377,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "otp code verification step page",
-      "id": "docs_wireframes_mh_12_auth_flow_html_otp_verify_step",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_wireframes_mh_12_auth_flow_html_otp_verify_step"
     },
     {
       "label": "Profile completion step page",
@@ -9072,8 +9391,8 @@
       "contributor": null,
       "community": 81,
       "norm_label": "profile completion step page",
-      "id": "docs_wireframes_mh_12_auth_flow_html_profile_completion_step",
-      "community_name": "mh-12-auth-flow.html wireframe"
+      "community_name": "mh-12-auth-flow.html wireframe",
+      "id": "docs_wireframes_mh_12_auth_flow_html_profile_completion_step"
     },
     {
       "label": "mh-13-feed-detail.html wireframe",
@@ -9086,8 +9405,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "mh-13-feed-detail.html wireframe",
-      "id": "docs_wireframes_mh_13_feed_detail_html",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_mh_13_feed_detail_html"
     },
     {
       "label": "Public feed page (grid of cover photos)",
@@ -9100,8 +9419,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "public feed page (grid of cover photos)",
-      "id": "docs_wireframes_mh_13_feed_detail_html_feed_page",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_mh_13_feed_detail_html_feed_page"
     },
     {
       "label": "Listing detail page",
@@ -9114,8 +9433,8 @@
       "contributor": null,
       "community": 75,
       "norm_label": "listing detail page",
-      "id": "docs_wireframes_mh_13_feed_detail_html_listing_detail_page",
-      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set"
+      "community_name": "DESIGN_TOKENS.md (MH-17) \u2014 Design Token Set",
+      "id": "docs_wireframes_mh_13_feed_detail_html_listing_detail_page"
     },
     {
       "label": "mh-14-listing-management.html wireframe",
@@ -9128,8 +9447,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "mh-14-listing-management.html wireframe",
-      "id": "docs_wireframes_mh_14_listing_management_html",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_wireframes_mh_14_listing_management_html"
     },
     {
       "label": "Publish/edit listing form page",
@@ -9142,8 +9461,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "publish/edit listing form page",
-      "id": "docs_wireframes_mh_14_listing_management_html_publish_form",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_wireframes_mh_14_listing_management_html_publish_form"
     },
     {
       "label": "Photo dropzone component",
@@ -9156,8 +9475,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "photo dropzone component",
-      "id": "docs_wireframes_mh_14_listing_management_html_photo_dropzone",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_wireframes_mh_14_listing_management_html_photo_dropzone"
     },
     {
       "label": "Owner's own listings ('Mes biens') page",
@@ -9170,8 +9489,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "owner's own listings ('mes biens') page",
-      "id": "docs_wireframes_mh_14_listing_management_html_my_listings_page",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_wireframes_mh_14_listing_management_html_my_listings_page"
     },
     {
       "label": "mh-15-owner-request.html wireframe",
@@ -9184,8 +9503,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "mh-15-owner-request.html wireframe",
-      "id": "docs_wireframes_mh_15_owner_request_html",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html"
     },
     {
       "label": "Owner request form page ('Devenir propri\u00e9taire')",
@@ -9198,8 +9517,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "owner request form page ('devenir proprietaire')",
-      "id": "docs_wireframes_mh_15_owner_request_html_become_owner_form",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html_become_owner_form"
     },
     {
       "label": "Identity document dropzone component",
@@ -9212,8 +9531,8 @@
       "contributor": null,
       "community": 83,
       "norm_label": "identity document dropzone component",
-      "id": "docs_wireframes_mh_15_owner_request_html_document_dropzone",
-      "community_name": "mh-14-listing-management.html wireframe"
+      "community_name": "mh-14-listing-management.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html_document_dropzone"
     },
     {
       "label": "Request pending status page",
@@ -9226,8 +9545,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "request pending status page",
-      "id": "docs_wireframes_mh_15_owner_request_html_status_pending_page",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html_status_pending_page"
     },
     {
       "label": "Request approved status page",
@@ -9240,8 +9559,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "request approved status page",
-      "id": "docs_wireframes_mh_15_owner_request_html_status_approved_page",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html_status_approved_page"
     },
     {
       "label": "Request rejected status page",
@@ -9254,8 +9573,8 @@
       "contributor": null,
       "community": 6,
       "norm_label": "request rejected status page",
-      "id": "docs_wireframes_mh_15_owner_request_html_status_rejected_page",
-      "community_name": "mh-15-owner-request.html wireframe"
+      "community_name": "mh-15-owner-request.html wireframe",
+      "id": "docs_wireframes_mh_15_owner_request_html_status_rejected_page"
     },
     {
       "label": "frontend/index.html \u2014 Vite SPA entry point",
@@ -9268,8 +9587,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "frontend/index.html \u2014 vite spa entry point",
-      "id": "frontend_index_html",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "frontend_index_html"
     },
     {
       "label": "src/main.tsx (React app mount)",
@@ -9282,8 +9601,8 @@
       "contributor": null,
       "community": 8,
       "norm_label": "src/main.tsx (react app mount)",
-      "id": "frontend_src_main_tsx",
-      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP"
+      "community_name": "TECHNICAL_SPEC_MVP_v1.2.md \u2014 Technical Specification MVP",
+      "id": "frontend_src_main_tsx"
     },
     {
       "label": "mcp/.toolbox/tool.yaml \u2014 postgres-local MCP toolbox source",
@@ -9296,8 +9615,8 @@
       "contributor": null,
       "community": 74,
       "norm_label": "mcp/.toolbox/tool.yaml \u2014 postgres-local mcp toolbox source",
-      "id": "mcp_toolbox_tool_yaml",
-      "community_name": "CLAUDE.md \u2014 MyHouse project instructions"
+      "community_name": "CLAUDE.md \u2014 MyHouse project instructions",
+      "id": "mcp_toolbox_tool_yaml"
     }
   ],
   "links": [
@@ -10923,7 +11242,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -11362,12 +11681,904 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_delete_on_missing_key_returns_typed_error_not_panic",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L179",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_presigned_url_returns_not_implemented_error",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L139",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_rs_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_rs_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_rs_storageprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L106",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L206",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_tempdir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_upload_on_owner_requests_prefix_returns_key_only",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_infra_storage_local_fs_upload_on_public_prefix_returns_computed_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs",
+      "target": "backend_src_shared_errors_apperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_public_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_rs_storageprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "backend_src_infra_storage_local_fs_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage",
+      "target": "pathbuf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L106",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_storage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "target": "pathbuf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "target": "pathbuf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L192",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_tempdir",
+      "target": "pathbuf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "target": "backend_src_infra_storage_local_fs_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "target": "backend_src_infra_storage_local_fs_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_public_url",
+      "target": "backend_src_infra_storage_local_fs_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "target": "backend_src_infra_storage_local_fs_rs_self",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "target": "into",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_storage",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_resolve",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_public_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L158",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_rs_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_infra_storage_local_fs_rs_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "target": "backend_src_shared_errors_apperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L143",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L130",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_owner_requests_prefix_returns_key_only",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_public_prefix_returns_computed_url",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_upload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "target": "backend_src_infra_storage_local_fs_rs_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "target": "backend_src_infra_storage_local_fs_rs_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "target": "backend_src_infra_storage_local_fs_rs_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "target": "backend_src_infra_storage_local_fs_rs_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "target": "backend_src_shared_errors_apperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L148",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L173",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_on_missing_key_returns_typed_error_not_panic",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L163",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_delete",
+      "target": "backend_src_shared_errors_apperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "target": "backend_src_infra_storage_local_fs_rs_duration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "target": "backend_src_shared_errors_apperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L183",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_presigned_url_returns_not_implemented_error",
+      "target": "backend_src_infra_storage_local_fs_localfsstorage_presigned_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_on_missing_key_returns_typed_error_not_panic",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L156",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_presigned_url_returns_not_implemented_error",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L106",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_storage",
+      "target": "backend_src_infra_storage_local_fs_rs_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_owner_requests_prefix_returns_key_only",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_public_prefix_returns_computed_url",
+      "target": "backend_src_infra_storage_local_fs_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L195",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_tempdir_path",
+      "target": "backend_src_infra_storage_local_fs_rs_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_public_prefix_returns_computed_url",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_upload_on_owner_requests_prefix_returns_key_only",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L141",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_read_returns_previously_uploaded_bytes",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L156",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_removes_existing_file",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_delete_on_missing_key_returns_typed_error_not_panic",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L181",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_presigned_url_returns_not_implemented_error",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_tempdir",
+      "target": "backend_src_infra_storage_local_fs_tempdir_drop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_tempdir",
+      "target": "backend_src_infra_storage_local_fs_tempdir_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/local_fs.rs",
+      "source_location": "L200",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_local_fs_tempdir",
+      "target": "drop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_storage_mod",
       "target": "backend_src_infra_storage_mod_build_storage_provider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/mod.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_mod",
+      "target": "backend_src_infra_storage_mod_rs_arc",
       "confidence_score": 1.0
     },
     {
@@ -11379,26 +12590,14 @@
       "context": "import",
       "_origin": "ast",
       "source": "backend_src_infra_storage_mod",
-      "target": "backend_src_infra_storage_mod_rs_arc",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L3",
-      "weight": 1.0,
-      "context": "import",
-      "_origin": "ast",
-      "source": "backend_src_infra_storage_mod",
-      "target": "storageprovider",
+      "target": "backend_src_infra_storage_mod_rs_storageprovider",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -11410,12 +12609,36 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/mod.rs",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
       "source": "backend_src_infra_storage_mod_build_storage_provider",
-      "target": "storageprovider",
+      "target": "backend_src_infra_storage_mod_rs_storageprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/provider.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_provider",
+      "target": "backend_src_infra_storage_provider_rs_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/provider.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_provider",
+      "target": "backend_src_infra_storage_provider_rs_duration",
       "confidence_score": 1.0
     },
     {
@@ -11450,30 +12673,6 @@
       "_origin": "ast",
       "source": "backend_src_infra_storage_provider",
       "target": "backend_src_shared_errors_apperror",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/infra/storage/provider.rs",
-      "source_location": "L11",
-      "weight": 1.0,
-      "context": "import",
-      "_origin": "ast",
-      "source": "backend_src_infra_storage_provider",
-      "target": "bytes",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/infra/storage/provider.rs",
-      "source_location": "L12",
-      "weight": 1.0,
-      "context": "import",
-      "_origin": "ast",
-      "source": "backend_src_infra_storage_provider",
-      "target": "duration",
       "confidence_score": 1.0
     },
     {
@@ -11559,6 +12758,18 @@
       "source_file": "backend/src/infra/storage/provider.rs",
       "source_location": "L46",
       "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_storage_provider_unimplementedstorage_upload",
+      "target": "backend_src_infra_storage_provider_rs_bytes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/storage/provider.rs",
+      "source_location": "L46",
+      "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
       "source": "backend_src_infra_storage_provider_unimplementedstorage_upload",
@@ -11593,24 +12804,12 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/provider.rs",
-      "source_location": "L46",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "_origin": "ast",
-      "source": "backend_src_infra_storage_provider_unimplementedstorage_upload",
-      "target": "bytes",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/infra/storage/provider.rs",
       "source_location": "L55",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
       "source": "backend_src_infra_storage_provider_unimplementedstorage_read",
-      "target": "bytes",
+      "target": "backend_src_infra_storage_provider_rs_bytes",
       "confidence_score": 1.0
     },
     {
@@ -11691,10 +12890,10 @@
       "source_file": "backend/src/infra/storage/provider.rs",
       "source_location": "L63",
       "weight": 1.0,
-      "context": "generic_arg",
+      "context": "parameter_type",
       "_origin": "ast",
       "source": "backend_src_infra_storage_provider_unimplementedstorage_presigned_url",
-      "target": "backend_src_shared_errors_apperror",
+      "target": "backend_src_infra_storage_provider_rs_duration",
       "confidence_score": 1.0
     },
     {
@@ -11703,10 +12902,10 @@
       "source_file": "backend/src/infra/storage/provider.rs",
       "source_location": "L63",
       "weight": 1.0,
-      "context": "parameter_type",
+      "context": "generic_arg",
       "_origin": "ast",
       "source": "backend_src_infra_storage_provider_unimplementedstorage_presigned_url",
-      "target": "duration",
+      "target": "backend_src_shared_errors_apperror",
       "confidence_score": 1.0
     },
     {
@@ -12612,6 +13811,18 @@
       "source_file": "backend/src/modules/listings/handler.rs",
       "source_location": "L41",
       "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_modules_listings_handler_get_by_id",
+      "target": "backend_src_modules_listings_handler_rs_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/modules/listings/handler.rs",
+      "source_location": "L41",
+      "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
       "source": "backend_src_modules_listings_handler_get_by_id",
@@ -12628,18 +13839,6 @@
       "_origin": "ast",
       "source": "backend_src_modules_listings_handler_get_by_id",
       "target": "backend_src_shared_errors_apperror",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L41",
-      "weight": 1.0,
-      "context": "parameter_type",
-      "_origin": "ast",
-      "source": "backend_src_modules_listings_handler_get_by_id",
-      "target": "path",
       "confidence_score": 1.0
     },
     {
@@ -22159,5 +23358,5 @@
       "source_file": ".github/workflows/ci-backend.yml"
     }
   ],
-  "built_at_commit": "05cee009bb72cd2aae97a07fb9e12eafee059adc"
+  "built_at_commit": "78b2d74c0a215e4f4eb504cebf00cf8b723beeea"
 }
