@@ -32,6 +32,14 @@ pub struct Mailer {
     from: Mailbox,
 }
 
+// `AsyncSmtpTransport` has no `Debug` impl (it wraps a live connection pool),
+// so this can't be derived. Only `from` is meaningful to display.
+impl std::fmt::Debug for Mailer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Mailer").field("from", &self.from).finish_non_exhaustive()
+    }
+}
+
 impl Mailer {
     /// Builds the SMTP transport from `SMTP_HOST` / `SMTP_PORT` / `SMTP_FROM`.
     ///
