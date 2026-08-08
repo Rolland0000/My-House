@@ -8,6 +8,7 @@ use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
 use crate::config::AppEnv;
 use crate::infra::health;
+use crate::modules::listings;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -30,10 +31,12 @@ use crate::infra::health;
 /// annotation is automatically collected into the OpenAPI schema served at
 /// `/api/docs/openapi.json` — no manual schema maintenance required.
 fn public_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(health::check))
+    OpenApiRouter::new()
+        .routes(routes!(health::check))
+        .routes(routes!(listings::handler::list))
+        .routes(routes!(listings::handler::get_by_id))
     // TODO EP-02: .routes(routes!(auth::request_otp))
     // TODO EP-02: .routes(routes!(auth::verify_otp))
-    // TODO EP-03: .routes(routes!(listings::list_public))
 }
 
 /// Routes requiring a valid session (any authenticated user — seeker by default).

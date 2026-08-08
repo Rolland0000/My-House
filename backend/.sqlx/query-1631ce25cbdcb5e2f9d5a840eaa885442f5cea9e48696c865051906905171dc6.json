@@ -1,0 +1,130 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            l.id,\n            l.title,\n            l.description,\n            l.type AS \"listing_type: ListingType\",\n            l.status AS \"status: crate::modules::listings::model::ListingStatus\",\n            l.city,\n            l.neighborhood,\n            l.price::float8 AS \"price!\",\n            l.surface_m2,\n            l.rooms,\n            to_char(l.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\",\n            u.id AS \"owner_id!\",\n            u.first_name AS owner_first_name,\n            u.last_name AS owner_last_name,\n            u.avatar_url AS owner_avatar_url\n        FROM listings l\n        JOIN users u ON u.id = l.owner_id\n        WHERE l.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "listing_type: ListingType",
+        "type_info": {
+          "Custom": {
+            "name": "listing_type",
+            "kind": {
+              "Enum": [
+                "apartment",
+                "studio",
+                "house",
+                "room",
+                "villa",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status: crate::modules::listings::model::ListingStatus",
+        "type_info": {
+          "Custom": {
+            "name": "listing_status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "city",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "neighborhood",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "price!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "surface_m2",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "rooms",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "owner_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "owner_first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "owner_last_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "owner_avatar_url",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      true,
+      null,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "1631ce25cbdcb5e2f9d5a840eaa885442f5cea9e48696c865051906905171dc6"
+}

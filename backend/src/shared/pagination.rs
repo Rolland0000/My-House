@@ -1,4 +1,5 @@
 use serde::Serialize;
+use utoipa::ToSchema;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pagination
@@ -8,7 +9,7 @@ use serde::Serialize;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Pagination metadata included alongside `data` in list responses.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct PaginationMeta {
     pub page: u32,
     pub per_page: u32,
@@ -20,8 +21,8 @@ pub struct PaginationMeta {
 ///
 /// Generic over the item type so every module can reuse it:
 /// `PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.
-#[derive(Debug, Clone, Serialize)]
-pub struct PaginatedResponse<T: Serialize> {
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct PaginatedResponse<T: Serialize + ToSchema> {
     pub data: Vec<T>,
     pub pagination: PaginationMeta,
 }
@@ -64,7 +65,7 @@ impl PaginationMeta {
     }
 }
 
-impl<T: Serialize> PaginatedResponse<T> {
+impl<T: Serialize + ToSchema> PaginatedResponse<T> {
     pub fn new(data: Vec<T>, meta: PaginationMeta) -> Self {
         Self {
             data,
