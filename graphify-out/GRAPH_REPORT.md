@@ -1,16 +1,16 @@
 # Graph Report - My-House  (2026-08-08)
 
 ## Corpus Check
-- 140 files · ~71,765 words
+- 141 files · ~72,334 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 781 nodes · 1214 edges · 86 communities (73 shown, 13 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 68 edges (avg confidence: 0.88)
+- 798 nodes · 1248 edges · 87 communities (74 shown, 13 thin omitted)
+- Extraction: 94% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 68 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `78b2d74c`
+- Built from commit: `2de6b0fc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,6 +31,7 @@
 - .mcp.json
 - React/TypeScript Rules (Agents)
 - Extraction subagent prompt (full)
+- local_fs.rs
 - Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark
 - Rust General Rules (Agents)
 - save-result feedback loop
@@ -45,7 +46,7 @@
 - connect_db
 - Step 9 - Save manifest, update cost tracker, clean up, and report
 - Step 4 - Build graph, cluster, analyze, generate outputs
-- Extraction subagent prompt (compact)
+- router.tsx
 - MH-XXX Ticket Conventions
 - git commit hook (graphify hook install)
 - analyze job (rust + javascript-typescript matrix)
@@ -62,7 +63,7 @@
 - Pagination standard (§8.3)
 - R-07: Absence of index on listings.price
 - POST /auth/refresh endpoint
-- ListingFeed.tsx
+- listings/index.ts
 - CLAUDE.md — MyHouse project instructions
 - DESIGN_TOKENS.md (MH-17) — Design Token Set
 - mh-12-auth-flow.html wireframe
@@ -73,26 +74,26 @@
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 29 edges
 2. `cn()` - 27 edges
-3. `AppState` - 21 edges
+3. `AppState` - 22 edges
 4. `compilerOptions` - 18 edges
 5. `compilerOptions` - 16 edges
 6. `ConfigError` - 13 edges
-7. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
-8. `LocalFsStorage` - 12 edges
-9. `ListingSummaryDto` - 12 edges
-10. `ListingDetailDto` - 12 edges
+7. `AppConfig` - 13 edges
+8. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
+9. `LocalFsStorage` - 12 edges
+10. `ListingSummaryDto` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Step B2 - Dispatch ALL subagents in a single message` --semantically_similar_to--> `Step B2 - Dispatch ALL subagents (Codex spawn_agent)`  [INFERRED] [semantically similar]
-  .claude/skills/graphify/SKILL.md → .codex/skills/graphify/SKILL.md
-- `Extraction subagent prompt (full)` --semantically_similar_to--> `Extraction subagent prompt (compact)`  [INFERRED] [semantically similar]
-  .claude/skills/graphify/references/extraction-spec.md → .codex/skills/graphify/references/extraction-spec.md
 - `--update (incremental re-extraction)` --semantically_similar_to--> `--update (incremental re-extraction) (Codex)`  [INFERRED] [semantically similar]
   .claude/skills/graphify/references/update.md → .codex/skills/graphify/references/update.md
 - `AGENTS.md — graphify trigger instructions` --semantically_similar_to--> `CLAUDE.md — MyHouse project instructions`  [INFERRED] [semantically similar]
   AGENTS.md → CLAUDE.md
 - `README Writing Rules (MyHouse)` --conceptually_related_to--> `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
   .claude/skills/readme/SKILL.md → .agents/rules/react-typecrypt.md
+- `/graphify command` --semantically_similar_to--> `/graphify command (Codex variant)`  [INFERRED] [semantically similar]
+  .claude/skills/graphify/SKILL.md → .codex/skills/graphify/SKILL.md
+- `Step B2 - Dispatch ALL subagents in a single message` --semantically_similar_to--> `Step B2 - Dispatch ALL subagents (Codex spawn_agent)`  [INFERRED] [semantically similar]
+  .claude/skills/graphify/SKILL.md → .codex/skills/graphify/SKILL.md
 
 ## Import Cycles
 - None detected.
@@ -108,15 +109,15 @@
 - **Backend CI Quality Gate (fmt, clippy, deny, audit, build, coverage)** — github_workflows_ci_backend_yml_backend_fmt, github_workflows_ci_backend_yml_backend_clippy, github_workflows_ci_backend_yml_backend_deny, github_workflows_ci_backend_yml_backend_audit, github_workflows_ci_backend_yml_backend_build, github_workflows_ci_backend_yml_backend_coverage [EXTRACTED 1.00]
 - **OpenAPI-to-TypeScript Generation Chain (utoipa → gen_openapi → types.ts → codegen job)** — github_workflows_ci_backend_yml_gen_openapi_bin, frontend_src_shared_api_types_ts, docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline, github_workflows_ci_frontend_yml_frontend_codegen [EXTRACTED 1.00]
 
-## Communities (86 total, 13 thin omitted)
+## Communities (87 total, 13 thin omitted)
 
 ### Community 0 - "AppState"
-Cohesion: 0.09
-Nodes (28): ApiDoc, AppServer, Error, Result, Self, shutdown_signal(), AppState, Inner (+20 more)
+Cohesion: 0.06
+Nodes (45): Address, AddressError, AsyncSmtpTransport, ApiDoc, AppServer, Error, Result, Self (+37 more)
 
 ### Community 1 - "config/mod.rs"
-Cohesion: 0.14
-Nodes (29): app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env() (+21 more)
+Cohesion: 0.16
+Nodes (25): app_port_defaults_to_3000_when_absent(), AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env(), rejects_invalid_smtp_port() (+17 more)
 
 ### Community 2 - "scripts"
 Cohesion: 0.06
@@ -131,8 +132,8 @@ Cohesion: 0.06
 Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
 
 ### Community 5 - "components/index.ts"
-Cohesion: 0.05
-Nodes (53): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router (+45 more)
+Cohesion: 0.07
+Nodes (49): ListingFeed(), typeOptions, Alert(), AlertProps, AlertVariant, variantConfig, Button(), ButtonProps (+41 more)
 
 ### Community 6 - "mh-15-owner-request.html wireframe"
 Cohesion: 0.18
@@ -152,15 +153,15 @@ Nodes (23): compilerOptions, allowImportingTsExtensions, jsx, lib, module, modul
 
 ### Community 10 - "AppError"
 Cohesion: 0.07
-Nodes (43): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_returns_previously_uploaded_bytes(), Bytes, Duration, Path (+35 more)
+Nodes (44): Bytes, Duration, Result, String, StorageProvider, UnimplementedStorage, count_listings(), find_listing_by_id() (+36 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 12 - ".new"
-Cohesion: 0.12
-Nodes (23): get_by_id(), list(), Json, Path, Result, State, Uuid, PaginatedResponse (+15 more)
+Cohesion: 0.18
+Nodes (15): PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T, Vec, test_defaults_applied_when_none() (+7 more)
 
 ### Community 13 - ".mcp.json"
 Cohesion: 0.15
@@ -172,7 +173,11 @@ Nodes (15): Functional Component Conventions (no React.FC), api.ts Single Fetch 
 
 ### Community 15 - "Extraction subagent prompt (full)"
 Cohesion: 0.18
-Nodes (13): EXTRACTED/INFERRED/AMBIGUOUS confidence rubric, Extraction JSON schema, Node ID format rule ({stem}_{entity}), source_file verbatim rule, Extraction subagent prompt (full), Part A - Structural extraction for code files (AST), Part B - Semantic extraction (parallel subagents), Part C - Merge AST + semantic into final extraction (+5 more)
+Nodes (14): EXTRACTED/INFERRED/AMBIGUOUS confidence rubric, Extraction JSON schema, Node ID format rule ({stem}_{entity}), source_file verbatim rule, Extraction subagent prompt (full), Part B - Semantic extraction (parallel subagents), Step B0 - Check extraction cache first, Step B1 - Split into chunks (+6 more)
+
+### Community 16 - "local_fs.rs"
+Cohesion: 0.17
+Nodes (19): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_returns_previously_uploaded_bytes(), Bytes, Duration, Path (+11 more)
 
 ### Community 17 - "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
 Cohesion: 0.18
@@ -203,8 +208,8 @@ Cohesion: 0.29
 Nodes (8): Step 2.5 - Transcribe video/audio files, Whisper domain-hint prompt strategy, /graphify command, Step 1 - Ensure graphify is installed, Step 2.5 - Video and audio detection, Step 2 - Detect files, Step 2.5 - Transcribe video/audio files (Codex), /graphify command (Codex variant)
 
 ### Community 25 - "/graphify add <url>"
-Cohesion: 0.29
-Nodes (6): Debounce mechanism (default 3s), /graphify add <url>, --watch flag, For /graphify add and --watch (section pointer), /graphify add <url> (Codex), --watch flag (Codex)
+Cohesion: 0.22
+Nodes (8): Debounce mechanism (default 3s), /graphify add <url>, --watch flag, For /graphify add and --watch (section pointer), Part A - Structural extraction for code files (AST), Step 3 - Extract entities and relationships, /graphify add <url> (Codex), --watch flag (Codex)
 
 ### Community 26 - "Multiple repos cross-repo graph merge"
 Cohesion: 0.29
@@ -227,12 +232,12 @@ Cohesion: 0.40
 Nodes (5): Honesty Rules, Stamped manifest files guard (#2015), Step 9 - Save manifest, update cost tracker, clean up, and report, Honesty Rules (Codex), Step 9 - Save manifest, update cost tracker, clean up (Codex)
 
 ### Community 31 - "Step 4 - Build graph, cluster, analyze, generate outputs"
-Cohesion: 0.40
-Nodes (5): Shrink-guard (#479), Step 4.5 - Graph health check, Step 4 - Build graph, cluster, analyze, generate outputs, Step 5 - Label communities, Step 6 - Generate Obsidian vault and HTML
+Cohesion: 0.29
+Nodes (7): Part C - Merge AST + semantic into final extraction, Shrink-guard (#479), Step 4.5 - Graph health check, Step 4 - Build graph, cluster, analyze, generate outputs, Step 5 - Label communities, Step 6 - Generate Obsidian vault and HTML, Step B3 - Collect, cache, and merge
 
-### Community 32 - "Extraction subagent prompt (compact)"
-Cohesion: 0.50
-Nodes (5): Compact prompt rationale (return inline, no CHUNK_PATH), Extraction subagent prompt (compact), spawn_agent / wait_agent / close_agent mechanism, Step B2 - Dispatch ALL subagents (Codex spawn_agent), multi_agent feature flag (~/.codex/config.toml)
+### Community 32 - "router.tsx"
+Cohesion: 0.19
+Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
 
 ### Community 33 - "MH-XXX Ticket Conventions"
 Cohesion: 0.50
@@ -247,12 +252,12 @@ Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
 ### Community 43 - "ListingDetailDto"
-Cohesion: 0.10
-Nodes (43): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+35 more)
-
-### Community 73 - "ListingFeed.tsx"
 Cohesion: 0.13
-Nodes (27): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+19 more)
+Nodes (31): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+23 more)
+
+### Community 73 - "listings/index.ts"
+Cohesion: 0.15
+Nodes (23): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+15 more)
 
 ### Community 74 - "CLAUDE.md — MyHouse project instructions"
 Cohesion: 0.17
@@ -292,13 +297,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AppError` connect `AppError` to `ListingDetailDto`, `.new`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `AppState` connect `AppState` to `.new`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `config/mod.rs` to `AppState`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `local_fs.rs`, `ListingDetailDto`?**
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `AppConfig` connect `AppState` to `config/mod.rs`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _177 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**
-  _Cohesion score 0.09024390243902439 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06041986687147977 - nodes in this community are weakly interconnected._
