@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(SQLX_OFFLINE=true cargo check)",
+      "Bash(cargo fmt *)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
