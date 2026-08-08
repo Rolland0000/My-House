@@ -593,7 +593,7 @@
       "label": "AppState",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate",
       "community": 0,
@@ -615,7 +615,7 @@
       "label": "Inner",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "backend_src_app_state_inner",
       "community": 0,
@@ -634,10 +634,21 @@
       "norm_label": "pgpool"
     },
     {
+      "label": "StorageProvider",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_app_state_rs_storageprovider",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "storageprovider"
+    },
+    {
       "label": ".new()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_new",
       "community": 0,
@@ -659,7 +670,7 @@
       "label": ".config()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L36",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_config",
       "community": 0,
@@ -670,7 +681,7 @@
       "label": ".db()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L41",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_db",
       "community": 0,
@@ -681,12 +692,23 @@
       "label": ".mailer()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L46",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_mailer",
       "community": 0,
       "community_name": "AppState",
       "norm_label": ".mailer()"
+    },
+    {
+      "label": ".storage()",
+      "file_type": "code",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "backend_src_app_state_appstate_storage",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": ".storage()"
     },
     {
       "label": "gen_openapi.rs",
@@ -1206,15 +1228,48 @@
       "norm_label": "json"
     },
     {
+      "label": "StorageStatus",
+      "file_type": "code",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "backend_src_infra_health_storagestatus",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "storagestatus"
+    },
+    {
+      "label": "check_storage()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "backend_src_infra_health_check_storage",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "check_storage()"
+    },
+    {
       "label": "openapi_schema_reflects_health_check()",
       "file_type": "code",
       "source_file": "backend/src/infra/health.rs",
-      "source_location": "L47",
+      "source_location": "L72",
       "_origin": "ast",
       "id": "backend_src_infra_health_openapi_schema_reflects_health_check",
       "community": 0,
       "community_name": "AppState",
       "norm_label": "openapi_schema_reflects_health_check()"
+    },
+    {
+      "label": "openapi_schema_reflects_storage_smoke_check()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L91",
+      "_origin": "ast",
+      "id": "backend_src_infra_health_openapi_schema_reflects_storage_smoke_check",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "openapi_schema_reflects_storage_smoke_check()"
     },
     {
       "label": "mailer.rs",
@@ -1308,7 +1363,7 @@
       "label": ".new()",
       "file_type": "code",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "backend_src_infra_mailer_mailer_new",
       "community": 0,
@@ -1341,7 +1396,7 @@
       "label": ".send()",
       "file_type": "code",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L58",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "backend_src_infra_mailer_mailer_send",
       "community": 0,
@@ -1363,7 +1418,7 @@
       "label": "test_config()",
       "file_type": "code",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L84",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "backend_src_infra_mailer_test_config",
       "community": 0,
@@ -1374,7 +1429,7 @@
       "label": "builds_successfully_with_valid_config()",
       "file_type": "code",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L106",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "backend_src_infra_mailer_builds_successfully_with_valid_config",
       "community": 0,
@@ -1385,7 +1440,7 @@
       "label": "rejects_malformed_smtp_from()",
       "file_type": "code",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L112",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "backend_src_infra_mailer_rejects_malformed_smtp_from",
       "community": 0,
@@ -2804,7 +2859,7 @@
       "label": "build_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L127",
+      "source_location": "L128",
       "_origin": "ast",
       "id": "backend_src_route_build_router",
       "community": 0,
@@ -2815,7 +2870,7 @@
       "label": "openapi_spec()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L146",
+      "source_location": "L147",
       "_origin": "ast",
       "id": "backend_src_route_openapi_spec",
       "community": 0,
@@ -3263,6 +3318,160 @@
       "norm_label": "test_paginated_response_serializes_correctly()"
     },
     {
+      "label": "storage_key.rs",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "storage_key.rs"
+    },
+    {
+      "label": "listing_media_key()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_listing_media_key",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "listing_media_key()"
+    },
+    {
+      "label": "ListingId",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "listingid",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "listingid"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_rs_string",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "string"
+    },
+    {
+      "label": "avatar_key()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_avatar_key",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "avatar_key()"
+    },
+    {
+      "label": "UserId",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "userid",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "userid"
+    },
+    {
+      "label": "owner_request_document_key()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_owner_request_document_key",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "owner_request_document_key()"
+    },
+    {
+      "label": "OwnerRequestId",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "ownerrequestid",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "ownerrequestid"
+    },
+    {
+      "label": "assert_key_shape()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_assert_key_shape",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "assert_key_shape()"
+    },
+    {
+      "label": "listing_media_key_has_expected_shape()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_listing_media_key_has_expected_shape",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "listing_media_key_has_expected_shape()"
+    },
+    {
+      "label": "avatar_key_has_expected_shape()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_avatar_key_has_expected_shape",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "avatar_key_has_expected_shape()"
+    },
+    {
+      "label": "owner_request_document_key_has_expected_shape()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_owner_request_document_key_has_expected_shape",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "owner_request_document_key_has_expected_shape()"
+    },
+    {
+      "label": "generated_keys_are_unique_across_calls()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_generated_keys_are_unique_across_calls",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "generated_keys_are_unique_across_calls()"
+    },
+    {
+      "label": "extension_is_preserved_verbatim()",
+      "file_type": "code",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "backend_src_shared_storage_key_extension_is_preserved_verbatim",
+      "community": 24,
+      "community_name": "storage_key.rs",
+      "norm_label": "extension_is_preserved_verbatim()"
+    },
+    {
       "label": "types.rs",
       "file_type": "code",
       "source_file": "backend/src/shared/types.rs",
@@ -3270,7 +3479,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "types.rs"
     },
     {
@@ -3281,7 +3490,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_generate_produces_unique_ids",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_generate_produces_unique_ids()"
     },
     {
@@ -3292,7 +3501,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_roundtrip_via_uuid",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_roundtrip_via_uuid()"
     },
     {
@@ -3303,7 +3512,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_from_uuid_conversion",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_from_uuid_conversion()"
     },
     {
@@ -3314,7 +3523,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_display_matches_uuid",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_display_matches_uuid()"
     },
     {
@@ -3325,7 +3534,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_serde_transparent_roundtrip",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_serde_transparent_roundtrip()"
     },
     {
@@ -3336,7 +3545,7 @@
       "_origin": "ast",
       "id": "backend_src_shared_types_test_different_types_are_not_interchangeable",
       "community": 24,
-      "community_name": "types.rs",
+      "community_name": "storage_key.rs",
       "norm_label": "test_different_types_are_not_interchangeable()"
     },
     {
@@ -3357,8 +3566,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_package",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "package.json"
     },
     {
@@ -3368,8 +3577,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "frontend_package_name",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "name"
     },
     {
@@ -3379,8 +3588,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_package_private",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "private"
     },
     {
@@ -3390,8 +3599,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "frontend_package_version",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "version"
     },
     {
@@ -3401,8 +3610,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_package_type",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "type"
     },
     {
@@ -3412,7 +3621,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_package_scripts",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "scripts"
     },
@@ -3423,7 +3632,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_package_scripts_predev",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "predev"
     },
@@ -3434,7 +3643,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "frontend_package_scripts_dev",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "dev"
     },
@@ -3445,7 +3654,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_package_scripts_build",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "build"
     },
@@ -3456,7 +3665,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "frontend_package_scripts_preview",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "preview"
     },
@@ -3467,7 +3676,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_package_scripts_lint",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "lint"
     },
@@ -3478,7 +3687,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "frontend_package_scripts_prettier_check",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "prettier:check"
     },
@@ -3489,7 +3698,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "frontend_package_scripts_prettier_write",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "prettier:write"
     },
@@ -3500,7 +3709,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "frontend_package_scripts_ts_check",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "ts:check"
     },
@@ -3511,7 +3720,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_package_scripts_format",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "format"
     },
@@ -3522,7 +3731,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "frontend_package_scripts_generate_types",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "generate:types"
     },
@@ -3533,7 +3742,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "frontend_package_scripts_generate_types_ci",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "generate:types:ci"
     },
@@ -3545,7 +3754,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "dependencies"
     },
     {
@@ -3556,7 +3765,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_tanstack_react_query",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -3567,7 +3776,7 @@
       "_origin": "ast",
       "id": "tanstack_react_query",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -3578,7 +3787,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_clsx",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -3589,7 +3798,7 @@
       "_origin": "ast",
       "id": "clsx",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -3600,7 +3809,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_lucide_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "lucide-react"
     },
     {
@@ -3611,7 +3820,7 @@
       "_origin": "ast",
       "id": "lucide_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "lucide-react"
     },
     {
@@ -3622,7 +3831,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react"
     },
     {
@@ -3633,7 +3842,7 @@
       "_origin": "ast",
       "id": "react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react"
     },
     {
@@ -3644,7 +3853,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_dom",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-dom"
     },
     {
@@ -3655,7 +3864,7 @@
       "_origin": "ast",
       "id": "react_dom",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-dom"
     },
     {
@@ -3666,7 +3875,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_router",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-router"
     },
     {
@@ -3677,7 +3886,7 @@
       "_origin": "ast",
       "id": "react_router",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-router"
     },
     {
@@ -3764,8 +3973,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 94,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -3775,8 +3984,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 94,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -3852,8 +4061,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_eslint_plugin_react_refresh",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 90,
+      "community_name": "eslint-plugin-react-refresh",
       "norm_label": "eslint-plugin-react-refresh"
     },
     {
@@ -3863,8 +4072,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "eslint_plugin_react_refresh",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 90,
+      "community_name": "eslint-plugin-react-refresh",
       "norm_label": "eslint-plugin-react-refresh"
     },
     {
@@ -3874,8 +4083,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_globals",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 91,
+      "community_name": "globals",
       "norm_label": "globals"
     },
     {
@@ -3885,8 +4094,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "globals",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 91,
+      "community_name": "globals",
       "norm_label": "globals"
     },
     {
@@ -3918,8 +4127,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_prettier",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 92,
+      "community_name": "prettier",
       "norm_label": "prettier"
     },
     {
@@ -3929,8 +4138,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "prettier",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 92,
+      "community_name": "prettier",
       "norm_label": "prettier"
     },
     {
@@ -3940,8 +4149,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_tailwindcss",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 93,
+      "community_name": "tailwindcss",
       "norm_label": "tailwindcss"
     },
     {
@@ -3951,8 +4160,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "tailwindcss",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 93,
+      "community_name": "tailwindcss",
       "norm_label": "tailwindcss"
     },
     {
@@ -3984,8 +4193,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_typescript_eslint",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "typescript-eslint",
       "norm_label": "typescript-eslint"
     },
     {
@@ -3995,8 +4204,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "typescript_eslint",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "typescript-eslint",
       "norm_label": "typescript-eslint"
     },
     {
@@ -4028,8 +4237,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "frontend_package_overrides",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "overrides"
     },
     {
@@ -4039,8 +4248,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "frontend_package_overrides_openapi_typescript",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "openapi-typescript"
     },
     {
@@ -4050,8 +4259,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "frontend_package_openapi_typescript_typescript",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "typescript"
     },
     {
@@ -4061,7 +4270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "app.tsx"
     },
@@ -4072,7 +4281,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_app",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "app()"
     },
@@ -4127,7 +4336,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "rootlayout.tsx"
     },
@@ -4138,7 +4347,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout_rootlayout",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "rootlayout()"
     },
@@ -4149,7 +4358,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_providers",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "providers.tsx"
     },
@@ -4160,7 +4369,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_providers_queryclient",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "queryclient"
     },
@@ -4171,7 +4380,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providersprops",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "providersprops"
     },
@@ -4182,7 +4391,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providers",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "providers()"
     },
@@ -4193,7 +4402,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_router",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "router.tsx"
     },
@@ -4204,7 +4413,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingfeed",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "listingfeed"
     },
@@ -4215,7 +4424,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingdetail",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "listingdetail"
     },
@@ -4226,7 +4435,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_src_app_router_withsuspense",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "withsuspense()"
     },
@@ -4237,7 +4446,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "frontend_src_app_router_router",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "router"
     },
@@ -4490,8 +4699,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "listings/index.ts",
       "norm_label": "listingfeed.tsx"
     },
     {
@@ -4501,8 +4710,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_typeoptions",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "listings/index.ts",
       "norm_label": "typeoptions"
     },
     {
@@ -4512,8 +4721,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_listingfeed",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "listings/index.ts",
       "norm_label": "listingfeed()"
     },
     {
@@ -4644,7 +4853,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_main",
-      "community": 32,
+      "community": 87,
       "community_name": "router.tsx",
       "norm_label": "main.tsx"
     },
@@ -5359,8 +5568,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "listings/index.ts",
       "norm_label": "usepagination.ts"
     },
     {
@@ -5370,8 +5579,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination_usepagination",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "listings/index.ts",
       "norm_label": "usepagination()"
     },
     {
@@ -6931,9 +7140,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 15,
       "norm_label": "step 3 - extract entities and relationships",
-      "community_name": "/graphify add <url>",
+      "community_name": "Extraction subagent prompt (full)",
       "id": "claude_skills_graphify_skill_step3_extract_entities"
     },
     {
@@ -6945,9 +7154,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 25,
+      "community": 15,
       "norm_label": "part a - structural extraction for code files (ast)",
-      "community_name": "/graphify add <url>",
+      "community_name": "Extraction subagent prompt (full)",
       "id": "claude_skills_graphify_skill_part_a_structural_extraction"
     },
     {
@@ -7015,9 +7224,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 31,
+      "community": 15,
       "norm_label": "step b3 - collect, cache, and merge",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "community_name": "Extraction subagent prompt (full)",
       "id": "claude_skills_graphify_skill_step_b3_collect_cache_merge"
     },
     {
@@ -7029,9 +7238,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 31,
+      "community": 15,
       "norm_label": "part c - merge ast + semantic into final extraction",
-      "community_name": "Step 4 - Build graph, cluster, analyze, generate outputs",
+      "community_name": "Extraction subagent prompt (full)",
       "id": "claude_skills_graphify_skill_part_c_merge_ast_semantic"
     },
     {
@@ -7725,9 +7934,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 32,
       "norm_label": "step b2 - dispatch all subagents (codex spawn_agent)",
-      "community_name": "Extraction subagent prompt (full)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_skill_step_b2_dispatch_subagents_codex"
     },
     {
@@ -7740,9 +7949,9 @@
       "author": null,
       "contributor": null,
       "rationale": "Codex has no Agent tool with disk-based chunk files; it collects agent results in memory via wait_agent/close_agent, so per-chunk success is judged by valid JSON output rather than a chunk file existing on disk, and requires multi_agent=true in ~/.codex/config.toml.",
-      "community": 15,
+      "community": 32,
       "norm_label": "spawn_agent / wait_agent / close_agent mechanism",
-      "community_name": "Extraction subagent prompt (full)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_skill_spawn_agent_mechanism"
     },
     {
@@ -7853,9 +8062,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 32,
       "norm_label": "extraction subagent prompt (compact)",
-      "community_name": "Extraction subagent prompt (full)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_references_extraction_spec_subagent_prompt_compact"
     },
     {
@@ -7868,9 +8077,9 @@
       "author": null,
       "contributor": null,
       "rationale": "The Codex variant compresses the same rules into a denser prompt because agents return results inline via wait_agent rather than writing chunk files to disk, so the CHUNK_PATH/Write-tool instructions are dropped and replaced by 'return the JSON inline'.",
-      "community": 15,
+      "community": 32,
       "norm_label": "compact prompt rationale (return inline, no chunk_path)",
-      "community_name": "Extraction subagent prompt (full)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_references_extraction_spec_compact_rationale"
     },
     {
@@ -7994,9 +8203,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 15,
+      "community": 32,
       "norm_label": "multi_agent feature flag (~/.codex/config.toml)",
-      "community_name": "Extraction subagent prompt (full)",
+      "community_name": "router.tsx",
       "id": "multi_agent_feature_flag_config_toml"
     },
     {
@@ -10311,7 +10520,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state",
@@ -10322,7 +10531,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state",
@@ -10381,7 +10590,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10392,7 +10601,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L41",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10403,7 +10612,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L46",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10414,7 +10623,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10422,10 +10631,21 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate",
+      "target": "backend_src_app_state_appstate_storage",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10437,7 +10657,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10466,6 +10686,18 @@
       "context": "generic_arg",
       "_origin": "ast",
       "source": "backend_src_infra_health_check",
+      "target": "backend_src_app_state_appstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_health_check_storage",
       "target": "backend_src_app_state_appstate",
       "confidence_score": 1.0
     },
@@ -10533,7 +10765,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10593,7 +10825,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L46",
+      "source_location": "L54",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10605,7 +10837,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10617,7 +10849,19 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L23",
+      "source_location": "L59",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_storage",
+      "target": "backend_src_app_state_rs_arc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10629,7 +10873,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10641,7 +10885,19 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L19",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_app_state_inner",
+      "target": "backend_src_app_state_rs_storageprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L20",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10653,7 +10909,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10665,7 +10921,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L41",
+      "source_location": "L49",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10677,7 +10933,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10689,7 +10945,19 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L59",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_storage",
+      "target": "backend_src_app_state_rs_storageprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10701,7 +10969,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10713,7 +10981,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10722,10 +10990,22 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_new",
+      "target": "backend_src_infra_storage_mod_build_storage_provider"
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10737,7 +11017,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L46",
+      "source_location": "L54",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -11536,7 +11816,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -11548,7 +11828,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L84",
+      "source_location": "L87",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -11918,6 +12198,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_health",
+      "target": "backend_src_infra_health_check_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
@@ -11929,11 +12220,33 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/health.rs",
-      "source_location": "L47",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_health",
       "target": "backend_src_infra_health_openapi_schema_reflects_health_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_health",
+      "target": "backend_src_infra_health_openapi_schema_reflects_storage_smoke_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_health",
+      "target": "backend_src_infra_health_storagestatus",
       "confidence_score": 1.0
     },
     {
@@ -11997,6 +12310,42 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_health_check_storage",
+      "target": "backend_src_infra_health_rs_state",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_health_check_storage",
+      "target": "backend_src_infra_health_rs_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/health.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_health_check_storage",
+      "target": "backend_src_infra_health_storagestatus",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
@@ -12012,7 +12361,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L106",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer",
@@ -12045,7 +12394,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L112",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer",
@@ -12056,7 +12405,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L84",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer",
@@ -12079,7 +12428,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -12115,7 +12464,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -12139,7 +12488,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_mailer",
@@ -12150,7 +12499,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_mailer",
@@ -12185,7 +12534,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -12197,7 +12546,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -12210,7 +12559,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L61",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_mailer_send",
@@ -12222,7 +12571,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L115",
+      "source_location": "L118",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_rejects_malformed_smtp_from",
@@ -12233,7 +12582,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L58",
+      "source_location": "L61",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -12246,7 +12595,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L107",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_builds_successfully_with_valid_config",
@@ -12258,7 +12607,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/mailer.rs",
-      "source_location": "L113",
+      "source_location": "L116",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_infra_mailer_rejects_malformed_smtp_from",
@@ -15294,7 +15643,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -15316,7 +15665,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L146",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -15456,7 +15805,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L127",
+      "source_location": "L128",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -15517,7 +15866,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L128",
+      "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_build_router",
@@ -15541,7 +15890,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L147",
+      "source_location": "L148",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_openapi_spec",
@@ -15552,7 +15901,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L146",
+      "source_location": "L147",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16288,6 +16637,285 @@
       "_origin": "ast",
       "source": "backend_src_shared_pagination_test_zero_total_gives_zero_pages",
       "target": "backend_src_shared_pagination_paginatedresponse_t_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_assert_key_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_avatar_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_avatar_key_has_expected_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_extension_is_preserved_verbatim",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_generated_keys_are_unique_across_calls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_listing_media_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_listing_media_key_has_expected_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_owner_request_document_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_storage_key_owner_request_document_key_has_expected_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key",
+      "target": "backend_src_shared_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_generated_keys_are_unique_across_calls",
+      "target": "backend_src_shared_storage_key_listing_media_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_listing_media_key",
+      "target": "backend_src_shared_storage_key_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_listing_media_key",
+      "target": "listingid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_listing_media_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_listing_media_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_avatar_key",
+      "target": "backend_src_shared_storage_key_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_owner_request_document_key",
+      "target": "backend_src_shared_storage_key_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_avatar_key",
+      "target": "userid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_avatar_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_avatar_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_extension_is_preserved_verbatim",
+      "target": "backend_src_shared_storage_key_avatar_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_owner_request_document_key",
+      "target": "ownerrequestid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_owner_request_document_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_owner_request_document_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_avatar_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_assert_key_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_listing_media_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_assert_key_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/shared/storage_key.rs",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_shared_storage_key_owner_request_document_key_has_expected_shape",
+      "target": "backend_src_shared_storage_key_assert_key_shape",
       "confidence_score": 1.0
     },
     {
@@ -23945,5 +24573,5 @@
       "source_file": ".github/workflows/ci-backend.yml"
     }
   ],
-  "built_at_commit": "2de6b0fc5566a159b8f2b8d1b6692bfc0b0040bf"
+  "built_at_commit": "f8077ea36df5df50b940cc363aeb9eb10483a25d"
 }

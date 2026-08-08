@@ -1,16 +1,16 @@
 # Graph Report - My-House  (2026-08-08)
 
 ## Corpus Check
-- 140 files · ~71,765 words
+- 141 files · ~72,412 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 781 nodes · 1214 edges · 86 communities (73 shown, 13 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 68 edges (avg confidence: 0.88)
+- 800 nodes · 1251 edges · 88 communities (75 shown, 13 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `78b2d74c`
+- Built from commit: `2de6b0fc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,6 +31,7 @@
 - .mcp.json
 - React/TypeScript Rules (Agents)
 - Extraction subagent prompt (full)
+- local_fs.rs
 - Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark
 - Rust General Rules (Agents)
 - save-result feedback loop
@@ -38,6 +39,7 @@
 - MyHouse Project Instructions (Agents)
 - Database Rules (Claude, sqlx/PostgreSQL)
 - /graphify command
+- storage_key.rs
 - /graphify add <url>
 - Multiple repos cross-repo graph merge
 - Code Review Backend Skill (Rust/Axum/MyHouse)
@@ -69,11 +71,12 @@
 - StorageProvider trait
 - mh-14-listing-management.html wireframe
 - pre-commit
+- router.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 29 edges
 2. `cn()` - 27 edges
-3. `AppState` - 21 edges
+3. `AppState` - 23 edges
 4. `compilerOptions` - 18 edges
 5. `compilerOptions` - 16 edges
 6. `ConfigError` - 13 edges
@@ -108,15 +111,15 @@
 - **Backend CI Quality Gate (fmt, clippy, deny, audit, build, coverage)** — github_workflows_ci_backend_yml_backend_fmt, github_workflows_ci_backend_yml_backend_clippy, github_workflows_ci_backend_yml_backend_deny, github_workflows_ci_backend_yml_backend_audit, github_workflows_ci_backend_yml_backend_build, github_workflows_ci_backend_yml_backend_coverage [EXTRACTED 1.00]
 - **OpenAPI-to-TypeScript Generation Chain (utoipa → gen_openapi → types.ts → codegen job)** — github_workflows_ci_backend_yml_gen_openapi_bin, frontend_src_shared_api_types_ts, docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline, github_workflows_ci_frontend_yml_frontend_codegen [EXTRACTED 1.00]
 
-## Communities (86 total, 13 thin omitted)
+## Communities (88 total, 13 thin omitted)
 
 ### Community 0 - "AppState"
-Cohesion: 0.09
-Nodes (28): ApiDoc, AppServer, Error, Result, Self, shutdown_signal(), AppState, Inner (+20 more)
+Cohesion: 0.08
+Nodes (34): ApiDoc, AppServer, Error, Result, Self, shutdown_signal(), AppState, Inner (+26 more)
 
 ### Community 1 - "config/mod.rs"
-Cohesion: 0.14
-Nodes (29): app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env() (+21 more)
+Cohesion: 0.16
+Nodes (26): app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env() (+18 more)
 
 ### Community 2 - "scripts"
 Cohesion: 0.06
@@ -131,8 +134,8 @@ Cohesion: 0.06
 Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
 
 ### Community 5 - "components/index.ts"
-Cohesion: 0.05
-Nodes (53): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router (+45 more)
+Cohesion: 0.07
+Nodes (46): Alert(), AlertProps, AlertVariant, variantConfig, Button(), ButtonProps, ButtonSize, ButtonVariant (+38 more)
 
 ### Community 6 - "mh-15-owner-request.html wireframe"
 Cohesion: 0.18
@@ -151,16 +154,16 @@ Cohesion: 0.08
 Nodes (23): compilerOptions, allowImportingTsExtensions, jsx, lib, module, moduleDetection, moduleResolution, noEmit (+15 more)
 
 ### Community 10 - "AppError"
-Cohesion: 0.07
-Nodes (43): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_returns_previously_uploaded_bytes(), Bytes, Duration, Path (+35 more)
+Cohesion: 0.08
+Nodes (39): Bytes, Duration, Result, String, StorageProvider, UnimplementedStorage, count_listings(), find_listing_by_id() (+31 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 12 - ".new"
-Cohesion: 0.12
-Nodes (23): get_by_id(), list(), Json, Path, Result, State, Uuid, PaginatedResponse (+15 more)
+Cohesion: 0.18
+Nodes (15): PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T, Vec, test_defaults_applied_when_none() (+7 more)
 
 ### Community 13 - ".mcp.json"
 Cohesion: 0.15
@@ -173,6 +176,10 @@ Nodes (15): Functional Component Conventions (no React.FC), api.ts Single Fetch 
 ### Community 15 - "Extraction subagent prompt (full)"
 Cohesion: 0.18
 Nodes (13): EXTRACTED/INFERRED/AMBIGUOUS confidence rubric, Extraction JSON schema, Node ID format rule ({stem}_{entity}), source_file verbatim rule, Extraction subagent prompt (full), Part A - Structural extraction for code files (AST), Part B - Semantic extraction (parallel subagents), Part C - Merge AST + semantic into final extraction (+5 more)
+
+### Community 16 - "local_fs.rs"
+Cohesion: 0.17
+Nodes (19): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_returns_previously_uploaded_bytes(), Bytes, Duration, Path (+11 more)
 
 ### Community 17 - "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
 Cohesion: 0.18
@@ -201,6 +208,10 @@ Nodes (8): Cascade and Filesystem Cleanup Ordering (Claude rules), Migration Con
 ### Community 23 - "/graphify command"
 Cohesion: 0.29
 Nodes (8): Step 2.5 - Transcribe video/audio files, Whisper domain-hint prompt strategy, /graphify command, Step 1 - Ensure graphify is installed, Step 2.5 - Video and audio detection, Step 2 - Detect files, Step 2.5 - Transcribe video/audio files (Codex), /graphify command (Codex variant)
+
+### Community 24 - "storage_key.rs"
+Cohesion: 0.14
+Nodes (13): assert_key_shape(), avatar_key(), avatar_key_has_expected_shape(), extension_is_preserved_verbatim(), generated_keys_are_unique_across_calls(), listing_media_key(), listing_media_key_has_expected_shape(), owner_request_document_key() (+5 more)
 
 ### Community 25 - "/graphify add <url>"
 Cohesion: 0.29
@@ -247,12 +258,12 @@ Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
 ### Community 43 - "ListingDetailDto"
-Cohesion: 0.10
-Nodes (43): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+35 more)
+Cohesion: 0.11
+Nodes (36): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+28 more)
 
 ### Community 73 - "ListingFeed.tsx"
-Cohesion: 0.13
-Nodes (27): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+19 more)
+Cohesion: 0.14
+Nodes (26): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+18 more)
 
 ### Community 74 - "CLAUDE.md — MyHouse project instructions"
 Cohesion: 0.17
@@ -274,6 +285,10 @@ Nodes (7): ADR-05: StorageProvider trait + LocalFsStorage over S3-at-MVP, LocalF
 Cohesion: 0.33
 Nodes (6): POST /media/upload endpoint, mh-14-listing-management.html wireframe, Owner's own listings ('Mes biens') page, Photo dropzone component, Publish/edit listing form page, Identity document dropzone component
 
+### Community 87 - "router.tsx"
+Cohesion: 0.19
+Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
+
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
   .agents/rules/insrtruction-for-my-house.md · relation: references
@@ -292,13 +307,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AppError` connect `AppError` to `ListingDetailDto`, `.new`?**
+- **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
   _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `AppState` connect `AppState` to `.new`?**
+- **Why does `AppError` connect `AppError` to `local_fs.rs`, `ListingDetailDto`?**
   _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `config/mod.rs` to `AppState`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _177 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**
-  _Cohesion score 0.09024390243902439 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07510204081632653 - nodes in this community are weakly interconnected._
