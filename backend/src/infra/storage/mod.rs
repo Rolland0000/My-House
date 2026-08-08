@@ -1,5 +1,7 @@
+pub mod local_fs;
 pub mod provider;
 
+pub use local_fs::LocalFsStorage;
 pub use provider::StorageProvider;
 
 use std::sync::Arc;
@@ -14,7 +16,11 @@ use crate::config::{AppConfig, StorageProvider as StorageProviderKind};
 /// config layer accepts (`local`, `s3`).
 pub fn build_storage_provider(config: &AppConfig) -> Arc<dyn StorageProvider> {
     match config.storage_provider {
-        StorageProviderKind::Local => Arc::new(UnimplementedStorage),
+        StorageProviderKind::Local => Arc::new(LocalFsStorage::new(
+            config.local_storage_path.clone(),
+            config.public_media_base_url.clone(),
+        )),
+        // Reserved for V2 — not implemented at MVP.
         StorageProviderKind::S3 => Arc::new(UnimplementedStorage),
     }
 }
