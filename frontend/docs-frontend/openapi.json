@@ -9,9 +9,115 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/listings": {
+      "get": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Public paginated feed of listings (cover photo + summary).",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "owner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListingType"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ListingSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/listings/{id}": {
+      "get": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Full listing detail — description, media, owner info (no phone).",
+        "operationId": "get_by_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
-        "tags": ["health"],
+        "tags": [
+          "health"
+        ],
         "summary": "Checks PostgreSQL connectivity via `SELECT 1`.",
         "operationId": "check",
         "responses": {
@@ -44,10 +150,342 @@
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "ListingDetailDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "type",
+          "status",
+          "city",
+          "price",
+          "media",
+          "owner",
+          "created_at"
+        ],
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListingMediaDto"
+            }
+          },
+          "neighborhood": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerDetailDto"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "rooms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ListingStatus"
+          },
+          "surface_m2": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ListingType"
+          }
+        }
+      },
+      "ListingDetailResponse": {
+        "type": "object",
+        "description": "Envelope for `GET /listings/:id` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ListingDetailDto"
+          }
+        }
+      },
+      "ListingMediaDto": {
+        "type": "object",
+        "description": "One media attachment in a listing detail response.",
+        "required": [
+          "id",
+          "url",
+          "is_cover",
+          "position"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_cover": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ListingStatus": {
+        "type": "string",
+        "enum": [
+          "available",
+          "unavailable"
+        ]
+      },
+      "ListingSummaryDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "type",
+          "status",
+          "city",
+          "price",
+          "owner"
+        ],
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "cover_photo_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "neighborhood": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerSummaryDto"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ListingStatus"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ListingType"
+          }
+        }
+      },
+      "ListingType": {
+        "type": "string",
+        "enum": [
+          "apartment",
+          "studio",
+          "house",
+          "room",
+          "villa",
+          "other"
+        ]
+      },
+      "OwnerDetailDto": {
+        "type": "object",
+        "description": "Owner info as embedded in a listing detail (adds avatar, still no phone —\nphone reveal is gated behind `GET /listings/:id/contact`, out of scope here).",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "OwnerSummaryDto": {
+        "type": "object",
+        "description": "Owner info as embedded in a listing summary (no avatar, no phone).",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "PaginatedResponse_ListingSummaryDto": {
+        "type": "object",
+        "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "type",
+                "status",
+                "city",
+                "price",
+                "owner"
+              ],
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "cover_photo_url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "neighborhood": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "owner": {
+                  "$ref": "#/components/schemas/OwnerSummaryDto"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/ListingStatus"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ListingType"
+                }
+              }
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "description": "Pagination metadata included alongside `data` in list responses.",
+        "required": [
+          "page",
+          "per_page",
+          "total",
+          "total_pages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "per_page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
           }
         }
       }
@@ -57,6 +495,10 @@
     {
       "name": "health",
       "description": "Service health check"
+    },
+    {
+      "name": "listings",
+      "description": "Public read-only listings feed"
     }
   ]
 }

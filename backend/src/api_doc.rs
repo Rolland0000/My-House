@@ -14,6 +14,9 @@ use utoipa::OpenApi;
         title = "MyHouse API",
         description = "Real estate rental matching platform (owners ↔ seekers)."
     ),
-    tags((name = "health", description = "Service health check"))
+    tags(
+        (name = "health", description = "Service health check"),
+        (name = "listings", description = "Public read-only listings feed"),
+    )
 )]
 pub struct ApiDoc;

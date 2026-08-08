@@ -8,6 +8,7 @@ use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
 use crate::config::AppEnv;
 use crate::infra::health;
+use crate::modules::listings;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -22,18 +23,21 @@ use crate::infra::health;
 //   Add auth check as a layer here; add tracing/logging at the global level.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Routes accessible without authentication.
+/// Routes accessible without authentication, mounted under the global
+/// `/api/v1` prefix (see [`merged_router`]) — everything except `/health`,
+/// which lives outside it per `TECHNICAL_SPEC_MVP.md §4` ("Hors `/api/v1`").
 ///
-/// Examples: OTP request/verify, public listing browse, health check.
+/// Examples: OTP request/verify, public listing browse.
 ///
 /// Built as an [`OpenApiRouter`] so every handler carrying a `#[utoipa::path]`
 /// annotation is automatically collected into the OpenAPI schema served at
 /// `/api/docs/openapi.json` — no manual schema maintenance required.
 fn public_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(health::check))
+    OpenApiRouter::new()
+        .routes(routes!(listings::handler::list))
+        .routes(routes!(listings::handler::get_by_id))
     // TODO EP-02: .routes(routes!(auth::request_otp))
     // TODO EP-02: .routes(routes!(auth::verify_otp))
-    // TODO EP-03: .routes(routes!(listings::list_public))
 }
 
 /// Routes requiring a valid session (any authenticated user — seeker by default).
@@ -83,6 +87,13 @@ fn admin_router() -> Router<AppState> {
 /// Merges all sub-routers and returns both the assembled router and the
 /// collected OpenAPI schema.
 ///
+/// Every role-scoped sub-router is nested under the global `/api/v1` prefix
+/// (`TECHNICAL_SPEC_MVP.md §4`) — `.nest()` on an [`OpenApiRouter`] prepends
+/// the prefix to both the live routes and the collected OpenAPI paths, so
+/// handlers keep declaring bare paths (e.g. `/listings`) in `#[utoipa::path]`.
+/// `/health` is the sole exception, mounted outside the prefix so it matches
+/// the dedicated `location /health` block in the prod nginx config.
+///
 /// Merge order does not affect routing precedence in Axum (routes are matched
 /// by specificity, not insertion order), but keep it consistent for readability:
 /// public → seeker → owner → admin.
@@ -91,16 +102,15 @@ fn admin_router() -> Router<AppState> {
 /// call site does — so [`openapi_spec`] can reuse it to produce the schema
 /// without a database or a running server.
 fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
-    let public = public_router();
-    let seeker = OpenApiRouter::from(seeker_router());
-    let owner = OpenApiRouter::from(owner_router());
-    let admin = OpenApiRouter::from(admin_router());
+    let api_v1 = OpenApiRouter::new()
+        .merge(public_router())
+        .merge(OpenApiRouter::from(seeker_router()))
+        .merge(OpenApiRouter::from(owner_router()))
+        .merge(OpenApiRouter::from(admin_router()));
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .merge(public)
-        .merge(seeker)
-        .merge(owner)
-        .merge(admin)
+        .routes(routes!(health::check))
+        .nest("/api/v1", api_v1)
         .split_for_parts()
 }
 
