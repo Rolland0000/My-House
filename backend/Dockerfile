@@ -64,7 +64,7 @@ WORKDIR /app
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=5 \
+HEALTHCHECK --interval=10s --timeout=3s --start-period=300s --retries=5 \
     CMD curl -f "http://localhost:${APP_PORT:-3000}/health" || exit 1
 
 CMD ["cargo", "watch", "-x", "run"]
