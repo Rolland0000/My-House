@@ -20,10 +20,13 @@ RUN mkdir src \
     && rm -rf src
 
 # `sqlx::migrate!()` embeds this directory's SQL files into the binary at
-# compile time — no live DATABASE_URL is required to build (no `query!`/
-# `query_as!` macros are used yet; if those are introduced, compiling will
-# additionally require a reachable DB or a committed `.sqlx/` offline cache).
+# compile time — no live DATABASE_URL is required for that. `query!`/
+# `query_as!` macros do need one, so we build against the committed `.sqlx/`
+# offline cache instead of a live DB (see database.md — `cargo sqlx prepare`
+# regenerates it after query changes).
+ENV SQLX_OFFLINE=true
 COPY migrations ./migrations
+COPY .sqlx ./.sqlx
 COPY src ./src
 RUN touch src/main.rs && cargo build --release
 
