@@ -1,10 +1,12 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 use backend_my_house::{
     app_server::AppServer,
     app_state::AppState,
     config::{AppConfig, AppEnv},
     infra::db,
+    infra::mailer::Mailer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
@@ -68,8 +70,14 @@ async fn main() {
         });
     tracing::info!("Connected to PostgreSQL — migrations applied");
 
-    // ── 6. Build shared state and start the server ────────────────────────────
-    let state = AppState::new(config, db_pool);
+    // ── 6. Build the SMTP mailer ───────────────────────────────────────────────
+    let mailer = Mailer::new(&config).unwrap_or_else(|err| {
+        eprintln!("FATAL — mailer configuration error: {err}");
+        std::process::exit(1);
+    });
+
+    // ── 7. Build shared state and start the server ────────────────────────────
+    let state = AppState::new(config, db_pool, Arc::new(mailer));
     let server = AppServer::new(state, addr);
 
     if let Err(e) = server.run().await {
