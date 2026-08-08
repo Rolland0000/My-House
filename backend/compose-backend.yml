@@ -18,9 +18,15 @@ services:
       # the same POSTGRES_* vars as the db service so credentials can
       # never drift out of sync between the two services.
       DATABASE_URL: postgresql://${POSTGRES_USER:? Set POSTGRES_USER in .env or environment}:${POSTGRES_PASSWORD:? Set POSTGRES_PASSWORD in .env or environment}@db:5432/${POSTGRES_DB:? Set POSTGRES_DB in .env or environment}
+      # Overrides env_file: inside the compose network Mailhog is reachable at
+      # the "mailhog" service hostname, not "localhost" (which backend/.env
+      # correctly uses for a bare `cargo run` on the host instead).
+      SMTP_HOST: mailhog
     depends_on:
       db:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     ports:
       - "0:3000"
     volumes:

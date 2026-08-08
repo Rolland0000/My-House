@@ -1,23 +1,23 @@
 # Graph Report - My-House  (2026-08-08)
 
 ## Corpus Check
-- 141 files · ~72,412 words
+- 142 files · ~73,010 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 800 nodes · 1251 edges · 88 communities (75 shown, 13 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
+- 817 nodes · 1284 edges · 96 communities (77 shown, 19 thin omitted)
+- Extraction: 94% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2de6b0fc`
+- Built from commit: `f8077ea3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AppState
 - config/mod.rs
-- scripts
+- dependencies
 - CI Backend Workflow
 - devDependencies
 - components/index.ts
@@ -47,7 +47,7 @@
 - connect_db
 - Step 9 - Save manifest, update cost tracker, clean up, and report
 - Step 4 - Build graph, cluster, analyze, generate outputs
-- Extraction subagent prompt (compact)
+- router.tsx
 - MH-XXX Ticket Conventions
 - git commit hook (graphify hook install)
 - analyze job (rust + javascript-typescript matrix)
@@ -64,7 +64,7 @@
 - Pagination standard (§8.3)
 - R-07: Absence of index on listings.price
 - POST /auth/refresh endpoint
-- ListingFeed.tsx
+- listings/index.ts
 - CLAUDE.md — MyHouse project instructions
 - DESIGN_TOKENS.md (MH-17) — Design Token Set
 - mh-12-auth-flow.html wireframe
@@ -72,18 +72,26 @@
 - mh-14-listing-management.html wireframe
 - pre-commit
 - router.tsx
+- scripts
+- package.json
+- eslint-plugin-react-refresh
+- globals
+- prettier
+- tailwindcss
+- @types/react-dom
+- typescript-eslint
 
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 29 edges
 2. `cn()` - 27 edges
-3. `AppState` - 23 edges
+3. `AppState` - 24 edges
 4. `compilerOptions` - 18 edges
 5. `compilerOptions` - 16 edges
 6. `ConfigError` - 13 edges
-7. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
-8. `LocalFsStorage` - 12 edges
-9. `ListingSummaryDto` - 12 edges
-10. `ListingDetailDto` - 12 edges
+7. `AppConfig` - 13 edges
+8. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
+9. `LocalFsStorage` - 12 edges
+10. `ListingSummaryDto` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Step B2 - Dispatch ALL subagents in a single message` --semantically_similar_to--> `Step B2 - Dispatch ALL subagents (Codex spawn_agent)`  [INFERRED] [semantically similar]
@@ -111,27 +119,27 @@
 - **Backend CI Quality Gate (fmt, clippy, deny, audit, build, coverage)** — github_workflows_ci_backend_yml_backend_fmt, github_workflows_ci_backend_yml_backend_clippy, github_workflows_ci_backend_yml_backend_deny, github_workflows_ci_backend_yml_backend_audit, github_workflows_ci_backend_yml_backend_build, github_workflows_ci_backend_yml_backend_coverage [EXTRACTED 1.00]
 - **OpenAPI-to-TypeScript Generation Chain (utoipa → gen_openapi → types.ts → codegen job)** — github_workflows_ci_backend_yml_gen_openapi_bin, frontend_src_shared_api_types_ts, docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline, github_workflows_ci_frontend_yml_frontend_codegen [EXTRACTED 1.00]
 
-## Communities (88 total, 13 thin omitted)
+## Communities (96 total, 19 thin omitted)
 
 ### Community 0 - "AppState"
-Cohesion: 0.08
-Nodes (34): ApiDoc, AppServer, Error, Result, Self, shutdown_signal(), AppState, Inner (+26 more)
+Cohesion: 0.06
+Nodes (48): Address, AddressError, AsyncSmtpTransport, ApiDoc, AppServer, Error, Result, Self (+40 more)
 
 ### Community 1 - "config/mod.rs"
 Cohesion: 0.16
-Nodes (26): app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env() (+18 more)
+Nodes (25): app_port_defaults_to_3000_when_absent(), AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env(), rejects_invalid_smtp_port() (+17 more)
 
-### Community 2 - "scripts"
-Cohesion: 0.06
-Nodes (32): clsx, dependencies, clsx, lucide-react, react, react-dom, react-router, @tanstack/react-query (+24 more)
+### Community 2 - "dependencies"
+Cohesion: 0.15
+Nodes (13): clsx, dependencies, clsx, lucide-react, react, react-dom, react-router, @tanstack/react-query (+5 more)
 
 ### Community 3 - "CI Backend Workflow"
 Cohesion: 0.09
 Nodes (33): docker-compose.yml (root), backend-dev service (dev profile, cargo-watch), backend-prod service (prod profile, release binary), frontend-dev service (dev profile, vite dev server), frontend-prod service (prod profile, nginx static), postgres service, ADR-06: utoipa + openapi-typescript over manual TS types, backend/Dockerfile (multi-stage build) (+25 more)
 
 ### Community 4 - "devDependencies"
-Cohesion: 0.06
-Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
+Cohesion: 0.11
+Nodes (19): eslint, @eslint/js, eslint-plugin-react-hooks, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, openapi-typescript (+11 more)
 
 ### Community 5 - "components/index.ts"
 Cohesion: 0.07
@@ -154,8 +162,8 @@ Cohesion: 0.08
 Nodes (23): compilerOptions, allowImportingTsExtensions, jsx, lib, module, moduleDetection, moduleResolution, noEmit (+15 more)
 
 ### Community 10 - "AppError"
-Cohesion: 0.08
-Nodes (39): Bytes, Duration, Result, String, StorageProvider, UnimplementedStorage, count_listings(), find_listing_by_id() (+31 more)
+Cohesion: 0.07
+Nodes (44): Bytes, Duration, Result, String, StorageProvider, UnimplementedStorage, count_listings(), find_listing_by_id() (+36 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.10
@@ -241,7 +249,7 @@ Nodes (5): Honesty Rules, Stamped manifest files guard (#2015), Step 9 - Save ma
 Cohesion: 0.40
 Nodes (5): Shrink-guard (#479), Step 4.5 - Graph health check, Step 4 - Build graph, cluster, analyze, generate outputs, Step 5 - Label communities, Step 6 - Generate Obsidian vault and HTML
 
-### Community 32 - "Extraction subagent prompt (compact)"
+### Community 32 - "router.tsx"
 Cohesion: 0.50
 Nodes (5): Compact prompt rationale (return inline, no CHUNK_PATH), Extraction subagent prompt (compact), spawn_agent / wait_agent / close_agent mechanism, Step B2 - Dispatch ALL subagents (Codex spawn_agent), multi_agent feature flag (~/.codex/config.toml)
 
@@ -258,10 +266,10 @@ Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
 ### Community 43 - "ListingDetailDto"
-Cohesion: 0.11
-Nodes (36): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+28 more)
+Cohesion: 0.13
+Nodes (31): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+23 more)
 
-### Community 73 - "ListingFeed.tsx"
+### Community 73 - "listings/index.ts"
 Cohesion: 0.14
 Nodes (26): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+18 more)
 
@@ -289,6 +297,14 @@ Nodes (6): POST /media/upload endpoint, mh-14-listing-management.html wireframe,
 Cohesion: 0.19
 Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
 
+### Community 88 - "scripts"
+Cohesion: 0.17
+Nodes (12): scripts, build, dev, format, generate:types, generate:types:ci, lint, predev (+4 more)
+
+### Community 89 - "package.json"
+Cohesion: 0.25
+Nodes (7): name, typescript, overrides, openapi-typescript, private, type, version
+
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
   .agents/rules/insrtruction-for-my-house.md · relation: references
@@ -298,7 +314,7 @@ Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, Listin
 ## Knowledge Gaps
 - **177 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+172 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -308,12 +324,12 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Why does `AppError` connect `AppError` to `local_fs.rs`, `ListingDetailDto`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `config/mod.rs` to `AppState`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `AppConfig` connect `AppState` to `config/mod.rs`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _177 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**
-  _Cohesion score 0.07510204081632653 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05706760316066725 - nodes in this community are weakly interconnected._

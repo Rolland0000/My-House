@@ -593,7 +593,7 @@
       "label": "AppState",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate",
       "community": 0,
@@ -615,7 +615,7 @@
       "label": "Inner",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "backend_src_app_state_inner",
       "community": 0,
@@ -648,7 +648,7 @@
       "label": ".new()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L28",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_new",
       "community": 0,
@@ -670,7 +670,7 @@
       "label": ".config()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L40",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_config",
       "community": 0,
@@ -681,7 +681,7 @@
       "label": ".db()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L45",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_db",
       "community": 0,
@@ -689,10 +689,21 @@
       "norm_label": ".db()"
     },
     {
+      "label": ".mailer()",
+      "file_type": "code",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "backend_src_app_state_appstate_mailer",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": ".mailer()"
+    },
+    {
       "label": ".storage()",
       "file_type": "code",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L50",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "backend_src_app_state_appstate_storage",
       "community": 0,
@@ -904,8 +915,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "backend_src_config_mod_appconfig",
-      "community": 1,
-      "community_name": "config/mod.rs",
+      "community": 0,
+      "community_name": "AppState",
       "norm_label": "appconfig"
     },
     {
@@ -1259,6 +1270,182 @@
       "community": 0,
       "community_name": "AppState",
       "norm_label": "openapi_schema_reflects_storage_smoke_check()"
+    },
+    {
+      "label": "mailer.rs",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "mailer.rs"
+    },
+    {
+      "label": "MailerError",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_mailererror",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "mailererror"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_rs_string",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "string"
+    },
+    {
+      "label": "AddressError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "addresserror",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "addresserror"
+    },
+    {
+      "label": "Mailer",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_mailer",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "mailer"
+    },
+    {
+      "label": "AsyncSmtpTransport",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "asyncsmtptransport",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "asyncsmtptransport"
+    },
+    {
+      "label": "Tokio1Executor",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "tokio1executor",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "tokio1executor"
+    },
+    {
+      "label": "Mailbox",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "mailbox",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "mailbox"
+    },
+    {
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_mailer_new",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": ".new()"
+    },
+    {
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_rs_result",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "result"
+    },
+    {
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_rs_self",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "self"
+    },
+    {
+      "label": ".send()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_mailer_send",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": ".send()"
+    },
+    {
+      "label": "Address",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "address",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "address"
+    },
+    {
+      "label": "test_config()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L87",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_test_config",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "test_config()"
+    },
+    {
+      "label": "builds_successfully_with_valid_config()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_builds_successfully_with_valid_config",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "builds_successfully_with_valid_config()"
+    },
+    {
+      "label": "rejects_malformed_smtp_from()",
+      "file_type": "code",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "backend_src_infra_mailer_rejects_malformed_smtp_from",
+      "community": 0,
+      "community_name": "AppState",
+      "norm_label": "rejects_malformed_smtp_from()"
     },
     {
       "label": "infra/mod.rs",
@@ -1803,7 +1990,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "backend/src/main.rs",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "backend_src_main_main",
       "community": 0,
@@ -2455,8 +2642,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "service.rs"
     },
     {
@@ -2466,8 +2653,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service_list_listings",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "list_listings()"
     },
     {
@@ -2477,8 +2664,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service_rs_pgpool",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "pgpool"
     },
     {
@@ -2488,8 +2675,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service_rs_result",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "result"
     },
     {
@@ -2499,8 +2686,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service_get_listing_detail",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "get_listing_detail()"
     },
     {
@@ -2510,8 +2697,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_service_rs_uuid",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 10,
+      "community_name": "AppError",
       "norm_label": "uuid"
     },
     {
@@ -3379,8 +3566,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_package",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "package.json"
     },
     {
@@ -3390,8 +3577,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "frontend_package_name",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "name"
     },
     {
@@ -3401,8 +3588,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_package_private",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "private"
     },
     {
@@ -3412,8 +3599,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "frontend_package_version",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "version"
     },
     {
@@ -3423,8 +3610,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_package_type",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "type"
     },
     {
@@ -3434,7 +3621,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_package_scripts",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "scripts"
     },
@@ -3445,7 +3632,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_package_scripts_predev",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "predev"
     },
@@ -3456,7 +3643,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "frontend_package_scripts_dev",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "dev"
     },
@@ -3467,7 +3654,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_package_scripts_build",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "build"
     },
@@ -3478,7 +3665,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "frontend_package_scripts_preview",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "preview"
     },
@@ -3489,7 +3676,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_package_scripts_lint",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "lint"
     },
@@ -3500,7 +3687,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "frontend_package_scripts_prettier_check",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "prettier:check"
     },
@@ -3511,7 +3698,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "frontend_package_scripts_prettier_write",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "prettier:write"
     },
@@ -3522,7 +3709,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "frontend_package_scripts_ts_check",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "ts:check"
     },
@@ -3533,7 +3720,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_package_scripts_format",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "format"
     },
@@ -3544,7 +3731,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "frontend_package_scripts_generate_types",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "generate:types"
     },
@@ -3555,7 +3742,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "frontend_package_scripts_generate_types_ci",
-      "community": 2,
+      "community": 88,
       "community_name": "scripts",
       "norm_label": "generate:types:ci"
     },
@@ -3567,7 +3754,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "dependencies"
     },
     {
@@ -3578,7 +3765,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_tanstack_react_query",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -3589,7 +3776,7 @@
       "_origin": "ast",
       "id": "tanstack_react_query",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "@tanstack/react-query"
     },
     {
@@ -3600,7 +3787,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_clsx",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -3611,7 +3798,7 @@
       "_origin": "ast",
       "id": "clsx",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "clsx"
     },
     {
@@ -3622,7 +3809,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_lucide_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "lucide-react"
     },
     {
@@ -3633,7 +3820,7 @@
       "_origin": "ast",
       "id": "lucide_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "lucide-react"
     },
     {
@@ -3644,7 +3831,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react"
     },
     {
@@ -3655,7 +3842,7 @@
       "_origin": "ast",
       "id": "react",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react"
     },
     {
@@ -3666,7 +3853,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_dom",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-dom"
     },
     {
@@ -3677,7 +3864,7 @@
       "_origin": "ast",
       "id": "react_dom",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-dom"
     },
     {
@@ -3688,7 +3875,7 @@
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_router",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-router"
     },
     {
@@ -3699,7 +3886,7 @@
       "_origin": "ast",
       "id": "react_router",
       "community": 2,
-      "community_name": "scripts",
+      "community_name": "dependencies",
       "norm_label": "react-router"
     },
     {
@@ -3786,8 +3973,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 94,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -3797,8 +3984,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 94,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -3874,8 +4061,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_eslint_plugin_react_refresh",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 90,
+      "community_name": "eslint-plugin-react-refresh",
       "norm_label": "eslint-plugin-react-refresh"
     },
     {
@@ -3885,8 +4072,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "eslint_plugin_react_refresh",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 90,
+      "community_name": "eslint-plugin-react-refresh",
       "norm_label": "eslint-plugin-react-refresh"
     },
     {
@@ -3896,8 +4083,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_globals",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 91,
+      "community_name": "globals",
       "norm_label": "globals"
     },
     {
@@ -3907,8 +4094,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "globals",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 91,
+      "community_name": "globals",
       "norm_label": "globals"
     },
     {
@@ -3940,8 +4127,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_prettier",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 92,
+      "community_name": "prettier",
       "norm_label": "prettier"
     },
     {
@@ -3951,8 +4138,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "prettier",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 92,
+      "community_name": "prettier",
       "norm_label": "prettier"
     },
     {
@@ -3962,8 +4149,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_tailwindcss",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 93,
+      "community_name": "tailwindcss",
       "norm_label": "tailwindcss"
     },
     {
@@ -3973,8 +4160,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "tailwindcss",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 93,
+      "community_name": "tailwindcss",
       "norm_label": "tailwindcss"
     },
     {
@@ -4006,8 +4193,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_typescript_eslint",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "typescript-eslint",
       "norm_label": "typescript-eslint"
     },
     {
@@ -4017,8 +4204,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "typescript_eslint",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "typescript-eslint",
       "norm_label": "typescript-eslint"
     },
     {
@@ -4050,8 +4237,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "frontend_package_overrides",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "overrides"
     },
     {
@@ -4061,8 +4248,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "frontend_package_overrides_openapi_typescript",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "openapi-typescript"
     },
     {
@@ -4072,8 +4259,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "frontend_package_openapi_typescript_typescript",
-      "community": 2,
-      "community_name": "scripts",
+      "community": 89,
+      "community_name": "package.json",
       "norm_label": "typescript"
     },
     {
@@ -4348,7 +4535,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listings/api.ts"
     },
     {
@@ -4359,7 +4546,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingsummary",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingsummary"
     },
     {
@@ -4370,7 +4557,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingdetail",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingdetail"
     },
     {
@@ -4381,7 +4568,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingtype",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingtype"
     },
     {
@@ -4392,7 +4579,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingstatus",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingstatus"
     },
     {
@@ -4403,7 +4590,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_paginationmeta",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "paginationmeta"
     },
     {
@@ -4414,7 +4601,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistingsparams",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listlistingsparams"
     },
     {
@@ -4425,7 +4612,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistingsresult",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listlistingsresult"
     },
     {
@@ -4436,7 +4623,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistings",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listlistings()"
     },
     {
@@ -4447,7 +4634,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_getlisting",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "getlisting()"
     },
     {
@@ -4458,7 +4645,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingcard.tsx"
     },
     {
@@ -4469,7 +4656,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard_listingcardprops",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingcardprops"
     },
     {
@@ -4480,7 +4667,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard_listingcard",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingcard()"
     },
     {
@@ -4491,7 +4678,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingdetail",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingdetail.tsx"
     },
     {
@@ -4502,7 +4689,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingdetail_listingdetail",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingdetail()"
     },
     {
@@ -4513,7 +4700,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingfeed.tsx"
     },
     {
@@ -4524,7 +4711,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_typeoptions",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "typeoptions"
     },
     {
@@ -4535,7 +4722,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_listingfeed",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listingfeed()"
     },
     {
@@ -4546,7 +4733,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "uselistings.ts"
     },
     {
@@ -4557,7 +4744,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings_uselistings",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "uselistings()"
     },
     {
@@ -4568,7 +4755,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings_uselisting",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "uselisting()"
     },
     {
@@ -4579,7 +4766,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_index",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "listings/index.ts"
     },
     {
@@ -4590,7 +4777,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_labels",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "labels.ts"
     },
     {
@@ -4601,7 +4788,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_labels_typelabels",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "typelabels"
     },
     {
@@ -4678,7 +4865,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "client.ts"
     },
     {
@@ -4689,7 +4876,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_errorenvelope",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "errorenvelope"
     },
     {
@@ -4700,7 +4887,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apierror",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "apierror"
     },
     {
@@ -4711,7 +4898,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apierror_constructor",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": ".constructor()"
     },
     {
@@ -4722,7 +4909,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_request",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "request()"
     },
     {
@@ -4733,7 +4920,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_queryvalue",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "queryvalue"
     },
     {
@@ -4744,7 +4931,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_buildquerystring",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "buildquerystring()"
     },
     {
@@ -4755,7 +4942,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apiget",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "apiget()"
     },
     {
@@ -5382,7 +5569,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "usepagination.ts"
     },
     {
@@ -5393,7 +5580,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination_usepagination",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "usepagination()"
     },
     {
@@ -5426,7 +5613,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "format.ts"
     },
     {
@@ -5437,7 +5624,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format_priceformatter",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "priceformatter"
     },
     {
@@ -5448,7 +5635,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format_formatprice",
       "community": 73,
-      "community_name": "ListingFeed.tsx",
+      "community_name": "listings/index.ts",
       "norm_label": "formatprice()"
     },
     {
@@ -7749,7 +7936,7 @@
       "contributor": null,
       "community": 32,
       "norm_label": "step b2 - dispatch all subagents (codex spawn_agent)",
-      "community_name": "Extraction subagent prompt (compact)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_skill_step_b2_dispatch_subagents_codex"
     },
     {
@@ -7764,7 +7951,7 @@
       "rationale": "Codex has no Agent tool with disk-based chunk files; it collects agent results in memory via wait_agent/close_agent, so per-chunk success is judged by valid JSON output rather than a chunk file existing on disk, and requires multi_agent=true in ~/.codex/config.toml.",
       "community": 32,
       "norm_label": "spawn_agent / wait_agent / close_agent mechanism",
-      "community_name": "Extraction subagent prompt (compact)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_skill_spawn_agent_mechanism"
     },
     {
@@ -7877,7 +8064,7 @@
       "contributor": null,
       "community": 32,
       "norm_label": "extraction subagent prompt (compact)",
-      "community_name": "Extraction subagent prompt (compact)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_references_extraction_spec_subagent_prompt_compact"
     },
     {
@@ -7892,7 +8079,7 @@
       "rationale": "The Codex variant compresses the same rules into a denser prompt because agents return results inline via wait_agent rather than writing chunk files to disk, so the CHUNK_PATH/Write-tool instructions are dropped and replaced by 'return the JSON inline'.",
       "community": 32,
       "norm_label": "compact prompt rationale (return inline, no chunk_path)",
-      "community_name": "Extraction subagent prompt (compact)",
+      "community_name": "router.tsx",
       "id": "codex_skills_graphify_references_extraction_spec_compact_rationale"
     },
     {
@@ -8018,7 +8205,7 @@
       "contributor": null,
       "community": 32,
       "norm_label": "multi_agent feature flag (~/.codex/config.toml)",
-      "community_name": "Extraction subagent prompt (compact)",
+      "community_name": "router.tsx",
       "id": "multi_agent_feature_flag_config_toml"
     },
     {
@@ -10333,7 +10520,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state",
@@ -10344,7 +10531,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state",
@@ -10388,10 +10575,22 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_app_state",
+      "target": "backend_src_infra_mailer_mailer",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L40",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10402,7 +10601,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L45",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10413,7 +10612,18 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L28",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate",
+      "target": "backend_src_app_state_appstate_mailer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10424,7 +10634,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L50",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate",
@@ -10435,7 +10645,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10447,7 +10657,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10615,7 +10825,31 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L50",
+      "source_location": "L54",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_mailer",
+      "target": "backend_src_app_state_rs_arc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_new",
+      "target": "backend_src_app_state_rs_arc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L59",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10627,7 +10861,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L23",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10639,7 +10873,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10651,7 +10885,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L23",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10663,7 +10897,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
       "context": "field",
       "_origin": "ast",
@@ -10675,7 +10909,19 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L45",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_app_state_inner",
+      "target": "backend_src_infra_mailer_mailer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L49",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10687,7 +10933,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L28",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10699,7 +10945,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L50",
+      "source_location": "L59",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10711,7 +10957,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L28",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -10723,7 +10969,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L28",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10732,12 +10978,24 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_new",
+      "target": "backend_src_infra_mailer_mailer",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L29",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_app_state_appstate_new",
@@ -10747,12 +11005,24 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app_state.rs",
-      "source_location": "L40",
+      "source_location": "L44",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
       "source": "backend_src_app_state_appstate_config",
       "target": "backend_src_config_mod_appconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app_state.rs",
+      "source_location": "L54",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_app_state_appstate_mailer",
+      "target": "backend_src_infra_mailer_mailer",
       "confidence_score": 1.0
     },
     {
@@ -11531,6 +11801,42 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_config_mod_appconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_new",
+      "target": "backend_src_config_mod_appconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_test_config",
+      "target": "backend_src_config_mod_appconfig",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/infra/storage/mod.rs",
@@ -12037,6 +12343,275 @@
       "_origin": "ast",
       "source": "backend_src_infra_health_check_storage",
       "target": "backend_src_infra_health_storagestatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "asyncsmtptransport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_infra_mailer_builds_successfully_with_valid_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_infra_mailer_mailer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_infra_mailer_mailererror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_infra_mailer_rejects_malformed_smtp_from",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "backend_src_infra_mailer_test_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer",
+      "target": "mailbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_new",
+      "target": "backend_src_infra_mailer_mailererror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailererror",
+      "target": "addresserror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailererror",
+      "target": "backend_src_infra_mailer_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_send",
+      "target": "backend_src_infra_mailer_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer",
+      "target": "asyncsmtptransport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer",
+      "target": "backend_src_infra_mailer_mailer_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer",
+      "target": "backend_src_infra_mailer_mailer_send",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer",
+      "target": "mailbox",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer",
+      "target": "tokio1executor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_new",
+      "target": "backend_src_infra_mailer_rs_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "generic_arg",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_new",
+      "target": "backend_src_infra_mailer_rs_self",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_send",
+      "target": "backend_src_infra_mailer_mailer_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_rejects_malformed_smtp_from",
+      "target": "backend_src_infra_mailer_mailer_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_mailer_send",
+      "target": "address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_builds_successfully_with_valid_config",
+      "target": "backend_src_infra_mailer_test_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/infra/mailer.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_infra_mailer_rejects_malformed_smtp_from",
+      "target": "backend_src_infra_mailer_test_config",
       "confidence_score": 1.0
     },
     {
@@ -13273,7 +13848,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/main.rs",
-      "source_location": "L12",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_main",
@@ -23998,5 +24573,5 @@
       "source_file": ".github/workflows/ci-backend.yml"
     }
   ],
-  "built_at_commit": "2de6b0fc5566a159b8f2b8d1b6692bfc0b0040bf"
+  "built_at_commit": "f8077ea36df5df50b940cc363aeb9eb10483a25d"
 }

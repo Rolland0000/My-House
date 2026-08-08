@@ -29,6 +29,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  # Local dev SMTP catcher — accepts any mail on 1025, no real delivery.
+  # UI at http://localhost:8025 to inspect what Mailer::send actually sent.
+  mailhog:
+    profiles: ["dev"]
+    image: mailhog/mailhog
+    container_name: mh-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
 volumes:
   postgres_data:

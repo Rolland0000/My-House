@@ -1,7 +1,7 @@
 {
   "0": "AppState",
   "1": "config/mod.rs",
-  "2": "scripts",
+  "2": "dependencies",
   "3": "CI Backend Workflow",
   "4": "devDependencies",
   "5": "components/index.ts",
@@ -31,7 +31,7 @@
   "29": "connect_db",
   "30": "Step 9 - Save manifest, update cost tracker, clean up, and report",
   "31": "Step 4 - Build graph, cluster, analyze, generate outputs",
-  "32": "Extraction subagent prompt (compact)",
+  "32": "router.tsx",
   "33": "MH-XXX Ticket Conventions",
   "34": "git commit hook (graphify hook install)",
   "35": "analyze job (rust + javascript-typescript matrix)",
@@ -72,7 +72,7 @@
   "70": "auth/index.ts",
   "71": "contact/api.ts",
   "72": "contact/index.ts",
-  "73": "ListingFeed.tsx",
+  "73": "listings/index.ts",
   "74": "CLAUDE.md — MyHouse project instructions",
   "75": "DESIGN_TOKENS.md (MH-17) — Design Token Set",
   "76": "profile/api.ts",
@@ -86,5 +86,13 @@
   "84": "vite-env.d.ts",
   "85": "vite.config.ts",
   "86": "pre-commit",
-  "87": "router.tsx"
+  "87": "router.tsx",
+  "88": "scripts",
+  "89": "package.json",
+  "90": "eslint-plugin-react-refresh",
+  "91": "globals",
+  "92": "prettier",
+  "93": "tailwindcss",
+  "94": "@types/react-dom",
+  "95": "typescript-eslint"
 }
