@@ -35,6 +35,31 @@ pub async fn check(State(state): State<AppState>) -> (StatusCode, Json<HealthSta
     }
 }
 
+/// Storage backend response body.
+#[derive(Serialize, ToSchema)]
+pub struct StorageStatus {
+    status: &'static str,
+}
+
+/// Throwaway smoke check confirming `Arc<dyn StorageProvider>` (MH-27) is reachable
+/// from a handler via `State<AppState>` extraction. No module has real uploads yet
+/// (first real caller is EP-08/Media) — this only proves the plumbing compiles and
+/// resolves through the extractor, mirroring [`check`] above.
+#[utoipa::path(
+    get,
+    path = "/health/storage",
+    tag = "health",
+    responses(
+        (status = 200, description = "Storage provider reachable via AppState", body = StorageStatus),
+    )
+)]
+pub async fn check_storage(State(state): State<AppState>) -> Json<StorageStatus> {
+    // Touching the trait object through State<AppState> is the point of this
+    // check — no operation is actually performed on it yet.
+    let _storage = state.storage();
+    Json(StorageStatus { status: "ok" })
+}
+
 #[cfg(test)]
 mod tests {
     use utoipa_axum::routes;
@@ -56,5 +81,23 @@ mod tests {
         assert!(operation.responses.responses.contains_key("200"));
         assert!(operation.responses.responses.contains_key("503"));
         assert!(schemas.iter().any(|(name, _)| name == "HealthStatus"));
+    }
+
+    /// Same pin for the storage smoke check (MH-27): confirms `GET
+    /// /health/storage` is registered and documented, i.e. that `check_storage`
+    /// — which extracts `State<AppState>` and calls `.storage()` — compiles
+    /// and is wired into the router's route table.
+    #[test]
+    fn openapi_schema_reflects_storage_smoke_check() {
+        let (schemas, paths, _method_router) = routes!(super::check_storage);
+
+        let operation = paths
+            .paths
+            .get("/health/storage")
+            .and_then(|item| item.get.as_ref())
+            .expect("GET /health/storage should be registered in the OpenAPI schema");
+
+        assert!(operation.responses.responses.contains_key("200"));
+        assert!(schemas.iter().any(|(name, _)| name == "StorageStatus"));
     }
 }

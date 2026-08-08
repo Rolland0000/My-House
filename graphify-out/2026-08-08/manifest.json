@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "backend/src/infra/storage/mod.rs": {
-    "mtime": 1786196856.683791,
-    "ast_hash": "ccbbaaa02a611c18fcda156409ac97c8",
+    "mtime": 1786198586.2127297,
+    "ast_hash": "7a952c9c190d071f7811c34a96f836e7",
     "semantic_hash": ""
   },
   "backend/src/lib.rs": {
@@ -757,6 +757,11 @@
   "frontend/compose-frontend.yml": {
     "mtime": 1786172206.0806975,
     "ast_hash": "15f957ffe0f552659d1fc674681b62ff",
+    "semantic_hash": ""
+  },
+  "backend/src/infra/storage/local_fs.rs": {
+    "mtime": 1786198747.9240978,
+    "ast_hash": "918a04f27e1b04130426a3b1c121ab07",
     "semantic_hash": ""
   }
 }

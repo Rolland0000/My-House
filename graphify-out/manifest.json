@@ -60,9 +60,9 @@
     "semantic_hash": "dfbb8ba8eef635d9ee9cdce375ef3fc8"
   },
   "backend/src/app_state.rs": {
-    "mtime": 1784418984.5901663,
-    "ast_hash": "0306db8fe3b72bb51a80f14601d89eb5",
-    "semantic_hash": "0306db8fe3b72bb51a80f14601d89eb5"
+    "mtime": 1786200874.7462354,
+    "ast_hash": "e2fa9717c859d1b03e91237a91b56039",
+    "semantic_hash": ""
   },
   "backend/src/bin/gen_openapi.rs": {
     "mtime": 1786185196.720061,
@@ -80,9 +80,9 @@
     "semantic_hash": "653adab761993ec6c82d2cf7b8a871ea"
   },
   "backend/src/infra/health.rs": {
-    "mtime": 1784418984.5916786,
-    "ast_hash": "d5b369f8629baaa0729e4b6133bfe9ca",
-    "semantic_hash": "d5b369f8629baaa0729e4b6133bfe9ca"
+    "mtime": 1786200979.5499766,
+    "ast_hash": "36ccad82e750f7dbd581e99e189613e8",
+    "semantic_hash": ""
   },
   "backend/src/infra/mod.rs": {
     "mtime": 1786196869.5037656,
@@ -155,8 +155,8 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "backend/src/route.rs": {
-    "mtime": 1786193793.796323,
-    "ast_hash": "e59a40ac151f668aedd741260904d980",
+    "mtime": 1786201047.5052283,
+    "ast_hash": "929f71b0844f9228684d4d88437c8e67",
     "semantic_hash": ""
   },
   "backend/src/shared/errors.rs": {
@@ -165,9 +165,9 @@
     "semantic_hash": "1fe5bb9a94dffe08cc90f95836dfe586"
   },
   "backend/src/shared/mod.rs": {
-    "mtime": 1784005046.4807868,
-    "ast_hash": "3a441c8c801b50b326b84b0c349c43a3",
-    "semantic_hash": "3a441c8c801b50b326b84b0c349c43a3"
+    "mtime": 1786200959.4749396,
+    "ast_hash": "6bafc21a6179a1da058db01ad302a69f",
+    "semantic_hash": ""
   },
   "backend/src/shared/pagination.rs": {
     "mtime": 1786184074.211461,
@@ -180,8 +180,8 @@
     "semantic_hash": "9962697b78f27d8117bf284578d5195b"
   },
   "frontend/docs-frontend/openapi.json": {
-    "mtime": 1786193793.797905,
-    "ast_hash": "c3d274d5b5bcafe03c2ce5c36dde8d8a",
+    "mtime": 1786201258.6970468,
+    "ast_hash": "2e25f62ec8147a9bcfa9ea890dd92664",
     "semantic_hash": ""
   },
   "frontend/eslint.config.js": {
@@ -762,6 +762,11 @@
   "backend/src/infra/storage/local_fs.rs": {
     "mtime": 1786198747.9240978,
     "ast_hash": "918a04f27e1b04130426a3b1c121ab07",
+    "semantic_hash": ""
+  },
+  "backend/src/shared/storage_key.rs": {
+    "mtime": 1786200919.300879,
+    "ast_hash": "26dcf5339878e8296891783b1ac87328",
     "semantic_hash": ""
   }
 }
