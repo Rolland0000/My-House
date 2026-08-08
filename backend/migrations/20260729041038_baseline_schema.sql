@@ -92,7 +92,22 @@ CREATE TABLE listings (
 CREATE INDEX idx_listings_search ON listings USING GIN(search_vector);
 CREATE INDEX idx_listings_owner  ON listings(owner_id);
 CREATE INDEX idx_listings_city   ON listings(city);
-CREATE INDEX idx_listings_city_normalized ON listings(lower(unaccent(city)));
+
+-- unaccent() is STABLE, not IMMUTABLE (depends on search_path resolving the
+-- text search dictionary), so it can't be used directly in an index
+-- expression. Wrap it pinned to the "unaccent" dictionary and mark the
+-- wrapper IMMUTABLE — safe here since we always pass the same dictionary.
+CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+    RETURNS text
+    LANGUAGE sql
+    IMMUTABLE
+    PARALLEL SAFE
+    STRICT
+AS $$
+    SELECT unaccent('unaccent', $1)
+$$;
+
+CREATE INDEX idx_listings_city_normalized ON listings(lower(immutable_unaccent(city)));
 CREATE INDEX idx_listings_status ON listings(status);
 CREATE INDEX idx_listings_type   ON listings(type);
 
