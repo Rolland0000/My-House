@@ -110,6 +110,7 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::check))
+        .routes(routes!(health::check_storage))
         .nest("/api/v1", api_v1)
         .split_for_parts()
 }
