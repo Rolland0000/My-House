@@ -15,6 +15,7 @@
   "13": ".mcp.json",
   "14": "React/TypeScript Rules (Agents)",
   "15": "Extraction subagent prompt (full)",
+  "16": "local_fs.rs",
   "17": "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark",
   "18": "Rust General Rules (Agents)",
   "19": "save-result feedback loop",
@@ -22,7 +23,7 @@
   "21": "MyHouse Project Instructions (Agents)",
   "22": "Database Rules (Claude, sqlx/PostgreSQL)",
   "23": "/graphify command",
-  "24": "types.rs",
+  "24": "storage_key.rs",
   "25": "/graphify add <url>",
   "26": "Multiple repos cross-repo graph merge",
   "27": "Code Review Backend Skill (Rust/Axum/MyHouse)",
@@ -84,5 +85,6 @@
   "83": "mh-14-listing-management.html wireframe",
   "84": "vite-env.d.ts",
   "85": "vite.config.ts",
-  "86": "pre-commit"
+  "86": "pre-commit",
+  "87": "router.tsx"
 }

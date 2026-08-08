@@ -1,16 +1,16 @@
 # Graph Report - My-House  (2026-08-08)
 
 ## Corpus Check
-- 139 files · ~71,212 words
+- 140 files · ~71,765 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 752 nodes · 1139 edges · 87 communities (74 shown, 13 thin omitted)
+- 781 nodes · 1214 edges · 86 communities (73 shown, 13 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 68 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `05cee009`
+- Built from commit: `78b2d74c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,7 +31,6 @@
 - .mcp.json
 - React/TypeScript Rules (Agents)
 - Extraction subagent prompt (full)
-- router.tsx
 - Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark
 - Rust General Rules (Agents)
 - save-result feedback loop
@@ -72,16 +71,16 @@
 - pre-commit
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 27 edges
-2. `AppError` - 24 edges
+1. `AppError` - 29 edges
+2. `cn()` - 27 edges
 3. `AppState` - 21 edges
 4. `compilerOptions` - 18 edges
 5. `compilerOptions` - 16 edges
 6. `ConfigError` - 13 edges
 7. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
-8. `ListingSummaryDto` - 12 edges
-9. `ListingDetailDto` - 12 edges
-10. `scripts` - 12 edges
+8. `LocalFsStorage` - 12 edges
+9. `ListingSummaryDto` - 12 edges
+10. `ListingDetailDto` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Step B2 - Dispatch ALL subagents in a single message` --semantically_similar_to--> `Step B2 - Dispatch ALL subagents (Codex spawn_agent)`  [INFERRED] [semantically similar]
@@ -109,7 +108,7 @@
 - **Backend CI Quality Gate (fmt, clippy, deny, audit, build, coverage)** — github_workflows_ci_backend_yml_backend_fmt, github_workflows_ci_backend_yml_backend_clippy, github_workflows_ci_backend_yml_backend_deny, github_workflows_ci_backend_yml_backend_audit, github_workflows_ci_backend_yml_backend_build, github_workflows_ci_backend_yml_backend_coverage [EXTRACTED 1.00]
 - **OpenAPI-to-TypeScript Generation Chain (utoipa → gen_openapi → types.ts → codegen job)** — github_workflows_ci_backend_yml_gen_openapi_bin, frontend_src_shared_api_types_ts, docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline, github_workflows_ci_frontend_yml_frontend_codegen [EXTRACTED 1.00]
 
-## Communities (87 total, 13 thin omitted)
+## Communities (86 total, 13 thin omitted)
 
 ### Community 0 - "AppState"
 Cohesion: 0.09
@@ -132,8 +131,8 @@ Cohesion: 0.06
 Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
 
 ### Community 5 - "components/index.ts"
-Cohesion: 0.07
-Nodes (45): AlertProps, AlertVariant, variantConfig, Button(), ButtonProps, ButtonSize, ButtonVariant, sizeClasses (+37 more)
+Cohesion: 0.05
+Nodes (53): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router (+45 more)
 
 ### Community 6 - "mh-15-owner-request.html wireframe"
 Cohesion: 0.18
@@ -152,16 +151,16 @@ Cohesion: 0.08
 Nodes (23): compilerOptions, allowImportingTsExtensions, jsx, lib, module, moduleDetection, moduleResolution, noEmit (+15 more)
 
 ### Community 10 - "AppError"
-Cohesion: 0.08
-Nodes (39): Result, String, StorageProvider, UnimplementedStorage, count_listings(), find_listing_by_id(), find_media_for_listing(), list_listings() (+31 more)
+Cohesion: 0.07
+Nodes (43): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_returns_previously_uploaded_bytes(), Bytes, Duration, Path (+35 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 12 - ".new"
-Cohesion: 0.18
-Nodes (15): PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T, Vec, test_defaults_applied_when_none() (+7 more)
+Cohesion: 0.12
+Nodes (23): get_by_id(), list(), Json, Path, Result, State, Uuid, PaginatedResponse (+15 more)
 
 ### Community 13 - ".mcp.json"
 Cohesion: 0.15
@@ -174,10 +173,6 @@ Nodes (15): Functional Component Conventions (no React.FC), api.ts Single Fetch 
 ### Community 15 - "Extraction subagent prompt (full)"
 Cohesion: 0.18
 Nodes (13): EXTRACTED/INFERRED/AMBIGUOUS confidence rubric, Extraction JSON schema, Node ID format rule ({stem}_{entity}), source_file verbatim rule, Extraction subagent prompt (full), Part A - Structural extraction for code files (AST), Part B - Semantic extraction (parallel subagents), Part C - Merge AST + semantic into final extraction (+5 more)
-
-### Community 16 - "router.tsx"
-Cohesion: 0.19
-Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
 
 ### Community 17 - "Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark"
 Cohesion: 0.18
@@ -252,8 +247,8 @@ Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
 ### Community 43 - "ListingDetailDto"
-Cohesion: 0.11
-Nodes (36): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+28 more)
+Cohesion: 0.10
+Nodes (43): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+35 more)
 
 ### Community 73 - "ListingFeed.tsx"
 Cohesion: 0.13
@@ -297,12 +292,12 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `AppError` connect `AppError` to `ListingDetailDto`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `ListingDetailDto`, `.new`?**
+  _High betweenness centrality (0.043) - this node is a cross-community bridge._
+- **Why does `AppState` connect `AppState` to `.new`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `config/mod.rs` to `AppState`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _177 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**
