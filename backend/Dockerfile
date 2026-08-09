@@ -25,6 +25,7 @@ RUN mkdir src \
 # offline cache instead of a live DB (see database.md — `cargo sqlx prepare`
 # regenerates it after query changes).
 ENV SQLX_OFFLINE=true
+COPY askama.toml ./askama.toml
 COPY migrations ./migrations
 COPY .sqlx ./.sqlx
 COPY src ./src

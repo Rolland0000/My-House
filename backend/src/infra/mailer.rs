@@ -112,6 +112,7 @@ mod tests {
             smtp_host: "localhost".to_string(),
             smtp_port: 1025,
             smtp_from: "noreply@myhouse.app".to_string(),
+            admin_notification_email: "admin@myhouse.app".to_string(),
         }
     }
 

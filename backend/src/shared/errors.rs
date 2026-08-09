@@ -107,6 +107,9 @@ pub enum AppError {
 
     #[error("Storage error: {0}")]
     Storage(String),
+
+    #[error("Template rendering error: {0}")]
+    TemplateRender(String),
 }
 
 impl AppError {
@@ -146,6 +149,7 @@ impl AppError {
             Self::Internal => (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
             Self::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR"),
             Self::Storage(_) => (StatusCode::INTERNAL_SERVER_ERROR, "STORAGE_ERROR"),
+            Self::TemplateRender(_) => (StatusCode::INTERNAL_SERVER_ERROR, "TEMPLATE_RENDER_ERROR"),
         }
     }
 }
