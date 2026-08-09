@@ -8,6 +8,7 @@ use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
 use crate::config::AppEnv;
 use crate::infra::health;
+use crate::middleware::logging::request_id;
 use crate::modules::listings;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -135,7 +136,7 @@ pub fn build_router(state: AppState) -> Router {
     };
 
     router
-        // TODO EP-01: .layer(TraceLayer::new_for_http())
+        .layer(axum::middleware::from_fn(request_id))
         // TODO EP-01: .layer(CorsLayer::permissive())   ← tighten in prod
         .with_state(state)
 }

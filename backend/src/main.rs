@@ -8,7 +8,7 @@ use backend_my_house::{
     infra::db,
     infra::mailer::Mailer,
 };
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
 #[tokio::main]
 async fn main() {
@@ -46,9 +46,21 @@ async fn main() {
     //
     // Logging is initialised after dotenvy so that RUST_LOG from .env is
     // already in the environment when EnvFilter reads it.
+    //
+    // Format is JSON in staging/production (machine-parseable for whatever
+    // log capture the hosting platform provides — no shipping/aggregation is
+    // wired at MVP, cf. Epic "(rattrapage) Logging & Request Tracing" scope
+    // boundary) and pretty/human-readable in development. Verbosity is
+    // controlled exclusively via RUST_LOG — no dedicated log-level config var.
+    let fmt_layer = if app_env.is_dev() {
+        tracing_subscriber::fmt::layer().pretty().boxed()
+    } else {
+        tracing_subscriber::fmt::layer().json().boxed()
+    };
+
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
-        .with(tracing_subscriber::fmt::layer())
+        .with(fmt_layer)
         .init();
 
     // ── 4. Fail-fast config loading ───────────────────────────────────────────
