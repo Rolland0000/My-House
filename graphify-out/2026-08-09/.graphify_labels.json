@@ -1,7 +1,7 @@
 {
   "0": "AppState",
   "1": "config/mod.rs",
-  "2": "dependencies",
+  "2": "scripts",
   "3": "CI Backend Workflow",
   "4": "devDependencies",
   "5": "components/index.ts",
@@ -87,12 +87,5 @@
   "85": "vite.config.ts",
   "86": "pre-commit",
   "87": "router.tsx",
-  "88": "scripts",
-  "89": "package.json",
-  "90": "eslint-plugin-react-refresh",
-  "91": "globals",
-  "92": "prettier",
-  "93": "tailwindcss",
-  "94": "@types/react-dom",
-  "95": "typescript-eslint"
+  "88": "notifications/service.rs"
 }

@@ -1,16 +1,16 @@
 # Graph Report - My-House  (2026-08-09)
 
 ## Corpus Check
-- 143 files · ~73,841 words
+- 144 files · ~74,202 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 835 nodes · 1309 edges · 89 communities (76 shown, 13 thin omitted)
+- 846 nodes · 1323 edges · 89 communities (76 shown, 13 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0f30403c`
+- Built from commit: `cd6253f6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -64,14 +64,14 @@
 - Pagination standard (§8.3)
 - R-07: Absence of index on listings.price
 - POST /auth/refresh endpoint
-- listings/index.ts
+- ListingFeed.tsx
 - CLAUDE.md — MyHouse project instructions
 - DESIGN_TOKENS.md (MH-17) — Design Token Set
 - mh-12-auth-flow.html wireframe
 - StorageProvider trait
 - mh-14-listing-management.html wireframe
 - pre-commit
-- router.tsx
+- resolve_request_id
 - notifications/service.rs
 
 ## God Nodes (most connected - your core abstractions)
@@ -135,8 +135,8 @@ Cohesion: 0.06
 Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
 
 ### Community 5 - "components/index.ts"
-Cohesion: 0.07
-Nodes (46): Alert(), AlertProps, AlertVariant, variantConfig, Button(), ButtonProps, ButtonSize, ButtonVariant (+38 more)
+Cohesion: 0.05
+Nodes (53): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router (+45 more)
 
 ### Community 6 - "mh-15-owner-request.html wireframe"
 Cohesion: 0.18
@@ -163,8 +163,8 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 12 - ".new"
-Cohesion: 0.18
-Nodes (15): PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T, Vec, test_defaults_applied_when_none() (+7 more)
+Cohesion: 0.12
+Nodes (23): get_by_id(), list(), Json, Path, Result, State, Uuid, PaginatedResponse (+15 more)
 
 ### Community 13 - ".mcp.json"
 Cohesion: 0.15
@@ -259,12 +259,12 @@ Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
 ### Community 43 - "ListingDetailDto"
-Cohesion: 0.13
-Nodes (31): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+23 more)
+Cohesion: 0.18
+Nodes (23): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+15 more)
 
-### Community 73 - "listings/index.ts"
-Cohesion: 0.14
-Nodes (26): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+18 more)
+### Community 73 - "ListingFeed.tsx"
+Cohesion: 0.13
+Nodes (27): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+19 more)
 
 ### Community 74 - "CLAUDE.md — MyHouse project instructions"
 Cohesion: 0.17
@@ -286,9 +286,9 @@ Nodes (7): ADR-05: StorageProvider trait + LocalFsStorage over S3-at-MVP, LocalF
 Cohesion: 0.33
 Nodes (6): POST /media/upload endpoint, mh-14-listing-management.html wireframe, Owner's own listings ('Mes biens') page, Photo dropzone component, Publish/edit listing form page, Identity document dropzone component
 
-### Community 87 - "router.tsx"
-Cohesion: 0.19
-Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
+### Community 87 - "resolve_request_id"
+Cohesion: 0.25
+Nodes (10): generates_a_valid_uuid_when_header_is_absent(), propagates_incoming_x_request_id_header_verbatim(), request_id(), resolve_request_id(), Response, String, two_calls_without_header_produce_distinct_ids(), HeaderMap (+2 more)
 
 ### Community 88 - "notifications/service.rs"
 Cohesion: 0.19
@@ -312,12 +312,12 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AppError` connect `AppError` to `local_fs.rs`, `notifications/service.rs`, `ListingDetailDto`?**
-  _High betweenness centrality (0.055) - this node is a cross-community bridge._
-- **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `local_fs.rs`, `notifications/service.rs`, `.new`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `AppState` connect `AppState` to `.new`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `AppState` to `config/mod.rs`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _182 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**

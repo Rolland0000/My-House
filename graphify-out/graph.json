@@ -2031,6 +2031,127 @@
       "norm_label": "main()"
     },
     {
+      "label": "logging.rs",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "logging.rs"
+    },
+    {
+      "label": "resolve_request_id()",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_resolve_request_id",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "resolve_request_id()"
+    },
+    {
+      "label": "HeaderMap",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "headermap",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "headermap"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_rs_string",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "string"
+    },
+    {
+      "label": "request_id()",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_request_id",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "request_id()"
+    },
+    {
+      "label": "Request",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "request",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "request"
+    },
+    {
+      "label": "Next",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "next",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "next"
+    },
+    {
+      "label": "Response",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_rs_response",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "response"
+    },
+    {
+      "label": "generates_a_valid_uuid_when_header_is_absent()",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_generates_a_valid_uuid_when_header_is_absent",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "generates_a_valid_uuid_when_header_is_absent()"
+    },
+    {
+      "label": "propagates_incoming_x_request_id_header_verbatim()",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_propagates_incoming_x_request_id_header_verbatim",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "propagates_incoming_x_request_id_header_verbatim()"
+    },
+    {
+      "label": "two_calls_without_header_produce_distinct_ids()",
+      "file_type": "code",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "backend_src_middleware_logging_two_calls_without_header_produce_distinct_ids",
+      "community": 87,
+      "community_name": "resolve_request_id",
+      "norm_label": "two_calls_without_header_produce_distinct_ids()"
+    },
+    {
       "label": "middleware/mod.rs",
       "file_type": "code",
       "source_file": "backend/src/middleware/mod.rs",
@@ -2290,8 +2411,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "handler.rs"
     },
     {
@@ -2301,8 +2422,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_list",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "list()"
     },
     {
@@ -2312,8 +2433,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_state",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "state"
     },
     {
@@ -2323,8 +2444,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "query",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "query"
     },
     {
@@ -2334,8 +2455,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_result",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "result"
     },
     {
@@ -2345,8 +2466,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_json",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "json"
     },
     {
@@ -2356,8 +2477,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_get_by_id",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "get_by_id()"
     },
     {
@@ -2367,8 +2488,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_path",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "path"
     },
     {
@@ -2378,8 +2499,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_src_modules_listings_handler_rs_uuid",
-      "community": 43,
-      "community_name": "ListingDetailDto",
+      "community": 12,
+      "community_name": ".new",
       "norm_label": "uuid"
     },
     {
@@ -2969,7 +3090,7 @@
       "label": "public_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "backend_src_route_public_router",
       "community": 0,
@@ -2991,7 +3112,7 @@
       "label": "seeker_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "backend_src_route_seeker_router",
       "community": 0,
@@ -3013,7 +3134,7 @@
       "label": "owner_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "backend_src_route_owner_router",
       "community": 0,
@@ -3024,7 +3145,7 @@
       "label": "admin_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L74",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "backend_src_route_admin_router",
       "community": 0,
@@ -3035,7 +3156,7 @@
       "label": "merged_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L104",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "backend_src_route_merged_router",
       "community": 0,
@@ -3057,7 +3178,7 @@
       "label": "build_router()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L128",
+      "source_location": "L129",
       "_origin": "ast",
       "id": "backend_src_route_build_router",
       "community": 0,
@@ -3068,7 +3189,7 @@
       "label": "openapi_spec()",
       "file_type": "code",
       "source_file": "backend/src/route.rs",
-      "source_location": "L147",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "backend_src_route_openapi_spec",
       "community": 0,
@@ -3180,7 +3301,7 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "id": "response",
+      "id": "backend_src_shared_errors_rs_response",
       "community": 10,
       "community_name": "AppError",
       "norm_label": "response"
@@ -4468,8 +4589,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "app.tsx"
     },
     {
@@ -4479,8 +4600,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_app",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "app()"
     },
     {
@@ -4534,8 +4655,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "rootlayout.tsx"
     },
     {
@@ -4545,8 +4666,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_src_app_layout_rootlayout_rootlayout",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "rootlayout()"
     },
     {
@@ -4556,8 +4677,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_providers",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providers.tsx"
     },
     {
@@ -4567,8 +4688,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_src_app_providers_queryclient",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "queryclient"
     },
     {
@@ -4578,8 +4699,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providersprops",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providersprops"
     },
     {
@@ -4589,8 +4710,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_src_app_providers_providers",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "providers()"
     },
     {
@@ -4600,8 +4721,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_app_router",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "router.tsx"
     },
     {
@@ -4611,8 +4732,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingfeed",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "listingfeed"
     },
     {
@@ -4622,8 +4743,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_src_app_router_listingdetail",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "listingdetail"
     },
     {
@@ -4633,8 +4754,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_src_app_router_withsuspense",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "withsuspense()"
     },
     {
@@ -4644,8 +4765,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "frontend_src_app_router_router",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "router"
     },
     {
@@ -4733,7 +4854,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listings/api.ts"
     },
     {
@@ -4744,7 +4865,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingsummary",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingsummary"
     },
     {
@@ -4755,7 +4876,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingdetail",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingdetail"
     },
     {
@@ -4766,7 +4887,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingtype",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingtype"
     },
     {
@@ -4777,7 +4898,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listingstatus",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingstatus"
     },
     {
@@ -4788,7 +4909,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_paginationmeta",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "paginationmeta"
     },
     {
@@ -4799,7 +4920,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistingsparams",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listlistingsparams"
     },
     {
@@ -4810,7 +4931,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistingsresult",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listlistingsresult"
     },
     {
@@ -4821,7 +4942,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_listlistings",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listlistings()"
     },
     {
@@ -4832,7 +4953,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_api_getlisting",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "getlisting()"
     },
     {
@@ -4843,7 +4964,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingcard.tsx"
     },
     {
@@ -4854,7 +4975,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard_listingcardprops",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingcardprops"
     },
     {
@@ -4865,7 +4986,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingcard_listingcard",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingcard()"
     },
     {
@@ -4876,7 +4997,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingdetail",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingdetail.tsx"
     },
     {
@@ -4887,7 +5008,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingdetail_listingdetail",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingdetail()"
     },
     {
@@ -4898,7 +5019,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingfeed.tsx"
     },
     {
@@ -4909,7 +5030,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_typeoptions",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "typeoptions"
     },
     {
@@ -4920,7 +5041,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_components_listingfeed_listingfeed",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listingfeed()"
     },
     {
@@ -4931,7 +5052,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "uselistings.ts"
     },
     {
@@ -4942,7 +5063,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings_uselistings",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "uselistings()"
     },
     {
@@ -4953,7 +5074,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_hooks_uselistings_uselisting",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "uselisting()"
     },
     {
@@ -4964,7 +5085,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_index",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "listings/index.ts"
     },
     {
@@ -4975,7 +5096,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_labels",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "labels.ts"
     },
     {
@@ -4986,7 +5107,7 @@
       "_origin": "ast",
       "id": "frontend_src_features_listings_labels_typelabels",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "typelabels"
     },
     {
@@ -5051,8 +5172,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_src_main",
-      "community": 87,
-      "community_name": "router.tsx",
+      "community": 5,
+      "community_name": "components/index.ts",
       "norm_label": "main.tsx"
     },
     {
@@ -5063,7 +5184,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "client.ts"
     },
     {
@@ -5074,7 +5195,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_errorenvelope",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "errorenvelope"
     },
     {
@@ -5085,7 +5206,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apierror",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "apierror"
     },
     {
@@ -5096,7 +5217,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apierror_constructor",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": ".constructor()"
     },
     {
@@ -5107,7 +5228,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_request",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "request()"
     },
     {
@@ -5118,7 +5239,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_queryvalue",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "queryvalue"
     },
     {
@@ -5129,7 +5250,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_buildquerystring",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "buildquerystring()"
     },
     {
@@ -5140,7 +5261,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_api_client_apiget",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "apiget()"
     },
     {
@@ -5194,8 +5315,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "frontend_src_shared_components_alert_alert",
-      "community": 5,
-      "community_name": "components/index.ts",
+      "community": 73,
+      "community_name": "ListingFeed.tsx",
       "norm_label": "alert()"
     },
     {
@@ -5767,7 +5888,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "usepagination.ts"
     },
     {
@@ -5778,7 +5899,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_hooks_usepagination_usepagination",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "usepagination()"
     },
     {
@@ -5811,7 +5932,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "format.ts"
     },
     {
@@ -5822,7 +5943,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format_priceformatter",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "priceformatter"
     },
     {
@@ -5833,7 +5954,7 @@
       "_origin": "ast",
       "id": "frontend_src_shared_utils_format_formatprice",
       "community": 73,
-      "community_name": "listings/index.ts",
+      "community_name": "ListingFeed.tsx",
       "norm_label": "formatprice()"
     },
     {
@@ -10951,7 +11072,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L74",
+      "source_location": "L75",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10963,7 +11084,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L128",
+      "source_location": "L129",
       "weight": 1.0,
       "context": "parameter_type",
       "_origin": "ast",
@@ -10975,7 +11096,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L104",
+      "source_location": "L105",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10987,7 +11108,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -10999,7 +11120,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -11011,7 +11132,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "context": "generic_arg",
       "_origin": "ast",
@@ -14102,6 +14223,169 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging",
+      "target": "backend_src_middleware_logging_generates_a_valid_uuid_when_header_is_absent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging",
+      "target": "backend_src_middleware_logging_propagates_incoming_x_request_id_header_verbatim",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging",
+      "target": "backend_src_middleware_logging_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging",
+      "target": "backend_src_middleware_logging_resolve_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging",
+      "target": "backend_src_middleware_logging_two_calls_without_header_produce_distinct_ids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_generates_a_valid_uuid_when_header_is_absent",
+      "target": "backend_src_middleware_logging_resolve_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_propagates_incoming_x_request_id_header_verbatim",
+      "target": "backend_src_middleware_logging_resolve_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_request_id",
+      "target": "backend_src_middleware_logging_resolve_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_resolve_request_id",
+      "target": "backend_src_middleware_logging_rs_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_resolve_request_id",
+      "target": "headermap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_two_calls_without_header_produce_distinct_ids",
+      "target": "backend_src_middleware_logging_resolve_request_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_request_id",
+      "target": "backend_src_middleware_logging_rs_response",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_request_id",
+      "target": "next",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/middleware/logging.rs",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast",
+      "source": "backend_src_middleware_logging_request_id",
+      "target": "request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "backend/src/modules/listings/dto.rs",
       "source_location": "L99",
       "weight": 1.0,
@@ -16116,7 +16400,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L74",
+      "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16127,7 +16411,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L128",
+      "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16138,7 +16422,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L104",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16149,7 +16433,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L147",
+      "source_location": "L148",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16160,7 +16444,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16171,7 +16455,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16182,7 +16466,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route",
@@ -16230,7 +16514,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L106",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_merged_router",
@@ -16241,7 +16525,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16254,7 +16538,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L107",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_merged_router",
@@ -16265,7 +16549,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16277,7 +16561,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L74",
+      "source_location": "L75",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16289,7 +16573,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L128",
+      "source_location": "L129",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16301,7 +16585,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L104",
+      "source_location": "L105",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16313,7 +16597,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16326,7 +16610,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L108",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_merged_router",
@@ -16338,7 +16622,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L109",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_merged_router",
@@ -16350,7 +16634,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L129",
+      "source_location": "L130",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_build_router",
@@ -16361,7 +16645,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L104",
+      "source_location": "L105",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16374,7 +16658,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L148",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "backend_src_route_openapi_spec",
@@ -16385,7 +16669,7 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/route.rs",
-      "source_location": "L147",
+      "source_location": "L148",
       "weight": 1.0,
       "context": "return_type",
       "_origin": "ast",
@@ -16629,7 +16913,7 @@
       "context": "return_type",
       "_origin": "ast",
       "source": "backend_src_shared_errors_apperror_into_response",
-      "target": "response",
+      "target": "backend_src_shared_errors_rs_response",
       "confidence_score": 1.0
     },
     {
@@ -16689,7 +16973,7 @@
       "context": "parameter_type",
       "_origin": "ast",
       "source": "backend_src_shared_errors_parse_envelope",
-      "target": "response",
+      "target": "backend_src_shared_errors_rs_response",
       "confidence_score": 1.0
     },
     {
@@ -25057,5 +25341,5 @@
       "source_file": ".github/workflows/ci-backend.yml"
     }
   ],
-  "built_at_commit": "0f30403c9a5ab2dfd2320e2f9f47422acb234380"
+  "built_at_commit": "cd6253f654fee9a28ab4e48a0c7e24da47a7021d"
 }

@@ -1,23 +1,23 @@
-# Graph Report - My-House  (2026-08-08)
+# Graph Report - My-House  (2026-08-09)
 
 ## Corpus Check
-- 142 files · ~73,010 words
+- 143 files · ~73,841 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 817 nodes · 1284 edges · 96 communities (77 shown, 19 thin omitted)
-- Extraction: 94% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
+- 835 nodes · 1309 edges · 89 communities (76 shown, 13 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 69 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f8077ea3`
+- Built from commit: `0f30403c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AppState
 - config/mod.rs
-- dependencies
+- scripts
 - CI Backend Workflow
 - devDependencies
 - components/index.ts
@@ -72,17 +72,10 @@
 - mh-14-listing-management.html wireframe
 - pre-commit
 - router.tsx
-- scripts
-- package.json
-- eslint-plugin-react-refresh
-- globals
-- prettier
-- tailwindcss
-- @types/react-dom
-- typescript-eslint
+- notifications/service.rs
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppError` - 29 edges
+1. `AppError` - 31 edges
 2. `cn()` - 27 edges
 3. `AppState` - 24 edges
 4. `compilerOptions` - 18 edges
@@ -90,8 +83,8 @@
 6. `ConfigError` - 13 edges
 7. `AppConfig` - 13 edges
 8. `ARCHITECTURE_v1.2.md — arc42 Software Architecture Document` - 13 edges
-9. `LocalFsStorage` - 12 edges
-10. `ListingSummaryDto` - 12 edges
+9. `Mailer` - 12 edges
+10. `LocalFsStorage` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Step B2 - Dispatch ALL subagents in a single message` --semantically_similar_to--> `Step B2 - Dispatch ALL subagents (Codex spawn_agent)`  [INFERRED] [semantically similar]
@@ -119,27 +112,27 @@
 - **Backend CI Quality Gate (fmt, clippy, deny, audit, build, coverage)** — github_workflows_ci_backend_yml_backend_fmt, github_workflows_ci_backend_yml_backend_clippy, github_workflows_ci_backend_yml_backend_deny, github_workflows_ci_backend_yml_backend_audit, github_workflows_ci_backend_yml_backend_build, github_workflows_ci_backend_yml_backend_coverage [EXTRACTED 1.00]
 - **OpenAPI-to-TypeScript Generation Chain (utoipa → gen_openapi → types.ts → codegen job)** — github_workflows_ci_backend_yml_gen_openapi_bin, frontend_src_shared_api_types_ts, docs_technical_spec_mvp_v1_2_md_ts_codegen_pipeline, github_workflows_ci_frontend_yml_frontend_codegen [EXTRACTED 1.00]
 
-## Communities (96 total, 19 thin omitted)
+## Communities (89 total, 13 thin omitted)
 
 ### Community 0 - "AppState"
-Cohesion: 0.06
-Nodes (48): Address, AddressError, AsyncSmtpTransport, ApiDoc, AppServer, Error, Result, Self (+40 more)
+Cohesion: 0.05
+Nodes (50): Address, AddressError, AsyncSmtpTransport, ApiDoc, AppServer, Error, Result, Self (+42 more)
 
 ### Community 1 - "config/mod.rs"
 Cohesion: 0.16
 Nodes (25): app_port_defaults_to_3000_when_absent(), AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env(), rejects_invalid_smtp_port() (+17 more)
 
-### Community 2 - "dependencies"
-Cohesion: 0.15
-Nodes (13): clsx, dependencies, clsx, lucide-react, react, react-dom, react-router, @tanstack/react-query (+5 more)
+### Community 2 - "scripts"
+Cohesion: 0.06
+Nodes (32): clsx, dependencies, clsx, lucide-react, react, react-dom, react-router, @tanstack/react-query (+24 more)
 
 ### Community 3 - "CI Backend Workflow"
 Cohesion: 0.09
 Nodes (33): docker-compose.yml (root), backend-dev service (dev profile, cargo-watch), backend-prod service (prod profile, release binary), frontend-dev service (dev profile, vite dev server), frontend-prod service (prod profile, nginx static), postgres service, ADR-06: utoipa + openapi-typescript over manual TS types, backend/Dockerfile (multi-stage build) (+25 more)
 
 ### Community 4 - "devDependencies"
-Cohesion: 0.11
-Nodes (19): eslint, @eslint/js, eslint-plugin-react-hooks, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, openapi-typescript (+11 more)
+Cohesion: 0.06
+Nodes (31): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks (+23 more)
 
 ### Community 5 - "components/index.ts"
 Cohesion: 0.07
@@ -297,13 +290,9 @@ Nodes (6): POST /media/upload endpoint, mh-14-listing-management.html wireframe,
 Cohesion: 0.19
 Nodes (8): App(), RootLayout(), Providers(), ProvidersProps, queryClient, ListingDetail, ListingFeed, router
 
-### Community 88 - "scripts"
-Cohesion: 0.17
-Nodes (12): scripts, build, dev, format, generate:types, generate:types:ci, lint, predev (+4 more)
-
-### Community 89 - "package.json"
-Cohesion: 0.25
-Nodes (7): name, typescript, overrides, openapi-typescript, private, type, version
+### Community 88 - "notifications/service.rs"
+Cohesion: 0.19
+Nodes (14): NotificationTemplate, OtpTemplate, OwnerRequestApprovedTemplate, OwnerRequestReceivedTemplate, OwnerRequestRejectedTemplate, render(), renders_otp_template_with_sample_context(), renders_owner_request_approved_template_with_sample_context() (+6 more)
 
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
@@ -312,9 +301,9 @@ Nodes (7): name, typescript, overrides, openapi-typescript, private, type, versi
   .claude/skills/readme/SKILL.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **177 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+172 more)
+- **182 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+177 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -323,13 +312,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
 - **What is the exact relationship between `React/TypeScript Rules (Agents)` and `README Writing Rules (MyHouse)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
+- **Why does `AppError` connect `AppError` to `local_fs.rs`, `notifications/service.rs`, `ListingDetailDto`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **Why does `AppState` connect `AppState` to `ListingDetailDto`?**
-  _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `AppError` connect `AppError` to `local_fs.rs`, `ListingDetailDto`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `AppState` to `config/mod.rs`?**
-  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
-  _177 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _182 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppState` be split into smaller, more focused modules?**
-  _Cohesion score 0.05706760316066725 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.053923541247484906 - nodes in this community are weakly interconnected._
