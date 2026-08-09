@@ -156,6 +156,10 @@ pub struct AppConfig {
     pub smtp_port: u16,
     /// Sender address for outgoing mail (e.g. `noreply@myhouse.app`).
     pub smtp_from: String,
+    /// Fixed recipient for admin notifications (owner-request received, …).
+    /// A config value, not a DB query — the admin role has exactly one holder
+    /// at MVP (TECHNICAL_SPEC_MVP.md §3bis.2).
+    pub admin_notification_email: String,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -277,6 +281,7 @@ impl AppConfig {
         let smtp_host = require("SMTP_HOST")?;
         let smtp_port = require_u16("SMTP_PORT")?;
         let smtp_from = require("SMTP_FROM")?;
+        let admin_notification_email = require("ADMIN_NOTIFICATION_EMAIL")?;
 
         Ok(AppConfig {
             app_port,
@@ -295,6 +300,7 @@ impl AppConfig {
             smtp_host,
             smtp_port,
             smtp_from,
+            admin_notification_email,
         })
     }
 }
@@ -337,6 +343,7 @@ mod tests {
         env::set_var("SMTP_HOST", "localhost");
         env::set_var("SMTP_PORT", "1025");
         env::set_var("SMTP_FROM", "noreply@myhouse.app");
+        env::set_var("ADMIN_NOTIFICATION_EMAIL", "admin@myhouse.app");
     }
 
     #[test]

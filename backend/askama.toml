@@ -1,0 +1,4 @@
+[general]
+# Templates live beside the module that owns them (modules/notifications/),
+# not the askama-default `templates/` at crate root — see TECHNICAL_SPEC_MVP.md §3bis.1.
+dirs = ["src/modules/notifications/templates"]
