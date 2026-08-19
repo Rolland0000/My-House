@@ -21,10 +21,6 @@ pub enum Role {
 }
 
 /// Checks `role` against the set of `allowed` roles, with no hierarchy applied.
-///
-/// Pure and DB-free by design (MH-31): callers already hold a known `Role`
-/// (from a decoded JWT claim or a fetched user row) and only need the
-/// authorization decision, not token/DB access.
 pub fn require_role(role: Role, allowed: &[Role]) -> Result<(), AppError> {
     if allowed.contains(&role) {
         Ok(())
