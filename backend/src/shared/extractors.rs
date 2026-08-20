@@ -118,7 +118,7 @@ mod tests {
 
     impl TokenDecoder for StubDecoder {
         fn decode(&self, _token: &str) -> Result<TokenClaims, AppError> {
-            self.0.clone().map_err(|_| AppError::Unauthorized)
+            self.0.map_err(|_| AppError::Unauthorized)
         }
     }
 
