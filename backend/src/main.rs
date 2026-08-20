@@ -5,8 +5,10 @@ use backend_my_house::{
     app_server::AppServer,
     app_state::AppState,
     config::{AppConfig, AppEnv},
+    infra::cache::build_cache_provider,
     infra::db,
     infra::mailer::Mailer,
+    infra::storage::build_storage_provider,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
@@ -88,8 +90,16 @@ async fn main() {
         std::process::exit(1);
     });
 
-    // ── 7. Build shared state and start the server ────────────────────────────
-    let state = AppState::new(config, db_pool, Arc::new(mailer));
+    // ── 7. Select infra providers (storage, cache) ────────────────────────────
+    //
+    // Engine choice happens once, here, at process startup — not inside
+    // `AppState::new`, so swapping `STORAGE_PROVIDER` or a future cache
+    // backend never touches `AppState`'s construction logic.
+    let storage = build_storage_provider(&config);
+    let cache_provider = build_cache_provider();
+
+    // ── 8. Build shared state and start the server ────────────────────────────
+    let state = AppState::new(config, db_pool, Arc::new(mailer), storage, cache_provider);
     let server = AppServer::new(state, addr);
 
     if let Err(e) = server.run().await {

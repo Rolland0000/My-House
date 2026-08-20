@@ -57,6 +57,9 @@ pub enum AppError {
     #[error("Access token expired.")]
     TokenExpired,
 
+    #[error("Account is suspended.")]
+    AccountSuspended,
+
     // ── 403 Forbidden ────────────────────────────────────────────────────────
     #[error("Account is inactive.")]
     AccountInactive,
@@ -126,6 +129,7 @@ impl AppError {
             Self::OtpInvalid => (StatusCode::UNAUTHORIZED, "OTP_INVALID"),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED"),
             Self::TokenExpired => (StatusCode::UNAUTHORIZED, "TOKEN_EXPIRED"),
+            Self::AccountSuspended => (StatusCode::UNAUTHORIZED, "ACCOUNT_SUSPENDED"),
             // 403
             Self::AccountInactive => (StatusCode::FORBIDDEN, "ACCOUNT_INACTIVE"),
             Self::Forbidden => (StatusCode::FORBIDDEN, "FORBIDDEN"),

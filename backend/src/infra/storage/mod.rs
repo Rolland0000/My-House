@@ -1,5 +1,5 @@
-pub mod local_fs;
-pub mod provider;
+mod local_fs;
+mod provider;
 
 pub use local_fs::LocalFsStorage;
 pub use provider::StorageProvider;
