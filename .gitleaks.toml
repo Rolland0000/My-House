@@ -9,7 +9,6 @@ paths = [
   '''^\.env$''',
   '''^\.env\.example$''',
   '''^\.env\.prod\.example$''',
-  '''^backend/\.env$''',
   '''^backend/\.env\.example$''',
   '''^frontend/\.env\.example$''',
 ]
