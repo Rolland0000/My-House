@@ -7,7 +7,8 @@ use crate::config::AppConfig;
 use crate::infra::cache::{AppCache, AppCacheProvider};
 use crate::infra::mailer::Mailer;
 use crate::infra::storage::StorageProvider;
-use crate::shared::token_decoder::{TokenDecoder, UnimplementedTokenDecoder};
+use crate::shared::crypto::JwtTokenDecoder;
+use crate::shared::token_decoder::TokenDecoder;
 
 /// Shared application state injected into every Axum handler via `axum::extract::State`.
 ///
@@ -29,7 +30,7 @@ struct Inner {
     pub storage: Arc<dyn StorageProvider>,
     /// In-memory caches (e.g. `AuthUser`'s `is_active` recheck).
     pub cache: AppCache,
-    /// JWT claims decoder — `UnimplementedTokenDecoder` until MH-35.
+    /// JWT claims decoder, backed by `shared::crypto::JwtTokenDecoder`.
     pub token_decoder: Arc<dyn TokenDecoder>,
 }
 
@@ -37,8 +38,8 @@ impl AppState {
     /// `storage` and `cache_provider` are engine choices selectable via
     /// config (`STORAGE_PROVIDER`, and eventually a cache equivalent) — the
     /// composition root (`main.rs`) builds them and passes the result in.
-    /// `token_decoder` has no such choice to make yet (MH-35 ships the one
-    /// real implementation) so it stays built internally.
+    /// `token_decoder` has no such choice to make (there is only the one
+    /// JWT-backed implementation) so it stays built internally.
     pub fn new(
         config: AppConfig,
         db: PgPool,
@@ -46,6 +47,9 @@ impl AppState {
         storage: Arc<dyn StorageProvider>,
         cache_provider: Arc<dyn AppCacheProvider<Uuid, bool>>,
     ) -> Self {
+        let token_decoder: Arc<dyn TokenDecoder> =
+            Arc::new(JwtTokenDecoder::new(config.jwt_secret.as_bytes()));
+
         Self {
             inner: Arc::new(Inner {
                 config,
@@ -53,7 +57,7 @@ impl AppState {
                 mailer,
                 storage,
                 cache: AppCache::new(cache_provider),
-                token_decoder: Arc::new(UnimplementedTokenDecoder),
+                token_decoder,
             }),
         }
     }

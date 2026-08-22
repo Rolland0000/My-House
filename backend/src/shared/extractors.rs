@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
-use axum::extract::FromRequestParts;
+use axum::extract::{FromRef, FromRequestParts};
 use axum::http::request::Parts;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::app_state::AppState;
@@ -45,21 +48,43 @@ impl IsActiveLookup for PgIsActiveLookup<'_> {
     }
 }
 
+/// The slice of `AppState` `AuthUser` actually needs — `config`, `mailer`,
+/// `storage` stay unreachable from the auth path even though `AppState`
+/// carries them. Built per request from cheap `Arc`/`PgPool` clones.
+#[derive(Clone)]
+struct AuthState {
+    db: PgPool,
+    cache: Arc<dyn AppCacheProvider<Uuid, bool>>,
+    token_decoder: Arc<dyn TokenDecoder>,
+}
+
+impl FromRef<AppState> for AuthState {
+    fn from_ref(state: &AppState) -> Self {
+        Self {
+            db: state.db().clone(),
+            cache: state.cache().is_active_status(),
+            token_decoder: Arc::clone(state.token_decoder()),
+        }
+    }
+}
+
 #[async_trait]
-impl FromRequestParts<AppState> for AuthUser {
+impl<S> FromRequestParts<S> for AuthUser
+where
+    S: Send + Sync,
+    AuthState: FromRef<S>,
+{
     type Rejection = AppError;
 
-    async fn from_request_parts(
-        parts: &mut Parts,
-        state: &AppState,
-    ) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let token = bearer_token(parts)?;
+        let auth_state = AuthState::from_ref(state);
 
         resolve_identity(
             token,
-            state.token_decoder().as_ref(),
-            state.cache().is_active_status(),
-            &PgIsActiveLookup(state.db()),
+            auth_state.token_decoder.as_ref(),
+            auth_state.cache.as_ref(),
+            &PgIsActiveLookup(&auth_state.db),
         )
         .await
     }

@@ -34,7 +34,8 @@ impl AppCache {
         }
     }
 
-    pub fn is_active_status(&self) -> &dyn AppCacheProvider<Uuid, bool> {
-        &*self.is_active_status
+    /// Owned `Arc` handle, so callers can build a self-contained substate.
+    pub fn is_active_status(&self) -> Arc<dyn AppCacheProvider<Uuid, bool>> {
+        Arc::clone(&self.is_active_status)
     }
 }

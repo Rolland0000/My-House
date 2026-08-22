@@ -7,7 +7,7 @@
 //! storage key, and reading them back requires the authenticated admin document
 //! endpoint (`StorageProvider::read`), never the filesystem directly.
 
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use async_trait::async_trait;
 use bytes::Bytes;
@@ -35,9 +35,20 @@ impl LocalFsStorage {
         }
     }
 
-    /// Resolves `key` to an absolute path under the storage root.
-    fn resolve(&self, key: &str) -> PathBuf {
-        self.root.join(key)
+    /// Resolves `key` to a path under the storage root, rejecting absolute paths and `..` components.
+    fn resolve(&self, key: &str) -> Result<PathBuf, AppError> {
+        let key_path = Path::new(key);
+        if key_path.is_absolute()
+            || key_path.components().any(|component| {
+                matches!(
+                    component,
+                    Component::ParentDir | Component::RootDir | Component::Prefix(_)
+                )
+            })
+        {
+            return Err(AppError::Storage(format!("invalid storage key: {key}")));
+        }
+        Ok(self.root.join(key_path))
     }
 
     /// Builds the public URL for a public-prefixed key.
@@ -58,7 +69,7 @@ impl StorageProvider for LocalFsStorage {
         data: Bytes,
         _content_type: &str,
     ) -> Result<String, AppError> {
-        let path = self.resolve(key);
+        let path = self.resolve(key)?;
         if let Some(parent) = Path::new(&path).parent() {
             fs::create_dir_all(parent).await?;
         }
@@ -72,13 +83,13 @@ impl StorageProvider for LocalFsStorage {
     }
 
     async fn read(&self, key: &str) -> Result<Bytes, AppError> {
-        let path = self.resolve(key);
+        let path = self.resolve(key)?;
         let data = fs::read(&path).await?;
         Ok(Bytes::from(data))
     }
 
     async fn delete(&self, key: &str) -> Result<(), AppError> {
-        let path = self.resolve(key);
+        let path = self.resolve(key)?;
         fs::remove_file(&path).await.map_err(|error| {
             if error.kind() == std::io::ErrorKind::NotFound {
                 AppError::Storage(format!("cannot delete: key not found: {key}"))
@@ -171,6 +182,40 @@ mod tests {
         let store = storage(dir.path());
 
         let result = store.delete("listings/does-not-exist/photo.jpg").await;
+
+        assert!(matches!(result, Err(AppError::Storage(_))));
+    }
+
+    #[tokio::test]
+    async fn upload_rejects_key_with_parent_dir_component() {
+        let dir = tempdir();
+        let store = storage(dir.path());
+
+        let result = store
+            .upload("../escape.txt", Bytes::from_static(b"data"), "text/plain")
+            .await;
+
+        assert!(matches!(result, Err(AppError::Storage(_))));
+    }
+
+    #[tokio::test]
+    async fn upload_rejects_absolute_key() {
+        let dir = tempdir();
+        let store = storage(dir.path());
+
+        let result = store
+            .upload("/etc/passwd", Bytes::from_static(b"data"), "text/plain")
+            .await;
+
+        assert!(matches!(result, Err(AppError::Storage(_))));
+    }
+
+    #[tokio::test]
+    async fn read_rejects_key_with_parent_dir_component() {
+        let dir = tempdir();
+        let store = storage(dir.path());
+
+        let result = store.read("listings/../../../etc/passwd").await;
 
         assert!(matches!(result, Err(AppError::Storage(_))));
     }

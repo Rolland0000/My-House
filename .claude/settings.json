@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(SQLX_OFFLINE=true cargo check)",
-      "Bash(cargo fmt *)"
+      "Bash(cargo fmt *)",
+      "mcp__context7__query-docs"
     ]
   },
   "hooks": {

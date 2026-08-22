@@ -11,17 +11,10 @@ pub struct TokenClaims {
 }
 
 /// Decoding seam consumed by `AuthUser` — kept independent of any concrete
-/// JWT library so MH-35 can implement it with no structural change here.
+/// JWT library. `shared::crypto::JwtTokenDecoder` is the MH-35 implementation.
 pub trait TokenDecoder: Send + Sync {
-    /// Any decode failure (malformed, expired, bad signature) maps to `AppError::Unauthorized`.
+    /// A decode failure maps to `AppError::TokenExpired` for an expired
+    /// token, `AppError::Unauthorized` for anything else (malformed, bad
+    /// signature, disallowed algorithm).
     fn decode(&self, token: &str) -> Result<TokenClaims, AppError>;
-}
-
-/// Placeholder until MH-35 lands the JWT-backed implementation.
-pub(crate) struct UnimplementedTokenDecoder;
-
-impl TokenDecoder for UnimplementedTokenDecoder {
-    fn decode(&self, _token: &str) -> Result<TokenClaims, AppError> {
-        todo!("TokenDecoder implementation lands in MH-35 (JWT access token issuance & validation)")
-    }
 }
