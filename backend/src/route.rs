@@ -8,6 +8,7 @@ use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
 use crate::config::AppEnv;
 use crate::infra::health;
+use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::modules::{auth, listings};
 
@@ -134,9 +135,11 @@ pub fn build_router(state: AppState) -> Router {
         router.merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", openapi))
     };
 
+    let cors = build_cors_layer(state.config());
+
     router
         .layer(axum::middleware::from_fn(request_id))
-        // TODO EP-01: .layer(CorsLayer::permissive())   ← tighten in prod
+        .layer(cors)
         .with_state(state)
 }
 
