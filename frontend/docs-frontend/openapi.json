@@ -9,9 +9,34 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "description": "New access token issued; refresh cookie rotated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired, or reused refresh token"
+          }
+        }
+      }
+    },
     "/api/v1/listings": {
       "get": {
-        "tags": ["listings"],
+        "tags": [
+          "listings"
+        ],
         "summary": "Public paginated feed of listings (cover photo + summary).",
         "operationId": "list",
         "parameters": [
@@ -77,7 +102,9 @@
     },
     "/api/v1/listings/{id}": {
       "get": {
-        "tags": ["listings"],
+        "tags": [
+          "listings"
+        ],
         "summary": "Full listing detail — description, media, owner info (no phone).",
         "operationId": "get_by_id",
         "parameters": [
@@ -111,7 +138,9 @@
     },
     "/health": {
       "get": {
-        "tags": ["health"],
+        "tags": [
+          "health"
+        ],
         "summary": "Checks PostgreSQL connectivity via `SELECT 1`.",
         "operationId": "check",
         "responses": {
@@ -140,7 +169,9 @@
     },
     "/health/storage": {
       "get": {
-        "tags": ["health"],
+        "tags": [
+          "health"
+        ],
         "summary": "Throwaway smoke check confirming `Arc<dyn StorageProvider>` (MH-27) is reachable\nfrom a handler via `State<AppState>` extraction. No module has real uploads yet\n(first real caller is EP-08/Media) — this only proves the plumbing compiles and\nresolves through the extractor, mirroring [`check`] above.",
         "operationId": "check_storage",
         "responses": {
@@ -163,7 +194,9 @@
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
           "status": {
             "type": "string"
@@ -205,7 +238,10 @@
             }
           },
           "neighborhood": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/OwnerDetailDto"
@@ -215,14 +251,20 @@
             "format": "double"
           },
           "rooms": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           },
           "status": {
             "$ref": "#/components/schemas/ListingStatus"
           },
           "surface_m2": {
-            "type": ["integer", "null"],
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           },
           "title": {
@@ -236,7 +278,9 @@
       "ListingDetailResponse": {
         "type": "object",
         "description": "Envelope for `GET /listings/:id` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
-        "required": ["data"],
+        "required": [
+          "data"
+        ],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ListingDetailDto"
@@ -246,7 +290,12 @@
       "ListingMediaDto": {
         "type": "object",
         "description": "One media attachment in a listing detail response.",
-        "required": ["id", "url", "is_cover", "position"],
+        "required": [
+          "id",
+          "url",
+          "is_cover",
+          "position"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -266,24 +315,41 @@
       },
       "ListingStatus": {
         "type": "string",
-        "enum": ["available", "unavailable"]
+        "enum": [
+          "available",
+          "unavailable"
+        ]
       },
       "ListingSummaryDto": {
         "type": "object",
-        "required": ["id", "title", "type", "status", "city", "price", "owner"],
+        "required": [
+          "id",
+          "title",
+          "type",
+          "status",
+          "city",
+          "price",
+          "owner"
+        ],
         "properties": {
           "city": {
             "type": "string"
           },
           "cover_photo_url": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "neighborhood": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "owner": {
             "$ref": "#/components/schemas/OwnerSummaryDto"
@@ -305,68 +371,111 @@
       },
       "ListingType": {
         "type": "string",
-        "enum": ["apartment", "studio", "house", "room", "villa", "other"]
+        "enum": [
+          "apartment",
+          "studio",
+          "house",
+          "room",
+          "villa",
+          "other"
+        ]
       },
       "OwnerDetailDto": {
         "type": "object",
         "description": "Owner info as embedded in a listing detail (adds avatar, still no phone —\nphone reveal is gated behind `GET /listings/:id/contact`, out of scope here).",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
           "avatar_url": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "first_name": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "last_name": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
       "OwnerSummaryDto": {
         "type": "object",
         "description": "Owner info as embedded in a listing summary (no avatar, no phone).",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
           "first_name": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "last_name": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
       "PaginatedResponse_ListingSummaryDto": {
         "type": "object",
         "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
-        "required": ["data", "pagination"],
+        "required": [
+          "data",
+          "pagination"
+        ],
         "properties": {
           "data": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "title", "type", "status", "city", "price", "owner"],
+              "required": [
+                "id",
+                "title",
+                "type",
+                "status",
+                "city",
+                "price",
+                "owner"
+              ],
               "properties": {
                 "city": {
                   "type": "string"
                 },
                 "cover_photo_url": {
-                  "type": ["string", "null"]
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "id": {
                   "type": "string",
                   "format": "uuid"
                 },
                 "neighborhood": {
-                  "type": ["string", "null"]
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "owner": {
                   "$ref": "#/components/schemas/OwnerSummaryDto"
@@ -395,7 +504,12 @@
       "PaginationMeta": {
         "type": "object",
         "description": "Pagination metadata included alongside `data` in list responses.",
-        "required": ["page", "per_page", "total", "total_pages"],
+        "required": [
+          "page",
+          "per_page",
+          "total",
+          "total_pages"
+        ],
         "properties": {
           "page": {
             "type": "integer",
@@ -419,10 +533,35 @@
           }
         }
       },
+      "RefreshResponse": {
+        "type": "object",
+        "description": "`{ \"data\": { \"access_token\": \"...\" } }` — matches the envelope used\nelsewhere (e.g. `ListingDetailResponse`) and by the sibling\n`/auth/otp/verify` endpoint's actual JSON example.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RefreshTokenDto"
+          }
+        }
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          }
+        }
+      },
       "StorageStatus": {
         "type": "object",
         "description": "Storage backend response body.",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
           "status": {
             "type": "string"
@@ -439,6 +578,10 @@
     {
       "name": "listings",
       "description": "Public read-only listings feed"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication — token refresh"
     }
   ]
 }

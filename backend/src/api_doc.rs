@@ -17,6 +17,7 @@ use utoipa::OpenApi;
     tags(
         (name = "health", description = "Service health check"),
         (name = "listings", description = "Public read-only listings feed"),
+        (name = "auth", description = "Authentication — token refresh"),
     )
 )]
 pub struct ApiDoc;

@@ -9,7 +9,7 @@ use crate::app_state::AppState;
 use crate::config::AppEnv;
 use crate::infra::health;
 use crate::middleware::logging::request_id;
-use crate::modules::listings;
+use crate::modules::{auth, listings};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -37,6 +37,7 @@ fn public_router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(listings::handler::list))
         .routes(routes!(listings::handler::get_by_id))
+        .routes(routes!(auth::handler::refresh))
     // TODO EP-02: .routes(routes!(auth::request_otp))
     // TODO EP-02: .routes(routes!(auth::verify_otp))
 }

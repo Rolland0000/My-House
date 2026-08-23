@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            rt.id,\n            rt.user_id,\n            u.role AS \"role: Role\",\n            (rt.revoked_at IS NOT NULL) AS \"is_revoked!\",\n            (rt.expires_at < NOW())     AS \"is_expired!\"\n        FROM refresh_tokens rt\n        JOIN users u ON u.id = rt.user_id\n        WHERE rt.token_hash = $1\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "role: Role",
+        "type_info": {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "seeker",
+                "owner",
+                "admin"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_revoked!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_expired!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "8758e9cc19001187d29f93f7bdd80ba5a253a40392d0033a3cfc46b598c6aeda"
+}
