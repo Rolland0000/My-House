@@ -10,32 +10,49 @@ use uuid::Uuid;
 
 use moka::MokaStore;
 
-/// Only staleness bound on an admin suspension taking effect — no proactive
-/// invalidation (MH-32, ARCHITECTURE.md §8.1).
+use crate::shared::types::RefreshTokenId;
+
+/// Staleness bound on an admin suspension taking effect (MH-32).
 const IS_ACTIVE_STATUS_TTL: Duration = Duration::from_secs(8);
 
-/// Selects and constructs the cache engine backing `AppCache`. Single choice
-/// point, made at startup by the caller (`main.rs`) — mirrors
-/// `storage::build_storage_provider`.
+/// Grace window for concurrent double-refresh (MH-36) — a cache hit means
+/// the reuse is within the window, by construction of the TTL.
+const REFRESH_REUSE_GRACE_WINDOW: Duration = Duration::from_secs(5);
+
+/// Engine choice, made once at startup by the caller (`main.rs`).
 pub fn build_cache_provider() -> Arc<dyn AppCacheProvider<Uuid, bool>> {
     Arc::new(MokaStore::new(IS_ACTIVE_STATUS_TTL))
 }
 
-/// Single point of entry for every in-memory cache the app keeps. Fields are
-/// typed by `AppCacheProvider`, not the concrete engine.
+/// Keyed by the just-revoked row's id, valued with the raw new
+/// refresh-token string — only recoverable here, since only its hash is
+/// persisted to `refresh_tokens`.
+pub fn build_refresh_replay_cache_provider() -> Arc<dyn AppCacheProvider<RefreshTokenId, String>> {
+    Arc::new(MokaStore::new(REFRESH_REUSE_GRACE_WINDOW))
+}
+
+/// Single point of entry for every in-memory cache the app keeps.
 pub struct AppCache {
     is_active_status: Arc<dyn AppCacheProvider<Uuid, bool>>,
+    refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
 }
 
 impl AppCache {
-    pub fn new(cache_provider: Arc<dyn AppCacheProvider<Uuid, bool>>) -> Self {
+    pub fn new(
+        is_active_status: Arc<dyn AppCacheProvider<Uuid, bool>>,
+        refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
+    ) -> Self {
         Self {
-            is_active_status: cache_provider,
+            is_active_status,
+            refresh_replay,
         }
     }
 
-    /// Owned `Arc` handle, so callers can build a self-contained substate.
     pub fn is_active_status(&self) -> Arc<dyn AppCacheProvider<Uuid, bool>> {
         Arc::clone(&self.is_active_status)
+    }
+
+    pub fn refresh_replay(&self) -> Arc<dyn AppCacheProvider<RefreshTokenId, String>> {
+        Arc::clone(&self.refresh_replay)
     }
 }

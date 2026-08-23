@@ -1,7 +1,6 @@
-//! Project-wide home for cryptographic operations. Scoped to JWT access-token
-//! signing and verification for MH-35; a future ticket (refresh-token
-//! hashing) extends this module rather than scattering crypto calls
-//! elsewhere.
+//! Project-wide home for cryptographic operations: JWT access-token
+//! signing/verification (MH-35) and refresh-token hashing (MH-36). Future
+//! crypto needs extend this module rather than scattering calls elsewhere.
 //!
 //! HS256 (HMAC-SHA256) is used, not an asymmetric algorithm: MyHouse issues
 //! and verifies tokens from the same monolith process, so a shared secret
@@ -22,6 +21,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::shared::errors::AppError;
@@ -98,6 +98,13 @@ fn map_jwt_error(error: jsonwebtoken::errors::Error) -> AppError {
         ErrorKind::ExpiredSignature => AppError::TokenExpired,
         _ => AppError::Unauthorized,
     }
+}
+
+/// Hashes a raw opaque refresh-token string to its hex-encoded SHA-256
+/// digest — the only form ever persisted in `refresh_tokens.token_hash`.
+pub fn hash_refresh_token(raw_token: &str) -> String {
+    let digest = Sha256::digest(raw_token.as_bytes());
+    digest.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
 /// `TokenDecoder` backed by [`verify_access_token`]. Built once from

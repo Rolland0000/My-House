@@ -9,6 +9,7 @@ use crate::infra::mailer::Mailer;
 use crate::infra::storage::StorageProvider;
 use crate::shared::crypto::JwtTokenDecoder;
 use crate::shared::token_decoder::TokenDecoder;
+use crate::shared::types::RefreshTokenId;
 
 /// Shared application state injected into every Axum handler via `axum::extract::State`.
 ///
@@ -46,6 +47,7 @@ impl AppState {
         mailer: Arc<Mailer>,
         storage: Arc<dyn StorageProvider>,
         cache_provider: Arc<dyn AppCacheProvider<Uuid, bool>>,
+        refresh_replay_provider: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
     ) -> Self {
         let token_decoder: Arc<dyn TokenDecoder> =
             Arc::new(JwtTokenDecoder::new(config.jwt_secret.as_bytes()));
@@ -56,7 +58,7 @@ impl AppState {
                 db,
                 mailer,
                 storage,
-                cache: AppCache::new(cache_provider),
+                cache: AppCache::new(cache_provider, refresh_replay_provider),
                 token_decoder,
             }),
         }
