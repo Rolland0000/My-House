@@ -30,6 +30,7 @@ trait RefreshTokenRepository: Send + Sync {
         ttl_days: i32,
     ) -> Result<Option<Uuid>, AppError>;
     async fn revoke_all_for_user(&self, user_id: Uuid) -> Result<(), AppError>;
+    async fn revoke(&self, token_hash: &str) -> Result<(), AppError>;
 }
 
 struct PgRefreshTokenRepository<'a>(&'a PgPool);
@@ -52,6 +53,10 @@ impl RefreshTokenRepository for PgRefreshTokenRepository<'_> {
 
     async fn revoke_all_for_user(&self, user_id: Uuid) -> Result<(), AppError> {
         repository::revoke_all_for_user(self.0, user_id).await
+    }
+
+    async fn revoke(&self, token_hash: &str) -> Result<(), AppError> {
+        repository::revoke(self.0, token_hash).await
     }
 }
 
@@ -145,6 +150,20 @@ async fn handle_revoked(
     Err(AppError::RefreshTokenInvalid)
 }
 
+/// Entry point wired by the handler. Revokes only the single current token
+/// — never the whole family, unlike [`handle_revoked`]'s theft response.
+pub async fn logout(pool: &PgPool, raw_token: &str) -> Result<(), AppError> {
+    perform_logout(raw_token, &PgRefreshTokenRepository(pool)).await
+}
+
+async fn perform_logout(
+    raw_token: &str,
+    repo: &dyn RefreshTokenRepository,
+) -> Result<(), AppError> {
+    let token_hash = crypto::hash_refresh_token(raw_token);
+    repo.revoke(&token_hash).await
+}
+
 fn mint(user_id: Uuid, role: Role, secret: &[u8], ttl_seconds: u64) -> Result<String, AppError> {
     crypto::issue_access_token(TokenClaims { user_id, role }, secret, ttl_seconds)
 }
@@ -164,6 +183,7 @@ mod tests {
         find_by_hash_calls: AtomicUsize,
         rotate_calls: AtomicUsize,
         revoke_all_calls: AtomicUsize,
+        revoke_calls: AtomicUsize,
     }
 
     impl StubRepository {
@@ -174,6 +194,7 @@ mod tests {
                 find_by_hash_calls: AtomicUsize::new(0),
                 rotate_calls: AtomicUsize::new(0),
                 revoke_all_calls: AtomicUsize::new(0),
+                revoke_calls: AtomicUsize::new(0),
             }
         }
     }
@@ -202,6 +223,11 @@ mod tests {
 
         async fn revoke_all_for_user(&self, _user_id: Uuid) -> Result<(), AppError> {
             self.revoke_all_calls.fetch_add(1, Ordering::SeqCst);
+            Ok(())
+        }
+
+        async fn revoke(&self, _token_hash: &str) -> Result<(), AppError> {
+            self.revoke_calls.fetch_add(1, Ordering::SeqCst);
             Ok(())
         }
     }
@@ -303,6 +329,7 @@ mod tests {
             find_by_hash_calls: AtomicUsize::new(0),
             rotate_calls: AtomicUsize::new(0),
             revoke_all_calls: AtomicUsize::new(0),
+            revoke_calls: AtomicUsize::new(0),
         };
         let cache = build_refresh_replay_cache_provider();
         cache.insert(row_id, "winner-raw-token".to_string()).await;
@@ -312,6 +339,16 @@ mod tests {
             .unwrap();
 
         assert_eq!(outcome.raw_refresh_token, "winner-raw-token");
+        assert_eq!(repo.revoke_all_calls.load(Ordering::SeqCst), 0);
+    }
+
+    #[tokio::test]
+    async fn logout_revokes_only_the_single_current_token() {
+        let repo = StubRepository::single(None);
+
+        perform_logout("raw-token", &repo).await.unwrap();
+
+        assert_eq!(repo.revoke_calls.load(Ordering::SeqCst), 1);
         assert_eq!(repo.revoke_all_calls.load(Ordering::SeqCst), 0);
     }
 }

@@ -4,6 +4,7 @@ use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
+use crate::shared::extractors::AuthUser;
 
 use super::dto::{RefreshResponse, RefreshTokenDto};
 use super::service;
@@ -57,4 +58,34 @@ pub async fn refresh(
             },
         }),
     ))
+}
+
+/// The access token itself keeps authenticating requests until its own
+/// (max 15 min) expiry — MH-35's stateless JWTs can't be invalidated early.
+/// Logout only guarantees the session can't be *refreshed* again.
+#[utoipa::path(
+    post,
+    path = "/auth/logout",
+    tag = "auth",
+    responses(
+        (status = 200, description = "Current refresh token revoked; cookie cleared"),
+        (status = 401, description = "Missing or invalid access token"),
+    )
+)]
+pub async fn logout(
+    State(state): State<AppState>,
+    _user: AuthUser,
+    jar: CookieJar,
+) -> Result<CookieJar, AppError> {
+    if let Some(raw_token) = jar.get(REFRESH_TOKEN_COOKIE).map(|c| c.value().to_string()) {
+        service::logout(state.db(), &raw_token).await?;
+    }
+
+    let config = state.config();
+    let removal_cookie = Cookie::build(REFRESH_TOKEN_COOKIE)
+        .domain(config.cookie_domain.clone())
+        .path("/auth")
+        .build();
+
+    Ok(jar.remove(removal_cookie))
 }

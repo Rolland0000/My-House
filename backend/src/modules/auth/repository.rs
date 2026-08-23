@@ -95,3 +95,17 @@ pub async fn revoke_all_for_user(pool: &PgPool, user_id: Uuid) -> Result<(), App
     .map_err(db_err)?;
     Ok(())
 }
+
+/// Revokes the single row matching `token_hash`. The `AND revoked_at IS
+/// NULL` guard makes this a no-op (0 rows affected, still `Ok`) for an
+/// already-revoked or unknown hash — logout's idempotent contract.
+pub async fn revoke(pool: &PgPool, token_hash: &str) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1 AND revoked_at IS NULL"#,
+        token_hash
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+    Ok(())
+}
