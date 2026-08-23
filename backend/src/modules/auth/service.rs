@@ -3,11 +3,13 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::infra::cache::AppCacheProvider;
+use crate::infra::mailer::Mailer;
+use crate::modules::notifications;
 use crate::shared::crypto;
 use crate::shared::errors::AppError;
 use crate::shared::rbac::Role;
 use crate::shared::token_decoder::TokenClaims;
-use crate::shared::types::RefreshTokenId;
+use crate::shared::types::{PendingOtp, RefreshTokenId};
 
 use super::model::RefreshTokenLookup;
 use super::repository;
@@ -168,10 +170,45 @@ fn mint(user_id: Uuid, role: Role, secret: &[u8], ttl_seconds: u64) -> Result<St
     crypto::issue_access_token(TokenClaims { user_id, role }, secret, ttl_seconds)
 }
 
+/// Entry point wired by the handler. Never reveals to the caller whether
+/// `email` is already registered — every branch returns the same `Ok(())`.
+pub async fn otp_request(
+    pool: &PgPool,
+    otp_cache: &dyn AppCacheProvider<String, PendingOtp>,
+    rate_limit_cache: &dyn AppCacheProvider<String, ()>,
+    mailer: &Mailer,
+    otp_ttl_seconds: u64,
+    email: &str,
+) -> Result<(), AppError> {
+    if rate_limit_cache.get(&email.to_string()).await.is_some() {
+        return Err(AppError::OtpRateLimited);
+    }
+
+    let is_new = !repository::email_exists(pool, email).await?;
+    let raw_code = crypto::generate_otp_code();
+    let code_hash = crypto::hash_otp_code(&raw_code);
+
+    otp_cache
+        .insert(
+            email.to_string(),
+            PendingOtp {
+                code_hash,
+                is_new,
+                attempts: 0,
+            },
+        )
+        .await;
+    rate_limit_cache.insert(email.to_string(), ()).await;
+
+    notifications::service::send_otp_email(mailer, email, &raw_code, otp_ttl_seconds / 60).await;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::infra::cache::build_refresh_replay_cache_provider;
+    use crate::infra::cache::build_refresh_replay_cache;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     /// `lookups` is consulted in order across successive `find_by_hash`
@@ -249,7 +286,7 @@ mod tests {
         let lookup = row(false, false);
         let row_id = RefreshTokenId::new(lookup.id);
         let repo = StubRepository::single(Some(lookup));
-        let cache = build_refresh_replay_cache_provider();
+        let cache = build_refresh_replay_cache();
 
         let outcome = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30)
             .await
@@ -267,7 +304,7 @@ mod tests {
     #[tokio::test]
     async fn reuse_after_grace_window_revokes_family_and_returns_unauthorized() {
         let repo = StubRepository::single(Some(row(true, false)));
-        let cache = build_refresh_replay_cache_provider(); // empty: no grace entry
+        let cache = build_refresh_replay_cache(); // empty: no grace entry
 
         let result = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30).await;
 
@@ -280,7 +317,7 @@ mod tests {
         let lookup = row(true, false);
         let row_id = RefreshTokenId::new(lookup.id);
         let repo = StubRepository::single(Some(lookup));
-        let cache = build_refresh_replay_cache_provider();
+        let cache = build_refresh_replay_cache();
         cache.insert(row_id, "cached-raw-token".to_string()).await;
 
         let outcome = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30)
@@ -295,7 +332,7 @@ mod tests {
     #[tokio::test]
     async fn expired_token_is_rejected_without_family_revocation() {
         let repo = StubRepository::single(Some(row(false, true)));
-        let cache = build_refresh_replay_cache_provider();
+        let cache = build_refresh_replay_cache();
 
         let result = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30).await;
 
@@ -306,7 +343,7 @@ mod tests {
     #[tokio::test]
     async fn unknown_token_hash_is_rejected() {
         let repo = StubRepository::single(None);
-        let cache = build_refresh_replay_cache_provider();
+        let cache = build_refresh_replay_cache();
 
         let result = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30).await;
 
@@ -331,7 +368,7 @@ mod tests {
             revoke_all_calls: AtomicUsize::new(0),
             revoke_calls: AtomicUsize::new(0),
         };
-        let cache = build_refresh_replay_cache_provider();
+        let cache = build_refresh_replay_cache();
         cache.insert(row_id, "winner-raw-token".to_string()).await;
 
         let outcome = perform_refresh("raw-token", &repo, cache.as_ref(), SECRET, 900, 30)

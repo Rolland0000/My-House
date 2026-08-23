@@ -1,15 +1,13 @@
 use std::sync::Arc;
 
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::config::AppConfig;
-use crate::infra::cache::{AppCache, AppCacheProvider};
+use crate::infra::cache::AppCache;
 use crate::infra::mailer::Mailer;
 use crate::infra::storage::StorageProvider;
 use crate::shared::crypto::JwtTokenDecoder;
 use crate::shared::token_decoder::TokenDecoder;
-use crate::shared::types::RefreshTokenId;
 
 /// Shared application state injected into every Axum handler via `axum::extract::State`.
 ///
@@ -36,18 +34,18 @@ struct Inner {
 }
 
 impl AppState {
-    /// `storage` and `cache_provider` are engine choices selectable via
-    /// config (`STORAGE_PROVIDER`, and eventually a cache equivalent) — the
-    /// composition root (`main.rs`) builds them and passes the result in.
-    /// `token_decoder` has no such choice to make (there is only the one
-    /// JWT-backed implementation) so it stays built internally.
+    /// `storage` and `cache` are engine choices selectable via config
+    /// (`STORAGE_PROVIDER`, and eventually a cache equivalent) — the
+    /// composition root (`main.rs`) builds them (assembling `cache` via
+    /// `AppCache::new`) and passes the result in. `token_decoder` has no
+    /// such choice to make (there is only the one JWT-backed implementation)
+    /// so it stays built internally.
     pub fn new(
         config: AppConfig,
         db: PgPool,
         mailer: Arc<Mailer>,
         storage: Arc<dyn StorageProvider>,
-        cache_provider: Arc<dyn AppCacheProvider<Uuid, bool>>,
-        refresh_replay_provider: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
+        cache: AppCache,
     ) -> Self {
         let token_decoder: Arc<dyn TokenDecoder> =
             Arc::new(JwtTokenDecoder::new(config.jwt_secret.as_bytes()));
@@ -58,7 +56,7 @@ impl AppState {
                 db,
                 mailer,
                 storage,
-                cache: AppCache::new(cache_provider, refresh_replay_provider),
+                cache,
                 token_decoder,
             }),
         }

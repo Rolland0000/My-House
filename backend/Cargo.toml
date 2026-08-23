@@ -32,5 +32,6 @@ jsonwebtoken = { version = "11", default-features = false, features = ["rust_cry
 sha2 = "0.10"
 axum-extra = { version = "0.9", features = ["cookie"] }
 time = "0.3"
+rand = "0.8"
 
 [dev-dependencies]

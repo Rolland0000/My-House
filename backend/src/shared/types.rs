@@ -98,6 +98,16 @@ define_id_type!(
     RefreshTokenId
 );
 
+/// A pending OTP challenge, cached by email. `is_new` is resolved once at
+/// creation so verification can trust the stored value instead of
+/// re-querying.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PendingOtp {
+    pub code_hash: String,
+    pub is_new: bool,
+    pub attempts: u32,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

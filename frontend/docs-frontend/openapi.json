@@ -26,6 +26,40 @@
         }
       }
     },
+    "/api/v1/auth/otp/request": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Identical 200 response whether `payload.email` is registered or not —\nthe endpoint must never let a caller enumerate accounts.",
+        "operationId": "otp_request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OTP code generated and emailed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpRequestResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests for this email within the rate-limit window"
+          }
+        }
+      }
+    },
     "/api/v1/auth/refresh": {
       "post": {
         "tags": [
@@ -397,6 +431,40 @@
           "other"
         ]
       },
+      "OtpRequestDto": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "OtpRequestMessageDto": {
+        "type": "object",
+        "description": "`{ \"data\": { \"message\": \"...\" } }` — identical shape whether `email` is\nknown or unknown, so the response can never be used to enumerate\nregistered accounts.",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "OtpRequestResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OtpRequestMessageDto"
+          }
+        }
+      },
       "OwnerDetailDto": {
         "type": "object",
         "description": "Owner info as embedded in a listing detail (adds avatar, still no phone —\nphone reveal is gated behind `GET /listings/:id/contact`, out of scope here).",
@@ -598,7 +666,7 @@
     },
     {
       "name": "auth",
-      "description": "Authentication — token refresh"
+      "description": "Authentication — OTP request, token refresh, logout"
     }
   ]
 }

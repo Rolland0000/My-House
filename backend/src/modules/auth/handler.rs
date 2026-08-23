@@ -6,10 +6,46 @@ use crate::app_state::AppState;
 use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
 
-use super::dto::{RefreshResponse, RefreshTokenDto};
+use super::dto::{
+    OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, RefreshResponse, RefreshTokenDto,
+};
 use super::service;
 
 pub const REFRESH_TOKEN_COOKIE: &str = "refresh_token";
+
+/// Identical 200 response whether `payload.email` is registered or not —
+/// the endpoint must never let a caller enumerate accounts.
+#[utoipa::path(
+    post,
+    path = "/auth/otp/request",
+    tag = "auth",
+    request_body = OtpRequestDto,
+    responses(
+        (status = 200, description = "OTP code generated and emailed", body = OtpRequestResponse),
+        (status = 429, description = "Too many requests for this email within the rate-limit window"),
+    )
+)]
+pub async fn otp_request(
+    State(state): State<AppState>,
+    Json(payload): Json<OtpRequestDto>,
+) -> Result<Json<OtpRequestResponse>, AppError> {
+    let config = state.config();
+    service::otp_request(
+        state.db(),
+        state.cache().otp().as_ref(),
+        state.cache().otp_rate_limit().as_ref(),
+        state.mailer(),
+        config.otp_ttl_seconds,
+        &payload.email,
+    )
+    .await?;
+
+    Ok(Json(OtpRequestResponse {
+        data: OtpRequestMessageDto {
+            message: "OTP code sent".to_string(),
+        },
+    }))
+}
 
 #[utoipa::path(
     post,
