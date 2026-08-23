@@ -109,3 +109,15 @@ pub async fn revoke(pool: &PgPool, token_hash: &str) -> Result<(), AppError> {
     .map_err(db_err)?;
     Ok(())
 }
+
+/// Whether `email` already belongs to a registered user — resolves the OTP
+/// request's `is_new` flag without exposing anything else about the row.
+pub async fn email_exists(pool: &PgPool, email: &str) -> Result<bool, AppError> {
+    sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM users WHERE email = $1) AS "exists!""#,
+        email
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(db_err)
+}

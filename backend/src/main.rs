@@ -1,11 +1,15 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use backend_my_house::{
     app_server::AppServer,
     app_state::AppState,
     config::{AppConfig, AppEnv},
-    infra::cache::{build_cache_provider, build_refresh_replay_cache_provider},
+    infra::cache::{
+        build_cache_provider, build_otp_cache, build_otp_rate_limit_cache,
+        build_refresh_replay_cache, AppCache,
+    },
     infra::db,
     infra::mailer::Mailer,
     infra::storage::build_storage_provider,
@@ -96,18 +100,15 @@ async fn main() {
     // `AppState::new`, so swapping `STORAGE_PROVIDER` or a future cache
     // backend never touches `AppState`'s construction logic.
     let storage = build_storage_provider(&config);
-    let cache_provider = build_cache_provider();
-    let refresh_replay_provider = build_refresh_replay_cache_provider();
+    let cache = AppCache::new(
+        build_cache_provider(),
+        build_refresh_replay_cache(),
+        build_otp_cache(Duration::from_secs(config.otp_ttl_seconds)),
+        build_otp_rate_limit_cache(Duration::from_secs(config.otp_rate_limit_seconds)),
+    );
 
     // ── 8. Build shared state and start the server ────────────────────────────
-    let state = AppState::new(
-        config,
-        db_pool,
-        Arc::new(mailer),
-        storage,
-        cache_provider,
-        refresh_replay_provider,
-    );
+    let state = AppState::new(config, db_pool, Arc::new(mailer), storage, cache);
     let server = AppServer::new(state, addr);
 
     if let Err(e) = server.run().await {

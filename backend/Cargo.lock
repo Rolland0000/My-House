@@ -209,6 +209,7 @@ dependencies = [
  "jsonwebtoken",
  "lettre",
  "moka",
+ "rand",
  "serde",
  "serde_json",
  "sha2 0.10.9",

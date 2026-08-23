@@ -1,27 +1,9 @@
-//! Project-wide home for cryptographic operations: JWT access-token
-//! signing/verification (MH-35) and refresh-token hashing (MH-36). Future
-//! crypto needs extend this module rather than scattering calls elsewhere.
-//!
-//! HS256 (HMAC-SHA256) is used, not an asymmetric algorithm: MyHouse issues
-//! and verifies tokens from the same monolith process, so a shared secret
-//! (`JWT_SECRET`, length-validated at `AppConfig::from_env`) is the right
-//! trade-off — no keypair/PKI overhead for a benefit that only matters once
-//! issuance and verification live in separate services.
-//!
-//! Access tokens are stateless by design: there is no DB-backed revocation
-//! list, so a token remains cryptographically valid for its full TTL
-//! regardless of later account changes. This is an accepted MVP trade-off,
-//! bounded by two things: a short `JWT_ACCESS_TTL_SECONDS` TTL, and MH-32's
-//! `AuthUser` extractor rechecking `is_active` on every request (see
-//! `shared::extractors::resolve_identity`) — a suspended account is locked
-//! out well within the token's own lifetime, even though its signature
-//! would still verify.
+//! Access-token issuance and verification.
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
 use crate::shared::errors::AppError;
@@ -29,7 +11,7 @@ use crate::shared::rbac::Role;
 use crate::shared::token_decoder::{TokenClaims, TokenDecoder};
 
 /// JWT wire payload — internal to this module. Callers only ever see
-/// `TokenClaims` (no `iat`/`exp`); nothing outside `crypto.rs` needs the raw
+/// `TokenClaims` (no `iat`/`exp`); nothing outside `crypto` needs the raw
 /// timestamps.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Claims {
@@ -98,13 +80,6 @@ fn map_jwt_error(error: jsonwebtoken::errors::Error) -> AppError {
         ErrorKind::ExpiredSignature => AppError::TokenExpired,
         _ => AppError::Unauthorized,
     }
-}
-
-/// Hashes a raw opaque refresh-token string to its hex-encoded SHA-256
-/// digest — the only form ever persisted in `refresh_tokens.token_hash`.
-pub fn hash_refresh_token(raw_token: &str) -> String {
-    let digest = Sha256::digest(raw_token.as_bytes());
-    digest.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
 /// `TokenDecoder` backed by [`verify_access_token`]. Built once from

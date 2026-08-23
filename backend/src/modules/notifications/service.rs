@@ -10,7 +10,9 @@
 //! and continue or fail the request, `render` itself never sends anything.
 
 use askama::Template;
+use lettre::Address;
 
+use crate::infra::mailer::Mailer;
 use crate::shared::errors::AppError;
 
 /// Context for `otp.html` — OTP code delivery.
@@ -114,6 +116,33 @@ pub fn render(template: NotificationTemplate<'_>) -> Result<String, AppError> {
         tracing::error!(error = %error, "notifications: template render failed");
         AppError::TemplateRender(error.to_string())
     })
+}
+
+/// Renders and sends the OTP login-code email. Best-effort like every
+/// `Mailer::send` call: a malformed `to` address or a render failure is
+/// logged and swallowed rather than propagated, so it can never fail the
+/// request that triggered it.
+pub async fn send_otp_email(mailer: &Mailer, to: &str, otp_code: &str, ttl_minutes: u64) {
+    let body = match render(NotificationTemplate::Otp {
+        otp_code,
+        ttl_minutes,
+    }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: failed to render OTP email");
+            return;
+        }
+    };
+
+    let address: Address = match to.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: invalid OTP recipient address");
+            return;
+        }
+    };
+
+    mailer.send(address, "Your MyHouse login code", body).await;
 }
 
 #[cfg(test)]
