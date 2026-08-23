@@ -8,6 +8,8 @@
 
 use std::{env, fmt};
 
+use axum::http::HeaderValue;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Error type
 // ─────────────────────────────────────────────────────────────────────────────
@@ -151,6 +153,10 @@ pub struct AppConfig {
     /// Domain attribute of the `refresh_token` cookie (e.g. `localhost`).
     pub cookie_domain: String,
 
+    // ── CORS ─────────────────────────────────────────────────────────────────
+    /// Origins allowed to make cross-origin requests (`ALLOWED_ORIGINS`, comma-separated).
+    pub allowed_origins: Vec<String>,
+
     // ── Email / SMTP ─────────────────────────────────────────────────────────
     pub smtp_host: String,
     pub smtp_port: u16,
@@ -224,6 +230,40 @@ fn optional_u16_or(key: &str, default: u16) -> Result<u16, ConfigError> {
     }
 }
 
+/// Parse a required comma-separated origin list (e.g. `http://localhost,http://localhost:5173`).
+fn require_origins(key: &str) -> Result<Vec<String>, ConfigError> {
+    require_parsed(key, |raw| {
+        let origins: Vec<String> = raw
+            .split(',')
+            .map(|origin| origin.trim().to_owned())
+            .collect();
+
+        for origin in &origins {
+            if origin.is_empty() {
+                return Err(
+                    "must not contain an empty origin (check for a stray comma)".to_string()
+                );
+            }
+            if !(origin.starts_with("http://") || origin.starts_with("https://")) {
+                return Err(format!(
+                    "origin \"{origin}\" must start with http:// or https://"
+                ));
+            }
+            if origin.ends_with('/') {
+                return Err(format!(
+                    "origin \"{origin}\" must not have a trailing slash"
+                ));
+            }
+            if HeaderValue::from_str(origin).is_err() {
+                return Err(format!(
+                    "origin \"{origin}\" is not a valid HTTP header value"
+                ));
+            }
+        }
+        Ok(origins)
+    })
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AppConfig::from_env
 // ─────────────────────────────────────────────────────────────────────────────
@@ -277,6 +317,9 @@ impl AppConfig {
         // ── Cookies ───────────────────────────────────────────────────────────
         let cookie_domain = require("COOKIE_DOMAIN")?;
 
+        // ── CORS ──────────────────────────────────────────────────────────────
+        let allowed_origins = require_origins("ALLOWED_ORIGINS")?;
+
         // ── Email / SMTP ──────────────────────────────────────────────────────
         let smtp_host = require("SMTP_HOST")?;
         let smtp_port = require_u16("SMTP_PORT")?;
@@ -297,6 +340,7 @@ impl AppConfig {
             local_storage_path,
             public_media_base_url,
             cookie_domain,
+            allowed_origins,
             smtp_host,
             smtp_port,
             smtp_from,
@@ -340,6 +384,7 @@ mod tests {
         env::set_var("LOCAL_STORAGE_PATH", "/app/storage");
         env::set_var("PUBLIC_MEDIA_BASE_URL", "http://localhost/media");
         env::set_var("COOKIE_DOMAIN", "localhost");
+        env::set_var("ALLOWED_ORIGINS", "http://localhost,http://localhost:5173");
         env::set_var("SMTP_HOST", "localhost");
         env::set_var("SMTP_PORT", "1025");
         env::set_var("SMTP_FROM", "noreply@myhouse.app");
@@ -398,6 +443,40 @@ mod tests {
         let err =
             AppConfig::from_env(AppEnv::Development).expect_err("should fail on invalid SMTP_PORT");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "SMTP_PORT"));
+    }
+
+    #[test]
+    fn parses_allowed_origins_into_a_list() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert_eq!(
+            cfg.allowed_origins,
+            vec![
+                "http://localhost".to_string(),
+                "http://localhost:5173".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn rejects_allowed_origins_without_scheme() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ALLOWED_ORIGINS", "localhost:5173");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on origin missing a scheme");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "ALLOWED_ORIGINS"));
+    }
+
+    #[test]
+    fn rejects_allowed_origins_with_a_stray_comma() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ALLOWED_ORIGINS", "http://localhost,,http://localhost:5173");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on an empty origin entry");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "ALLOWED_ORIGINS"));
     }
 
     #[test]

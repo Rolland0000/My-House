@@ -109,6 +109,7 @@ mod tests {
             local_storage_path: "/tmp".to_string(),
             public_media_base_url: "http://localhost/media".to_string(),
             cookie_domain: "localhost".to_string(),
+            allowed_origins: vec!["http://localhost".to_string()],
             smtp_host: "localhost".to_string(),
             smtp_port: 1025,
             smtp_from: "noreply@myhouse.app".to_string(),
