@@ -9,6 +9,23 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "The access token itself keeps authenticating requests until its own\n(max 15 min) expiry — MH-35's stateless JWTs can't be invalidated early.\nLogout only guarantees the session can't be *refreshed* again.",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "Current refresh token revoked; cookie cleared"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          }
+        }
+      }
+    },
     "/api/v1/auth/refresh": {
       "post": {
         "tags": [

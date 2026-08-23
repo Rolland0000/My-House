@@ -45,14 +45,12 @@ fn public_router() -> OpenApiRouter<AppState> {
 /// Routes requiring a valid session (any authenticated user — seeker by default).
 ///
 /// Protected by: `AuthUser` extractor (re-validates `is_active` on every request).
-/// Examples: profile read/update, saved searches.
-fn seeker_router() -> Router<AppState> {
-    Router::new()
-    // TODO EP-02: .route("/api/v1/users/me",         get(users::me))
-    // TODO EP-02: .route("/api/v1/users/me",         patch(users::update_me))
-    // TODO EP-02: .route("/api/v1/users/owner-request", post(users::request_owner_upgrade))
-    // Layer added here before merge:
-    // .layer(middleware::from_fn_with_state(state, require_auth))
+/// Examples: profile read/update, saved searches, logout.
+fn seeker_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().routes(routes!(auth::handler::logout))
+    // TODO EP-02: .routes(routes!(users::me))
+    // TODO EP-02: .routes(routes!(users::update_me))
+    // TODO EP-02: .routes(routes!(users::request_owner_upgrade))
 }
 
 /// Routes restricted to validated owners.
@@ -106,7 +104,7 @@ fn admin_router() -> Router<AppState> {
 fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
     let api_v1 = OpenApiRouter::new()
         .merge(public_router())
-        .merge(OpenApiRouter::from(seeker_router()))
+        .merge(seeker_router())
         .merge(OpenApiRouter::from(owner_router()))
         .merge(OpenApiRouter::from(admin_router()));
 
