@@ -33,5 +33,6 @@ sha2 = "0.10"
 axum-extra = { version = "0.9", features = ["cookie"] }
 time = "0.3"
 rand = "0.8"
+ipnet = "2.12.1"
 
 [dev-dependencies]
