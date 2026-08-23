@@ -6,9 +6,11 @@
 //!
 //! Variable catalogue — see `backend/.env.example` for the full list.
 
+use std::net::IpAddr;
 use std::{env, fmt};
 
 use axum::http::HeaderValue;
+use ipnet::IpNet;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error type
@@ -173,6 +175,15 @@ pub struct AppConfig {
     /// Email to bootstrap the admin account with. Required when
     /// `admin_bootstrap_on_startup` is `true` — validated in [`AppConfig::from_env`].
     pub admin_bootstrap_email: Option<String>,
+
+    // ── Rate limiting ────────────────────────────────────────────────────────
+    /// Generic per-IP request cap within `rate_limit_window_seconds` (MH-39).
+    pub rate_limit_max_requests: u32,
+    /// Fixed window length in seconds for `rate_limit_max_requests`.
+    pub rate_limit_window_seconds: u64,
+    /// Reverse proxies whose `X-Forwarded-For` is trusted, as IPs or CIDRs.
+    /// Empty means no proxy is trusted and the header is never read.
+    pub trusted_proxies: Vec<IpNet>,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -250,6 +261,23 @@ fn optional_u16_or(key: &str, default: u16) -> Result<u16, ConfigError> {
             reason: format!("expected a port number (0–65535), got \"{raw}\""),
         }),
     }
+}
+
+/// Parse a required comma-separated list of trusted proxy IPs or CIDRs
+/// (e.g. `172.16.0.0/12,10.0.0.5`). An empty value trusts no proxy.
+fn require_trusted_proxies(key: &str) -> Result<Vec<IpNet>, ConfigError> {
+    require_parsed(key, |raw| {
+        raw.split(',')
+            .map(str::trim)
+            .filter(|entry| !entry.is_empty())
+            .map(|entry| {
+                entry
+                    .parse::<IpNet>()
+                    .or_else(|_| entry.parse::<IpAddr>().map(IpNet::from))
+                    .map_err(|_| format!("\"{entry}\" is not a valid IP address or CIDR"))
+            })
+            .collect()
+    })
 }
 
 /// Parse a required comma-separated origin list (e.g. `http://localhost,http://localhost:5173`).
@@ -360,6 +388,23 @@ impl AppConfig {
             return Err(ConfigError::Missing("ADMIN_BOOTSTRAP_EMAIL".to_string()));
         }
 
+        // ── Rate limiting ─────────────────────────────────────────────────────
+        let rate_limit_max_requests = require_u32("RATE_LIMIT_MAX_REQUESTS")?;
+        if rate_limit_max_requests == 0 {
+            return Err(ConfigError::Invalid {
+                key: "RATE_LIMIT_MAX_REQUESTS".to_string(),
+                reason: "must be greater than 0".to_string(),
+            });
+        }
+        let rate_limit_window_seconds = require_u64("RATE_LIMIT_WINDOW_SECONDS")?;
+        if rate_limit_window_seconds == 0 {
+            return Err(ConfigError::Invalid {
+                key: "RATE_LIMIT_WINDOW_SECONDS".to_string(),
+                reason: "must be greater than 0".to_string(),
+            });
+        }
+        let trusted_proxies = require_trusted_proxies("TRUSTED_PROXIES")?;
+
         Ok(AppConfig {
             app_port,
             app_env,
@@ -381,6 +426,9 @@ impl AppConfig {
             admin_notification_email,
             admin_bootstrap_on_startup,
             admin_bootstrap_email,
+            rate_limit_max_requests,
+            rate_limit_window_seconds,
+            trusted_proxies,
         })
     }
 }
@@ -427,6 +475,9 @@ mod tests {
         env::set_var("ADMIN_NOTIFICATION_EMAIL", "admin@myhouse.app");
         env::remove_var("ADMIN_BOOTSTRAP_ON_STARTUP");
         env::remove_var("ADMIN_BOOTSTRAP_EMAIL");
+        env::set_var("RATE_LIMIT_MAX_REQUESTS", "100");
+        env::set_var("RATE_LIMIT_WINDOW_SECONDS", "60");
+        env::set_var("TRUSTED_PROXIES", "");
     }
 
     #[test]
@@ -515,6 +566,46 @@ mod tests {
         let err = AppConfig::from_env(AppEnv::Development)
             .expect_err("should fail on an empty origin entry");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "ALLOWED_ORIGINS"));
+    }
+
+    #[test]
+    fn rejects_zero_rate_limit_max_requests() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("RATE_LIMIT_MAX_REQUESTS", "0");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on a zero request cap");
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "RATE_LIMIT_MAX_REQUESTS")
+        );
+    }
+
+    #[test]
+    fn parses_trusted_proxies_as_ips_and_cidrs() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("TRUSTED_PROXIES", "172.16.0.0/12, 10.0.0.5");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert_eq!(cfg.trusted_proxies.len(), 2);
+        assert!(cfg.trusted_proxies[1].contains(&"10.0.0.5".parse::<IpAddr>().unwrap()));
+    }
+
+    #[test]
+    fn empty_trusted_proxies_trusts_nothing() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert!(cfg.trusted_proxies.is_empty());
+    }
+
+    #[test]
+    fn rejects_malformed_trusted_proxies() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("TRUSTED_PROXIES", "not-an-ip");
+        let err =
+            AppConfig::from_env(AppEnv::Development).expect_err("should fail on a malformed entry");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "TRUSTED_PROXIES"));
     }
 
     #[test]

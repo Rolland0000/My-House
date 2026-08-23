@@ -7,8 +7,8 @@ use backend_my_house::{
     app_state::AppState,
     config::{AppConfig, AppEnv},
     infra::cache::{
-        build_cache_provider, build_otp_cache, build_otp_rate_limit_cache,
-        build_refresh_replay_cache, AppCache,
+        build_cache_provider, build_ip_rate_limit_cache, build_otp_cache,
+        build_otp_rate_limit_cache, build_refresh_replay_cache, AppCache,
     },
     infra::db,
     infra::mailer::Mailer,
@@ -114,6 +114,7 @@ async fn main() {
         build_refresh_replay_cache(),
         build_otp_cache(Duration::from_secs(config.otp_ttl_seconds)),
         build_otp_rate_limit_cache(Duration::from_secs(config.otp_rate_limit_seconds)),
+        build_ip_rate_limit_cache(Duration::from_secs(config.rate_limit_window_seconds)),
     );
 
     // ── 8. Build shared state and start the server ────────────────────────────

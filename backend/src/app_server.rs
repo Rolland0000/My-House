@@ -29,9 +29,14 @@ impl AppServer {
         let listener = TcpListener::bind(self.addr).await?;
         info!("MyHouse backend listening on {}", self.addr);
 
-        axum::serve(listener, app)
-            .with_graceful_shutdown(shutdown_signal())
-            .await?;
+        // `with_connect_info` exposes the real peer `SocketAddr` to
+        // extractors (e.g. the rate-limit middleware's `ConnectInfo`).
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
         info!("Server shut down gracefully");
         Ok(())
