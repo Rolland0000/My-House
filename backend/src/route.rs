@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use axum::Router;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -10,6 +12,7 @@ use crate::config::AppEnv;
 use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
+use crate::middleware::rate_limit::{rate_limit, RateLimitState};
 use crate::modules::{auth, listings};
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -118,9 +121,9 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
 
 /// Assembles all sub-routers and applies global middleware layers.
 ///
-/// Global layers (tracing, CORS, request-id, …) are applied here via
-/// `.layer()` on the final router so that they run for every request
-/// regardless of role.
+/// Global layers (tracing, CORS, request-id, rate-limit, …) are applied
+/// here via `.layer()` on the final router so that they run for every
+/// request regardless of role.
 ///
 /// The Swagger UI (which also serves the raw schema at
 /// `/api/docs/openapi.json`) is mounted everywhere except production — the
@@ -136,8 +139,18 @@ pub fn build_router(state: AppState) -> Router {
     };
 
     let cors = build_cors_layer(state.config());
+    let rate_limit_state = RateLimitState::new(
+        state.config().rate_limit_max_requests,
+        Duration::from_secs(state.config().rate_limit_window_seconds),
+        state.config().trusted_proxies.clone(),
+        state.cache().ip_rate_limit(),
+    );
 
     router
+        .layer(axum::middleware::from_fn_with_state(
+            rate_limit_state,
+            rate_limit,
+        ))
         .layer(axum::middleware::from_fn(request_id))
         .layer(cors)
         .with_state(state)

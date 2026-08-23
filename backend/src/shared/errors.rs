@@ -104,6 +104,9 @@ pub enum AppError {
     #[error("Too many OTP requests. Please wait before trying again.")]
     OtpRateLimited,
 
+    #[error("Too many requests. Please wait before trying again.")]
+    RateLimited,
+
     // ── 500 Internal Server Error ─────────────────────────────────────────────
     #[error("Internal server error.")]
     Internal,
@@ -153,6 +156,7 @@ impl AppError {
             Self::CoverPhotoRequired => (StatusCode::UNPROCESSABLE_ENTITY, "COVER_PHOTO_REQUIRED"),
             // 429
             Self::OtpRateLimited => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
+            Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
             // 500
             Self::Internal => (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
             Self::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR"),
@@ -232,6 +236,15 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "OTP_RATE_LIMITED");
+    }
+
+    #[tokio::test]
+    async fn test_rate_limited_produces_429_distinct_from_otp_rate_limited() {
+        let response = AppError::RateLimited.into_response();
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "RATE_LIMITED");
     }
 
     #[tokio::test]
