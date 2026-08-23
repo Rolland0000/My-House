@@ -31,3 +31,22 @@ pub struct RefreshTokenDto {
 pub struct RefreshResponse {
     pub data: RefreshTokenDto,
 }
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct OtpVerifyDto {
+    pub email: String,
+    pub code: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct OtpVerifyTokenDto {
+    pub access_token: String,
+    pub is_new_user: bool,
+}
+
+/// `{ "data": { "access_token": "...", "is_new_user": bool } }` per
+/// `TECHNICAL_SPEC_MVP.md §4.1`.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct OtpVerifyResponse {
+    pub data: OtpVerifyTokenDto,
+}

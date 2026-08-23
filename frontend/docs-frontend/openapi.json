@@ -60,6 +60,40 @@
         }
       }
     },
+    "/api/v1/auth/otp/verify": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Second half of the unified auth endpoint (seeker_auth_flow.mermaid §2):\nverifies the code cached by `/auth/otp/request`, creates the account on\nfirst login, and issues the session.",
+        "operationId": "otp_verify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerifyDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified; session issued (account created if new)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpVerifyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid, expired, or attempt-exhausted OTP code"
+          }
+        }
+      }
+    },
     "/api/v1/auth/refresh": {
       "post": {
         "tags": [
@@ -462,6 +496,48 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OtpRequestMessageDto"
+          }
+        }
+      },
+      "OtpVerifyDto": {
+        "type": "object",
+        "required": [
+          "email",
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "OtpVerifyResponse": {
+        "type": "object",
+        "description": "`{ \"data\": { \"access_token\": \"...\", \"is_new_user\": bool } }` per\n`TECHNICAL_SPEC_MVP.md §4.1`.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OtpVerifyTokenDto"
+          }
+        }
+      },
+      "OtpVerifyTokenDto": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "is_new_user"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "is_new_user": {
+            "type": "boolean"
           }
         }
       },

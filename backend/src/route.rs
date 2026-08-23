@@ -38,8 +38,8 @@ fn public_router() -> OpenApiRouter<AppState> {
         .routes(routes!(listings::handler::list))
         .routes(routes!(listings::handler::get_by_id))
         .routes(routes!(auth::handler::otp_request))
+        .routes(routes!(auth::handler::otp_verify))
         .routes(routes!(auth::handler::refresh))
-    // TODO EP-02: .routes(routes!(auth::verify_otp))
 }
 
 /// Routes requiring a valid session (any authenticated user — seeker by default).

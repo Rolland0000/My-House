@@ -205,11 +205,165 @@ pub async fn otp_request(
     Ok(())
 }
 
+pub struct VerifyOutcome {
+    pub access_token: String,
+    pub raw_refresh_token: String,
+    pub is_new_user: bool,
+}
+
+/// Repository seam — lets `perform_verify_otp` be unit tested without a
+/// `PgPool`, mirroring [`RefreshTokenRepository`].
+#[async_trait]
+trait VerifyOtpRepository: Send + Sync {
+    async fn find_user_by_email(&self, email: &str) -> Result<Option<(Uuid, Role)>, AppError>;
+    /// `None` means `email` was taken by a concurrent request first.
+    async fn create_seeker(&self, email: &str) -> Result<Option<Uuid>, AppError>;
+    async fn insert_refresh_token(
+        &self,
+        user_id: Uuid,
+        token_hash: &str,
+        ttl_days: i32,
+    ) -> Result<(), AppError>;
+}
+
+struct PgVerifyOtpRepository<'a>(&'a PgPool);
+
+#[async_trait]
+impl VerifyOtpRepository for PgVerifyOtpRepository<'_> {
+    async fn find_user_by_email(&self, email: &str) -> Result<Option<(Uuid, Role)>, AppError> {
+        repository::find_user_by_email(self.0, email).await
+    }
+
+    async fn create_seeker(&self, email: &str) -> Result<Option<Uuid>, AppError> {
+        repository::create_seeker(self.0, email).await
+    }
+
+    async fn insert_refresh_token(
+        &self,
+        user_id: Uuid,
+        token_hash: &str,
+        ttl_days: i32,
+    ) -> Result<(), AppError> {
+        repository::insert_refresh_token(self.0, user_id, token_hash, ttl_days).await
+    }
+}
+
+/// Entry point wired by the handler.
+#[allow(clippy::too_many_arguments)]
+pub async fn verify_otp(
+    pool: &PgPool,
+    otp_cache: &dyn AppCacheProvider<String, PendingOtp>,
+    mailer: &Mailer,
+    jwt_secret: &[u8],
+    access_ttl_seconds: u64,
+    refresh_ttl_days: u64,
+    otp_max_attempts: u32,
+    email: &str,
+    code: &str,
+) -> Result<VerifyOutcome, AppError> {
+    perform_verify_otp(
+        &PgVerifyOtpRepository(pool),
+        otp_cache,
+        mailer,
+        jwt_secret,
+        access_ttl_seconds,
+        refresh_ttl_days,
+        otp_max_attempts,
+        email,
+        code,
+    )
+    .await
+}
+
+/// Core logic, decoupled from `PgPool` for unit testing.
+#[allow(clippy::too_many_arguments)]
+async fn perform_verify_otp(
+    repo: &dyn VerifyOtpRepository,
+    otp_cache: &dyn AppCacheProvider<String, PendingOtp>,
+    mailer: &Mailer,
+    jwt_secret: &[u8],
+    access_ttl_seconds: u64,
+    refresh_ttl_days: u64,
+    otp_max_attempts: u32,
+    email: &str,
+    code: &str,
+) -> Result<VerifyOutcome, AppError> {
+    let entry = otp_cache
+        .get(&email.to_string())
+        .await
+        .ok_or(AppError::OtpInvalid)?;
+
+    // Constant-time-ish comparison isn't the point here — both sides are
+    // already SHA-256 digests, so a length/prefix leak reveals nothing about
+    // the raw code.
+    if crypto::hash_otp_code(code) != entry.code_hash {
+        let attempts = entry.attempts + 1;
+        if attempts >= otp_max_attempts {
+            // 3rd (or config-configured Nth) mismatch permanently
+            // invalidates the code — deleting the entry, not just marking it
+            // exhausted, so a later correct-code retry also fails (AUTH-06).
+            otp_cache.invalidate(&email.to_string()).await;
+        } else {
+            otp_cache
+                .insert(email.to_string(), PendingOtp { attempts, ..entry })
+                .await;
+        }
+        return Err(AppError::OtpInvalid);
+    }
+
+    // Single-use: the entry is gone before any account/session mutation
+    // happens, so a replayed second call with the same code can never
+    // succeed twice.
+    otp_cache.invalidate(&email.to_string()).await;
+
+    let (user_id, role, is_new_user) = if entry.is_new {
+        // A concurrent verify call for the same still-valid code (double
+        // click, client retry) can win the `users.email` unique constraint
+        // first. Fall back to the row it created instead of surfacing that
+        // race as a 500 to the loser — same contract as `rotate`'s lost race.
+        let user_id = match repo.create_seeker(email).await? {
+            Some(user_id) => {
+                notifications::service::send_welcome_email(mailer, email, email).await;
+                user_id
+            }
+            None => {
+                repo.find_user_by_email(email)
+                    .await?
+                    .ok_or(AppError::OtpInvalid)?
+                    .0
+            }
+        };
+        (user_id, Role::Seeker, true)
+    } else {
+        let (user_id, role) = repo
+            .find_user_by_email(email)
+            .await?
+            .ok_or(AppError::OtpInvalid)?;
+        (user_id, role, false)
+    };
+
+    let access_token = mint(user_id, role, jwt_secret, access_ttl_seconds)?;
+
+    let raw_refresh_token = Uuid::new_v4().to_string();
+    let refresh_token_hash = crypto::hash_refresh_token(&raw_refresh_token);
+    repo.insert_refresh_token(user_id, &refresh_token_hash, refresh_ttl_days as i32)
+        .await?;
+
+    Ok(VerifyOutcome {
+        access_token,
+        raw_refresh_token,
+        is_new_user,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::infra::cache::build_refresh_replay_cache;
+    use crate::config::{AppConfig, AppEnv, StorageProvider};
+    use crate::infra::cache::{build_otp_cache, build_refresh_replay_cache};
     use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
+    use std::time::Duration;
 
     /// `lookups` is consulted in order across successive `find_by_hash`
     /// calls (the last entry repeats) — lets a test simulate the state
@@ -387,5 +541,313 @@ mod tests {
 
         assert_eq!(repo.revoke_calls.load(Ordering::SeqCst), 1);
         assert_eq!(repo.revoke_all_calls.load(Ordering::SeqCst), 0);
+    }
+
+    fn test_mailer() -> Mailer {
+        let config = AppConfig {
+            app_port: 3000,
+            app_env: AppEnv::Development,
+            database_url: "postgresql://x:x@localhost/x".to_string(),
+            jwt_secret: "unit-test-secret-at-least-32-bytes-long!!".to_string(),
+            jwt_access_ttl_seconds: 900,
+            jwt_refresh_ttl_days: 30,
+            otp_ttl_seconds: 600,
+            otp_max_attempts: 3,
+            otp_rate_limit_seconds: 60,
+            storage_provider: StorageProvider::Local,
+            local_storage_path: "/tmp".to_string(),
+            public_media_base_url: "http://localhost/media".to_string(),
+            cookie_domain: "localhost".to_string(),
+            smtp_host: "localhost".to_string(),
+            smtp_port: 1025,
+            smtp_from: "noreply@myhouse.app".to_string(),
+            admin_notification_email: "admin@myhouse.app".to_string(),
+        };
+        Mailer::new(&config).expect("test mailer config should build")
+    }
+
+    async fn otp_cache_with_entry(
+        email: &str,
+        code_hash: String,
+        is_new: bool,
+        attempts: u32,
+    ) -> Arc<dyn AppCacheProvider<String, PendingOtp>> {
+        let cache = build_otp_cache(Duration::from_secs(60));
+        cache
+            .insert(
+                email.to_string(),
+                PendingOtp {
+                    code_hash,
+                    is_new,
+                    attempts,
+                },
+            )
+            .await;
+        cache
+    }
+
+    /// `existing_user` drives `find_user_by_email`; `create_seeker_result`
+    /// drives `create_seeker` (`None` simulates a lost unique-violation race).
+    struct StubVerifyRepository {
+        existing_user: Option<(Uuid, Role)>,
+        create_seeker_result: Option<Uuid>,
+        find_calls: AtomicUsize,
+        create_calls: AtomicUsize,
+        insert_refresh_calls: AtomicUsize,
+    }
+
+    impl StubVerifyRepository {
+        fn known(user_id: Uuid, role: Role) -> Self {
+            Self {
+                existing_user: Some((user_id, role)),
+                create_seeker_result: Some(Uuid::new_v4()),
+                find_calls: AtomicUsize::new(0),
+                create_calls: AtomicUsize::new(0),
+                insert_refresh_calls: AtomicUsize::new(0),
+            }
+        }
+
+        fn unknown() -> Self {
+            Self {
+                existing_user: None,
+                create_seeker_result: Some(Uuid::new_v4()),
+                find_calls: AtomicUsize::new(0),
+                create_calls: AtomicUsize::new(0),
+                insert_refresh_calls: AtomicUsize::new(0),
+            }
+        }
+
+        /// `create_seeker` loses the unique-violation race; `winner_id` is
+        /// what the concurrent `find_user_by_email` fallback returns.
+        fn lost_create_race(winner_id: Uuid, role: Role) -> Self {
+            Self {
+                existing_user: Some((winner_id, role)),
+                create_seeker_result: None,
+                find_calls: AtomicUsize::new(0),
+                create_calls: AtomicUsize::new(0),
+                insert_refresh_calls: AtomicUsize::new(0),
+            }
+        }
+    }
+
+    #[async_trait]
+    impl VerifyOtpRepository for StubVerifyRepository {
+        async fn find_user_by_email(&self, _email: &str) -> Result<Option<(Uuid, Role)>, AppError> {
+            self.find_calls.fetch_add(1, Ordering::SeqCst);
+            Ok(self.existing_user)
+        }
+
+        async fn create_seeker(&self, _email: &str) -> Result<Option<Uuid>, AppError> {
+            self.create_calls.fetch_add(1, Ordering::SeqCst);
+            Ok(self.create_seeker_result)
+        }
+
+        async fn insert_refresh_token(
+            &self,
+            _user_id: Uuid,
+            _token_hash: &str,
+            _ttl_days: i32,
+        ) -> Result<(), AppError> {
+            self.insert_refresh_calls.fetch_add(1, Ordering::SeqCst);
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn correct_code_new_email_creates_account_and_issues_session_with_is_new_user_true() {
+        let cache =
+            otp_cache_with_entry("new@example.com", crypto::hash_otp_code("123456"), true, 0).await;
+        let repo = StubVerifyRepository::unknown();
+        let mailer = test_mailer();
+
+        let outcome = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "new@example.com",
+            "123456",
+        )
+        .await
+        .unwrap();
+
+        assert!(outcome.is_new_user);
+        let decoded = crypto::verify_access_token(&outcome.access_token, SECRET).unwrap();
+        assert_eq!(decoded.role, Role::Seeker);
+        assert_eq!(repo.create_calls.load(Ordering::SeqCst), 1);
+        assert_eq!(repo.find_calls.load(Ordering::SeqCst), 0);
+        assert_eq!(repo.insert_refresh_calls.load(Ordering::SeqCst), 1);
+        assert!(cache.get(&"new@example.com".to_string()).await.is_none());
+    }
+
+    #[tokio::test]
+    async fn losing_the_create_seeker_race_falls_back_to_the_winners_account() {
+        let cache =
+            otp_cache_with_entry("race@example.com", crypto::hash_otp_code("123456"), true, 0)
+                .await;
+        let winner_id = Uuid::new_v4();
+        let repo = StubVerifyRepository::lost_create_race(winner_id, Role::Seeker);
+        let mailer = test_mailer();
+
+        let outcome = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "race@example.com",
+            "123456",
+        )
+        .await
+        .unwrap();
+
+        assert!(outcome.is_new_user);
+        let decoded = crypto::verify_access_token(&outcome.access_token, SECRET).unwrap();
+        assert_eq!(decoded.user_id, winner_id);
+        assert_eq!(repo.create_calls.load(Ordering::SeqCst), 1);
+        assert_eq!(repo.find_calls.load(Ordering::SeqCst), 1);
+        assert_eq!(repo.insert_refresh_calls.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn correct_code_known_email_mutates_nothing_and_reports_is_new_user_false() {
+        let cache = otp_cache_with_entry(
+            "known@example.com",
+            crypto::hash_otp_code("654321"),
+            false,
+            0,
+        )
+        .await;
+        let user_id = Uuid::new_v4();
+        let repo = StubVerifyRepository::known(user_id, Role::Owner);
+        let mailer = test_mailer();
+
+        let outcome = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "known@example.com",
+            "654321",
+        )
+        .await
+        .unwrap();
+
+        assert!(!outcome.is_new_user);
+        let decoded = crypto::verify_access_token(&outcome.access_token, SECRET).unwrap();
+        assert_eq!(decoded.user_id, user_id);
+        assert_eq!(decoded.role, Role::Owner);
+        assert_eq!(repo.create_calls.load(Ordering::SeqCst), 0);
+        assert_eq!(repo.find_calls.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn wrong_code_under_max_attempts_increments_counter_and_keeps_entry_valid() {
+        let cache = otp_cache_with_entry(
+            "retry@example.com",
+            crypto::hash_otp_code("123456"),
+            false,
+            0,
+        )
+        .await;
+        let repo = StubVerifyRepository::unknown();
+        let mailer = test_mailer();
+
+        let result = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "retry@example.com",
+            "000000",
+        )
+        .await;
+
+        assert!(matches!(result, Err(AppError::OtpInvalid)));
+        let entry = cache
+            .get(&"retry@example.com".to_string())
+            .await
+            .expect("entry remains valid for further attempts");
+        assert_eq!(entry.attempts, 1);
+    }
+
+    #[tokio::test]
+    async fn third_mismatch_deletes_entry_so_a_later_correct_code_also_fails() {
+        let cache = otp_cache_with_entry(
+            "exhausted@example.com",
+            crypto::hash_otp_code("123456"),
+            false,
+            2,
+        )
+        .await;
+        let repo = StubVerifyRepository::unknown();
+        let mailer = test_mailer();
+
+        let third_attempt = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "exhausted@example.com",
+            "000000",
+        )
+        .await;
+
+        assert!(matches!(third_attempt, Err(AppError::OtpInvalid)));
+        assert!(cache
+            .get(&"exhausted@example.com".to_string())
+            .await
+            .is_none());
+
+        let retry_with_correct_code = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "exhausted@example.com",
+            "123456",
+        )
+        .await;
+
+        assert!(matches!(retry_with_correct_code, Err(AppError::OtpInvalid)));
+    }
+
+    #[tokio::test]
+    async fn missing_otp_entry_is_rejected() {
+        let cache = build_otp_cache(Duration::from_secs(60));
+        let repo = StubVerifyRepository::unknown();
+        let mailer = test_mailer();
+
+        let result = perform_verify_otp(
+            &repo,
+            cache.as_ref(),
+            &mailer,
+            SECRET,
+            900,
+            30,
+            3,
+            "absent@example.com",
+            "123456",
+        )
+        .await;
+
+        assert!(matches!(result, Err(AppError::OtpInvalid)));
     }
 }

@@ -145,6 +145,30 @@ pub async fn send_otp_email(mailer: &Mailer, to: &str, otp_code: &str, ttl_minut
     mailer.send(address, "Your MyHouse login code", body).await;
 }
 
+/// Renders and sends the welcome email, triggered once by a brand-new
+/// account's first successful OTP verification. Best-effort like
+/// [`send_otp_email`]: a render or delivery failure is logged and
+/// swallowed, never propagated to the caller.
+pub async fn send_welcome_email(mailer: &Mailer, to: &str, user_name: &str) {
+    let body = match render(NotificationTemplate::Welcome { user_name }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: failed to render welcome email");
+            return;
+        }
+    };
+
+    let address: Address = match to.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: invalid welcome recipient address");
+            return;
+        }
+    };
+
+    mailer.send(address, "Bienvenue sur MyHouse", body).await;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

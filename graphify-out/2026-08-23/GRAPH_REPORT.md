@@ -1,11 +1,11 @@
 # Graph Report - My-House  (2026-08-23)
 
 ## Corpus Check
-- 170 files · ~81,947 words
+- 170 files · ~81,746 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1119 nodes · 2081 edges · 115 communities (93 shown, 22 thin omitted)
+- 1117 nodes · 2068 edges · 115 communities (93 shown, 22 thin omitted)
 - Extraction: 95% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 91 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
@@ -17,7 +17,7 @@
 ## Community Hubs (Navigation)
 - components/index.ts
 - AppConfig, Env Parsing & Mailer
-- route.rs
+- AppState
 - ListingDetailDto
 - AppError
 - MyHouse Database Rules (sqlx/PostgreSQL)
@@ -36,9 +36,9 @@
 - notifications/service.rs
 - auth/handler.rs
 - find_is_active
-- AppState
+- TokenDecoder
 - .mcp.json
-- MokaStore<K, V>
+- auth/repository.rs
 - errors.rs
 - storage_key.rs
 - ARCHITECTURE_v1.2.md — arc42 Software Architecture Document
@@ -81,7 +81,7 @@
 - pre-commit
 - package.json
 - hashing.rs
-- typescript-eslint
+- eslint
 - eslint-plugin-react-refresh
 - globals
 - prettier
@@ -106,9 +106,9 @@
 3. `cn()` - 27 edges
 4. `AppCacheProvider` - 26 edges
 5. `Mailer` - 20 edges
-6. `perform_verify_otp()` - 20 edges
-7. `Role` - 20 edges
-8. `perform_refresh()` - 19 edges
+6. `perform_refresh()` - 19 edges
+7. `perform_verify_otp()` - 19 edges
+8. `Role` - 19 edges
 9. `compilerOptions` - 18 edges
 10. `AppCache` - 16 edges
 
@@ -153,17 +153,17 @@ Nodes (54): App(), RootLayout(), Providers(), ProvidersProps, queryClient, Listi
 Cohesion: 0.16
 Nodes (25): app_port_defaults_to_3000_when_absent(), AppEnv, ConfigError, loads_valid_config(), optional_or(), optional_u16_or(), rejects_invalid_app_env(), rejects_invalid_smtp_port() (+17 more)
 
-### Community 2 - "route.rs"
-Cohesion: 0.33
-Nodes (11): ApiDoc, admin_router(), build_router(), merged_router(), openapi_spec(), owner_router(), public_router(), seeker_router() (+3 more)
+### Community 2 - "AppState"
+Cohesion: 0.32
+Nodes (12): ApiDoc, AppState, admin_router(), build_router(), merged_router(), openapi_spec(), owner_router(), public_router() (+4 more)
 
 ### Community 3 - "ListingDetailDto"
-Cohesion: 0.09
-Nodes (43): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+35 more)
+Cohesion: 0.08
+Nodes (51): ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto, From (+43 more)
 
 ### Community 4 - "AppError"
-Cohesion: 0.07
-Nodes (68): RefreshTokenLookup, Uuid, create_seeker(), db_err(), email_exists(), find_by_hash(), find_user_by_email(), insert_refresh_token() (+60 more)
+Cohesion: 0.10
+Nodes (51): RefreshTokenLookup, Uuid, correct_code_known_email_mutates_nothing_and_reports_is_new_user_false(), correct_code_new_email_creates_account_and_issues_session_with_is_new_user_true(), expired_token_is_rejected_without_family_revocation(), handle_revoked(), logout(), logout_revokes_only_the_single_current_token() (+43 more)
 
 ### Community 5 - "MyHouse Database Rules (sqlx/PostgreSQL)"
 Cohesion: 0.05
@@ -174,8 +174,8 @@ Cohesion: 0.14
 Nodes (26): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+18 more)
 
 ### Community 7 - "extractors.rs"
-Cohesion: 0.07
-Nodes (55): Algorithm, Claims, encode_with_exp(), expired_token_is_rejected_with_token_expired(), issue_access_token(), issued_token_expires_exactly_ttl_seconds_after_issuance(), jwt_token_decoder_adapter_delegates_correctly(), JwtTokenDecoder (+47 more)
+Cohesion: 0.06
+Nodes (56): Algorithm, Claims, encode_with_exp(), expired_token_is_rejected_with_token_expired(), issue_access_token(), issued_token_expires_exactly_ttl_seconds_after_issuance(), jwt_token_decoder_adapter_delegates_correctly(), JwtTokenDecoder (+48 more)
 
 ### Community 8 - "dependencies"
 Cohesion: 0.15
@@ -187,15 +187,15 @@ Nodes (22): delete_on_missing_key_returns_typed_error_not_panic(), delete_remove
 
 ### Community 10 - "devDependencies"
 Cohesion: 0.11
-Nodes (19): eslint, @eslint/js, eslint-plugin-react-hooks, devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, openapi-typescript (+11 more)
+Nodes (19): @eslint/js, eslint-plugin-react-hooks, devDependencies, @eslint/js, eslint-plugin-react-hooks, openapi-typescript, @tailwindcss/vite, @types/react (+11 more)
 
 ### Community 11 - "AppCacheProvider"
-Cohesion: 0.14
-Nodes (20): AppCache, build_cache_provider(), build_otp_cache(), build_otp_rate_limit_cache(), build_refresh_replay_cache(), Arc, Duration, RefreshTokenId (+12 more)
+Cohesion: 0.11
+Nodes (24): AppCache, build_cache_provider(), build_otp_cache(), build_otp_rate_limit_cache(), build_refresh_replay_cache(), Arc, Duration, RefreshTokenId (+16 more)
 
 ### Community 12 - ".new"
-Cohesion: 0.12
-Nodes (23): get_by_id(), list(), Json, Path, Result, State, Uuid, PaginatedResponse (+15 more)
+Cohesion: 0.18
+Nodes (15): PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T, Vec, test_defaults_applied_when_none() (+7 more)
 
 ### Community 13 - "compilerOptions"
 Cohesion: 0.08
@@ -229,21 +229,21 @@ Nodes (17): OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDt
 Cohesion: 0.47
 Nodes (5): find_is_active(), Option, PgPool, Result, Uuid
 
-### Community 21 - "AppState"
-Cohesion: 0.32
-Nodes (6): AppState, Inner, Arc, PgPool, Self, StorageProvider
+### Community 21 - "TokenDecoder"
+Cohesion: 0.26
+Nodes (8): Inner, Arc, PgPool, Self, StorageProvider, Send, Sync, TokenDecoder
 
 ### Community 22 - ".mcp.json"
 Cohesion: 0.15
 Nodes (16): DATABASE_URI, GITHUB_PERSONAL_ACCESS_TOKEN, npx, uvx, context7, filesystem, git, github (+8 more)
 
-### Community 23 - "MokaStore<K, V>"
-Cohesion: 0.52
-Nodes (4): MokaStore<K, V>, K, Option, V
+### Community 23 - "auth/repository.rs"
+Cohesion: 0.34
+Nodes (14): create_seeker(), db_err(), email_exists(), find_by_hash(), find_user_by_email(), insert_refresh_token(), revoke(), revoke_all_for_user() (+6 more)
 
 ### Community 24 - "errors.rs"
-Cohesion: 0.18
-Nodes (13): ErrorBody, ErrorEnvelope, parse_envelope(), Error, Response, Self, StatusCode, String (+5 more)
+Cohesion: 0.24
+Nodes (11): ErrorBody, ErrorEnvelope, parse_envelope(), Response, StatusCode, String, test_bad_request_carries_detail(), test_internal_error_is_500() (+3 more)
 
 ### Community 25 - "storage_key.rs"
 Cohesion: 0.25
@@ -258,7 +258,7 @@ Cohesion: 0.17
 Nodes (13): AGENTS.md — graphify trigger instructions, CLAUDE.md — MyHouse project instructions, Architecture Invariants (modular monolith, handler→service→repository, AppError), Key Decisions Already Locked (OTP auth, role model, refresh token cookie, etc.), MCP Usage Policy (GitHub, PostgreSQL, Git, Context7, Filesystem, Sequential Thinking), Locked Stack Decision (Rust/Axum, React/TS, PostgreSQL, moka, Docker), ADR-02: OTP Passwordless over Password/OAuth, ADR-09: Refresh token rotation on each use (+5 more)
 
 ### Community 28 - "Mailer"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (16): Address, AddressError, AsyncSmtpTransport, AppConfig, builds_successfully_with_valid_config(), Mailer, MailerError, rejects_malformed_smtp_from() (+8 more)
 
 ### Community 29 - "Extraction subagent prompt (full)"
@@ -415,11 +415,11 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `README Writing Rules Skill` and `Embedded React/TypeScript Rules Content`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **Why does `AppError` connect `AppError` to `ListingDetailDto`, `extractors.rs`, `local_fs.rs`, `.new`, `UnimplementedStorage`, `notifications/service.rs`, `auth/handler.rs`, `find_is_active`, `errors.rs`?**
-  _High betweenness centrality (0.153) - this node is a cross-community bridge._
-- **Why does `AppState` connect `AppState` to `route.rs`, `extractors.rs`, `.run`, `health.rs`, `.new`, `auth/handler.rs`, `Mailer`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
-- **Why does `AppConfig` connect `Mailer` to `AppConfig, Env Parsing & Mailer`, `AppCacheProvider`, `AppState`?**
+- **Why does `AppError` connect `AppError` to `ListingDetailDto`, `extractors.rs`, `local_fs.rs`, `UnimplementedStorage`, `notifications/service.rs`, `auth/handler.rs`, `find_is_active`, `auth/repository.rs`, `errors.rs`?**
+  _High betweenness centrality (0.157) - this node is a cross-community bridge._
+- **Why does `AppState` connect `AppState` to `ListingDetailDto`, `extractors.rs`, `.run`, `health.rs`, `auth/handler.rs`, `TokenDecoder`, `Mailer`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+- **Why does `AppConfig` connect `Mailer` to `AppConfig, Env Parsing & Mailer`, `AppCacheProvider`, `TokenDecoder`?**
   _High betweenness centrality (0.039) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _205 weakly-connected nodes found - possible documentation gaps or missing edges._
