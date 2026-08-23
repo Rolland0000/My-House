@@ -5,7 +5,8 @@
       "Bash(cargo fmt *)",
       "mcp__context7__query-docs",
       "Bash(graphify export *)",
-      "Bash(awk '/^## God Nodes/,/^## Surprising Connections/' graphify-out/GRAPH_REPORT.md)"
+      "Bash(awk '/^## God Nodes/,/^## Surprising Connections/' graphify-out/GRAPH_REPORT.md)",
+      "Bash(gh issue *)"
     ]
   },
   "hooks": {

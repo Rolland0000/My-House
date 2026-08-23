@@ -166,6 +166,13 @@ pub struct AppConfig {
     /// A config value, not a DB query — the admin role has exactly one holder
     /// at MVP (TECHNICAL_SPEC_MVP.md §3bis.2).
     pub admin_notification_email: String,
+
+    // ── Admin bootstrap ──────────────────────────────────────────────────────
+    /// If `true`, checks/creates the single admin account at startup.
+    pub admin_bootstrap_on_startup: bool,
+    /// Email to bootstrap the admin account with. Required when
+    /// `admin_bootstrap_on_startup` is `true` — validated in [`AppConfig::from_env`].
+    pub admin_bootstrap_email: Option<String>,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -181,6 +188,21 @@ fn require(key: &str) -> Result<String, ConfigError> {
 #[allow(dead_code)] // used by optional vars added in future tickets
 fn optional_or(key: &str, default: &str) -> String {
     env::var(key).unwrap_or_else(|_| default.to_string())
+}
+
+/// Parse an optional variable as `bool`, falling back to `default`.
+fn optional_bool_or(key: &str, default: bool) -> Result<bool, ConfigError> {
+    match env::var(key) {
+        Err(_) => Ok(default),
+        Ok(raw) => match raw.as_str() {
+            "true" => Ok(true),
+            "false" => Ok(false),
+            other => Err(ConfigError::Invalid {
+                key: key.to_string(),
+                reason: format!("expected \"true\" or \"false\", got \"{other}\""),
+            }),
+        },
+    }
 }
 
 /// Parse a required variable as `T` using a custom parser closure.
@@ -326,6 +348,18 @@ impl AppConfig {
         let smtp_from = require("SMTP_FROM")?;
         let admin_notification_email = require("ADMIN_NOTIFICATION_EMAIL")?;
 
+        // ── Admin bootstrap ───────────────────────────────────────────────────
+        let admin_bootstrap_on_startup = optional_bool_or("ADMIN_BOOTSTRAP_ON_STARTUP", false)?;
+        // Trimmed before storing: a stray space in the .env would otherwise be
+        // written into `users.email`, which is matched exactly at login.
+        let admin_bootstrap_email = match env::var("ADMIN_BOOTSTRAP_EMAIL") {
+            Ok(raw) if !raw.trim().is_empty() => Some(raw.trim().to_string()),
+            _ => None,
+        };
+        if admin_bootstrap_on_startup && admin_bootstrap_email.is_none() {
+            return Err(ConfigError::Missing("ADMIN_BOOTSTRAP_EMAIL".to_string()));
+        }
+
         Ok(AppConfig {
             app_port,
             app_env,
@@ -345,6 +379,8 @@ impl AppConfig {
             smtp_port,
             smtp_from,
             admin_notification_email,
+            admin_bootstrap_on_startup,
+            admin_bootstrap_email,
         })
     }
 }
@@ -389,6 +425,8 @@ mod tests {
         env::set_var("SMTP_PORT", "1025");
         env::set_var("SMTP_FROM", "noreply@myhouse.app");
         env::set_var("ADMIN_NOTIFICATION_EMAIL", "admin@myhouse.app");
+        env::remove_var("ADMIN_BOOTSTRAP_ON_STARTUP");
+        env::remove_var("ADMIN_BOOTSTRAP_EMAIL");
     }
 
     #[test]
@@ -486,5 +524,74 @@ mod tests {
         env::remove_var("APP_PORT");
         let cfg = AppConfig::from_env(AppEnv::Development).expect("should load with default port");
         assert_eq!(cfg.app_port, 3000);
+    }
+
+    #[test]
+    fn admin_bootstrap_defaults_to_disabled_when_absent() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert!(!cfg.admin_bootstrap_on_startup);
+        assert_eq!(cfg.admin_bootstrap_email, None);
+    }
+
+    #[test]
+    fn rejects_admin_bootstrap_enabled_without_email() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail when bootstrap is enabled without an email");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "ADMIN_BOOTSTRAP_EMAIL"));
+    }
+
+    #[test]
+    fn loads_admin_bootstrap_email_when_enabled() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "root@myhouse.app");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert!(cfg.admin_bootstrap_on_startup);
+        assert_eq!(
+            cfg.admin_bootstrap_email.as_deref(),
+            Some("root@myhouse.app")
+        );
+    }
+
+    #[test]
+    fn trims_surrounding_whitespace_from_admin_bootstrap_email() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "  root@myhouse.app  ");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert_eq!(
+            cfg.admin_bootstrap_email.as_deref(),
+            Some("root@myhouse.app")
+        );
+    }
+
+    #[test]
+    fn rejects_admin_bootstrap_email_that_is_only_whitespace() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "   ");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("whitespace-only email should not satisfy the requirement");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "ADMIN_BOOTSTRAP_EMAIL"));
+    }
+
+    #[test]
+    fn rejects_invalid_admin_bootstrap_on_startup() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "yes");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on non-boolean ADMIN_BOOTSTRAP_ON_STARTUP");
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "ADMIN_BOOTSTRAP_ON_STARTUP")
+        );
     }
 }

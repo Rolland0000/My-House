@@ -114,6 +114,8 @@ mod tests {
             smtp_port: 1025,
             smtp_from: "noreply@myhouse.app".to_string(),
             admin_notification_email: "admin@myhouse.app".to_string(),
+            admin_bootstrap_on_startup: false,
+            admin_bootstrap_email: None,
         }
     }
 

@@ -13,6 +13,7 @@ use backend_my_house::{
     infra::db,
     infra::mailer::Mailer,
     infra::storage::build_storage_provider,
+    modules::users,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
@@ -87,6 +88,14 @@ async fn main() {
             std::process::exit(1);
         });
     tracing::info!("Connected to PostgreSQL — migrations applied");
+
+    // ── 5b. Bootstrap the admin account ───────────────────────────────────────
+    users::service::bootstrap_admin(&db_pool, &config)
+        .await
+        .unwrap_or_else(|err| {
+            eprintln!("FATAL — admin bootstrap failed: {err}");
+            std::process::exit(1);
+        });
 
     // ── 6. Build the SMTP mailer ───────────────────────────────────────────────
     let mailer = Mailer::new(&config).unwrap_or_else(|err| {
