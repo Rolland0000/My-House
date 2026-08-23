@@ -7,7 +7,8 @@ use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
 
 use super::dto::{
-    OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, RefreshResponse, RefreshTokenDto,
+    OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse,
+    OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto,
 };
 use super::service;
 
@@ -45,6 +46,59 @@ pub async fn otp_request(
             message: "OTP code sent".to_string(),
         },
     }))
+}
+
+/// Second half of the unified auth endpoint (seeker_auth_flow.mermaid §2):
+/// verifies the code cached by `/auth/otp/request`, creates the account on
+/// first login, and issues the session.
+#[utoipa::path(
+    post,
+    path = "/auth/otp/verify",
+    tag = "auth",
+    request_body = OtpVerifyDto,
+    responses(
+        (status = 200, description = "OTP verified; session issued (account created if new)", body = OtpVerifyResponse),
+        (status = 401, description = "Invalid, expired, or attempt-exhausted OTP code"),
+    )
+)]
+pub async fn otp_verify(
+    State(state): State<AppState>,
+    jar: CookieJar,
+    Json(payload): Json<OtpVerifyDto>,
+) -> Result<(CookieJar, Json<OtpVerifyResponse>), AppError> {
+    let config = state.config();
+    let outcome = service::verify_otp(
+        state.db(),
+        state.cache().otp().as_ref(),
+        state.mailer(),
+        config.jwt_secret.as_bytes(),
+        config.jwt_access_ttl_seconds,
+        config.jwt_refresh_ttl_days,
+        config.otp_max_attempts,
+        &payload.email,
+        &payload.code,
+    )
+    .await?;
+
+    let max_age_seconds = (config.jwt_refresh_ttl_days * 86_400) as i64;
+    let cookie = Cookie::build((REFRESH_TOKEN_COOKIE, outcome.raw_refresh_token))
+        .http_only(true)
+        .secure(true)
+        .same_site(SameSite::Strict)
+        .domain(config.cookie_domain.clone())
+        .path("/auth")
+        .max_age(time::Duration::seconds(max_age_seconds))
+        .build();
+
+    Ok((
+        jar.add(cookie),
+        Json(OtpVerifyResponse {
+            data: OtpVerifyTokenDto {
+                access_token: outcome.access_token,
+                is_new_user: outcome.is_new_user,
+            },
+        }),
+    ))
 }
 
 #[utoipa::path(

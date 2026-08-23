@@ -121,3 +121,65 @@ pub async fn email_exists(pool: &PgPool, email: &str) -> Result<bool, AppError> 
     .await
     .map_err(db_err)
 }
+
+/// Existing account's id + current role, for `/auth/otp/verify`'s
+/// known-email branch — no `users` mutation, straight to session issuance.
+pub async fn find_user_by_email(
+    pool: &PgPool,
+    email: &str,
+) -> Result<Option<(Uuid, Role)>, AppError> {
+    let row = sqlx::query!(
+        r#"SELECT id, role AS "role: Role" FROM users WHERE email = $1"#,
+        email
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(db_err)?;
+
+    Ok(row.map(|r| (r.id, r.role)))
+}
+
+/// Creates a brand-new seeker account for `email`. `role` and `is_active`
+/// rely on their DB defaults (`'seeker'` / `true`).
+///
+/// Returns `None` on a `users.email` unique-violation — a concurrent verify
+/// call for the same email won the race — so the caller can fall back
+/// instead of surfacing a raw 500.
+pub async fn create_seeker(pool: &PgPool, email: &str) -> Result<Option<Uuid>, AppError> {
+    match sqlx::query_scalar!(
+        r#"INSERT INTO users (email) VALUES ($1) RETURNING id"#,
+        email
+    )
+    .fetch_one(pool)
+    .await
+    {
+        Ok(id) => Ok(Some(id)),
+        Err(sqlx::Error::Database(db_error)) if db_error.is_unique_violation() => Ok(None),
+        Err(error) => Err(db_err(error)),
+    }
+}
+
+/// Inserts a brand-new `refresh_tokens` row — backs `/auth/otp/verify`'s
+/// initial session issuance, where there is no prior row to revoke (unlike
+/// [`rotate`]).
+pub async fn insert_refresh_token(
+    pool: &PgPool,
+    user_id: Uuid,
+    token_hash: &str,
+    ttl_days: i32,
+) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+        INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+        VALUES ($1, $2, NOW() + make_interval(days => $3))
+        "#,
+        user_id,
+        token_hash,
+        ttl_days,
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+
+    Ok(())
+}
