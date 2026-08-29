@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
+import { AuthLayout } from "./layout/AuthLayout";
 import { RootLayout } from "./layout/RootLayout";
 import { Spinner } from "../shared/components";
 
@@ -10,6 +11,9 @@ const ListingDetail = lazy(() =>
   import("../features/listings/components/ListingDetail").then((m) => ({
     default: m.ListingDetail,
   }))
+);
+const AuthFlow = lazy(() =>
+  import("../features/auth/components/AuthFlow").then((m) => ({ default: m.AuthFlow }))
 );
 
 function withSuspense(Component: ComponentType) {
@@ -34,5 +38,10 @@ export const router = createBrowserRouter([
       { index: true, element: withSuspense(ListingFeed) },
       { path: "listings/:id", element: withSuspense(ListingDetail) },
     ],
+  },
+  {
+    path: "/login",
+    Component: AuthLayout,
+    children: [{ index: true, element: withSuspense(AuthFlow) }],
   },
 ]);
