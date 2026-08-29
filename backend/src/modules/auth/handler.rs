@@ -1,10 +1,10 @@
-use axum::extract::State;
-use axum::Json;
-use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
-
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
+use axum::extract::FromRef;
+use axum::extract::State;
+use axum::Json;
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 
 use super::dto::{
     OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse,
@@ -66,15 +66,13 @@ pub async fn otp_verify(
     jar: CookieJar,
     Json(payload): Json<OtpVerifyDto>,
 ) -> Result<(CookieJar, Json<OtpVerifyResponse>), AppError> {
-    let config = state.config();
+    let cookie_domain = state.config().cookie_domain.clone();
+    let config = service::OtpVerifyConfig::from_ref(&state);
     let outcome = service::verify_otp(
         state.db(),
         state.cache().otp().as_ref(),
         state.mailer(),
-        config.jwt_secret.as_bytes(),
-        config.jwt_access_ttl_seconds,
-        config.jwt_refresh_ttl_days,
-        config.otp_max_attempts,
+        &config,
         &payload.email,
         &payload.code,
     )
@@ -85,7 +83,7 @@ pub async fn otp_verify(
         .http_only(true)
         .secure(true)
         .same_site(SameSite::Strict)
-        .domain(config.cookie_domain.clone())
+        .domain(cookie_domain.clone())
         .path("/auth")
         .max_age(time::Duration::seconds(max_age_seconds))
         .build();
@@ -119,13 +117,12 @@ pub async fn refresh(
         .map(|c| c.value().to_string())
         .ok_or(AppError::RefreshTokenInvalid)?;
 
-    let config = state.config();
+    let cookie_domain = state.config().cookie_domain.clone();
+    let config = service::RefreshConfig::from_ref(&state);
     let outcome = service::refresh(
         state.db(),
         state.cache().refresh_replay().as_ref(),
-        config.jwt_secret.as_bytes(),
-        config.jwt_access_ttl_seconds,
-        config.jwt_refresh_ttl_days,
+        &config,
         &raw_token,
     )
     .await?;
@@ -135,7 +132,7 @@ pub async fn refresh(
         .http_only(true)
         .secure(true)
         .same_site(SameSite::Strict)
-        .domain(config.cookie_domain.clone())
+        .domain(cookie_domain.clone())
         .path("/auth")
         .max_age(time::Duration::seconds(max_age_seconds))
         .build();
