@@ -84,7 +84,7 @@ pub async fn otp_verify(
         .secure(true)
         .same_site(SameSite::Strict)
         .domain(cookie_domain.clone())
-        .path("/auth")
+        .path("/api/v1/auth")
         .max_age(time::Duration::seconds(max_age_seconds))
         .build();
 
@@ -133,7 +133,7 @@ pub async fn refresh(
         .secure(true)
         .same_site(SameSite::Strict)
         .domain(cookie_domain.clone())
-        .path("/auth")
+        .path("/api/v1/auth")
         .max_age(time::Duration::seconds(max_age_seconds))
         .build();
 
@@ -171,7 +171,7 @@ pub async fn logout(
     let config = state.config();
     let removal_cookie = Cookie::build(REFRESH_TOKEN_COOKIE)
         .domain(config.cookie_domain.clone())
-        .path("/auth")
+        .path("/api/v1/auth")
         .build();
 
     Ok(jar.remove(removal_cookie))

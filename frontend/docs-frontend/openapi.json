@@ -221,6 +221,42 @@
         }
       }
     },
+    "/api/v1/users/me": {
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "update_me",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or oversized first_name, last_name or phone"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -717,6 +753,14 @@
           }
         }
       },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "seeker",
+          "owner",
+          "admin"
+        ]
+      },
       "StorageStatus": {
         "type": "object",
         "description": "Storage backend response body.",
@@ -726,6 +770,82 @@
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateMeDto": {
+        "type": "object",
+        "required": [
+          "first_name",
+          "last_name"
+        ],
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "role"
+        ],
+        "properties": {
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UserDto"
           }
         }
       }
@@ -743,6 +863,10 @@
     {
       "name": "auth",
       "description": "Authentication — OTP request, token refresh, logout"
+    },
+    {
+      "name": "users",
+      "description": "Authenticated user profile"
     }
   ]
 }

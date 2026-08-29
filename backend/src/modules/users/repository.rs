@@ -2,6 +2,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::shared::errors::AppError;
+use crate::shared::rbac::Role;
+
+use super::model::UserRow;
 
 /// `is_active` for `user_id`, or `None` if the user no longer exists.
 /// Backs the `AuthUser` extractor's cache-miss fallback (MH-32).
@@ -10,6 +13,33 @@ pub async fn find_is_active(pool: &PgPool, user_id: Uuid) -> Result<Option<bool>
         .fetch_optional(pool)
         .await
         .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Overwrites the editable profile columns and returns the updated row, or
+/// `None` if the user no longer exists.
+pub async fn update_profile(
+    pool: &PgPool,
+    user_id: Uuid,
+    first_name: &str,
+    last_name: &str,
+    phone: Option<&str>,
+) -> Result<Option<UserRow>, AppError> {
+    sqlx::query_as!(
+        UserRow,
+        r#"
+        UPDATE users
+        SET first_name = $2, last_name = $3, phone = $4
+        WHERE id = $1
+        RETURNING id, email, role AS "role: Role", first_name, last_name, phone, avatar_url
+        "#,
+        user_id,
+        first_name,
+        last_name,
+        phone
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
 }
 
 /// Whether any user row currently has `role = 'admin'`.
