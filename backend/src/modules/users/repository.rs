@@ -20,9 +20,9 @@ pub async fn find_is_active(pool: &PgPool, user_id: Uuid) -> Result<Option<bool>
 pub async fn update_profile(
     pool: &PgPool,
     user_id: Uuid,
-    first_name: &str,
+    first_name: Option<&str>,
     last_name: &str,
-    phone: Option<&str>,
+    phone: &str,
 ) -> Result<Option<UserRow>, AppError> {
     sqlx::query_as!(
         UserRow,
@@ -53,17 +53,20 @@ pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
 /// Creates the admin account, promoting the row in place when `email` already
 /// belongs to a user. The upsert also makes this safe against a concurrent
 /// insert on the `users.email` unique constraint.
-pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<(), AppError> {
-    sqlx::query!(
+///
+/// `true` = row inserted, `false` = existing account promoted (`xmax = 0`
+/// distinguishes the two in an upsert).
+pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<bool, AppError> {
+    sqlx::query_scalar!(
         r#"
         INSERT INTO users (email, role, is_active)
         VALUES ($1, 'admin', true)
         ON CONFLICT (email) DO UPDATE SET role = 'admin', is_active = true
+        RETURNING (xmax = 0) AS "created!"
         "#,
         email
     )
-    .execute(pool)
+    .fetch_one(pool)
     .await
-    .map_err(|error| AppError::Database(error.to_string()))?;
-    Ok(())
+    .map_err(|error| AppError::Database(error.to_string()))
 }

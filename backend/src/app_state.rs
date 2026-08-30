@@ -31,6 +31,9 @@ struct Inner {
     pub cache: AppCache,
     /// JWT claims decoder, backed by `shared::crypto::JwtTokenDecoder`.
     pub token_decoder: Arc<dyn TokenDecoder>,
+    /// JWT signing secret, materialised once so token-minting paths clone an
+    /// `Arc` instead of re-allocating the secret on every request.
+    pub jwt_secret: Arc<[u8]>,
 }
 
 impl AppState {
@@ -49,6 +52,7 @@ impl AppState {
     ) -> Self {
         let token_decoder: Arc<dyn TokenDecoder> =
             Arc::new(JwtTokenDecoder::new(config.jwt_secret.as_bytes()));
+        let jwt_secret: Arc<[u8]> = Arc::from(config.jwt_secret.as_bytes());
 
         Self {
             inner: Arc::new(Inner {
@@ -58,6 +62,7 @@ impl AppState {
                 storage,
                 cache,
                 token_decoder,
+                jwt_secret,
             }),
         }
     }
@@ -90,5 +95,10 @@ impl AppState {
     /// Exposes the JWT claims decoder.
     pub fn token_decoder(&self) -> &Arc<dyn TokenDecoder> {
         &self.inner.token_decoder
+    }
+
+    /// Exposes the JWT signing secret used by the token-minting paths.
+    pub fn jwt_secret(&self) -> &Arc<[u8]> {
+        &self.inner.jwt_secret
     }
 }

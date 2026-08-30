@@ -17,6 +17,7 @@ use super::service;
         (status = 200, description = "Profile updated", body = UserResponse),
         (status = 400, description = "Missing or oversized first_name, last_name or phone"),
         (status = 401, description = "Missing or invalid access token"),
+        (status = 404, description = "User not found"),
     )
 )]
 pub async fn update_me(

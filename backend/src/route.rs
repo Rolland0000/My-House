@@ -43,6 +43,7 @@ fn public_router() -> OpenApiRouter<AppState> {
         .routes(routes!(listings::handler::get_by_id))
         .routes(routes!(auth::handler::otp_request))
         .routes(routes!(auth::handler::otp_verify))
+        .routes(routes!(auth::handler::register))
         .routes(routes!(auth::handler::refresh))
 }
 

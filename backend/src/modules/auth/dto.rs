@@ -38,15 +38,35 @@ pub struct OtpVerifyDto {
     pub code: String,
 }
 
+/// `is_new_user` discriminates the two shapes: `false` carries `access_token`,
+/// `true` carries `registration_ticket` for `POST /auth/register`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct OtpVerifyTokenDto {
-    pub access_token: String,
     pub is_new_user: bool,
+    pub access_token: Option<String>,
+    pub registration_ticket: Option<String>,
 }
 
-/// `{ "data": { "access_token": "...", "is_new_user": bool } }` per
-/// `TECHNICAL_SPEC_MVP.md §4.1`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct OtpVerifyResponse {
     pub data: OtpVerifyTokenDto,
+}
+
+/// `last_name` and `phone` are mandatory for every non-admin account.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct RegisterDto {
+    pub registration_ticket: String,
+    pub first_name: Option<String>,
+    pub last_name: String,
+    pub phone: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct RegisterTokenDto {
+    pub access_token: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct RegisterResponse {
+    pub data: RegisterTokenDto,
 }

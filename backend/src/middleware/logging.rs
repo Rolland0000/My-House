@@ -7,11 +7,18 @@
 //! request. No log shipping/aggregation is wired here; stdout only, per the
 //! epic's scope boundary.
 
+use std::time::Instant;
+
 use axum::{extract::Request, http::HeaderMap, middleware::Next, response::Response};
 use tracing::Instrument;
 use uuid::Uuid;
 
 const REQUEST_ID_HEADER: &str = "x-request-id";
+
+/// Container-orchestrator probes, hit every few seconds by the Docker
+/// healthcheck. Their start/end events are demoted to DEBUG so they don't
+/// drown the INFO stream; `RUST_LOG=backend_my_house=debug` brings them back.
+const HEALTH_PATHS: [&str; 2] = ["/health", "/health/storage"];
 
 /// Resolves the request id: propagates an incoming `X-Request-Id` header
 /// verbatim if present, otherwise generates a new UUID v4.
@@ -42,10 +49,32 @@ pub async fn request_id(request: Request, next: Next) -> Response {
         %path,
     );
 
+    let is_health_probe = HEALTH_PATHS.contains(&path.as_str());
+
     async move {
-        tracing::info!("request started");
+        if is_health_probe {
+            tracing::debug!("request started");
+        } else {
+            tracing::info!("request started");
+        }
+
+        let started = Instant::now();
         let response = next.run(request).await;
-        tracing::info!(status = %response.status(), "request completed");
+        let status = response.status();
+        let duration_ms = started.elapsed().as_millis() as u64;
+
+        // `tracing` macros take a static level, so the choice has to be made
+        // by branching rather than by computing a `Level` value.
+        if is_health_probe {
+            tracing::debug!(status = %status, duration_ms, "request completed");
+        } else if status.is_server_error() {
+            tracing::error!(status = %status, duration_ms, "request completed");
+        } else if status.is_client_error() {
+            tracing::warn!(status = %status, duration_ms, "request completed");
+        } else {
+            tracing::info!(status = %status, duration_ms, "request completed");
+        }
+
         response
     }
     .instrument(span)

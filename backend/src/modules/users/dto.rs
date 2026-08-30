@@ -6,11 +6,13 @@ use crate::shared::rbac::Role;
 
 use super::model::UserRow;
 
+/// Same obligations as `RegisterDto`: `phone` being required is what keeps an
+/// omitted field from silently erasing the stored number.
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct UpdateMeDto {
-    pub first_name: String,
+    pub first_name: Option<String>,
     pub last_name: String,
-    pub phone: Option<String>,
+    pub phone: String,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
