@@ -13,7 +13,7 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
-use crate::modules::{auth, listings};
+use crate::modules::{auth, listings, users};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -43,6 +43,7 @@ fn public_router() -> OpenApiRouter<AppState> {
         .routes(routes!(listings::handler::get_by_id))
         .routes(routes!(auth::handler::otp_request))
         .routes(routes!(auth::handler::otp_verify))
+        .routes(routes!(auth::handler::register))
         .routes(routes!(auth::handler::refresh))
 }
 
@@ -51,9 +52,10 @@ fn public_router() -> OpenApiRouter<AppState> {
 /// Protected by: `AuthUser` extractor (re-validates `is_active` on every request).
 /// Examples: profile read/update, saved searches, logout.
 fn seeker_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(auth::handler::logout))
+    OpenApiRouter::new()
+        .routes(routes!(auth::handler::logout))
+        .routes(routes!(users::handler::update_me))
     // TODO EP-02: .routes(routes!(users::me))
-    // TODO EP-02: .routes(routes!(users::update_me))
     // TODO EP-02: .routes(routes!(users::request_owner_upgrade))
 }
 

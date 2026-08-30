@@ -108,6 +108,24 @@ pub struct PendingOtp {
     pub attempts: u32,
 }
 
+/// The two short-lived auth challenges, sharing one cache store; the key
+/// namespaces ([`otp_key`] / [`registration_key`]) keep them apart.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AuthChallenge {
+    PendingOtp(PendingOtp),
+    PendingRegistration { email: String },
+}
+
+/// Cache key for the OTP challenge of `email`.
+pub fn otp_key(email: &str) -> String {
+    format!("otp:{email}")
+}
+
+/// Cache key for the single-use registration ticket `ticket`.
+pub fn registration_key(ticket: &str) -> String {
+    format!("reg:{ticket}")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

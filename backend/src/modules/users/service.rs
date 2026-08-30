@@ -1,8 +1,12 @@
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::config::AppConfig;
 use crate::shared::errors::AppError;
+use crate::shared::validation::{optional_name, required_name, required_phone};
 
+use super::dto::UpdateMeDto;
+use super::model::UserRow;
 use super::repository;
 
 /// Startup-only entry point — called once from `main` before the HTTP server
@@ -22,7 +26,24 @@ pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), Ap
     if repository::admin_exists(pool).await? {
         return Ok(());
     }
-    repository::upsert_admin(pool, email).await?;
-    tracing::info!(email, "admin account bootstrapped");
+    if repository::upsert_admin(pool, email).await? {
+        tracing::info!(email, "admin account bootstrapped");
+    } else {
+        tracing::warn!(email, "existing account promoted to admin by bootstrap");
+    }
     Ok(())
+}
+
+pub async fn update_me(
+    pool: &PgPool,
+    user_id: Uuid,
+    payload: UpdateMeDto,
+) -> Result<UserRow, AppError> {
+    let first_name = optional_name(payload.first_name.as_deref(), "first_name")?;
+    let last_name = required_name(&payload.last_name, "last_name")?;
+    let phone = required_phone(&payload.phone)?;
+
+    repository::update_profile(pool, user_id, first_name, last_name, phone)
+        .await?
+        .ok_or(AppError::UserNotFound)
 }

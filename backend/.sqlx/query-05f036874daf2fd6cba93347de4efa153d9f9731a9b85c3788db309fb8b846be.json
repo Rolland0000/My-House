@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users (email, role, is_active)\n        VALUES ($1, 'admin', true)\n        ON CONFLICT (email) DO UPDATE SET role = 'admin', is_active = true\n        RETURNING (xmax = 0) AS \"created!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "created!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "05f036874daf2fd6cba93347de4efa153d9f9731a9b85c3788db309fb8b846be"
+}

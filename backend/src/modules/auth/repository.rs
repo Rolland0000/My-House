@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::shared::errors::AppError;
 use crate::shared::rbac::Role;
 
-use super::model::RefreshTokenLookup;
+use super::model::{NewAccount, RefreshTokenLookup};
 
 fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
@@ -139,24 +139,49 @@ pub async fn find_user_by_email(
     Ok(row.map(|r| (r.id, r.role)))
 }
 
-/// Creates a brand-new seeker account for `email`. `role` and `is_active`
-/// rely on their DB defaults (`'seeker'` / `true`).
-///
-/// Returns `None` on a `users.email` unique-violation — a concurrent verify
-/// call for the same email won the race — so the caller can fall back
-/// instead of surfacing a raw 500.
-pub async fn create_seeker(pool: &PgPool, email: &str) -> Result<Option<Uuid>, AppError> {
-    match sqlx::query_scalar!(
-        r#"INSERT INTO users (email) VALUES ($1) RETURNING id"#,
-        email
+/// Creates the account and its first refresh token in one transaction.
+/// `role` and `is_active` rely on their DB defaults (`'seeker'` / `true`);
+/// a `users.email` unique-violation surfaces as [`AppError::EmailAlreadyExists`].
+pub async fn create_account(pool: &PgPool, account: NewAccount<'_>) -> Result<Uuid, AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let user_id = match sqlx::query_scalar!(
+        r#"
+        INSERT INTO users (email, first_name, last_name, phone)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+        "#,
+        account.email,
+        account.first_name,
+        account.last_name,
+        account.phone,
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     {
-        Ok(id) => Ok(Some(id)),
-        Err(sqlx::Error::Database(db_error)) if db_error.is_unique_violation() => Ok(None),
-        Err(error) => Err(db_err(error)),
-    }
+        Ok(id) => id,
+        // Dropping `tx` un-committed rolls it back.
+        Err(sqlx::Error::Database(db_error)) if db_error.is_unique_violation() => {
+            return Err(AppError::EmailAlreadyExists)
+        }
+        Err(error) => return Err(db_err(error)),
+    };
+
+    sqlx::query!(
+        r#"
+        INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+        VALUES ($1, $2, NOW() + make_interval(days => $3))
+        "#,
+        user_id,
+        account.refresh_token_hash,
+        account.refresh_ttl_days,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(db_err)?;
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(user_id)
 }
 
 /// Inserts a brand-new `refresh_tokens` row — backs `/auth/otp/verify`'s

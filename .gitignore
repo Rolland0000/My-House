@@ -18,3 +18,4 @@ graphify-out/*/cost.json
 # Generated types and specs
 frontend/openapi.json
 frontend/src/shared/api/types.ts
+docs/bien-ici-on-va-snug-squirrel.md

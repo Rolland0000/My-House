@@ -18,6 +18,7 @@ use utoipa::OpenApi;
         (name = "health", description = "Service health check"),
         (name = "listings", description = "Public read-only listings feed"),
         (name = "auth", description = "Authentication — OTP request, token refresh, logout"),
+        (name = "users", description = "Authenticated user profile"),
     )
 )]
 pub struct ApiDoc;

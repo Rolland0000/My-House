@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use moka::MokaStore;
 
-use crate::shared::types::{PendingOtp, RefreshTokenId};
+use crate::shared::types::{AuthChallenge, RefreshTokenId};
 
 /// Staleness bound on an admin suspension taking effect (MH-32).
 const IS_ACTIVE_STATUS_TTL: Duration = Duration::from_secs(8);
@@ -31,11 +31,12 @@ const IS_ACTIVE_STATUS_MAX_ENTRIES: u64 = 10_000;
 /// Concurrent refreshes within a 5s grace window — inherently small.
 const REFRESH_REPLAY_MAX_ENTRIES: u64 = 10_000;
 
-/// Pending OTP challenges; keyed by caller-supplied email, so capped well
+/// Pending OTP challenges and registration tickets; keyed by
+/// caller-supplied email (or a server-generated ticket), so capped well
 /// above expected signup volume rather than at it.
-const OTP_MAX_ENTRIES: u64 = 50_000;
+const AUTH_CHALLENGE_MAX_ENTRIES: u64 = 50_000;
 
-/// Same key space as [`OTP_MAX_ENTRIES`], over a shorter window.
+/// Same key space as [`AUTH_CHALLENGE_MAX_ENTRIES`], over a shorter window.
 const OTP_RATE_LIMIT_MAX_ENTRIES: u64 = 50_000;
 
 /// Distinct client IPs seen within one rate-limit window (MH-39).
@@ -59,15 +60,19 @@ pub fn build_refresh_replay_cache() -> Arc<dyn AppCacheProvider<RefreshTokenId, 
     ))
 }
 
-/// OTP challenge cache, keyed by email. `ttl` is config-driven rather than a
-/// fixed const like the two builders above.
-pub fn build_otp_cache(ttl: Duration) -> Arc<dyn AppCacheProvider<String, PendingOtp>> {
-    Arc::new(MokaStore::new(ttl, OTP_MAX_ENTRIES))
+/// Auth challenge cache: OTP codes keyed by email, registration tickets
+/// keyed by ticket. One store, one TTL (`ttl` is config-driven rather than a
+/// fixed const like the two builders above) — the key namespaces in
+/// `shared::types` keep the two apart.
+pub fn build_auth_challenge_cache(
+    ttl: Duration,
+) -> Arc<dyn AppCacheProvider<String, AuthChallenge>> {
+    Arc::new(MokaStore::new(ttl, AUTH_CHALLENGE_MAX_ENTRIES))
 }
 
 /// OTP request rate-limit cache, keyed by email — kept separate from
-/// [`build_otp_cache`] so a rate-limit hit never clobbers a still-valid
-/// pending code. Only key presence within `ttl` matters; the value carries
+/// [`build_auth_challenge_cache`] so a rate-limit hit never clobbers a
+/// still-valid pending code. Only key presence within `ttl` matters; the value carries
 /// no information.
 pub fn build_otp_rate_limit_cache(ttl: Duration) -> Arc<dyn AppCacheProvider<String, ()>> {
     Arc::new(MokaStore::new(ttl, OTP_RATE_LIMIT_MAX_ENTRIES))
@@ -87,7 +92,7 @@ pub fn build_ip_rate_limit_cache(
 pub struct AppCache {
     is_active_status: Arc<dyn AppCacheProvider<Uuid, bool>>,
     refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
-    otp: Arc<dyn AppCacheProvider<String, PendingOtp>>,
+    auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
     otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
     ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
 }
@@ -96,14 +101,14 @@ impl AppCache {
     pub fn new(
         is_active_status: Arc<dyn AppCacheProvider<Uuid, bool>>,
         refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
-        otp: Arc<dyn AppCacheProvider<String, PendingOtp>>,
+        auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
         otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
         ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
     ) -> Self {
         Self {
             is_active_status,
             refresh_replay,
-            otp,
+            auth_challenge,
             otp_rate_limit,
             ip_rate_limit,
         }
@@ -117,8 +122,8 @@ impl AppCache {
         Arc::clone(&self.refresh_replay)
     }
 
-    pub fn otp(&self) -> Arc<dyn AppCacheProvider<String, PendingOtp>> {
-        Arc::clone(&self.otp)
+    pub fn auth_challenge(&self) -> Arc<dyn AppCacheProvider<String, AuthChallenge>> {
+        Arc::clone(&self.auth_challenge)
     }
 
     /// Per-email "requested recently" marker — key presence is the whole

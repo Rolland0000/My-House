@@ -283,7 +283,7 @@ graph TD
 
 ### 6.1 Authentification OTP — Login et Inscription Unifiés
 
-Le même endpoint gère login et inscription : si l'email est inconnu, le compte est créé après vérification du code. Le frontend est informé via `is_new_user: bool`.
+Le même endpoint d'entrée gère login et inscription, et le frontend est routé par `is_new_user: bool`. La création de compte, elle, est une transaction unique portée par `POST /auth/register` : `/auth/otp/verify` n'écrit rien en base pour un email inconnu, il délivre un `registration_ticket` opaque (UUID v4, usage unique, TTL 10 min, même store moka que l'OTP avec un namespace de clé distinct). Aucune ligne `users` ne peut donc exister sans ses champs obligatoires, ni sans la session pour laquelle elle a été créée.
 
 ```mermaid
 sequenceDiagram
@@ -298,25 +298,34 @@ sequenceDiagram
     Frontend->>Auth: POST /auth/otp/request { email }
     Auth->>Auth: Vérifie si email connu en DB
     Auth->>Auth: Génère code 6 chiffres (CSPRNG)\nHash le code (SHA-256)
-    Auth->>Moka: store(email → { hash, is_new, TTL=10min })
+    Auth->>Moka: store("otp:{email}" → { hash, is_new, TTL=10min })
     Auth->>Notifications: send_otp_email(email, code)
     Auth-->>Frontend: 200 OK
 
     Utilisateur->>Frontend: Saisit le code reçu
     Frontend->>Auth: POST /auth/otp/verify { email, code }
-    Auth->>Moka: get(email) → { hash, is_new }
+    Auth->>Moka: get("otp:{email}") → { hash, is_new }
     Auth->>Auth: SHA-256(code) == hash ?
-    Auth->>Moka: delete(email)
-    alt is_new = true
-        Auth->>DB: INSERT INTO users (role: seeker)
-    end
-    Auth->>DB: INSERT INTO refresh_tokens
-    Auth-->>Frontend: 200 OK { access_token, is_new_user }\n+ Set-Cookie: refresh_token\n(httpOnly, Secure, SameSite=Strict)
+    Auth->>Moka: delete("otp:{email}")
 
-    alt is_new_user = true
-        Frontend->>Frontend: Redirect → complétion de profil
+    alt is_new = false — email connu
+        Auth->>DB: INSERT INTO refresh_tokens
+        Auth-->>Frontend: 200 OK { is_new_user: false, access_token }\n+ Set-Cookie: refresh_token\n(httpOnly, Secure, SameSite=Strict)
+    else is_new = true — email inconnu
+        Auth->>Moka: store("reg:{ticket}" → { email }, TTL=10min)
+        Auth-->>Frontend: 200 OK { is_new_user: true, registration_ticket }\naucune écriture DB, aucun cookie
+
+        Utilisateur->>Frontend: Saisit nom (requis), téléphone (requis), prénom (facultatif)
+        Frontend->>Auth: POST /auth/register { registration_ticket, ... }
+        Auth->>Moka: get + delete("reg:{ticket}") → { email }
+        Auth->>DB: BEGIN\nINSERT INTO users\nINSERT INTO refresh_tokens\nCOMMIT
+        Note over Auth,DB: Unique violation sur users.email → 409 EMAIL_ALREADY_EXISTS
+        Auth->>Notifications: send_welcome_email (après COMMIT, best-effort)
+        Auth-->>Frontend: 200 OK { access_token }\n+ Set-Cookie: refresh_token
     end
 ```
+
+Le ticket est une preuve de possession de l'email, au même titre que l'access token : il ne quitte jamais l'état React côté frontend. Un rechargement pendant l'écran d'inscription le perd — sans conséquence en base, puisque aucun compte n'a été créé ; l'utilisateur redemande un code.
 
 ### 6.2 Demande et Validation du Rôle Owner
 
@@ -578,6 +587,7 @@ Le schéma OpenAPI est la source de vérité unique du contrat API. Les types Ty
 | ADR-06 | **utoipa + openapi-typescript**                                | Écriture manuelle des types TS                       | Single source of truth — cohérence garantie entre backend et frontend                                                                                                      |
 | ADR-07 | **Rôle `seeker` par défaut**                               | Choix de rôle à l'inscription                       | Friction minimale à l'entrée — upgrade owner en self-service validé par admin                                                                                            |
 | ADR-08 | **Un seul endpoint OTP**                                       | Endpoints login/register séparés                    | Simplifie le flux client —`is_new_user` gère le routage côté frontend                                                                                                  |
+| ADR-11 | **Inscription atomique via `POST /auth/register` + ticket opaque** | Création du compte dès `/auth/otp/verify`, complété ensuite par `PUT /users/me` | L'ancien flux laissait un compte fantôme (email seul, authentifiable) si l'utilisateur abandonnait entre les deux appels. `users` + `refresh_tokens` sont désormais insérés dans une seule transaction, tous champs obligatoires présents ; le ticket (usage unique, TTL 10 min) porte la preuve de possession de l'email entre les deux appels |
 | ADR-09 | **Rotation du refresh token à chaque usage**                  | Refresh token statique valable 30 jours sans rotation | Détection de vol (réutilisation d'un token déjà consommé) et révocation immédiate de la famille de tokens ; le TTL 30 jours reste un plafond indépendant             |
 | ADR-10 | **Refresh token en cookie `httpOnly` + `SameSite=Strict`** | Refresh token retourné en JSON body                  | Protection contre le vol via XSS (non accessible en JS) ;`SameSite=Strict` neutralise le CSRF sans token dédié, suffisant pour un MVP mono-domaine                       |
 

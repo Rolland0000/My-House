@@ -1,5 +1,5 @@
 use axum::{
-    http::StatusCode,
+    http::{header::RETRY_AFTER, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
     Json,
 };
@@ -87,6 +87,9 @@ pub enum AppError {
     #[error("An owner request is already pending.")]
     OwnerRequestAlreadyPending,
 
+    #[error("An account already exists for this email.")]
+    EmailAlreadyExists,
+
     // ── 422 Unprocessable Entity ─────────────────────────────────────────────
     #[error("Invalid document (unsupported format or size).")]
     InvalidDocument,
@@ -101,8 +104,9 @@ pub enum AppError {
     CoverPhotoRequired,
 
     // ── 429 Too Many Requests ─────────────────────────────────────────────────
+    /// Carries the wait time, emitted as a `Retry-After` header.
     #[error("Too many OTP requests. Please wait before trying again.")]
-    OtpRateLimited,
+    OtpRateLimited { retry_after_seconds: u64 },
 
     #[error("Too many requests. Please wait before trying again.")]
     RateLimited,
@@ -149,13 +153,14 @@ impl AppError {
             Self::OwnerRequestAlreadyPending => {
                 (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_PENDING")
             }
+            Self::EmailAlreadyExists => (StatusCode::CONFLICT, "EMAIL_ALREADY_EXISTS"),
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
             Self::InvalidFile => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_FILE"),
             Self::MediaQuotaExceeded => (StatusCode::UNPROCESSABLE_ENTITY, "MEDIA_QUOTA_EXCEEDED"),
             Self::CoverPhotoRequired => (StatusCode::UNPROCESSABLE_ENTITY, "COVER_PHOTO_REQUIRED"),
             // 429
-            Self::OtpRateLimited => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
+            Self::OtpRateLimited { .. } => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
             // 500
             Self::Internal => (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
@@ -169,6 +174,12 @@ impl AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, code) = self.status_and_code();
+        let retry_after_seconds = match &self {
+            Self::OtpRateLimited {
+                retry_after_seconds,
+            } => Some(*retry_after_seconds),
+            _ => None,
+        };
 
         // Server errors may carry internal detail (DB/storage/IO messages) that
         // must never reach the client; log the real cause and respond with a
@@ -188,7 +199,13 @@ impl IntoResponse for AppError {
             },
         };
 
-        (status, Json(body)).into_response()
+        let mut response = (status, Json(body)).into_response();
+        if let Some(seconds) = retry_after_seconds {
+            if let Ok(value) = HeaderValue::from_str(&seconds.to_string()) {
+                response.headers_mut().insert(RETRY_AFTER, value);
+            }
+        }
+        response
     }
 }
 
@@ -231,8 +248,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_otp_rate_limited_produces_429() {
-        let response = AppError::OtpRateLimited.into_response();
+        let response = AppError::OtpRateLimited {
+            retry_after_seconds: 60,
+        }
+        .into_response();
         assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert_eq!(response.headers()[RETRY_AFTER], "60");
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "OTP_RATE_LIMITED");
