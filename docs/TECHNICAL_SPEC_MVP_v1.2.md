@@ -168,7 +168,7 @@ frontend/
     │   │   ├── components/
     │   │   │   ├── OtpRequestForm.tsx
     │   │   │   ├── OtpVerifyForm.tsx
-    │   │   │   └── ProfileSetupForm.tsx  # Affiché si is_new_user = true
+    │   │   │   └── RegistrationForm.tsx   # Affiché si is_new_user = true
     │   │   ├── hooks/useAuth.ts
     │   │   ├── api.ts
     │   │   └── index.ts
@@ -268,12 +268,20 @@ CREATE TABLE users (
     role        user_role   NOT NULL DEFAULT 'seeker',
     first_name  VARCHAR(100),
     last_name   VARCHAR(100),
-    phone       VARCHAR(30),           -- Obligatoire pour le rôle owner
+    phone       VARCHAR(30),           -- Obligatoire hors admin (contrainte ci-dessous)
     avatar_url  VARCHAR(500),
     is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migration 20260830120000. Les colonnes restent nullable pour le rôle admin,
+-- bootstrappé depuis un email seul. NOT VALID : les comptes email-seul créés
+-- par l'ancien flux sont grandfathered.
+ALTER TABLE users
+  ADD CONSTRAINT users_profile_complete_for_non_admin
+  CHECK (role = 'admin' OR (last_name IS NOT NULL AND phone IS NOT NULL))
+  NOT VALID;
 
 -- ============================================================
 -- refresh_tokens
@@ -429,8 +437,8 @@ CREATE TRIGGER tg_owner_requests_updated_at
 
 | Décision                                 | Détail                                                                              |
 | ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| `users.first_name / last_name` nullable | Compte créé à la vérification OTP avant complétion du profil                    |
-| `users.phone` nullable                  | Renseigné lors de la demande owner — obligatoire pour le rôle owner               |
+| `users.first_name` nullable             | Facultatif — certaines personnes n'ont qu'un nom                                  |
+| `users.last_name / phone` nullable en DDL | Rendus obligatoires hors admin par `users_profile_complete_for_non_admin` ; la colonne reste nullable pour le bootstrap admin |
 | OTP non stocké en DB                     | Géré exclusivement dans moka (in-memory, TTL 10 min)                               |
 | `storage_key` vs `url`                | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé |
 | `is_cover` index partiel unique         | PostgreSQL garantit l'unicité de la cover sans contrainte applicative               |
@@ -512,7 +520,7 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 | Événement | Déclenché par | Destinataire | Template |
 | --- | --- | --- | --- |
 | Envoi OTP | `POST /auth/otp/request` | Utilisateur | `otp.html` |
-| Bienvenue (nouveau compte) | `POST /auth/otp/verify` (is_new_user=true) | Utilisateur | `welcome.html` |
+| Bienvenue (nouveau compte) | `POST /auth/register` (après COMMIT)      | Utilisateur | `welcome.html` |
 | Nouvelle demande owner | `POST /owner-requests` | Admin (email fixe, configuré) | `owner_request_received.html` |
 | Demande owner approuvée | `PATCH /admin/owner-requests/:id` (approved) | Utilisateur | `owner_request_approved.html` |
 | Demande owner rejetée | `PATCH /admin/owner-requests/:id` (rejected) | Utilisateur | `owner_request_rejected.html` |
@@ -569,7 +577,8 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 | Méthode | Endpoint              | Auth | Description                                                                                                   |
 | -------- | --------------------- | ---- | ------------------------------------------------------------------------------------------------------------- |
 | `POST` | `/auth/otp/request` | Non  | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                         |
-| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. Crée le compte si nouvel email. Retourne `{ access_token, is_new_user }` + cookie `refresh_token`. |
+| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. **Ne crée aucun compte.** Email connu → `{ is_new_user: false, access_token }` + cookie `refresh_token`. Email inconnu → `{ is_new_user: true, registration_ticket }`, sans cookie. |
+| `POST` | `/auth/register`    | Non  | Consomme le `registration_ticket` (usage unique, TTL 10 min) et crée `users` + `refresh_tokens` en **une transaction**. Retourne `{ access_token }` + cookie `refresh_token`. |
 | `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie, **révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
 | `POST` | `/auth/logout`      | JWT  | Révoque le refresh token courant et efface le cookie.                                                          |
 
@@ -592,17 +601,61 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 // Request
 { "email": "user@example.com", "code": "482910" }
 
-// Response 200
+// Response 200 — email connu
 // Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000
 {
   "data": {
+    "is_new_user": false,
     "access_token": "eyJ...",
-    "is_new_user": true
+    "registration_ticket": null
+  }
+}
+
+// Response 200 — email inconnu : aucune ligne `users`, aucun cookie
+{
+  "data": {
+    "is_new_user": true,
+    "access_token": null,
+    "registration_ticket": "a3f1c8e2-..."
   }
 }
 
 // Response 401 — code invalide ou expiré
 { "error": { "code": "OTP_INVALID", "message": "Code invalide ou expiré.", "status": 401 } }
+```
+
+**`POST /auth/register`**
+
+L'email n'est jamais lu dans le body : il provient du ticket, donc de l'OTP
+vérifié. Obligations par rôle sur les champs de profil :
+
+| Rôle | `last_name` | `phone` | `first_name` |
+| ---- | ----------- | ------- | ------------ |
+| `seeker`, `owner` | obligatoire | obligatoire | facultatif |
+| `admin` | nullable | nullable | facultatif |
+
+Invariant garanti en base par la contrainte `users_profile_complete_for_non_admin`
+(migration `20260830120000`), et bornes `MAX_NAME_LENGTH = 100` /
+`MAX_PHONE_LENGTH = 30`.
+
+```json
+// Request
+{
+  "registration_ticket": "a3f1c8e2-...",
+  "first_name": "Moussa",
+  "last_name": "Diallo",
+  "phone": "+225 07 00 00 00 00"
+}
+
+// Response 200
+// Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000
+{ "data": { "access_token": "eyJ..." } }
+
+// Response 401 — ticket inconnu, expiré ou déjà consommé
+{ "error": { "code": "OTP_INVALID", "message": "Code invalide ou expiré.", "status": 401 } }
+
+// Response 409 — l'email du ticket a été pris entre-temps
+{ "error": { "code": "EMAIL_ALREADY_EXISTS", "message": "Ce compte existe déjà.", "status": 409 } }
 ```
 
 ---
@@ -633,6 +686,18 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
     "created_at": "2025-06-01T10:00:00Z"
   }
 }
+```
+
+**`PUT /users/me`** — édition d'un profil déjà complet, jamais une complétion :
+`last_name` et `phone` sont requis (mêmes bornes que `/auth/register`),
+`first_name` facultatif. Un `phone` omis est un 400, pas un effacement.
+
+```json
+// Request
+{ "first_name": "Moussa", "last_name": "Diallo", "phone": "+225 07 00 00 00 00" }
+
+// Response 404 — le compte n'existe plus
+{ "error": { "code": "USER_NOT_FOUND", "message": "User not found.", "status": 404 } }
 ```
 
 **`POST /users/me/avatar`**
@@ -898,7 +963,7 @@ Chaque module backend contient un fichier `tests.rs` déclaré dans `mod.rs` sou
 
 | Module       | Cas critiques à tester                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------ |
-| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée |
+| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée, `/auth/otp/verify` sur email inconnu → aucune ligne `users`, ticket d'inscription à usage unique, transaction `create_account` (rollback si l'insert refresh_tokens échoue), 409 `EMAIL_ALREADY_EXISTS` |
 | `users`    | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
 | `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                |
 | `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée, 1ère photo d'un listing marquée `is_cover=true` automatiquement, uploads suivants `is_cover=false` |
