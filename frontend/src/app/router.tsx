@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 import { AuthLayout } from "./layout/AuthLayout";
+import { RequireAuth } from "./RequireAuth";
 import { RootLayout } from "./layout/RootLayout";
 import { Spinner } from "../shared/components";
 
@@ -14,6 +15,9 @@ const ListingDetail = lazy(() =>
 );
 const AuthFlow = lazy(() =>
   import("../features/auth/components/AuthFlow").then((m) => ({ default: m.AuthFlow }))
+);
+const ProfileForm = lazy(() =>
+  import("../features/profile/components/ProfileForm").then((m) => ({ default: m.ProfileForm }))
 );
 
 function withSuspense(Component: ComponentType) {
@@ -37,6 +41,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: withSuspense(ListingFeed) },
       { path: "listings/:id", element: withSuspense(ListingDetail) },
+      {
+        path: "profile",
+        element: <RequireAuth>{withSuspense(ProfileForm)}</RequireAuth>,
+      },
     ],
   },
   {
