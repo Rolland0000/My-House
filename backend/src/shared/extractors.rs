@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use axum::extract::{FromRef, FromRequestParts};
+use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
 use axum::http::request::Parts;
+use axum::Json;
+use serde::de::DeserializeOwned;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -71,6 +73,28 @@ where
             &auth_state.db,
         )
         .await
+    }
+}
+
+/// `axum::Json` with its deserialization rejection remapped to `AppError`.
+///
+/// Axum answers a missing required field with a bare `422`; the API contract
+/// says a malformed body is a `400` in the standard error envelope.
+pub struct AppJson<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequest<S> for AppJson<T>
+where
+    T: DeserializeOwned,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        Json::<T>::from_request(request, state)
+            .await
+            .map(|Json(payload)| Self(payload))
+            .map_err(|rejection| AppError::BadRequest(rejection.body_text()))
     }
 }
 

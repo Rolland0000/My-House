@@ -41,3 +41,65 @@ pub fn required_phone(raw: &str) -> Result<&str, AppError> {
     }
     Ok(trimmed)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn repeat(count: usize) -> String {
+        "é".repeat(count)
+    }
+
+    #[test]
+    fn required_name_trims_and_accepts_the_upper_bound() {
+        assert_eq!(required_name("  Ada  ", "first_name").unwrap(), "Ada");
+        let at_bound = repeat(MAX_NAME_LENGTH);
+        assert_eq!(required_name(&at_bound, "last_name").unwrap(), at_bound);
+    }
+
+    #[test]
+    fn required_name_rejects_blank_and_over_length() {
+        assert!(matches!(
+            required_name("   ", "last_name"),
+            Err(AppError::BadRequest(_))
+        ));
+        assert!(matches!(
+            required_name(&repeat(MAX_NAME_LENGTH + 1), "last_name"),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn optional_name_treats_absent_and_blank_as_cleared() {
+        assert_eq!(optional_name(None, "first_name").unwrap(), None);
+        assert_eq!(optional_name(Some("  "), "first_name").unwrap(), None);
+        assert_eq!(
+            optional_name(Some(" Ada "), "first_name").unwrap(),
+            Some("Ada")
+        );
+    }
+
+    #[test]
+    fn optional_name_still_enforces_the_length_bound() {
+        assert!(matches!(
+            optional_name(Some(&repeat(MAX_NAME_LENGTH + 1)), "first_name"),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn required_phone_trims_and_accepts_the_upper_bound() {
+        assert_eq!(required_phone(" +33600000000 ").unwrap(), "+33600000000");
+        let at_bound = "0".repeat(MAX_PHONE_LENGTH);
+        assert_eq!(required_phone(&at_bound).unwrap(), at_bound);
+    }
+
+    #[test]
+    fn required_phone_rejects_blank_and_over_length() {
+        assert!(matches!(required_phone("  "), Err(AppError::BadRequest(_))));
+        assert!(matches!(
+            required_phone(&"0".repeat(MAX_PHONE_LENGTH + 1)),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+}

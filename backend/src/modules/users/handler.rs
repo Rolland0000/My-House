@@ -3,10 +3,31 @@ use axum::Json;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 
 use super::dto::{UpdateMeDto, UserDto, UserResponse};
 use super::service;
+
+#[utoipa::path(
+    get,
+    path = "/users/me",
+    tag = "users",
+    responses(
+        (status = 200, description = "Caller profile", body = UserResponse),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 404, description = "User not found"),
+    )
+)]
+pub async fn get_me(
+    State(state): State<AppState>,
+    user: AuthUser,
+) -> Result<Json<UserResponse>, AppError> {
+    let row = service::get_me(state.db(), user.user_id).await?;
+
+    Ok(Json(UserResponse {
+        data: UserDto::from(row),
+    }))
+}
 
 #[utoipa::path(
     put,
@@ -23,7 +44,7 @@ use super::service;
 pub async fn update_me(
     State(state): State<AppState>,
     user: AuthUser,
-    Json(payload): Json<UpdateMeDto>,
+    AppJson(payload): AppJson<UpdateMeDto>,
 ) -> Result<Json<UserResponse>, AppError> {
     let row = service::update_me(state.db(), user.user_id, payload).await?;
 
