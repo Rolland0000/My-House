@@ -1,7 +1,8 @@
 export { AuthProvider } from "./AuthContext";
 export type { AuthStatus, AuthContextValue } from "./AuthContext";
 
-export { AuthFlow } from "./components/AuthFlow";
+// AuthFlow is deliberately not re-exported: router.tsx lazy-loads it by path,
+// and a static re-export here would pull it into the eager bundle.
 
 export { useAuth } from "./hooks/useAuth";
 export { useOtpRequest } from "./hooks/useOtpRequest";
