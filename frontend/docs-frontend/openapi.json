@@ -262,6 +262,30 @@
       }
     },
     "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "get_me",
+        "responses": {
+          "200": {
+            "description": "Caller profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
       "put": {
         "tags": [
           "users"
@@ -899,7 +923,9 @@
         "required": [
           "id",
           "email",
-          "role"
+          "role",
+          "is_active",
+          "created_at"
         ],
         "properties": {
           "avatar_url": {
@@ -907,6 +933,9 @@
               "string",
               "null"
             ]
+          },
+          "created_at": {
+            "type": "string"
           },
           "email": {
             "type": "string"
@@ -920,6 +949,9 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
           },
           "last_name": {
             "type": [

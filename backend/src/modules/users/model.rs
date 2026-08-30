@@ -10,4 +10,8 @@ pub struct UserRow {
     pub last_name: Option<String>,
     pub phone: Option<String>,
     pub avatar_url: Option<String>,
+    pub is_active: bool,
+    /// Pre-formatted as ISO 8601 in SQL, like `ListingDetailRow::created_at` —
+    /// no `chrono`/`time` feature enabled on `sqlx` in this crate.
+    pub created_at: String,
 }

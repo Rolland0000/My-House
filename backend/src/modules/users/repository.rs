@@ -15,6 +15,24 @@ pub async fn find_is_active(pool: &PgPool, user_id: Uuid) -> Result<Option<bool>
         .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Full profile row for `user_id`, or `None` if the user no longer exists.
+pub async fn find_by_id(pool: &PgPool, user_id: Uuid) -> Result<Option<UserRow>, AppError> {
+    sqlx::query_as!(
+        UserRow,
+        r#"
+        SELECT id, email, role AS "role: Role", first_name, last_name, phone, avatar_url,
+               is_active,
+               to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!"
+        FROM users
+        WHERE id = $1
+        "#,
+        user_id
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
 /// Overwrites the editable profile columns and returns the updated row, or
 /// `None` if the user no longer exists.
 pub async fn update_profile(
@@ -30,7 +48,9 @@ pub async fn update_profile(
         UPDATE users
         SET first_name = $2, last_name = $3, phone = $4
         WHERE id = $1
-        RETURNING id, email, role AS "role: Role", first_name, last_name, phone, avatar_url
+        RETURNING id, email, role AS "role: Role", first_name, last_name, phone, avatar_url,
+                  is_active,
+                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!"
         "#,
         user_id,
         first_name,

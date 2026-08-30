@@ -34,6 +34,12 @@ pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), Ap
     Ok(())
 }
 
+pub async fn get_me(pool: &PgPool, user_id: Uuid) -> Result<UserRow, AppError> {
+    repository::find_by_id(pool, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)
+}
+
 pub async fn update_me(
     pool: &PgPool,
     user_id: Uuid,

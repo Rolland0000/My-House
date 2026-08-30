@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        UPDATE users\n        SET first_name = $2, last_name = $3, phone = $4\n        WHERE id = $1\n        RETURNING id, email, role AS \"role: Role\", first_name, last_name, phone, avatar_url\n        ",
+  "query": "\n        SELECT id, email, role AS \"role: Role\", first_name, last_name, phone, avatar_url,\n               is_active,\n               to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\"\n        FROM users\n        WHERE id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -48,14 +48,21 @@
         "ordinal": 6,
         "name": "avatar_url",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at!",
+        "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Varchar",
-        "Varchar",
-        "Varchar"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -65,8 +72,10 @@
       true,
       true,
       true,
-      true
+      true,
+      false,
+      null
     ]
   },
-  "hash": "27dd7bfb9da5244db632a34fe4b5448ee20d4c45aef028abd56ffc53b73b25bb"
+  "hash": "bb1615a5d5e4e9a2fdcc0d8b1646170d85647e82814995162763f26fa73d6cf1"
 }
