@@ -17,13 +17,23 @@ interface ErrorEnvelope {
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
+  /** From the `Retry-After` header, on 429 responses. */
+  readonly retryAfterSeconds?: number;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, retryAfterSeconds?: number) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+function readRetryAfter(response: Response): number | undefined {
+  const raw = response.headers.get("Retry-After");
+  if (!raw) return undefined;
+  const seconds = Number(raw);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
 }
 
 type AccessTokenGetter = () => string | null;
@@ -76,7 +86,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(
       response.status,
       body?.error?.code ?? "UNKNOWN_ERROR",
-      body?.error?.message ?? response.statusText
+      body?.error?.message ?? response.statusText,
+      readRetryAfter(response)
     );
   }
 

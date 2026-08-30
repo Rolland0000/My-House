@@ -17,9 +17,19 @@ function OtpCodeInput({
   disabled = false,
 }: OtpCodeInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Editing a digit of an already-complete code must not re-fire a verification.
+  const lastSubmitted = useRef<string | null>(null);
+
+  function submit(fullCode: string) {
+    if (lastSubmitted.current === fullCode) return;
+    lastSubmitted.current = fullCode;
+    onComplete(fullCode);
+  }
 
   useEffect(() => {
     if (value.every((digit) => digit === "")) {
+      // Cleared after a failed verification: the same code becomes submittable again.
+      lastSubmitted.current = null;
       inputRefs.current[0]?.focus();
     }
   }, [value]);
@@ -37,7 +47,7 @@ function OtpCodeInput({
       focusInput(index + 1);
     }
     if (next.every((d) => d !== "")) {
-      onComplete(next.join(""));
+      submit(next.join(""));
     }
   }
 
@@ -60,7 +70,7 @@ function OtpCodeInput({
     const next = Array.from({ length }, (_, i) => pasted[i] ?? "");
     onChange(next);
     if (pasted.length === length) {
-      onComplete(pasted);
+      submit(pasted);
     } else {
       focusInput(pasted.length);
     }

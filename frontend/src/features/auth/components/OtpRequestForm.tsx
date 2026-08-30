@@ -39,7 +39,7 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
       onSuccess: () => onRequested(trimmedEmail),
       onError: (error) => {
         if (error instanceof ApiError && error.code === "OTP_RATE_LIMITED") {
-          start(OTP_RATE_LIMIT_COOLDOWN_SECONDS);
+          start(error.retryAfterSeconds ?? OTP_RATE_LIMIT_COOLDOWN_SECONDS);
         }
       },
     });

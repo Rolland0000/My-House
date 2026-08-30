@@ -13,6 +13,9 @@ export function useOtpVerify() {
   return useMutation({
     mutationFn: ({ email, code }: VerifyOtpParams) => verifyOtp(email, code),
     retry: false,
-    onSuccess: ({ data }) => setSession(data.access_token),
+    // A new user has no session yet — only the registration ticket.
+    onSuccess: ({ data }) => {
+      if (data.access_token) setSession(data.access_token);
+    },
   });
 }

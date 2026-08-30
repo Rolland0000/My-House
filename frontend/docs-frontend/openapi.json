@@ -65,7 +65,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Second half of the unified auth endpoint (seeker_auth_flow.mermaid §2):\nverifies the code cached by `/auth/otp/request`, creates the account on\nfirst login, and issues the session.",
+        "summary": "Second half of the unified auth endpoint (seeker_auth_flow.mermaid §2):\nverifies the code cached by `/auth/otp/request`. A known email gets its\nsession straight away; an unknown one gets a single-use registration\nticket — no account row and no cookie until `/auth/register` runs.",
         "operationId": "otp_verify",
         "requestBody": {
           "content": {
@@ -79,7 +79,7 @@
         },
         "responses": {
           "200": {
-            "description": "OTP verified; session issued (account created if new)",
+            "description": "OTP verified; session issued, or registration ticket returned for an unknown email",
             "content": {
               "application/json": {
                 "schema": {
@@ -113,6 +113,46 @@
           },
           "401": {
             "description": "Missing, unknown, expired, or reused refresh token"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Creates the account in one transaction from the ticket handed out by\n`/auth/otp/verify`, and opens the session.",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Account created; session issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or over-long last_name / phone"
+          },
+          "401": {
+            "description": "Unknown, expired, or already-used registration ticket"
+          },
+          "409": {
+            "description": "An account already exists for this email"
           }
         }
       }
@@ -253,6 +293,9 @@
           },
           "401": {
             "description": "Missing or invalid access token"
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }
@@ -552,7 +595,6 @@
       },
       "OtpVerifyResponse": {
         "type": "object",
-        "description": "`{ \"data\": { \"access_token\": \"...\", \"is_new_user\": bool } }` per\n`TECHNICAL_SPEC_MVP.md §4.1`.",
         "required": [
           "data"
         ],
@@ -564,16 +606,25 @@
       },
       "OtpVerifyTokenDto": {
         "type": "object",
+        "description": "`is_new_user` discriminates the two shapes: `false` carries `access_token`,\n`true` carries `registration_ticket` for `POST /auth/register`.",
         "required": [
-          "access_token",
           "is_new_user"
         ],
         "properties": {
           "access_token": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "is_new_user": {
             "type": "boolean"
+          },
+          "registration_ticket": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -753,6 +804,54 @@
           }
         }
       },
+      "RegisterDto": {
+        "type": "object",
+        "description": "`last_name` and `phone` are mandatory for every non-admin account.",
+        "required": [
+          "registration_ticket",
+          "last_name",
+          "phone"
+        ],
+        "properties": {
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "registration_ticket": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RegisterTokenDto"
+          }
+        }
+      },
+      "RegisterTokenDto": {
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          }
+        }
+      },
       "Role": {
         "type": "string",
         "enum": [
@@ -775,22 +874,23 @@
       },
       "UpdateMeDto": {
         "type": "object",
+        "description": "Same obligations as `RegisterDto`: `phone` being required is what keeps an\nomitted field from silently erasing the stored number.",
         "required": [
-          "first_name",
-          "last_name"
+          "last_name",
+          "phone"
         ],
         "properties": {
           "first_name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "last_name": {
             "type": "string"
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           }
         }
       },

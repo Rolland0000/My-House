@@ -5,13 +5,18 @@ import { useCountdown } from "../../../shared/hooks/useCountdown";
 import { formatCountdown } from "../../../shared/utils/format";
 import { useOtpRequest } from "../hooks/useOtpRequest";
 import { useOtpVerify } from "../hooks/useOtpVerify";
-import { OTP_CODE_LENGTH, OTP_RESEND_INITIAL_COOLDOWN_SECONDS } from "../constants";
+import {
+  OTP_CODE_LENGTH,
+  OTP_RATE_LIMIT_COOLDOWN_SECONDS,
+  OTP_RESEND_INITIAL_COOLDOWN_SECONDS,
+} from "../constants";
 import { OtpCodeInput } from "./OtpCodeInput";
 
 interface OtpVerifyFormProps {
   email: string;
   onBack: () => void;
-  onVerified: (isNewUser: boolean) => void;
+  /** Registration ticket for a new user, `null` when the session is already open. */
+  onVerified: (registrationTicket: string | null) => void;
 }
 
 function emptyCode(): string[] {
@@ -37,7 +42,7 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
     verifyOtp.mutate(
       { email, code: fullCode },
       {
-        onSuccess: ({ data }) => onVerified(data.is_new_user),
+        onSuccess: ({ data }) => onVerified(data.registration_ticket ?? null),
         onError: () => setCode(emptyCode()),
       }
     );
@@ -46,6 +51,11 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
   function handleResend() {
     resendOtp.mutate(email, {
       onSuccess: () => startResendCooldown(OTP_RESEND_INITIAL_COOLDOWN_SECONDS),
+      onError: (error) => {
+        if (error instanceof ApiError && error.code === "OTP_RATE_LIMITED") {
+          startResendCooldown(error.retryAfterSeconds ?? OTP_RATE_LIMIT_COOLDOWN_SECONDS);
+        }
+      },
     });
   }
 
