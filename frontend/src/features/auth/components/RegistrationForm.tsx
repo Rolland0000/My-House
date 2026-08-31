@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Alert, Button, FormField, Input } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
+import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../../../shared/api/constants";
 import { useRegister } from "../hooks/useRegister";
-import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../constants";
 
 interface RegistrationFormProps {
   email: string;

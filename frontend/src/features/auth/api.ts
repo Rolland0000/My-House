@@ -1,16 +1,13 @@
-import { apiPost, apiPut } from "../../shared/api/client";
+import { apiPost } from "../../shared/api/client";
 import type { components } from "../../shared/api/types";
 
 export type OtpVerifyToken = components["schemas"]["OtpVerifyTokenDto"];
 export type RegisterPayload = components["schemas"]["RegisterDto"];
-export type UpdateMePayload = components["schemas"]["UpdateMeDto"];
-export type User = components["schemas"]["UserDto"];
 
 type OtpRequestResponse = components["schemas"]["OtpRequestResponse"];
 type OtpVerifyResponse = components["schemas"]["OtpVerifyResponse"];
 type RefreshResponse = components["schemas"]["RefreshResponse"];
 type RegisterResponse = components["schemas"]["RegisterResponse"];
-type UserResponse = components["schemas"]["UserResponse"];
 
 export function requestOtp(email: string): Promise<OtpRequestResponse> {
   return apiPost("/api/v1/auth/otp/request", { email });
@@ -31,8 +28,4 @@ export function refreshSession(): Promise<RefreshResponse> {
 
 export function logout(): Promise<void> {
   return apiPost("/api/v1/auth/logout");
-}
-
-export function updateMe(payload: UpdateMePayload): Promise<UserResponse> {
-  return apiPut("/api/v1/users/me", payload);
 }
