@@ -1,6 +1,7 @@
 pub mod crypto;
 pub mod errors;
 pub mod extractors;
+pub mod file_validation;
 pub mod pagination;
 pub mod rbac;
 pub mod storage_key;

@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use axum::extract::DefaultBodyLimit;
 use axum::Router;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -14,6 +15,11 @@ use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
 use crate::modules::{auth, listings, users};
+use crate::shared::file_validation::MAX_IMAGE_SIZE_BYTES;
+
+/// Headroom for multipart part headers and boundaries on top of the image
+/// budget itself, so a file at exactly the limit still gets through.
+const MULTIPART_OVERHEAD_BYTES: usize = 16 * 1024;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -59,6 +65,20 @@ fn seeker_router() -> OpenApiRouter<AppState> {
         // the schema.
         .routes(routes!(users::handler::get_me, users::handler::update_me))
     // TODO EP-02: .routes(routes!(users::request_owner_upgrade))
+}
+
+/// Avatar upload, kept in its own sub-router so the raised body limit applies
+/// to this route alone and not to the rest of the seeker surface.
+///
+/// The limit is a Tower layer rather than a check inside the handler: it cuts
+/// the stream off instead of letting an oversized body buffer first. Axum's
+/// 2 MB default would otherwise reject a valid 5 MB upload.
+fn avatar_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(users::handler::upload_avatar))
+        .layer(DefaultBodyLimit::max(
+            MAX_IMAGE_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES,
+        ))
 }
 
 /// Routes restricted to validated owners.
@@ -113,6 +133,7 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
     let api_v1 = OpenApiRouter::new()
         .merge(public_router())
         .merge(seeker_router())
+        .merge(avatar_router())
         .merge(OpenApiRouter::from(owner_router()))
         .merge(OpenApiRouter::from(admin_router()));
 
