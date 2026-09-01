@@ -8,7 +8,7 @@ publish = false
 default-run = "backend-my-house"
 
 [dependencies]
-axum = "0.7"
+axum = { version = "0.7", features = ["multipart"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["trace", "cors"] }
@@ -34,5 +34,6 @@ axum-extra = { version = "0.9", features = ["cookie"] }
 time = "0.3"
 rand = "0.8"
 ipnet = "2.12.1"
+infer = "0.22"
 
 [dev-dependencies]

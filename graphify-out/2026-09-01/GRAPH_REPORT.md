@@ -1,23 +1,23 @@
 # Graph Report - My-House  (2026-09-01)
 
 ## Corpus Check
-- 200 files · ~91,581 words
+- 200 files · ~91,550 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1332 nodes · 2524 edges · 114 communities (85 shown, 29 thin omitted)
+- 1333 nodes · 2524 edges · 117 communities (88 shown, 29 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 79 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `78a44d8e`
+- Built from commit: `df3ece0f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - components/index.ts
 - auth/index.ts
-- ListingFeed.tsx
+- auth/handler.rs
 - .new
 - config/mod.rs
 - jwt.rs
@@ -42,7 +42,7 @@
 - AppError
 - route.rs
 - ProfileForm.tsx
-- Pagination.tsx
+- router.tsx
 - .run
 - Extraction subagent prompt (full)
 - dependencies
@@ -81,6 +81,7 @@
 - R-08: search_vector trigger N+1 query
 - Refresh Token httpOnly Cookie
 - API Contract /api/v1
+- AuthFlow.tsx
 - frontend/index.html — Vite SPA entry point
 - globals
 - prettier
@@ -90,6 +91,8 @@
 - pre-commit
 - AppState
 - eslint-plugin-react-refresh
+- providers.tsx
+- AuthContext.tsx
 - graphify Slash Command Trigger (.claude/CLAUDE.md)
 - Backend Review Checklist Reference
 - AppError Centralized Error Type
@@ -150,19 +153,19 @@
 - **Notifications Module Email Template Set** — backend_src_modules_notifications_templates_otp, backend_src_modules_notifications_templates_welcome, backend_src_modules_notifications_templates_owner_request_approved, backend_src_modules_notifications_templates_owner_request_received, backend_src_modules_notifications_templates_owner_request_rejected [INFERRED 0.80]
 - **Dev Environment Docker Compose Stack** — backend_compose_backend_backend_dev, frontend_compose_frontend_frontend_dev, docker_compose_db, docker_compose_mailhog [INFERRED 0.85]
 
-## Communities (114 total, 29 thin omitted)
+## Communities (117 total, 29 thin omitted)
 
 ### Community 0 - "components/index.ts"
-Cohesion: 0.08
-Nodes (40): Alert(), AlertProps, AlertVariant, variantConfig, ButtonProps, ButtonSize, ButtonVariant, sizeClasses (+32 more)
+Cohesion: 0.05
+Nodes (67): FieldErrors, RegistrationFormProps, getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings() (+59 more)
 
 ### Community 1 - "auth/index.ts"
-Cohesion: 0.08
-Nodes (35): App(), AuthLayout(), RootLayout(), Providers(), ProvidersProps, queryClient, RequireAuth(), RequireAuthProps (+27 more)
+Cohesion: 0.23
+Nodes (15): logout(), OtpRequestResponse, OtpVerifyResponse, OtpVerifyToken, RefreshResponse, refreshSession(), registerAccount(), RegisterPayload (+7 more)
 
-### Community 2 - "ListingFeed.tsx"
-Cohesion: 0.18
-Nodes (20): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+12 more)
+### Community 2 - "auth/handler.rs"
+Cohesion: 0.14
+Nodes (29): OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse, OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto (+21 more)
 
 ### Community 3 - ".new"
 Cohesion: 0.07
@@ -201,12 +204,12 @@ Cohesion: 0.17
 Nodes (22): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_rejects_key_with_parent_dir_component(), read_returns_previously_uploaded_bytes(), Bytes, Duration (+14 more)
 
 ### Community 12 - "extractors.rs"
-Cohesion: 0.06
-Nodes (60): OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse, OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto (+52 more)
+Cohesion: 0.11
+Nodes (31): get_me(), multipart_error(), read_file_field(), Bytes, Json, Result, State, update_me() (+23 more)
 
 ### Community 13 - "users/dto.rs"
-Cohesion: 0.15
-Nodes (11): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Self, String (+3 more)
+Cohesion: 0.14
+Nodes (13): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Self, String (+5 more)
 
 ### Community 14 - "compilerOptions"
 Cohesion: 0.08
@@ -225,8 +228,8 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 18 - "OtpVerifyForm.tsx"
-Cohesion: 0.13
-Nodes (20): requestOtp(), AuthFlow(), markInterrupted(), readInterrupted(), Screen, OtpCodeInput(), OtpCodeInputProps, OtpRequestForm() (+12 more)
+Cohesion: 0.19
+Nodes (13): requestOtp(), OtpCodeInput(), OtpCodeInputProps, OtpRequestForm(), OtpRequestFormProps, emptyCode(), OtpVerifyForm(), OtpVerifyFormProps (+5 more)
 
 ### Community 19 - "devDependencies"
 Cohesion: 0.11
@@ -234,15 +237,15 @@ Nodes (19): eslint, @eslint/js, eslint-plugin-react-hooks, devDependencies, esli
 
 ### Community 20 - "users/service.rs"
 Cohesion: 0.06
-Nodes (51): UpdateMeDto, bootstrap_admin(), delete_previous_avatar(), deletes_the_key_behind_the_previous_avatar_url(), get_me(), RecordingStorage, replace_avatar(), Bytes (+43 more)
+Nodes (50): bootstrap_admin(), delete_previous_avatar(), deletes_the_key_behind_the_previous_avatar_url(), get_me(), RecordingStorage, replace_avatar(), Bytes, Duration (+42 more)
 
 ### Community 21 - ".mcp.json"
 Cohesion: 0.15
 Nodes (16): DATABASE_URI, GITHUB_PERSONAL_ACCESS_TOKEN, npx, uvx, context7, filesystem, git, github (+8 more)
 
 ### Community 22 - "client.ts"
-Cohesion: 0.26
-Nodes (11): AccessTokenGetter, apiGet(), buildQueryString(), ErrorEnvelope, isAuthPath(), QueryValue, readAccessToken(), readRetryAfter() (+3 more)
+Cohesion: 0.23
+Nodes (11): AccessTokenGetter, buildQueryString(), ErrorEnvelope, isAuthPath(), jsonInit(), QueryValue, readAccessToken(), readRetryAfter() (+3 more)
 
 ### Community 23 - "notifications/service.rs"
 Cohesion: 0.18
@@ -257,12 +260,12 @@ Cohesion: 0.32
 Nodes (12): ApiDoc, admin_router(), avatar_router(), build_router(), merged_router(), openapi_spec(), owner_router(), public_router() (+4 more)
 
 ### Community 26 - "ProfileForm.tsx"
-Cohesion: 0.19
+Cohesion: 0.18
 Nodes (19): getMe(), Profile, profileQueryKey, updateMe(), UpdateProfilePayload, UserResponse, FieldErrors, FIELDS_BY_SERVER_NAME (+11 more)
 
-### Community 27 - "Pagination.tsx"
-Cohesion: 0.38
-Nodes (4): Pagination(), PaginationProps, getPageItems(), PageItem
+### Community 27 - "router.tsx"
+Cohesion: 0.19
+Nodes (8): AuthLayout(), RootLayout(), RequireAuth(), RequireAuthProps, AuthFlow, ListingDetail, ListingFeed, ProfileForm
 
 ### Community 28 - ".run"
 Cohesion: 0.27
@@ -388,9 +391,21 @@ Nodes (3): Owner Request Approved Email Template, Owner Request Received (Admin 
 Cohesion: 0.67
 Nodes (3): README.md — Project Overview and Setup, Conventional Commits convention, Trunk-based development branching strategy
 
+### Community 67 - "AuthFlow.tsx"
+Cohesion: 0.47
+Nodes (5): AuthFlow(), markInterrupted(), readInterrupted(), Screen, RegistrationForm()
+
 ### Community 76 - "AppState"
 Cohesion: 0.22
 Nodes (9): AppState, Inner, Arc, PgPool, Self, StorageProvider, Send, Sync (+1 more)
+
+### Community 78 - "providers.tsx"
+Cohesion: 0.32
+Nodes (5): App(), Providers(), ProvidersProps, queryClient, router
+
+### Community 79 - "AuthContext.tsx"
+Cohesion: 0.39
+Nodes (6): AuthContext, AuthContextValue, AuthProvider(), AuthStatus, setAccessTokenGetter(), setUnauthorizedHandler()
 
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
@@ -414,10 +429,10 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `README Writing Rules Skill` and `Embedded React/TypeScript Rules Content`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **Why does `AppError` connect `AppError` to `.new`, `jwt.rs`, `AppCacheProvider`, `local_fs.rs`, `extractors.rs`, `users/service.rs`, `notifications/service.rs`?**
-  _High betweenness centrality (0.170) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `auth/handler.rs`, `.new`, `jwt.rs`, `AppCacheProvider`, `local_fs.rs`, `extractors.rs`, `users/service.rs`, `notifications/service.rs`?**
+  _High betweenness centrality (0.161) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `config/mod.rs` to `Mailer`, `AppState`, `users/service.rs`?**
-  _High betweenness centrality (0.050) - this node is a cross-community bridge._
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Why does `AppCacheProvider` connect `AppCacheProvider` to `rate_limit.rs`, `extractors.rs`, `MokaStore<K, V>`?**
   _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**

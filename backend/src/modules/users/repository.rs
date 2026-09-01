@@ -62,6 +62,31 @@ pub async fn update_profile(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Points the account at `avatar_url` and returns the updated row, or `None`
+/// if the user no longer exists.
+pub async fn update_avatar_url(
+    pool: &PgPool,
+    user_id: Uuid,
+    avatar_url: &str,
+) -> Result<Option<UserRow>, AppError> {
+    sqlx::query_as!(
+        UserRow,
+        r#"
+        UPDATE users
+        SET avatar_url = $2
+        WHERE id = $1
+        RETURNING id, email, role AS "role: Role", first_name, last_name, phone, avatar_url,
+                  is_active,
+                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!"
+        "#,
+        user_id,
+        avatar_url
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
 /// Whether any user row currently has `role = 'admin'`.
 pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
     sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM users WHERE role = 'admin') AS "exists!""#)

@@ -49,6 +49,14 @@ pub struct UserResponse {
     pub data: UserDto,
 }
 
+/// Documents the avatar upload body for the OpenAPI schema. Nothing
+/// deserializes into it — the handler walks the multipart fields itself.
+#[derive(ToSchema)]
+pub struct AvatarUploadForm {
+    #[schema(value_type = String, format = Binary)]
+    pub file: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

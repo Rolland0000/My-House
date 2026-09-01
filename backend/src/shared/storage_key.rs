@@ -20,6 +20,29 @@ pub fn avatar_key(user_id: UserId, ext: &str) -> String {
     format!("avatars/{user_id}/{}.{ext}", Uuid::new_v4())
 }
 
+/// Recovers the storage key from an avatar URL previously returned by
+/// `StorageProvider::upload`, or `None` when the URL does not point at a file
+/// owned by `user_id`.
+///
+/// Anchoring on the `avatars/{user_id}/` segment rather than stripping a
+/// configured base URL keeps this working when `PUBLIC_MEDIA_BASE_URL` differs
+/// between the environment that stored the URL and the one reading it back.
+pub fn avatar_key_from_url(url: &str, user_id: UserId) -> Option<String> {
+    let anchor = format!("avatars/{user_id}/");
+    let key = &url[url.rfind(&anchor)?..];
+    let filename = key.strip_prefix(&anchor)?;
+
+    // Rejects anything but a single `uuid.ext` segment — a nested path, a
+    // `..` component or a trailing query string all fail one of these.
+    let (stem, extension) = filename.rsplit_once('.')?;
+    if extension.is_empty() || !extension.chars().all(|c| c.is_ascii_alphanumeric()) {
+        return None;
+    }
+    Uuid::parse_str(stem).ok()?;
+
+    Some(key.to_string())
+}
+
 /// Builds a key under the private `owner-requests/{request_id}/{uuid}.{ext}` prefix.
 pub fn owner_request_document_key(request_id: OwnerRequestId, ext: &str) -> String {
     format!("owner-requests/{request_id}/{}.{ext}", Uuid::new_v4())
@@ -64,6 +87,56 @@ mod tests {
         let user_id = UserId::generate();
         let key = avatar_key(user_id, "png");
         assert_key_shape(&key, "avatars", &user_id.to_string(), "png");
+    }
+
+    #[test]
+    fn avatar_key_from_url_round_trips_a_generated_key() {
+        let user_id = UserId::generate();
+        let key = avatar_key(user_id, "png");
+        let url = format!("http://localhost/media/{key}");
+
+        assert_eq!(avatar_key_from_url(&url, user_id), Some(key));
+    }
+
+    #[test]
+    fn avatar_key_from_url_rejects_a_url_owned_by_another_user() {
+        let owner = UserId::generate();
+        let other = UserId::generate();
+        let url = format!("http://localhost/media/{}", avatar_key(other, "jpg"));
+
+        assert_eq!(avatar_key_from_url(&url, owner), None);
+    }
+
+    #[test]
+    fn avatar_key_from_url_rejects_malformed_filenames() {
+        let user_id = UserId::generate();
+        let filename = Uuid::new_v4();
+        for suffix in [
+            "nested/photo.jpg",
+            "../../etc/passwd.jpg",
+            &format!("{filename}"),
+            &format!("{filename}."),
+            "not-a-uuid.jpg",
+            &format!("{filename}.jpg?x=../evil.jpg"),
+        ] {
+            let url = format!("http://localhost/media/avatars/{user_id}/{suffix}");
+            assert_eq!(
+                avatar_key_from_url(&url, user_id),
+                None,
+                "expected {suffix:?} to be rejected"
+            );
+        }
+    }
+
+    #[test]
+    fn avatar_key_from_url_rejects_a_url_without_the_avatar_prefix() {
+        let user_id = UserId::generate();
+        let url = format!(
+            "http://localhost/media/{}",
+            listing_media_key(ListingId::generate(), "jpg")
+        );
+
+        assert_eq!(avatar_key_from_url(&url, user_id), None);
     }
 
     #[test]

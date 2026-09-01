@@ -90,6 +90,10 @@ pub enum AppError {
     #[error("An account already exists for this email.")]
     EmailAlreadyExists,
 
+    // ── 413 Payload Too Large ────────────────────────────────────────────────
+    #[error("File exceeds the maximum allowed size.")]
+    PayloadTooLarge,
+
     // ── 422 Unprocessable Entity ─────────────────────────────────────────────
     #[error("Invalid document (unsupported format or size).")]
     InvalidDocument,
@@ -154,6 +158,8 @@ impl AppError {
                 (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_PENDING")
             }
             Self::EmailAlreadyExists => (StatusCode::CONFLICT, "EMAIL_ALREADY_EXISTS"),
+            // 413
+            Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
             Self::InvalidFile => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_FILE"),

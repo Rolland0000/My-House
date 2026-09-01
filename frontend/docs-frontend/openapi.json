@@ -324,6 +324,52 @@
         }
       }
     },
+    "/api/v1/users/me/avatar": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "operationId": "upload_avatar",
+        "requestBody": {
+          "description": "Image (JPEG, PNG or WebP, 5 MB max) in a `file` field",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AvatarUploadForm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed multipart body or missing `file` field"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "413": {
+            "description": "File exceeds the maximum allowed size"
+          },
+          "422": {
+            "description": "Unsupported image format"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -379,6 +425,19 @@
   },
   "components": {
     "schemas": {
+      "AvatarUploadForm": {
+        "type": "object",
+        "description": "Documents the avatar upload body for the OpenAPI schema. Nothing\ndeserializes into it — the handler walks the multipart fields itself.",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
