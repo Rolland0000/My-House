@@ -10,6 +10,9 @@ use crate::shared::extractors::{AppJson, AuthUser};
 use super::dto::{AvatarUploadForm, UpdateMeDto, UserDto, UserResponse};
 use super::service;
 
+/// Multipart field carrying the image (`TECHNICAL_SPEC_MVP.md §4.2`).
+const AVATAR_FIELD_NAME: &str = "file";
+
 #[utoipa::path(
     get,
     path = "/users/me",
@@ -54,9 +57,6 @@ pub async fn update_me(
         data: UserDto::from(row),
     }))
 }
-
-/// Multipart field carrying the image (`TECHNICAL_SPEC_MVP.md §4.2`).
-const AVATAR_FIELD_NAME: &str = "file";
 
 #[utoipa::path(
     post,

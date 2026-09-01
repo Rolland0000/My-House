@@ -54,7 +54,7 @@ pub struct UserResponse {
 #[derive(ToSchema)]
 pub struct AvatarUploadForm {
     #[schema(value_type = String, format = Binary)]
-    pub file: Vec<u8>,
+    pub file: String,
 }
 
 #[cfg(test)]

@@ -24,9 +24,15 @@ pub struct ValidatedFile {
 }
 
 /// Accepts `bytes` only if it is a non-empty, within-budget JPEG, PNG or WebP.
+///
+/// Size and format fail with distinct errors: callers past the route's body
+/// limit still land on a 413 rather than a misleading format error.
 pub fn validate_image(bytes: &[u8], max_size_bytes: usize) -> Result<ValidatedFile, AppError> {
-    if bytes.is_empty() || bytes.len() > max_size_bytes {
+    if bytes.is_empty() {
         return Err(AppError::InvalidFile);
+    }
+    if bytes.len() > max_size_bytes {
+        return Err(AppError::PayloadTooLarge);
     }
 
     let detected = infer::get(bytes).ok_or(AppError::InvalidFile)?;
@@ -92,7 +98,7 @@ mod tests {
 
         assert!(matches!(
             validate_image(&oversized, MAX_IMAGE_SIZE_BYTES),
-            Err(AppError::InvalidFile)
+            Err(AppError::PayloadTooLarge)
         ));
     }
 }
