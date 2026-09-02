@@ -275,13 +275,13 @@
     "semantic_hash": "7458ad3a8ea9a209874cbe6d4c3257e5"
   },
   "frontend/src/features/profile/api.ts": {
-    "mtime": 1788081737.15721,
-    "ast_hash": "46888286ce05e7f6a5b83899f556b862",
+    "mtime": 1788273913.0197272,
+    "ast_hash": "fd1fbe149e07ad69c91809c521f81ed0",
     "semantic_hash": ""
   },
   "frontend/src/features/profile/index.ts": {
-    "mtime": 1788081745.9070733,
-    "ast_hash": "1d5530999f71d5acc6807a16a500a5c1",
+    "mtime": 1788273989.488478,
+    "ast_hash": "d60026b48efaa0115c361bda431ad903",
     "semantic_hash": ""
   },
   "frontend/src/features/search/api.ts": {
@@ -305,9 +305,9 @@
     "semantic_hash": "ae2027b2474919fdef27befe85dea50c"
   },
   "frontend/src/shared/api/client.ts": {
-    "mtime": 1788080126.416475,
-    "ast_hash": "de903271e16daa3a5424945d3e2a374c",
-    "semantic_hash": "de903271e16daa3a5424945d3e2a374c"
+    "mtime": 1788273913.018105,
+    "ast_hash": "d954433d99088ffa1cba5d2dcb1ef456",
+    "semantic_hash": ""
   },
   "frontend/src/shared/components/Button.tsx": {
     "mtime": 1785298038.4232984,
@@ -1060,8 +1060,8 @@
     "semantic_hash": ""
   },
   "frontend/src/features/profile/components/ProfileForm.tsx": {
-    "mtime": 1788081819.2116308,
-    "ast_hash": "f54abf3d7a55532b39f796a5e716963c",
+    "mtime": 1788273989.488023,
+    "ast_hash": "b35c9128701f8604d91993180dc37486",
     "semantic_hash": ""
   },
   "frontend/src/features/profile/hooks/useProfile.ts": {
@@ -1075,8 +1075,8 @@
     "semantic_hash": ""
   },
   "frontend/src/shared/api/constants.ts": {
-    "mtime": 1788081518.1017528,
-    "ast_hash": "c1c8d6ffdaa60dde06fd9574c7b2bb64",
+    "mtime": 1788273913.0190966,
+    "ast_hash": "92549da61b0cbb6fd1db49a929481166",
     "semantic_hash": ""
   },
   "backend/.sqlx/query-44f47cf5c7fa220e5f83ac06e03c40bf17244a095bbb2fc03caf87c1c4b5c86b.json": {
@@ -1087,6 +1087,16 @@
   "backend/src/shared/file_validation.rs": {
     "mtime": 1788271842.7628143,
     "ast_hash": "de67e72796e92b5d86de45f3fa6f3232",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/profile/components/AvatarUpload.tsx": {
+    "mtime": 1788274020.7815397,
+    "ast_hash": "5c6bf4c34909e20e53a638ec0fad95d8",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/profile/hooks/useUploadAvatar.ts": {
+    "mtime": 1788273919.2839143,
+    "ast_hash": "5d32a38ee3ac6cfe0af6ef317c9498d2",
     "semantic_hash": ""
   }
 }
