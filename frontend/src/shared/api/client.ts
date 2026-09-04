@@ -131,3 +131,10 @@ export function apiPost<T>(path: string, body?: unknown): Promise<T> {
 export function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, jsonInit("PUT", body));
 }
+
+// No Content-Type: the browser derives it from the FormData, boundary included.
+// A FormData re-serializes on every fetch, so a replay after a token refresh
+// sends the same body rather than an already-consumed stream.
+export function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  return request<T>(path, { method: "POST", body: formData });
+}

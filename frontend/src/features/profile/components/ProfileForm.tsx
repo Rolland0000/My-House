@@ -13,6 +13,7 @@ import { ApiError } from "../../../shared/api/client";
 import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../../../shared/api/constants";
 import type { Profile } from "../api";
 import { useProfile } from "../hooks/useProfile";
+import { AvatarUpload } from "./AvatarUpload";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
 const ROLE_LABELS: Record<Profile["role"], string> = {
@@ -177,7 +178,12 @@ function ProfileForm() {
             {error instanceof ApiError ? error.message : "Profil indisponible."}
           </Alert>
         )}
-        {data && <ProfileFields profile={data} />}
+        {data && (
+          <div className="flex flex-col gap-6">
+            <AvatarUpload avatarUrl={data.avatar_url ?? null} />
+            <ProfileFields profile={data} />
+          </div>
+        )}
       </Card>
     </div>
   );
