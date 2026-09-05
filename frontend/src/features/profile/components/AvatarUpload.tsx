@@ -17,6 +17,16 @@ function preCheck(file: File): string | null {
   return null;
 }
 
+/** Only these schemes are ever valid for an avatar `src`. */
+function isSafeImageUrl(url: string): boolean {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === "http:" || protocol === "https:" || protocol === "blob:";
+  } catch {
+    return false;
+  }
+}
+
 /** Distinct messages per backend error code (`shared/errors.rs`); a size
  *  rejection must never read as a format problem. */
 function serverMessage(error: unknown): string {
@@ -76,7 +86,8 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
     });
   }
 
-  const displayedUrl = previewUrl ?? (avatarUrl === brokenUrl ? null : avatarUrl);
+  const candidateUrl = previewUrl ?? (avatarUrl === brokenUrl ? null : avatarUrl);
+  const displayedUrl = candidateUrl && isSafeImageUrl(candidateUrl) ? candidateUrl : null;
 
   return (
     <section className="flex flex-col gap-4 border-b border-border pb-6">
