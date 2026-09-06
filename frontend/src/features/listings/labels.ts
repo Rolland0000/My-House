@@ -1,10 +1,10 @@
 import type { ListingType } from "./api";
 
 export const typeLabels: Record<ListingType, string> = {
-  apartment: "Appartement",
+  apartment: "Apartment",
   studio: "Studio",
-  house: "Maison",
-  room: "Chambre",
+  house: "House",
+  room: "Room",
   villa: "Villa",
-  other: "Autre",
+  other: "Other",
 };

@@ -5,6 +5,9 @@ import { ApiError } from "../../../shared/api/client";
 import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../../../shared/api/constants";
 import { useRegister } from "../hooks/useRegister";
 
+const REQUIRED_MESSAGE = "This field is required.";
+const GENERIC_ERROR_MESSAGE = "An error occurred. Please try again.";
+
 interface RegistrationFormProps {
   email: string;
   registrationTicket: string;
@@ -35,8 +38,8 @@ function RegistrationForm({
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const errors: FieldErrors = {};
-    if (!lastName.trim()) errors.lastName = "Ce champ est requis.";
-    if (!phone.trim()) errors.phone = "Ce champ est requis.";
+    if (!lastName.trim()) errors.lastName = REQUIRED_MESSAGE;
+    if (!phone.trim()) errors.phone = REQUIRED_MESSAGE;
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -54,11 +57,11 @@ function RegistrationForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h2 className="text-lg font-bold text-text">Créez votre compte</h2>
-        <p className="text-sm text-text-muted">Dernière étape avant de commencer.</p>
+        <h2 className="text-lg font-bold text-text">Create your account</h2>
+        <p className="text-sm text-text-muted">Last step before you get started.</p>
       </div>
 
-      <FormField label="Prénom">
+      <FormField label="First name">
         <Input
           value={firstName}
           maxLength={MAX_NAME_LENGTH}
@@ -67,7 +70,7 @@ function RegistrationForm({
         />
       </FormField>
 
-      <FormField label="Nom" required error={fieldErrors.lastName}>
+      <FormField label="Last name" required error={fieldErrors.lastName}>
         <Input
           value={lastName}
           maxLength={MAX_NAME_LENGTH}
@@ -81,7 +84,7 @@ function RegistrationForm({
         <Input value={email} disabled readOnly />
       </FormField>
 
-      <FormField label="Téléphone" required error={fieldErrors.phone}>
+      <FormField label="Phone" required error={fieldErrors.phone}>
         <Input
           type="tel"
           placeholder="+225 07 00 00 00 00"
@@ -95,18 +98,18 @@ function RegistrationForm({
 
       {alreadyExists && (
         <Alert variant="warning">
-          Ce compte existe déjà.{" "}
+          This account already exists.{" "}
           <button type="button" onClick={onAccountExists} className="font-semibold underline">
-            Reconnectez-vous
+            Sign in
           </button>
           .
         </Alert>
       )}
 
-      {error && !alreadyExists && <Alert variant="error">{error.message}</Alert>}
+      {error && !alreadyExists && <Alert variant="error">{GENERIC_ERROR_MESSAGE}</Alert>}
 
       <Button type="submit" isLoading={register.isPending}>
-        Terminer
+        Finish
       </Button>
     </form>
   );

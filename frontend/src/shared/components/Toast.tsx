@@ -75,7 +75,7 @@ function ToastProvider({ children }: { children: ReactNode }) {
                 <p className="flex-1 text-text">{toast.message}</p>
                 <button
                   type="button"
-                  aria-label="Fermer la notification"
+                  aria-label="Close notification"
                   onClick={() => dismissToast(toast.id)}
                   className="text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 >

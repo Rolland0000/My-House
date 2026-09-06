@@ -3,4 +3,12 @@
 
 export { useProfile } from "./hooks/useProfile";
 export { useUpdateProfile } from "./hooks/useUpdateProfile";
-export { getMe, updateMe, profileQueryKey, type Profile, type UpdateProfilePayload } from "./api";
+export { useUploadAvatar } from "./hooks/useUploadAvatar";
+export {
+  getMe,
+  updateMe,
+  uploadAvatar,
+  profileQueryKey,
+  type Profile,
+  type UpdateProfilePayload,
+} from "./api";

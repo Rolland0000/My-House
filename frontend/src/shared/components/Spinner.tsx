@@ -13,7 +13,7 @@ const sizeClasses: Record<NonNullable<SpinnerProps["size"]>, string> = {
   lg: "size-8",
 };
 
-function Spinner({ size = "md", className, label = "Chargement…" }: SpinnerProps) {
+function Spinner({ size = "md", className, label = "Loading…" }: SpinnerProps) {
   return (
     <span role="status" className="inline-flex items-center">
       <LoaderCircle

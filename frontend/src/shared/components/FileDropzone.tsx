@@ -19,7 +19,7 @@ function FileDropzone({
   multiple = false,
   hasError = false,
   disabled = false,
-  label = "Glissez-déposez un fichier ici, ou cliquez pour sélectionner",
+  label = "Drag and drop a file here, or click to select",
   hint,
   className,
 }: FileDropzoneProps) {

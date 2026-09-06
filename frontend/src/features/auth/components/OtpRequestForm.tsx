@@ -30,7 +30,7 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
     event.preventDefault();
     const trimmedEmail = email.trim();
     if (!EMAIL_PATTERN.test(trimmedEmail)) {
-      setFormError("Adresse email invalide.");
+      setFormError("Invalid email address.");
       return;
     }
     setFormError(null);
@@ -48,16 +48,16 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h2 className="text-lg font-bold text-text">Trouvez votre prochain logement</h2>
+        <h2 className="text-lg font-bold text-text">Find your next home</h2>
         <p className="text-sm text-text-muted">
-          Entrez votre email, on vous envoie un code à 6 chiffres. Pas de mot de passe.
+          Enter your email, we'll send you a 6-digit code. No password needed.
         </p>
       </div>
 
-      <FormField label="Adresse email" required error={formError ?? undefined}>
+      <FormField label="Email address" required error={formError ?? undefined}>
         <Input
           type="email"
-          placeholder="vous@exemple.com"
+          placeholder="you@example.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={otpRequest.isPending || isCoolingDown}
@@ -67,18 +67,18 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
 
       {isCoolingDown && (
         <Alert variant="warning">
-          Trop de demandes. Réessayez dans {formatCountdown(secondsLeft)}.
+          Too many requests. Try again in {formatCountdown(secondsLeft)}.
         </Alert>
       )}
 
       {genericError && <Alert variant="error">{genericError}</Alert>}
 
       <Button type="submit" isLoading={otpRequest.isPending} disabled={isCoolingDown}>
-        {isCoolingDown ? `Réessayer dans ${formatCountdown(secondsLeft)}` : "Recevoir le code"}
+        {isCoolingDown ? `Retry in ${formatCountdown(secondsLeft)}` : "Get the code"}
       </Button>
 
       <p className="text-center text-sm text-text-muted">
-        En continuant, vous acceptez les CGU de MyHouse.
+        By continuing, you agree to MyHouse's Terms of Service.
       </p>
     </form>
   );

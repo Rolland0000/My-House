@@ -13,56 +13,21 @@ import { ApiError } from "../../../shared/api/client";
 import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../../../shared/api/constants";
 import type { Profile } from "../api";
 import { useProfile } from "../hooks/useProfile";
+import {
+  serverFieldError,
+  validate,
+  type ProfileFieldErrors as FieldErrors,
+} from "../profileValidation";
+import { AvatarUpload } from "./AvatarUpload";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
 const ROLE_LABELS: Record<Profile["role"], string> = {
-  seeker: "Locataire",
-  owner: "Propriétaire",
-  admin: "Administrateur",
+  seeker: "Tenant",
+  owner: "Owner",
+  admin: "Administrator",
 };
 
-interface FieldErrors {
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-}
-
-const FIELDS_BY_SERVER_NAME: [string, keyof FieldErrors][] = [
-  ["first_name", "firstName"],
-  ["last_name", "lastName"],
-  ["phone", "phone"],
-];
-
-const REQUIRED_MESSAGE = "Ce champ est requis.";
-
-function maxLengthMessage(field: keyof FieldErrors): string {
-  return `${field === "phone" ? MAX_PHONE_LENGTH : MAX_NAME_LENGTH} caractères maximum.`;
-}
-
-/** Maps a server 400 back onto the field it names, restated in the form's own
- *  wording — the raw server message is English. An unrecognised rule returns
- *  null so it surfaces in the banner rather than as a mislabelled field error. */
-function serverFieldError(message: string): { field: keyof FieldErrors; text: string } | null {
-  const match = FIELDS_BY_SERVER_NAME.find(([name]) => message.includes(name));
-  if (!match) return null;
-  const [, field] = match;
-
-  if (message.includes("at most")) return { field, text: maxLengthMessage(field) };
-  if (message.includes("required") || message.includes("missing field")) {
-    return { field, text: REQUIRED_MESSAGE };
-  }
-  return null;
-}
-
-function validate(firstName: string, lastName: string, phone: string): FieldErrors {
-  const errors: FieldErrors = {};
-  if (firstName.trim().length > MAX_NAME_LENGTH) errors.firstName = maxLengthMessage("firstName");
-  if (!lastName.trim()) errors.lastName = REQUIRED_MESSAGE;
-  else if (lastName.trim().length > MAX_NAME_LENGTH) errors.lastName = maxLengthMessage("lastName");
-  if (!phone.trim()) errors.phone = REQUIRED_MESSAGE;
-  else if (phone.trim().length > MAX_PHONE_LENGTH) errors.phone = maxLengthMessage("phone");
-  return errors;
-}
+const GENERIC_ERROR_MESSAGE = "An error occurred. Please try again.";
 
 interface ProfileFieldsProps {
   profile: Profile;
@@ -92,7 +57,7 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
         phone: phone.trim(),
       },
       {
-        onSuccess: () => showToast("Profil mis à jour.", { variant: "success" }),
+        onSuccess: () => showToast("Profile updated.", { variant: "success" }),
         onError: (error) => {
           if (!(error instanceof ApiError)) return;
           const fieldError = serverFieldError(error.message);
@@ -105,11 +70,11 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h1 className="text-lg font-bold text-text">Mon profil</h1>
-        <p className="text-sm text-text-muted">Vos informations de contact.</p>
+        <h1 className="text-lg font-bold text-text">My profile</h1>
+        <p className="text-sm text-text-muted">Your contact information.</p>
       </div>
 
-      <FormField label="Prénom" error={fieldErrors.firstName}>
+      <FormField label="First name" error={fieldErrors.firstName}>
         <Input
           value={firstName}
           maxLength={MAX_NAME_LENGTH}
@@ -119,7 +84,7 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
         />
       </FormField>
 
-      <FormField label="Nom" required error={fieldErrors.lastName}>
+      <FormField label="Last name" required error={fieldErrors.lastName}>
         <Input
           value={lastName}
           maxLength={MAX_NAME_LENGTH}
@@ -129,7 +94,7 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
         />
       </FormField>
 
-      <FormField label="Téléphone" required error={fieldErrors.phone}>
+      <FormField label="Phone" required error={fieldErrors.phone}>
         <Input
           type="tel"
           placeholder="+225 07 00 00 00 00"
@@ -147,15 +112,15 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
           <dd className="text-base text-text-muted">{profile.email}</dd>
         </div>
         <div className="flex flex-col gap-1.5">
-          <dt className="text-sm font-semibold text-text">Rôle</dt>
+          <dt className="text-sm font-semibold text-text">Role</dt>
           <dd className="text-base text-text-muted">{ROLE_LABELS[profile.role]}</dd>
         </div>
       </dl>
 
-      {bannerError && <Alert variant="error">{requestError.message}</Alert>}
+      {bannerError && <Alert variant="error">{GENERIC_ERROR_MESSAGE}</Alert>}
 
       <Button type="submit" isLoading={update.isPending}>
-        Enregistrer
+        Save
       </Button>
     </form>
   );
@@ -169,15 +134,20 @@ function ProfileForm() {
       <Card>
         {isPending && (
           <div className="flex justify-center py-8">
-            <Spinner size="lg" label="Chargement du profil…" />
+            <Spinner size="lg" label="Loading profile…" />
           </div>
         )}
         {!isPending && error && (
           <Alert variant="error">
-            {error instanceof ApiError ? error.message : "Profil indisponible."}
+            {error instanceof ApiError ? GENERIC_ERROR_MESSAGE : "Profile unavailable."}
           </Alert>
         )}
-        {data && <ProfileFields profile={data} />}
+        {data && (
+          <div className="flex flex-col gap-6">
+            <AvatarUpload avatarUrl={data.avatar_url ?? null} />
+            <ProfileFields profile={data} />
+          </div>
+        )}
       </Card>
     </div>
   );

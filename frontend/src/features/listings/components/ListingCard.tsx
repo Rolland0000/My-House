@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ImageOff, MapPin } from "lucide-react";
 import { Card } from "../../../shared/components";
 import { formatPrice } from "../../../shared/utils/format";
+import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { typeLabels } from "../labels";
 import type { ListingSummary } from "../api";
 
@@ -11,6 +12,11 @@ interface ListingCardProps {
 
 function ListingCard({ listing }: ListingCardProps) {
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
+
+  const coverPhotoUrl =
+    listing.cover_photo_url && isRemoteMediaUrl(listing.cover_photo_url)
+      ? listing.cover_photo_url
+      : null;
 
   return (
     <Link
@@ -22,10 +28,10 @@ function ListingCard({ listing }: ListingCardProps) {
         className="overflow-hidden transition-colors group-hover:border-border-strong"
       >
         <div className="relative aspect-4/3 bg-primary-soft">
-          {listing.cover_photo_url ? (
+          {coverPhotoUrl ? (
             <img
-              src={listing.cover_photo_url}
-              alt=""
+              src={coverPhotoUrl}
+              alt={listing.title}
               loading="lazy"
               className="size-full object-cover"
             />
@@ -39,7 +45,7 @@ function ListingCard({ listing }: ListingCardProps) {
           </span>
           {listing.status === "unavailable" && (
             <span className="absolute right-2 top-2 rounded-sm bg-error-soft px-2 py-0.5 text-sm font-semibold text-error">
-              Indisponible
+              Unavailable
             </span>
           )}
         </div>

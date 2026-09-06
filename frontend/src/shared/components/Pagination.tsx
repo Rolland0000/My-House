@@ -29,7 +29,7 @@ function Pagination({
     <nav aria-label="Pagination" className={cn("flex items-center gap-1", className)}>
       <button
         type="button"
-        aria-label="Page précédente"
+        aria-label="Previous page"
         className={navButtonClasses}
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
@@ -65,7 +65,7 @@ function Pagination({
 
       <button
         type="button"
-        aria-label="Page suivante"
+        aria-label="Next page"
         className={navButtonClasses}
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
