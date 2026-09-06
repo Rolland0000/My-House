@@ -1,11 +1,13 @@
 use axum::extract::{Multipart, State};
 use axum::http::StatusCode;
 use axum::Json;
+use axum_extra::extract::cookie::CookieJar;
 use bytes::Bytes;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
 use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::session_cookie::clear_refresh_cookie;
 
 use super::dto::{AvatarUploadForm, UpdateMeDto, UserDto, UserResponse};
 use super::service;
@@ -89,6 +91,31 @@ pub async fn upload_avatar(
     Ok(Json(UserResponse {
         data: UserDto::from(row),
     }))
+}
+
+/// Deletes the caller's own account only — `user_id` comes from the access
+/// token, never from a path or body parameter. The refresh cookie is cleared
+/// unconditionally: the account row (and its refresh tokens, via cascade) is
+/// already gone by the time this runs.
+#[utoipa::path(
+    delete,
+    path = "/users/me",
+    tag = "users",
+    responses(
+        (status = 200, description = "Account deleted; session cookie cleared"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 404, description = "User not found"),
+    )
+)]
+pub async fn delete_me(
+    State(state): State<AppState>,
+    user: AuthUser,
+    jar: CookieJar,
+) -> Result<CookieJar, AppError> {
+    service::delete_account(state.db(), state.storage().as_ref(), user.user_id).await?;
+
+    let cookie_domain = state.config().cookie_domain.clone();
+    Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
 }
 
 /// Reads the `file` part, skipping any other field. The part's declared

@@ -60,10 +60,14 @@ fn public_router() -> OpenApiRouter<AppState> {
 fn seeker_router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(auth::handler::logout))
-        // Same path, two methods: one `routes!` call — each call contributes a
-        // single OpenAPI path item, so splitting them would drop a method from
-        // the schema.
-        .routes(routes!(users::handler::get_me, users::handler::update_me))
+        // Same path, three methods: one `routes!` call — each call contributes
+        // a single OpenAPI path item, so splitting them would drop a method
+        // from the schema.
+        .routes(routes!(
+            users::handler::get_me,
+            users::handler::update_me,
+            users::handler::delete_me
+        ))
     // TODO EP-02: .routes(routes!(users::request_owner_upgrade))
 }
 

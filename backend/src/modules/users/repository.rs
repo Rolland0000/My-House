@@ -95,6 +95,68 @@ pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
         .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Storage keys of every listing photo owned by `user_id`, read from
+/// `listing_media.storage_key` rather than reconstructed from `url`.
+pub async fn list_listing_media_keys_for_owner(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Vec<String>, AppError> {
+    sqlx::query_scalar!(
+        r#"
+        SELECT lm.storage_key
+        FROM listing_media lm
+        JOIN listings l ON l.id = lm.listing_id
+        WHERE l.owner_id = $1
+        "#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Storage keys unnested from `owner_requests.identity_documents`
+/// (`[{ "storage_key", "original_filename" }]`) across all of `user_id`'s
+/// requests. No dedicated `owner_requests` module exists yet, hence the
+/// query living here.
+pub async fn list_owner_request_document_keys(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Vec<String>, AppError> {
+    let keys = sqlx::query_scalar!(
+        r#"
+        SELECT elem ->> 'storage_key' AS storage_key
+        FROM owner_requests, jsonb_array_elements(identity_documents) AS elem
+        WHERE user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))?;
+
+    Ok(keys
+        .into_iter()
+        .filter_map(|key| {
+            if key.is_none() {
+                tracing::warn!(%user_id, "identity document missing storage_key; skipping delete");
+            }
+            key
+        })
+        .collect())
+}
+
+/// Deletes the account row; `ON DELETE CASCADE` removes its dependent rows.
+/// `false` when `user_id` no longer exists.
+pub async fn delete_by_id(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError> {
+    let result = sqlx::query!("DELETE FROM users WHERE id = $1", user_id)
+        .execute(pool)
+        .await
+        .map_err(|error| AppError::Database(error.to_string()))?;
+
+    Ok(result.rows_affected() > 0)
+}
+
 /// Creates the admin account, promoting the row in place when `email` already
 /// belongs to a user. The upsert also makes this safe against a concurrent
 /// insert on the `users.email` unique constraint.
