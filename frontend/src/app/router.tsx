@@ -25,7 +25,7 @@ function withSuspense(Component: ComponentType) {
     <Suspense
       fallback={
         <div className="flex justify-center py-16">
-          <Spinner size="lg" label="Chargement…" />
+          <Spinner size="lg" label="Loading…" />
         </div>
       }
     >

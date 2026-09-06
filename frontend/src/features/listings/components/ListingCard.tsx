@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ImageOff, MapPin } from "lucide-react";
 import { Card } from "../../../shared/components";
 import { formatPrice } from "../../../shared/utils/format";
+import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { typeLabels } from "../labels";
 import type { ListingSummary } from "../api";
 
@@ -12,19 +13,10 @@ interface ListingCardProps {
 function ListingCard({ listing }: ListingCardProps) {
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
 
-  // Scheme check kept inline (not a shared helper) so static analysis can see
-  // `coverPhotoUrl` is validated before it reaches `img src` below.
-  let coverPhotoUrl: string | null = null;
-  if (listing.cover_photo_url) {
-    try {
-      const protocol = new URL(listing.cover_photo_url).protocol;
-      if (protocol === "http:" || protocol === "https:") {
-        coverPhotoUrl = listing.cover_photo_url;
-      }
-    } catch {
-      // Malformed URL — falls back to the placeholder below.
-    }
-  }
+  const coverPhotoUrl =
+    listing.cover_photo_url && isRemoteMediaUrl(listing.cover_photo_url)
+      ? listing.cover_photo_url
+      : null;
 
   return (
     <Link
@@ -37,7 +29,12 @@ function ListingCard({ listing }: ListingCardProps) {
       >
         <div className="relative aspect-4/3 bg-primary-soft">
           {coverPhotoUrl ? (
-            <img src={coverPhotoUrl} alt="" loading="lazy" className="size-full object-cover" />
+            <img
+              src={coverPhotoUrl}
+              alt={listing.title}
+              loading="lazy"
+              className="size-full object-cover"
+            />
           ) : (
             <div className="flex size-full items-center justify-center text-text-muted">
               <ImageOff className="size-8" aria-hidden="true" />
@@ -48,7 +45,7 @@ function ListingCard({ listing }: ListingCardProps) {
           </span>
           {listing.status === "unavailable" && (
             <span className="absolute right-2 top-2 rounded-sm bg-error-soft px-2 py-0.5 text-sm font-semibold text-error">
-              Indisponible
+              Unavailable
             </span>
           )}
         </div>

@@ -3,10 +3,12 @@ import { UserRound } from "lucide-react";
 import { Alert, Button, FileDropzone, useToast } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { ACCEPTED_AVATAR_TYPES, MAX_AVATAR_SIZE_BYTES } from "../../../shared/api/constants";
+import { isDisplayableMediaUrl } from "../../../shared/utils/mediaUrl";
 import { useUploadAvatar } from "../hooks/useUploadAvatar";
 
-const FORMAT_MESSAGE = "Format non supporté. Choisissez une image JPEG, PNG ou WebP.";
-const SIZE_MESSAGE = "Image trop lourde. La taille maximale est de 5 Mo.";
+const FORMAT_MESSAGE = "Unsupported format. Choose a JPEG, PNG, or WebP image.";
+const SIZE_MESSAGE = "Image too large. Maximum size is 5 MB.";
+const GENERIC_ERROR_MESSAGE = "Upload failed. Please try again.";
 
 /** Pre-checks that spare an obviously doomed round-trip. The server re-runs
  *  both on the actual bytes, so a file that slips through here still gets
@@ -17,14 +19,14 @@ function preCheck(file: File): string | null {
   return null;
 }
 
-/** Distinct messages per backend error code (`shared/errors.rs`); a size
- *  rejection must never read as a format problem. */
+/** Distinct messages per backend error code (`shared/errors.rs`); unmapped
+ *  codes get a generic fallback, never the server's raw text. */
 function serverMessage(error: unknown): string {
-  if (!(error instanceof ApiError)) return "Envoi impossible. Réessayez.";
+  if (!(error instanceof ApiError)) return GENERIC_ERROR_MESSAGE;
   if (error.code === "PAYLOAD_TOO_LARGE") return SIZE_MESSAGE;
   if (error.code === "INVALID_FILE") return FORMAT_MESSAGE;
-  if (error.code === "BAD_REQUEST") return "Fichier illisible. Sélectionnez une autre image.";
-  return error.message;
+  if (error.code === "BAD_REQUEST") return "Unreadable file. Choose another image.";
+  return GENERIC_ERROR_MESSAGE;
 }
 
 interface AvatarUploadProps {
@@ -70,24 +72,14 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
     upload.mutate(file, {
       onSuccess: () => {
         clearSelection();
-        showToast("Photo de profil mise à jour.", { variant: "success" });
+        showToast("Profile picture updated.", { variant: "success" });
       },
       onError: (error) => setErrorMessage(serverMessage(error)),
     });
   }
 
   const rawUrl = previewUrl ?? (avatarUrl === brokenUrl ? null : avatarUrl);
-  let displayedUrl: string | null = null;
-  if (rawUrl) {
-    try {
-      const protocol = new URL(rawUrl).protocol;
-      if (protocol === "http:" || protocol === "https:" || protocol === "blob:") {
-        displayedUrl = rawUrl;
-      }
-    } catch {
-      // Malformed URL — displayedUrl stays null and the placeholder is shown.
-    }
-  }
+  const displayedUrl = rawUrl && isDisplayableMediaUrl(rawUrl) ? rawUrl : null;
 
   return (
     <section className="flex flex-col gap-4 border-b border-border pb-6">
@@ -96,9 +88,13 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
           {displayedUrl ? (
             <img
               src={displayedUrl}
-              alt="Photo de profil"
+              alt="Profile picture"
               className="size-full object-cover"
-              onError={() => setBrokenUrl(avatarUrl)}
+              onError={() => {
+                // A failed local blob preview must not mark the server's
+                // avatar as broken — only the real avatarUrl can be broken.
+                if (!previewUrl) setBrokenUrl(avatarUrl);
+              }}
             />
           ) : (
             <div className="flex size-full items-center justify-center" aria-hidden="true">
@@ -107,18 +103,18 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
           )}
         </div>
         <div>
-          <h2 className="text-base font-semibold text-text">Photo de profil</h2>
-          <p className="text-sm text-text-muted">JPEG, PNG ou WebP — 5 Mo maximum.</p>
+          <h2 className="text-base font-semibold text-text">Profile picture</h2>
+          <p className="text-sm text-text-muted">JPEG, PNG, or WebP — 5 MB maximum.</p>
         </div>
       </div>
 
       {file ? (
         <div className="flex gap-2">
           <Button onClick={handleUpload} isLoading={upload.isPending}>
-            Envoyer la photo
+            Upload photo
           </Button>
           <Button variant="secondary" onClick={clearSelection} disabled={upload.isPending}>
-            Annuler
+            Cancel
           </Button>
         </div>
       ) : (
@@ -126,7 +122,7 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
           accept={ACCEPTED_AVATAR_TYPES.join(",")}
           onFilesSelected={handleFilesSelected}
           hasError={Boolean(errorMessage)}
-          label="Glissez une image ici, ou cliquez pour en choisir une"
+          label="Drag an image here, or click to choose one"
         />
       )}
 

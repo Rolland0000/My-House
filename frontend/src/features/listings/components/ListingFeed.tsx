@@ -9,9 +9,10 @@ import { ListingCard } from "./ListingCard";
 import type { ListingType } from "../api";
 
 const CITY_FILTER_DEBOUNCE_MS = 400;
+const GENERIC_ERROR_MESSAGE = "Please try again in a moment.";
 
 const typeOptions = [
-  { value: "", label: "Tous les types" },
+  { value: "", label: "All types" },
   ...Object.entries(typeLabels).map(([value, label]) => ({ value, label })),
 ];
 
@@ -37,34 +38,34 @@ function ListingFeed() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-      <h1 className="text-lg font-bold text-text">Découvrez des logements</h1>
+      <h1 className="text-lg font-bold text-text">Discover rentals</h1>
 
       <div className="flex flex-wrap gap-3">
         <Input
           value={cityInput}
           onChange={(event) => setCityInput(event.target.value)}
-          placeholder="Ville"
-          aria-label="Filtrer par ville"
+          placeholder="City"
+          aria-label="Filter by city"
           className="max-w-xs"
         />
         <Select
           value={type}
           onChange={(event) => setType(event.target.value as ListingType | "")}
           options={typeOptions}
-          aria-label="Filtrer par type de bien"
+          aria-label="Filter by property type"
           className="max-w-xs"
         />
       </div>
 
       {error && (
-        <Alert variant="error" title="Impossible de charger les annonces">
-          {error instanceof ApiError ? error.message : "Réessayez dans quelques instants."}
+        <Alert variant="error" title="Unable to load listings">
+          {error instanceof ApiError ? GENERIC_ERROR_MESSAGE : GENERIC_ERROR_MESSAGE}
         </Alert>
       )}
 
       {isPending ? (
         <div className="flex justify-center py-16">
-          <Spinner size="lg" label="Chargement des annonces…" />
+          <Spinner size="lg" label="Loading listings…" />
         </div>
       ) : data && data.data.length > 0 ? (
         <div
@@ -80,8 +81,8 @@ function ListingFeed() {
       ) : data ? (
         <p className="py-16 text-center text-text-muted">
           {hasActiveFilters
-            ? "Aucun résultat pour ces filtres."
-            : "Aucun bien disponible pour le moment."}
+            ? "No results for these filters."
+            : "No properties available right now."}
         </p>
       ) : null}
 

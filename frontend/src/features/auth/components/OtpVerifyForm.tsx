@@ -66,25 +66,25 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
         onClick={onBack}
         className="self-start text-sm text-text-muted hover:text-text"
       >
-        ← Modifier l'email
+        ← Edit email
       </button>
 
       <div>
-        <h2 className="text-lg font-bold text-text">Vérifiez votre boîte mail</h2>
+        <h2 className="text-lg font-bold text-text">Check your inbox</h2>
         <p className="text-sm text-text-muted">
-          Code envoyé à <span className="font-semibold text-text">{email}</span>
+          Code sent to <span className="font-semibold text-text">{email}</span>
         </p>
       </div>
 
       {isInvalid && (
         <Alert variant="error">
-          Code invalide ou expiré. Vérifiez le code reçu par email ou demandez-en un nouveau.
+          Invalid or expired code. Check the code you received by email, or request a new one.
         </Alert>
       )}
 
       {isResendRateLimited && (
         <Alert variant="warning">
-          Trop de demandes de renvoi. Réessayez dans {formatCountdown(resendCooldown)}.
+          Too many resend requests. Try again in {formatCountdown(resendCooldown)}.
         </Alert>
       )}
 
@@ -102,20 +102,18 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
         isLoading={verifyOtp.isPending}
         disabled={code.some((digit) => !digit)}
       >
-        Vérifier
+        Verify
       </Button>
 
       <p className="text-sm text-text-muted">
-        Rien reçu ?{" "}
+        Didn't receive anything?{" "}
         <button
           type="button"
           onClick={handleResend}
           disabled={resendDisabled}
           className="font-semibold text-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {resendCooldown > 0
-            ? `Renvoyer le code (${formatCountdown(resendCooldown)})`
-            : "Renvoyer le code"}
+          {resendCooldown > 0 ? `Resend code (${formatCountdown(resendCooldown)})` : "Resend code"}
         </button>
       </p>
     </div>

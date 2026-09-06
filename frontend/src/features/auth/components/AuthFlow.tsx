@@ -62,8 +62,8 @@ function AuthFlow() {
         <div className="flex flex-col gap-5">
           {wasInterrupted && (
             <Alert variant="info">
-              Votre inscription a été interrompue et aucun compte n'a été créé. Demandez un nouveau
-              code pour reprendre.
+              Your registration was interrupted and no account was created. Request a new code to
+              continue.
             </Alert>
           )}
           <OtpRequestForm

@@ -77,7 +77,7 @@ function OtpCodeInput({
   }
 
   return (
-    <div className="flex gap-2" role="group" aria-label="Code de vérification à 6 chiffres">
+    <div className="flex gap-2" role="group" aria-label="6-digit verification code">
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}
@@ -93,7 +93,7 @@ function OtpCodeInput({
           onChange={(event) => handleChange(index, event)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          aria-label={`Chiffre ${index + 1}`}
+          aria-label={`Digit ${index + 1}`}
           className="h-12 w-10 rounded-sm border border-border bg-surface text-center text-lg font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50"
         />
       ))}
