@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT elem ->> 'storage_key' AS storage_key\n        FROM owner_requests, jsonb_array_elements(identity_documents) AS elem\n        WHERE user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "storage_key",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4fdac5e1f4144abd0e05f88ca5fdf7f83ab9f496b4450f0b4d6789f955ae64e0"
+}

@@ -89,6 +89,50 @@ pub async fn replace_avatar(
     Ok(updated)
 }
 
+/// Deletes the caller's account. Runs storage cleanup before the row delete —
+/// the reverse order would lose the file references and make orphans
+/// undetectable. A failure between the two steps leaves the account with
+/// some files already gone; retrying re-enumerates whatever remains, so no
+/// partial state needs its own repair path.
+pub async fn delete_account(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    user_id: Uuid,
+) -> Result<(), AppError> {
+    let avatar_url = repository::find_by_id(pool, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)?
+        .avatar_url;
+
+    let mut keys = Vec::new();
+    if let Some(url) = avatar_url.as_deref() {
+        match avatar_key_from_url(url, UserId::new(user_id)) {
+            Some(key) => keys.push(key),
+            None => tracing::warn!(%user_id, "avatar URL yields no storage key; skipping delete"),
+        }
+    }
+    keys.extend(repository::list_listing_media_keys_for_owner(pool, user_id).await?);
+    keys.extend(repository::list_owner_request_document_keys(pool, user_id).await?);
+
+    delete_storage_objects(storage, keys, user_id).await;
+
+    if !repository::delete_by_id(pool, user_id).await? {
+        return Err(AppError::UserNotFound);
+    }
+
+    Ok(())
+}
+
+/// Best-effort delete for every key in `keys`; a failure (including a file
+/// already absent) is logged and never aborts the remaining keys.
+async fn delete_storage_objects(storage: &dyn StorageProvider, keys: Vec<String>, user_id: Uuid) {
+    for key in keys {
+        if let Err(error) = storage.delete(&key).await {
+            tracing::warn!(%user_id, key, error = %error, "failed to delete storage object during account cleanup; continuing");
+        }
+    }
+}
+
 /// Best-effort cleanup: the replacement is already stored and referenced, so a
 /// failure here costs an orphaned file, never a broken profile.
 async fn delete_previous_avatar(
@@ -218,6 +262,42 @@ mod tests {
         );
 
         delete_previous_avatar(&storage, Some(&url), Uuid::new_v4()).await;
+
+        assert!(storage.deleted_keys().is_empty());
+    }
+
+    #[tokio::test]
+    async fn deletes_every_enumerated_key() {
+        let storage = RecordingStorage::new(false);
+        let keys = vec![
+            "avatars/u/1.png".to_string(),
+            "listings/l/2.jpg".to_string(),
+            "owner-requests/r/3.pdf".to_string(),
+        ];
+
+        delete_storage_objects(&storage, keys.clone(), Uuid::new_v4()).await;
+
+        assert_eq!(storage.deleted_keys(), keys);
+    }
+
+    #[tokio::test]
+    async fn a_missing_or_failing_key_does_not_abort_the_remaining_keys() {
+        let storage = RecordingStorage::new(true);
+        let keys = vec![
+            "listings/l/1.jpg".to_string(),
+            "listings/l/2.jpg".to_string(),
+        ];
+
+        delete_storage_objects(&storage, keys.clone(), Uuid::new_v4()).await;
+
+        assert_eq!(storage.deleted_keys(), keys);
+    }
+
+    #[tokio::test]
+    async fn no_keys_is_a_no_op() {
+        let storage = RecordingStorage::new(false);
+
+        delete_storage_objects(&storage, Vec::new(), Uuid::new_v4()).await;
 
         assert!(storage.deleted_keys().is_empty());
     }

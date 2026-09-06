@@ -322,6 +322,24 @@
             "description": "User not found"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Deletes the caller's own account only — `user_id` comes from the access\ntoken, never from a path or body parameter. The refresh cookie is cleared\nunconditionally: the account row (and its refresh tokens, via cascade) is\nalready gone by the time this runs.",
+        "operationId": "delete_me",
+        "responses": {
+          "200": {
+            "description": "Account deleted; session cookie cleared"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
       }
     },
     "/api/v1/users/me/avatar": {

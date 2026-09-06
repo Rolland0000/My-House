@@ -4,6 +4,7 @@ pub mod extractors;
 pub mod file_validation;
 pub mod pagination;
 pub mod rbac;
+pub mod session_cookie;
 pub mod storage_key;
 pub mod token_decoder;
 pub mod types;

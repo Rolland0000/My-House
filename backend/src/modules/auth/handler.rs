@@ -1,9 +1,12 @@
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
+use crate::shared::session_cookie::{
+    build_refresh_cookie, clear_refresh_cookie, REFRESH_TOKEN_COOKIE,
+};
 use axum::extract::State;
 use axum::Json;
-use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use axum_extra::extract::cookie::CookieJar;
 
 use super::dto::{
     OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse,
@@ -11,21 +14,6 @@ use super::dto::{
     RegisterTokenDto,
 };
 use super::service;
-
-pub const REFRESH_TOKEN_COOKIE: &str = "refresh_token";
-
-/// Single definition of the refresh cookie's attributes, shared by every
-/// endpoint that opens or rotates a session.
-fn refresh_cookie(raw_token: String, cookie_domain: String, ttl_days: u64) -> Cookie<'static> {
-    Cookie::build((REFRESH_TOKEN_COOKIE, raw_token))
-        .http_only(true)
-        .secure(true)
-        .same_site(SameSite::Strict)
-        .domain(cookie_domain)
-        .path("/api/v1/auth")
-        .max_age(time::Duration::seconds((ttl_days * 86_400) as i64))
-        .build()
-}
 
 /// Identical 200 response whether `payload.email` is registered or not —
 /// the endpoint must never let a caller enumerate accounts.
@@ -103,7 +91,7 @@ pub async fn otp_verify(
             access_token,
             raw_refresh_token,
         } => (
-            jar.add(refresh_cookie(
+            jar.add(build_refresh_cookie(
                 raw_refresh_token,
                 cookie_domain,
                 config.jwt_refresh_ttl_days,
@@ -170,7 +158,7 @@ pub async fn register(
     .await?;
 
     Ok((
-        jar.add(refresh_cookie(
+        jar.add(build_refresh_cookie(
             outcome.raw_refresh_token,
             cookie_domain,
             config.jwt_refresh_ttl_days,
@@ -217,7 +205,7 @@ pub async fn refresh(
     .await?;
 
     Ok((
-        jar.add(refresh_cookie(
+        jar.add(build_refresh_cookie(
             outcome.raw_refresh_token,
             cookie_domain,
             config.jwt_refresh_ttl_days,
@@ -251,11 +239,6 @@ pub async fn logout(
         service::logout(state.db(), &raw_token).await?;
     }
 
-    let config = state.config();
-    let removal_cookie = Cookie::build(REFRESH_TOKEN_COOKIE)
-        .domain(config.cookie_domain.clone())
-        .path("/api/v1/auth")
-        .build();
-
-    Ok(jar.remove(removal_cookie))
+    let cookie_domain = state.config().cookie_domain.clone();
+    Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
 }
