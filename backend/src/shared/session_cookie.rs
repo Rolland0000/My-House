@@ -25,6 +25,7 @@ pub fn build_refresh_cookie(
 
 pub fn clear_refresh_cookie(cookie_domain: String) -> Cookie<'static> {
     Cookie::build(REFRESH_TOKEN_COOKIE)
+        .secure(true)
         .domain(cookie_domain)
         .path(REFRESH_TOKEN_PATH)
         .build()
