@@ -12,6 +12,20 @@ interface ListingCardProps {
 function ListingCard({ listing }: ListingCardProps) {
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
 
+  // Scheme check kept inline (not a shared helper) so static analysis can see
+  // `coverPhotoUrl` is validated before it reaches `img src` below.
+  let coverPhotoUrl: string | null = null;
+  if (listing.cover_photo_url) {
+    try {
+      const protocol = new URL(listing.cover_photo_url).protocol;
+      if (protocol === "http:" || protocol === "https:") {
+        coverPhotoUrl = listing.cover_photo_url;
+      }
+    } catch {
+      // Malformed URL — falls back to the placeholder below.
+    }
+  }
+
   return (
     <Link
       to={`/listings/${listing.id}`}
@@ -22,13 +36,8 @@ function ListingCard({ listing }: ListingCardProps) {
         className="overflow-hidden transition-colors group-hover:border-border-strong"
       >
         <div className="relative aspect-4/3 bg-primary-soft">
-          {listing.cover_photo_url ? (
-            <img
-              src={listing.cover_photo_url}
-              alt=""
-              loading="lazy"
-              className="size-full object-cover"
-            />
+          {coverPhotoUrl ? (
+            <img src={coverPhotoUrl} alt="" loading="lazy" className="size-full object-cover" />
           ) : (
             <div className="flex size-full items-center justify-center text-text-muted">
               <ImageOff className="size-8" aria-hidden="true" />

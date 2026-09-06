@@ -44,6 +44,21 @@ function ListingDetail() {
   }
 
   const listing = data.data;
+
+  // Scheme check kept inline (not a shared helper) so static analysis can see
+  // each url is validated before it reaches `img src` below.
+  const displayableMedia: typeof listing.media = [];
+  for (const media of listing.media) {
+    try {
+      const protocol = new URL(media.url).protocol;
+      if (protocol === "http:" || protocol === "https:") {
+        displayableMedia.push(media);
+      }
+    } catch {
+      // Malformed URL — this photo is skipped.
+    }
+  }
+
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
   const ownerName = [listing.owner.first_name, listing.owner.last_name].filter(Boolean).join(" ");
   const stats = [
@@ -63,9 +78,9 @@ function ListingDetail() {
         Retour au feed
       </Link>
 
-      {listing.media.length > 0 ? (
+      {displayableMedia.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto rounded-md">
-          {listing.media.map((media) => (
+          {displayableMedia.map((media) => (
             <img
               key={media.id}
               src={media.url}
