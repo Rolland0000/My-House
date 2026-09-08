@@ -19,6 +19,7 @@ import {
   type ProfileFieldErrors as FieldErrors,
 } from "../profileValidation";
 import { AvatarUpload } from "./AvatarUpload";
+import { DeleteAccountSection } from "./DeleteAccountSection";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
 const ROLE_LABELS: Record<Profile["role"], string> = {
@@ -146,6 +147,7 @@ function ProfileForm() {
           <div className="flex flex-col gap-6">
             <AvatarUpload avatarUrl={data.avatar_url ?? null} />
             <ProfileFields profile={data} />
+            <DeleteAccountSection />
           </div>
         )}
       </Card>

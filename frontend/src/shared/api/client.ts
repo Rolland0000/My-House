@@ -94,7 +94,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (response.status === 204) {
     return undefined as T;
   }
-  return (await response.json()) as T;
+  // A 200 with no body (e.g. `DELETE /users/me`) has nothing for `.json()`
+  // to parse — read as text first so an empty body doesn't throw.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 type QueryValue = string | number | boolean | undefined;
@@ -130,6 +133,10 @@ export function apiPost<T>(path: string, body?: unknown): Promise<T> {
 
 export function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, jsonInit("PUT", body));
+}
+
+export function apiDelete<T>(path: string): Promise<T> {
+  return request<T>(path, { method: "DELETE" });
 }
 
 // No Content-Type: the browser derives it from the FormData, boundary included.
