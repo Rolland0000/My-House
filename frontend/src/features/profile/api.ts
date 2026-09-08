@@ -1,4 +1,4 @@
-import { apiGet, apiPut, apiUpload } from "../../shared/api/client";
+import { apiDelete, apiGet, apiPut, apiUpload } from "../../shared/api/client";
 import type { components } from "../../shared/api/types";
 
 export type Profile = components["schemas"]["UserDto"];
@@ -21,4 +21,8 @@ export function uploadAvatar(file: File): Promise<UserResponse> {
   const formData = new FormData();
   formData.append("file", file);
   return apiUpload("/api/v1/users/me/avatar", formData);
+}
+
+export function deleteAccount(): Promise<void> {
+  return apiDelete("/api/v1/users/me");
 }
