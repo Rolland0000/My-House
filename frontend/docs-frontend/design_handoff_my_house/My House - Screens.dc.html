@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap"><style>body{margin:0;background:#e8e9e4;font-family:Archivo,system-ui,sans-serif}a{color:#2E4A73}a:hover{color:#16233D}.dv-turn{padding:40px 44px 34px;border-bottom:1px solid rgba(22,35,61,.1);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#16233D;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 Archivo,system-ui,sans-serif;color:#16233D}.dv-opts{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(22,35,61,.1);color:#16233D;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11.5px/1.3 Archivo,system-ui,sans-serif;color:rgba(26,29,27,.6)}.dv-card{max-width:100%;background:#F4F5F2;border:1px solid rgba(22,35,61,.14);overflow:hidden}.dv-opt:target .dv-oid{background:#BE8A2E;color:#16233D}.dv-note{margin:14px 0 0;font:400 12.5px/1.55 Archivo,sans-serif;color:rgba(26,29,27,.6);max-width:74ch}.dv-next{margin:26px 0 0;font:12px/1.6 Archivo,system-ui,sans-serif;color:rgba(26,29,27,.55)}@keyframes mh-stamp{0%{transform:scale(.86);opacity:0}60%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}</style></helmet>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Header &amp; footer by connection state</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a">
+<div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Seeker signed in — owner request pending</div>
+<div class="dv-card" style="width:920px;background:#F4F5F2;padding:0">
+<header style="background:#fff;border-bottom:1px solid #D8DAD4">
+<div style="padding:0 26px;height:66px;display:flex;align-items:center;gap:26px">
+<a href="#2a" style="display:flex;align-items:baseline;gap:7px;text-decoration:none;flex:none"><span style="font:800 19px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span></a>
+<nav style="display:flex;gap:18px;align-items:center;flex:1"><a href="#2a" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">Home</a><a href="#2a" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;text-decoration:none;padding:6px 0;border-bottom:2px solid #16233D">Listings</a><a href="#2a" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">Search</a><a href="#2a" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">About</a><a href="#2a" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">Contact</a></nav>
+<a href="#2a" style="display:flex;align-items:center;gap:7px;text-decoration:none;background:#F8F1E5;border:1px solid rgba(199,125,29,.35);border-radius:2px;padding:8px 11px;flex:none"><span style="width:7px;height:7px;background:#C77D1D;display:block"></span><span style="font:600 12.5px/1 Archivo,sans-serif;color:#8F5A12">Owner request pending</span></a>
+<div style="display:flex;align-items:center;gap:10px;flex:none;border-left:1px solid #E7E8E4;padding-left:18px">
+<span style="width:32px;height:32px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Archivo,sans-serif;color:#fff">AT</span>
+<span style="font:600 14px/1 Archivo,sans-serif;color:#16233D">Amadou</span>
+<span style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #55606F;display:block"></span>
+</div>
+</div>
+</header>
+<div style="padding:14px 26px 0">
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);width:220px;margin-left:auto;padding:6px 0">
+<a href="#2a" style="display:block;padding:9px 14px;font:500 14px/1 Archivo,sans-serif;color:#1A1D1B;text-decoration:none">My profile</a>
+<a href="#2a" style="display:block;padding:9px 14px;font:500 14px/1 Archivo,sans-serif;color:#1A1D1B;text-decoration:none">Owner request</a>
+<div style="height:1px;background:#E7E8E4;margin:6px 0"></div>
+<a href="#2a" style="display:block;padding:9px 14px;font:500 14px/1 Archivo,sans-serif;color:#9A3A2E;text-decoration:none">Sign out</a>
+</div>
+</div>
+<p class="dv-note" style="padding:0 26px 20px">The pending badge lives in the header, not just in the profile menu — the request is the single thing standing between a seeker and publishing, so it should never be more than one glance away. The dropdown is the only element in the product allowed the 6px radius and the shadow.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="2b">
+<div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Owner signed in — “Add a property” carries the brass</div>
+<div class="dv-card" style="width:920px;background:#F4F5F2;padding:0">
+<header style="background:#fff;border-bottom:1px solid #D8DAD4">
+<div style="padding:0 26px;height:66px;display:flex;align-items:center;gap:24px">
+<a href="#2b" style="display:flex;align-items:baseline;gap:7px;text-decoration:none;flex:none"><span style="font:800 19px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span></a>
+<nav style="display:flex;gap:18px;align-items:center;flex:1"><a href="#2b" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">Listings</a><a href="#2b" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;text-decoration:none;padding:6px 0;border-bottom:2px solid #16233D">My properties</a><a href="#2b" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">About</a><a href="#2b" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:6px 0;border-bottom:2px solid transparent">Contact</a></nav>
+<span style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #D8DAD4;padding:6px 9px;flex:none"><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#16233D">Verified owner</span></span>
+<a href="#2b" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;text-decoration:none;padding:12px 16px;flex:none">Add a property</a>
+<div style="display:flex;align-items:center;gap:10px;flex:none;border-left:1px solid #E7E8E4;padding-left:16px">
+<span style="width:32px;height:32px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Archivo,sans-serif;color:#fff">FK</span>
+<span style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #55606F;display:block"></span>
+</div>
+</div>
+</header>
+<p class="dv-note" style="padding:16px 26px 20px">“Search” drops out for owners — they are here to manage supply, not to look for a home. The verified seal appears once, full brass, next to the name: this is the one place the seal is the subject rather than a card decoration.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="2c">
+<div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Admin — a tool, not a storefront</div>
+<div class="dv-card" style="width:920px;background:#F4F5F2;padding:0">
+<header style="background:#16233D">
+<div style="padding:0 22px;height:52px;display:flex;align-items:center;gap:22px">
+<span style="display:flex;align-items:baseline;gap:6px;flex:none"><span style="font:800 15px/1 Archivo,sans-serif;color:#fff;letter-spacing:-.01em">MY HOUSE</span><span style="font:600 11px/1 Archivo,sans-serif;color:#BE8A2E;letter-spacing:.06em">ADMIN</span></span>
+<nav style="display:flex;gap:2px;align-items:center;flex:1">
+<a href="#2c" style="font:600 13px/1 Archivo,sans-serif;color:#16233D;background:#F4F5F2;text-decoration:none;padding:9px 13px">Owner requests <span style="font:700 11px Archivo,sans-serif;color:#8F5A12;background:#F8F1E5;padding:2px 5px;margin-left:4px">7</span></a>
+<a href="#2c" style="font:500 13px/1 Archivo,sans-serif;color:#B8C0CE;text-decoration:none;padding:9px 13px">Users</a>
+<a href="#2c" style="font:500 13px/1 Archivo,sans-serif;color:#B8C0CE;text-decoration:none;padding:9px 13px">Properties</a>
+</nav>
+<span style="font:500 12.5px/1 Archivo,sans-serif;color:#8E9AAC;flex:none">admin@myhouse.app</span>
+<a href="#2c" style="font:500 12.5px/1 Archivo,sans-serif;color:#DDE2E9;text-decoration:none;flex:none">Sign out</a>
+</div>
+</header>
+<p class="dv-note" style="padding:16px 26px 20px">Ink ground, 52px tall, tabs as flat inserts rather than underlines — the chrome reads as an internal console the second you land on it, and there is no way to confuse it with the public site. The queue count is the only ornament, because it is the only thing an admin needs before clicking.</p>
+</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Authentication — three real steps, so a step indicator is legitimate</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2d">
+<div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>Step 1 — email, plus the interrupted-registration notice</div>
+<div class="dv-card" style="width:520px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;padding:0 24px"><span style="display:flex;align-items:baseline;gap:7px"><span style="font:800 17px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:5px;height:5px;background:#BE8A2E;display:block"></span></span></div>
+<div style="padding:32px 24px 34px">
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:26px 26px 28px">
+<div style="display:flex;align-items:center;gap:0;margin:0 0 24px">
+<span style="width:22px;height:22px;background:#16233D;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#fff;flex:none">1</span>
+<span style="flex:1;height:1px;background:#BDC1BA"></span>
+<span style="width:22px;height:22px;background:#fff;border:1px solid #BDC1BA;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#55606F;flex:none">2</span>
+<span style="flex:1;height:1px;background:#BDC1BA"></span>
+<span style="width:22px;height:22px;background:#fff;border:1px solid #BDC1BA;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#55606F;flex:none">3</span>
+</div>
+<h1 style="margin:0 0 4px;font:700 22px/1.2 Archivo,sans-serif;color:#16233D">Sign in or create an account</h1>
+<p style="margin:0;font:400 14px/1.55 Archivo,sans-serif;color:#55606F">We send a six-digit code. No password to remember.</p>
+<div style="display:flex;align-items:center;height:9px;width:110px;margin:14px 0 22px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="display:flex;gap:11px;background:#EEF1F5;border:1px solid rgba(46,74,115,.3);border-radius:2px;padding:12px 14px;margin:0 0 20px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #2E4A73;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#2E4A73;margin-top:1px">i</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">Your registration was interrupted and no account was created. Request a new code to continue.</p>
+</div>
+<label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Email</label>
+<input value="amadou.traore@example.com" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none;margin:0 0 18px">
+<span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:14px 18px">Send the code</span>
+<p style="margin:16px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">By continuing you accept the <a href="#2d" style="color:#2E4A73">terms of use</a>.</p>
+</div>
+</div>
+</div>
+<p class="dv-note">Only three steps exist, and they happen in order, so numbering them is honest rather than decorative. The interrupted notice reuses the exact wording already in <code style="font:500 12px ui-monospace,monospace">AuthFlow.tsx</code>.</p>
+</div>
+
+<div class="dv-opt" id="2e">
+<div class="dv-olabel"><a class="dv-oid" href="#2e">2e</a>Step 2 — OTP, four states side by side</div>
+<div class="dv-card" style="width:1010px;background:#F4F5F2;padding:26px 24px 28px">
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:22px">
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+<p style="margin:0 0 14px;font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Default</p>
+<a href="#2e" style="display:inline-block;margin:0 0 14px;font:500 13px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">← Edit email</a>
+<h2 style="margin:0 0 3px;font:700 20px/1.2 Archivo,sans-serif;color:#16233D">Check your inbox</h2>
+<p style="margin:0 0 18px;font:400 13.5px/1.5 Archivo,sans-serif;color:#55606F">Code sent to <b style="font-weight:600;color:#1A1D1B">amadou.traore@example.com</b></p>
+<div style="display:flex;gap:8px;margin:0 0 18px">
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#1A1D1B;border-radius:2px">4</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#1A1D1B;border-radius:2px">1</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#1A1D1B;border-radius:2px">7</span>
+<span style="width:44px;height:52px;border:1px solid #2E4A73;outline:2px solid #2E4A73;outline-offset:2px;background:#fff;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#1A1D1B;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#55606F;background:#F1F2EE;border:1px solid #D8DAD4;border-radius:2px;padding:14px 18px">Verify</span>
+<p style="margin:14px 0 0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Didn't receive anything? <span style="font:600 13px Archivo,sans-serif;color:#BDC1BA">Resend code (00:38)</span></p>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+<p style="margin:0 0 14px;font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Invalid or expired code</p>
+<div style="display:flex;gap:11px;background:#F7EBE9;border:1px solid rgba(185,74,61,.35);border-radius:2px;padding:12px 14px;margin:0 0 18px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #B94A3D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#B94A3D;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">Invalid or expired code. Check the code you received by email, or request a new one.</p>
+</div>
+<div style="display:flex;gap:8px;margin:0 0 18px">
+<span style="width:44px;height:52px;border:1px solid #B94A3D;outline:2px solid #2E4A73;outline-offset:2px;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #B94A3D;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #B94A3D;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #B94A3D;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #B94A3D;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #B94A3D;background:#fff;border-radius:2px"></span>
+</div>
+<p style="margin:0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">The six boxes clear and focus returns to the first, matching <code style="font:500 12px ui-monospace,monospace">OtpCodeInput</code>. Red is carried by the border only — a red fill behind six large digits would be unreadable outdoors.</p>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+<p style="margin:0 0 14px;font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Rate-limited resend</p>
+<div style="display:flex;gap:11px;background:#F8F1E5;border:1px solid rgba(199,125,29,.35);border-radius:2px;padding:12px 14px;margin:0 0 18px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #C77D1D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#8F5A12;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">Too many resend requests. Try again in <b style="font-weight:600">00:52</b>.</p>
+</div>
+<div style="display:flex;gap:8px;margin:0 0 18px;opacity:.5">
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+</div>
+<p style="margin:0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">The countdown comes from <code style="font:500 12px ui-monospace,monospace">Retry-After</code> when the server sends it, falling back to 60 s. The code boxes stay visible but muted — the user may still be holding a valid code.</p>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+<p style="margin:0 0 14px;font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Verifying, then the one orchestrated moment</p>
+<div style="display:flex;gap:8px;margin:0 0 20px;opacity:.55">
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">4</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">1</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">7</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">2</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">9</span>
+<span style="width:44px;height:52px;border:1px solid #D8DAD4;background:#F1F2EE;display:flex;align-items:center;justify-content:center;font:700 20px/1 Archivo,sans-serif;color:#55606F;border-radius:2px">5</span>
+</div>
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 18px">
+<span style="width:52px;height:52px;border:2px solid #BE8A2E;display:flex;align-items:center;justify-content:center;flex:none;animation:mh-stamp 320ms ease-out both"><span style="width:16px;height:9px;border-left:2.5px solid #16233D;border-bottom:2.5px solid #16233D;transform:rotate(-45deg);display:block;margin-top:-4px"></span></span>
+<div><p style="margin:0;font:600 15px/1.3 Archivo,sans-serif;color:#16233D">Email confirmed</p><p style="margin:0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Taking you to the next step…</p></div>
+</div>
+<p style="margin:0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">A brass square stamps in over 320 ms — the single orchestrated animation the direction allows, placed where it means something: possession of the email is now proven. Under <code style="font:500 12px ui-monospace,monospace">prefers-reduced-motion</code> the stamp simply appears.</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="2f">
+<div class="dv-olabel"><a class="dv-oid" href="#2f">2f</a>Step 2 on mobile 360 — the code is the whole screen</div>
+<div class="dv-card" style="width:360px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;padding:0 14px"><span style="display:flex;align-items:baseline;gap:6px"><span style="font:800 16px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:5px;height:5px;background:#BE8A2E;display:block"></span></span></div>
+<div style="padding:22px 14px 28px">
+<div style="display:flex;align-items:center;gap:0;margin:0 0 22px">
+<span style="width:22px;height:22px;background:#2F6E4E;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+<span style="flex:1;height:1px;background:#16233D"></span>
+<span style="width:22px;height:22px;background:#16233D;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#fff;flex:none">2</span>
+<span style="flex:1;height:1px;background:#BDC1BA"></span>
+<span style="width:22px;height:22px;background:#fff;border:1px solid #BDC1BA;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#55606F;flex:none">3</span>
+</div>
+<a href="#2f" style="display:inline-block;margin:0 0 14px;font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none;padding:12px 0">← Edit email</a>
+<h1 style="margin:0 0 3px;font:700 22px/1.2 Archivo,sans-serif;color:#16233D">Check your inbox</h1>
+<p style="margin:0 0 20px;font:400 14px/1.5 Archivo,sans-serif;color:#55606F">Code sent to <b style="font-weight:600;color:#1A1D1B">amadou.traore@example.com</b></p>
+<div style="display:flex;gap:6px;margin:0 0 20px">
+<span style="flex:1;height:56px;border:1px solid #2E4A73;background:#fff;display:flex;align-items:center;justify-content:center;font:700 21px/1 Archivo,sans-serif;color:#1A1D1B;border-radius:2px">4</span>
+<span style="flex:1;height:56px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="flex:1;height:56px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="flex:1;height:56px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="flex:1;height:56px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+<span style="flex:1;height:56px;border:1px solid #D8DAD4;background:#fff;border-radius:2px"></span>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 16px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:16px 18px">Verify</span>
+<p style="margin:16px 0 0;font:400 14px/1.5 Archivo,sans-serif;color:#55606F">Didn't receive anything? <span style="font:600 14px Archivo,sans-serif;color:#BDC1BA">Resend code (00:38)</span></p>
+</div>
+</div>
+<p class="dv-note">Boxes go fluid at 360px (six × 48px + gaps) and grow to 56px tall, above the 44px minimum, because this is the one field in the product typed under time pressure — sometimes outdoors, in sunlight.</p>
+</div>
+
+<div class="dv-opt" id="2g">
+<div class="dv-olabel"><a class="dv-oid" href="#2g">2g</a>Step 3 — profile completion, only if <code style="font:500 11px ui-monospace,monospace">is_new_user</code></div>
+<div class="dv-card" style="width:520px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;padding:0 24px"><span style="display:flex;align-items:baseline;gap:7px"><span style="font:800 17px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:5px;height:5px;background:#BE8A2E;display:block"></span></span></div>
+<div style="padding:32px 24px 34px">
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:26px">
+<div style="display:flex;align-items:center;gap:0;margin:0 0 24px">
+<span style="width:22px;height:22px;background:#2F6E4E;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+<span style="flex:1;height:1px;background:#16233D"></span>
+<span style="width:22px;height:22px;background:#2F6E4E;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+<span style="flex:1;height:1px;background:#16233D"></span>
+<span style="width:22px;height:22px;background:#16233D;display:flex;align-items:center;justify-content:center;font:700 12px/1 Archivo,sans-serif;color:#fff;flex:none">3</span>
+</div>
+<h1 style="margin:0 0 4px;font:700 22px/1.2 Archivo,sans-serif;color:#16233D">Create your account</h1>
+<p style="margin:0;font:400 14px/1.55 Archivo,sans-serif;color:#55606F">Last step before you get started.</p>
+<div style="display:flex;align-items:center;height:9px;width:110px;margin:14px 0 22px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">First name</label><input value="Amadou" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Last name <span style="color:#B94A3D">*</span></label><input value="" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"><p style="margin:6px 0 0;font:400 13px/1.4 Archivo,sans-serif;color:#9A3A2E">This field is required.</p></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Email</label><input value="amadou.traore@example.com" style="width:100%;box-sizing:border-box;height:46px;background:#F1F2EE;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#55606F;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Phone <span style="color:#B94A3D">*</span></label><input value="+225 07 00 00 00 00" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:14px 18px;margin:22px 0 0">Finish</span>
+</div>
+</div>
+</div>
+<p class="dv-note">Field-level errors sit under the field in <code style="font:500 12px ui-monospace,monospace">error</code>, never as a banner — <code style="font:500 12px ui-monospace,monospace">FormField</code> already wires <code style="font:500 12px ui-monospace,monospace">aria-describedby</code> and <code style="font:500 12px ui-monospace,monospace">aria-invalid</code>. The read-only email keeps its label rather than becoming plain text, so the form still reads as a record of what was verified.</p>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t4">
+<div class="dv-thd"><a class="dv-tid" href="#t4">4</a><span class="dv-tname">Listing detail — and the DET-01 warning as a real Alert</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2h">
+<div class="dv-olabel"><a class="dv-oid" href="#2h">2h</a>Detail, desktop — contact revealed</div>
+<div class="dv-card" style="width:1010px;background:#F4F5F2;padding:0">
+<header style="background:#fff;border-bottom:1px solid #D8DAD4"><div style="padding:0 26px;height:60px;display:flex;align-items:center;gap:24px"><span style="display:flex;align-items:baseline;gap:7px;flex:none"><span style="font:800 18px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span></span><nav style="display:flex;gap:18px;flex:1"><a href="#2h" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">Home</a><a href="#2h" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;text-decoration:none">Listings</a><a href="#2h" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">About</a><a href="#2h" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">Contact</a></nav><span style="width:32px;height:32px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Archivo,sans-serif;color:#fff;flex:none">AT</span></div></header>
+
+<div style="padding:22px 26px 40px">
+<a href="#2h" style="display:inline-block;margin:0 0 16px;font:600 13px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">← Back to listings</a>
+
+<div style="display:flex;gap:10px;overflow-x:auto;margin:0 0 6px">
+<div style="width:498px;height:300px;flex:none;background:#EDEEEA;overflow:hidden"><img src="assets/room-01.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+<div style="width:250px;height:300px;flex:none;background:#EDEEEA;overflow:hidden"><img src="assets/room-06.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+<div style="width:250px;height:300px;flex:none;background:#EDEEEA;overflow:hidden;position:relative"><img src="assets/room-02.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;inset:0;background:rgba(22,35,61,.62);display:flex;align-items:center;justify-content:center;font:600 14px/1 Archivo,sans-serif;color:#fff">+3 photos</span></div>
+</div>
+<div style="display:flex;gap:5px;margin:0 0 26px"><span style="width:34px;height:3px;background:#16233D"></span><span style="width:34px;height:3px;background:#D8DAD4"></span><span style="width:34px;height:3px;background:#D8DAD4"></span><span style="width:34px;height:3px;background:#D8DAD4"></span><span style="width:34px;height:3px;background:#D8DAD4"></span><span style="width:34px;height:3px;background:#D8DAD4"></span></div>
+
+<div style="display:grid;grid-template-columns:1fr 330px;gap:34px;align-items:start">
+<div>
+<p style="margin:0 0 6px;font:600 12.5px/1 Archivo,sans-serif;color:#2E4A73">Studio · 30 m² · 1 room</p>
+<h1 style="margin:0 0 4px;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">Furnished studio near the market</h1>
+<p style="margin:0;font:500 14px/1.4 Archivo,sans-serif;color:#55606F">Cocody, Abidjan</p>
+<div style="display:flex;align-items:center;height:9px;margin:20px 0"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:26px;height:1px;background:transparent"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<h2 style="margin:0 0 8px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">Description</h2>
+<p style="margin:0 0 14px;font:400 15px/1.6 Archivo,sans-serif;color:#1A1D1B;max-width:66ch">Thirty square metres on the second floor of a quiet three-storey building, ten minutes on foot from the Cocody market. One room with a separate kitchen corner, tiled bathroom, ceiling fan, shared water tank on the roof.</p>
+<p style="margin:0;font:400 15px/1.6 Archivo,sans-serif;color:#1A1D1B;max-width:66ch">Furnished: bed, wardrobe, table and two chairs. Electricity metered separately. Available from 1 October, minimum six months.</p>
+<div style="display:flex;align-items:center;height:9px;margin:24px 0"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:26px;height:1px;background:transparent"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<h2 style="margin:0 0 10px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">The owner</h2>
+<div style="display:flex;align-items:center;gap:13px">
+<span style="width:46px;height:46px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#fff;flex:none">FK</span>
+<div><p style="margin:0 0 2px;font:600 15px/1.3 Archivo,sans-serif;color:#16233D">Fatou K.</p><p style="margin:0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Owner · member since March 2026</p></div>
+<span style="display:flex;align-items:center;gap:6px;background:#F8F1E0;border:1px solid #BE8A2E;padding:6px 9px;flex:none"><span style="width:7px;height:7px;background:#BE8A2E;display:block"></span><span style="font:600 12px/1 Archivo,sans-serif;color:#16233D">Identity verified</span></span>
+</div>
+</div>
+
+<div>
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:20px 20px 22px;margin:0 0 16px">
+<p style="margin:0 0 2px;font:700 26px/1.1 Archivo,sans-serif;color:#16233D">180 000 <span style="font:500 14px Archivo,sans-serif;color:#55606F">FCFA / month</span></p>
+<p style="margin:0 0 18px;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Charges included · electricity separate</p>
+<div style="background:#F4F5F2;border:1px solid #BDC1BA;padding:14px;margin:0 0 16px">
+<p style="margin:0 0 4px;font:600 12px/1 Archivo,sans-serif;color:#55606F">Owner's phone</p>
+<p style="margin:0;font:700 20px/1.2 Archivo,sans-serif;color:#16233D">+225 07 58 41 20 96</p>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 14px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:13px 16px">Copy the number</span>
+</div>
+
+<div style="display:flex;gap:11px;background:#F8F1E5;border:1px solid rgba(199,125,29,.4);border-radius:2px;padding:14px 15px">
+<span style="width:18px;height:18px;flex:none;border:2px solid #C77D1D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px Archivo,sans-serif;color:#8F5A12;margin-top:1px">!</span>
+<div>
+<p style="margin:0 0 4px;font:600 13.5px/1.35 Archivo,sans-serif;color:#8F5A12">Before you contact this owner</p>
+<p style="margin:0 0 8px;font:400 13.5px/1.55 Archivo,sans-serif;color:#1A1D1B">Never send money before visiting the property. My House does not hold deposits and is not a party to your agreement. Verified identity does not guarantee the listing.</p>
+<a href="#2h" style="font:600 13px/1 Archivo,sans-serif;color:#8F5A12">Report this listing</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">DET-01 is a full <code style="font:500 12px ui-monospace,monospace">Alert variant="warning"</code> pinned directly under the revealed number, not fine print — it is the last thing read before the phone comes out. The number sits in its own inset panel on paper, so it reads as a record handed over rather than a button. Gallery scrolls horizontally with a segment bar instead of dots, echoing the dimension rule.</p>
+</div>
+
+<div class="dv-opt" id="2i">
+<div class="dv-olabel"><a class="dv-oid" href="#2i">2i</a>Detail, mobile 360 — contact not yet revealed</div>
+<div class="dv-card" style="width:360px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;gap:12px;padding:0 14px"><a href="#2i" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font:600 18px/1 Archivo,sans-serif;color:#16233D;text-decoration:none">←</a><span style="font:600 15px/1 Archivo,sans-serif;color:#16233D;flex:1">Listing</span><a href="#2i" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font:600 12px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">⚑</a></div>
+<div style="height:250px;background:#EDEEEA;overflow:hidden;position:relative"><img src="assets/room-01.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><div style="position:absolute;left:12px;bottom:12px;display:flex;gap:4px"><span style="width:22px;height:3px;background:#fff"></span><span style="width:22px;height:3px;background:rgba(255,255,255,.45)"></span><span style="width:22px;height:3px;background:rgba(255,255,255,.45)"></span><span style="width:22px;height:3px;background:rgba(255,255,255,.45)"></span><span style="width:22px;height:3px;background:rgba(255,255,255,.45)"></span><span style="width:22px;height:3px;background:rgba(255,255,255,.45)"></span></div></div>
+<div style="padding:20px 14px 26px">
+<p style="margin:0 0 5px;font:600 12.5px/1 Archivo,sans-serif;color:#2E4A73">Studio · 30 m² · 1 room</p>
+<h1 style="margin:0 0 4px;font:700 21px/1.25 Archivo,sans-serif;color:#16233D">Furnished studio near the market</h1>
+<p style="margin:0 0 14px;font:500 14px/1.4 Archivo,sans-serif;color:#55606F">Cocody, Abidjan</p>
+<p style="margin:0 0 18px;font:700 23px/1.1 Archivo,sans-serif;color:#16233D">180 000 <span style="font:500 13px Archivo,sans-serif;color:#55606F">FCFA / month</span></p>
+<div style="display:flex;align-items:center;height:9px;margin:0 0 18px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<p style="margin:0 0 20px;font:400 15px/1.6 Archivo,sans-serif;color:#1A1D1B">Thirty square metres on the second floor of a quiet three-storey building, ten minutes on foot from the Cocody market. One room with a separate kitchen corner, tiled bathroom, ceiling fan.</p>
+<div style="display:flex;gap:11px;background:#F8F1E5;border:1px solid rgba(199,125,29,.4);border-radius:2px;padding:13px 14px;margin:0 0 16px">
+<span style="width:18px;height:18px;flex:none;border:2px solid #C77D1D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px Archivo,sans-serif;color:#8F5A12;margin-top:1px">!</span>
+<div><p style="margin:0 0 3px;font:600 13.5px/1.35 Archivo,sans-serif;color:#8F5A12">Before you contact this owner</p><p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">Never send money before visiting. My House does not hold deposits.</p></div>
+</div>
+</div>
+<div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #D8DAD4;padding:12px 14px;display:flex;gap:10px;align-items:center">
+<div style="flex:1"><p style="margin:0;font:600 13px/1.2 Archivo,sans-serif;color:#16233D">Fatou K.</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">Identity verified</p></div>
+<span style="display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:15px 18px">Reveal phone number</span>
+</div>
+</div>
+<p class="dv-note">The warning is shown <b style="font-weight:600">before</b> the reveal, not after — on mobile the bottom bar is a fixed 68px with a 48px target, and the alert has already been read by the time the thumb gets there.</p>
+</div>
+
+<div class="dv-opt" id="2j">
+<div class="dv-olabel"><a class="dv-oid" href="#2j">2j</a>Detail — gone, unavailable, and failed to load</div>
+<div class="dv-card" style="width:520px;background:#F4F5F2;padding:24px">
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:44px 32px;text-align:center;margin:0 0 18px">
+<div style="width:40px;height:40px;margin:0 auto 18px;border:1px solid #BDC1BA;background:repeating-linear-gradient(135deg,#F1F2EE 0 5px,#fff 5px 10px)"></div>
+<h2 style="margin:0 0 6px;font:700 19px/1.25 Archivo,sans-serif;color:#16233D">This property is no longer available</h2>
+<p style="margin:0 auto 18px;font:400 14.5px/1.55 Archivo,sans-serif;color:#55606F;max-width:44ch">It may have been removed by the owner, or its status changed to “unavailable”.</p>
+<span style="display:inline-flex;align-items:center;justify-content:center;font:600 14px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:12px 18px">Back to listings</span>
+</div>
+<div style="display:flex;gap:11px;background:#F8F1E5;border:1px solid rgba(199,125,29,.35);border-radius:2px;padding:13px 14px;margin:0 0 14px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #C77D1D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#8F5A12;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">This property is currently unavailable.</p>
+</div>
+<div style="display:flex;gap:11px;background:#F7EBE9;border:1px solid rgba(185,74,61,.35);border-radius:2px;padding:13px 14px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #B94A3D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#B94A3D;margin-top:1px">!</span>
+<div><p style="margin:0 0 2px;font:600 13.5px/1.35 Archivo,sans-serif;color:#9A3A2E">Unable to load this listing</p><p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">Please try again in a moment.</p></div>
+</div>
+<p class="dv-note" style="max-width:none">Three distinct outcomes, three distinct treatments: a 404 is a full page (the listing is gone), “unavailable” is an inline warning above a listing that still renders, a network failure is an error Alert. All three strings come from <code style="font:500 12px ui-monospace,monospace">ListingDetail.tsx</code> as written.</p>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t5">
+<div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">Owner — property management</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2k">
+<div class="dv-olabel"><a class="dv-oid" href="#2k">2k</a>My properties — availability toggle per row</div>
+<div class="dv-card" style="width:1010px;background:#F4F5F2;padding:0">
+<header style="background:#fff;border-bottom:1px solid #D8DAD4"><div style="padding:0 26px;height:60px;display:flex;align-items:center;gap:24px"><span style="display:flex;align-items:baseline;gap:7px;flex:none"><span style="font:800 18px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span></span><nav style="display:flex;gap:18px;flex:1"><a href="#2k" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">Listings</a><a href="#2k" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;text-decoration:none;padding:6px 0;border-bottom:2px solid #16233D">My properties</a></nav><a href="#2k" style="font:600 14px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;text-decoration:none;padding:11px 16px;flex:none">Add a property</a><span style="width:32px;height:32px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Archivo,sans-serif;color:#fff;flex:none">FK</span></div></header>
+<div style="padding:30px 26px 40px">
+<h1 style="margin:0;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">My properties</h1>
+<div style="display:flex;align-items:center;height:9px;width:120px;margin:14px 0 22px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="display:flex;gap:16px;margin:0 0 20px">
+<span style="font:600 13px/1 Archivo,sans-serif;color:#16233D;background:#fff;border:1px solid #16233D;border-radius:2px;padding:9px 13px">All 4</span>
+<span style="font:500 13px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:9px 13px">Available 3</span>
+<span style="font:500 13px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:9px 13px">Unavailable 1</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;display:flex;align-items:stretch;overflow:hidden">
+<div style="width:150px;flex:none;background:#EDEEEA;overflow:hidden;position:relative"><img src="assets/room-01.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;left:0;top:0;background:#fff;border-right:1px solid #D8DAD4;border-bottom:1px solid #D8DAD4;padding:3px 7px;font:600 10.5px/1 Archivo,sans-serif;color:#16233D">COVER</span></div>
+<div style="flex:1;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:5px">
+<p style="margin:0;font:700 16px/1.3 Archivo,sans-serif;color:#16233D">Furnished studio near the market</p>
+<p style="margin:0;font:500 12.5px/1.4 Archivo,sans-serif;color:#55606F">Studio · Cocody, Abidjan · 30 m² · 6 photos</p>
+<p style="margin:0;font:700 16px/1.2 Archivo,sans-serif;color:#1A1D1B">180 000 <span style="font:500 12px Archivo,sans-serif;color:#55606F">FCFA / month</span></p>
+</div>
+<div style="width:230px;flex:none;padding:16px 18px;display:flex;flex-direction:column;gap:11px;justify-content:center;border-left:1px solid #E7E8E4">
+<label style="display:flex;align-items:center;gap:9px"><span style="width:38px;height:22px;background:#2F6E4E;border-radius:11px;display:flex;align-items:center;padding:2px;flex:none"><span style="width:18px;height:18px;background:#fff;border-radius:50%;display:block;margin-left:auto"></span></span><span style="font:600 13px/1 Archivo,sans-serif;color:#1A1D1B">Available</span></label>
+<div style="display:flex;gap:8px"><span style="font:600 12.5px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:9px 12px">Edit</span><span style="font:600 12.5px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:9px 12px">Delete</span></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;display:flex;align-items:stretch;overflow:hidden">
+<div style="width:150px;flex:none;background:#EDEEEA;overflow:hidden;position:relative"><img src="assets/room-06.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1);opacity:.75"><span style="position:absolute;left:0;top:0;background:#fff;border-right:1px solid #D8DAD4;border-bottom:1px solid #D8DAD4;padding:3px 7px;font:600 10.5px/1 Archivo,sans-serif;color:#16233D">COVER</span></div>
+<div style="flex:1;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:5px">
+<div style="display:flex;align-items:center;gap:9px"><p style="margin:0;font:700 16px/1.3 Archivo,sans-serif;color:#55606F">Two-room, Yopougon</p><span style="font:600 11px/1 Archivo,sans-serif;color:#8F5A12;background:#F8F1E5;border:1px solid rgba(199,125,29,.3);padding:4px 7px">Hidden from the feed</span></div>
+<p style="margin:0;font:500 12.5px/1.4 Archivo,sans-serif;color:#55606F">Apartment · Yopougon, Abidjan · 48 m² · 3 photos</p>
+<p style="margin:0;font:700 16px/1.2 Archivo,sans-serif;color:#55606F">120 000 <span style="font:500 12px Archivo,sans-serif;color:#55606F">FCFA / month</span></p>
+</div>
+<div style="width:230px;flex:none;padding:16px 18px;display:flex;flex-direction:column;gap:11px;justify-content:center;border-left:1px solid #E7E8E4">
+<label style="display:flex;align-items:center;gap:9px"><span style="width:38px;height:22px;background:#fff;border:1px solid #BDC1BA;border-radius:11px;display:flex;align-items:center;padding:2px;flex:none"><span style="width:18px;height:18px;background:#BDC1BA;border-radius:50%;display:block"></span></span><span style="font:600 13px/1 Archivo,sans-serif;color:#55606F">Unavailable</span></label>
+<div style="display:flex;gap:8px"><span style="font:600 12.5px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:9px 12px">Edit</span><span style="font:600 12.5px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:9px 12px">Delete</span></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;display:flex;align-items:stretch;overflow:hidden">
+<div style="width:150px;flex:none;background:repeating-linear-gradient(135deg,#E4E6E1 0 6px,#EDEEEA 6px 12px);display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:10px"><span style="font:500 10.5px/1.4 ui-monospace,monospace;color:#7B8290;text-align:center;white-space:pre-line">no photo
+yet</span></div>
+<div style="flex:1;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:5px">
+<div style="display:flex;align-items:center;gap:9px"><p style="margin:0;font:700 16px/1.3 Archivo,sans-serif;color:#16233D">Room with a host family</p><span style="font:600 11px/1 Archivo,sans-serif;color:#9A3A2E;background:#F7EBE9;border:1px solid rgba(185,74,61,.3);padding:4px 7px">Add a photo to publish</span></div>
+<p style="margin:0;font:500 12.5px/1.4 Archivo,sans-serif;color:#55606F">Room · Bastos, Yaoundé · 14 m² · 0 photos</p>
+<p style="margin:0;font:700 16px/1.2 Archivo,sans-serif;color:#1A1D1B">60 000 <span style="font:500 12px Archivo,sans-serif;color:#55606F">FCFA / month</span></p>
+</div>
+<div style="width:230px;flex:none;padding:16px 18px;display:flex;flex-direction:column;gap:11px;justify-content:center;border-left:1px solid #E7E8E4">
+<label style="display:flex;align-items:center;gap:9px;opacity:.5"><span style="width:38px;height:22px;background:#fff;border:1px solid #BDC1BA;border-radius:11px;display:flex;align-items:center;padding:2px;flex:none"><span style="width:18px;height:18px;background:#BDC1BA;border-radius:50%;display:block"></span></span><span style="font:600 13px/1 Archivo,sans-serif;color:#55606F">Unavailable</span></label>
+<div style="display:flex;gap:8px"><span style="font:600 12.5px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:9px 12px">Add photos</span><span style="font:600 12.5px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:9px 12px">Delete</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">A horizontal row, not the postcard grid — an owner is scanning status and price, not browsing. Unavailable rows desaturate their photo and grey their price, so a glance down the column tells you what the public can see. The COVER tag is repeated here so the owner always knows which photo the feed is using.</p>
+</div>
+
+<div class="dv-opt" id="2l">
+<div class="dv-olabel"><a class="dv-oid" href="#2l">2l</a>Create / edit form</div>
+<div class="dv-card" style="width:760px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;padding:0 24px;gap:14px"><a href="#2l" style="font:600 13px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">← My properties</a></div>
+<div style="padding:30px 26px 40px">
+<h1 style="margin:0;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">New property</h1>
+<div style="display:flex;align-items:center;height:9px;width:120px;margin:14px 0 24px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:26px">
+<div style="display:flex;flex-direction:column;gap:17px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Title <span style="color:#B94A3D">*</span></label><input value="Furnished studio near the market" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Description <span style="color:#B94A3D">*</span></label><textarea style="width:100%;box-sizing:border-box;height:120px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:11px 13px;font:400 15px/1.55 Archivo,sans-serif;color:#1A1D1B;outline:none;resize:vertical">Thirty square metres on the second floor of a quiet three-storey building, ten minutes on foot from the Cocody market.</textarea><p style="margin:6px 0 0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Describe what a visitor cannot see in the photos: floor, water, electricity, noise, access.</p></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Type <span style="color:#B94A3D">*</span></label><select style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none;appearance:none"><option>Studio</option><option>Apartment</option><option>House</option><option>Room</option><option>Villa</option><option>Other</option></select></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Price <span style="color:#B94A3D">*</span></label><div style="display:flex;border:1px solid #D8DAD4;border-radius:2px;background:#fff;overflow:hidden"><input value="180 000" style="flex:1;min-width:0;height:46px;border:0;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"><span style="display:flex;align-items:center;padding:0 13px;background:#F1F2EE;border-left:1px solid #E7E8E4;font:600 13px/1 Archivo,sans-serif;color:#55606F;flex:none">FCFA / month</span></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Surface</label><div style="display:flex;border:1px solid #D8DAD4;border-radius:2px;background:#fff;overflow:hidden"><input value="30" style="flex:1;min-width:0;height:46px;border:0;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"><span style="display:flex;align-items:center;padding:0 13px;background:#F1F2EE;border-left:1px solid #E7E8E4;font:600 13px/1 Archivo,sans-serif;color:#55606F;flex:none">m²</span></div></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Rooms</label><input value="1" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">City <span style="color:#B94A3D">*</span></label><input value="Abidjan" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Neighbourhood</label><input value="Cocody" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;height:9px;margin:24px 0"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="display:flex;gap:12px;align-items:center">
+<span style="display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:14px 20px">Save and add photos</span>
+<span style="display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:14px 20px">Cancel</span>
+<span style="flex:1"></span>
+<span style="font:400 12.5px/1.4 Archivo,sans-serif;color:#55606F">Nothing is published until a photo is added.</span>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">Units live inside the field as attached suffixes (FCFA / month, m²) rather than as hint text — the number and its unit are one value. The primary action says what happens next instead of “Save”, because the listing genuinely cannot go live without a photo.</p>
+</div>
+
+<div class="dv-opt" id="2m">
+<div class="dv-olabel"><a class="dv-oid" href="#2m">2m</a>Photo upload — first upload becomes the cover, visibly</div>
+<div class="dv-card" style="width:760px;background:#F4F5F2;padding:0">
+<div style="padding:30px 26px 40px">
+<h1 style="margin:0;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">Photos</h1>
+<div style="display:flex;align-items:center;height:9px;width:120px;margin:14px 0 24px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+
+<div style="display:flex;gap:11px;background:#EEF1F5;border:1px solid rgba(46,74,115,.3);border-radius:2px;padding:12px 14px;margin:0 0 20px">
+<span style="width:17px;height:17px;flex:none;border:2px solid #2E4A73;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#2E4A73;margin-top:1px">i</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B">The first photo you upload becomes the cover shown in the feed. You can pick a different one at any time.</p>
+</div>
+
+<div style="border:2px dashed #BDC1BA;background:#fff;border-radius:2px;padding:28px 24px;text-align:center;margin:0 0 22px">
+<div style="width:34px;height:22px;margin:0 auto 12px;border:2px solid #55606F;border-bottom-width:2px;position:relative"><span style="position:absolute;left:50%;top:-9px;margin-left:-1px;width:2px;height:12px;background:#55606F;display:block"></span></div>
+<p style="margin:0 0 3px;font:600 14px/1.3 Archivo,sans-serif;color:#1A1D1B">Drag photos here, or click to select</p>
+<p style="margin:0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">JPEG or WebP, up to 5 MB each. Landscape shots work best.</p>
+</div>
+
+<p style="margin:0 0 12px;font:600 12px/1 Archivo,sans-serif;color:#16233D">6 photos · cover is photo 1</p>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+<div style="border:2px solid #BE8A2E;position:relative"><div style="aspect-ratio:4/3;background:#EDEEEA;overflow:hidden"><img src="assets/room-01.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div><span style="position:absolute;left:0;top:0;background:#BE8A2E;padding:4px 8px;font:700 10.5px/1 Archivo,sans-serif;color:#16233D;letter-spacing:.03em">COVER</span><span style="position:absolute;right:5px;top:5px;width:24px;height:24px;background:#fff;border:1px solid #D8DAD4;display:flex;align-items:center;justify-content:center;font:600 13px/1 Archivo,sans-serif;color:#9A3A2E">×</span></div>
+<div style="border:1px solid #D8DAD4;position:relative"><div style="aspect-ratio:4/3;background:#EDEEEA;overflow:hidden"><img src="assets/room-06.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div><span style="position:absolute;left:0;bottom:0;background:#fff;border-top:1px solid #D8DAD4;border-right:1px solid #D8DAD4;padding:5px 8px;font:600 11px/1 Archivo,sans-serif;color:#2E4A73">Make cover</span><span style="position:absolute;right:5px;top:5px;width:24px;height:24px;background:#fff;border:1px solid #D8DAD4;display:flex;align-items:center;justify-content:center;font:600 13px/1 Archivo,sans-serif;color:#9A3A2E">×</span></div>
+<div style="border:1px solid #D8DAD4;position:relative"><div style="aspect-ratio:4/3;background:#EDEEEA;overflow:hidden"><img src="assets/room-02.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div><span style="position:absolute;left:0;bottom:0;background:#fff;border-top:1px solid #D8DAD4;border-right:1px solid #D8DAD4;padding:5px 8px;font:600 11px/1 Archivo,sans-serif;color:#2E4A73">Make cover</span><span style="position:absolute;right:5px;top:5px;width:24px;height:24px;background:#fff;border:1px solid #D8DAD4;display:flex;align-items:center;justify-content:center;font:600 13px/1 Archivo,sans-serif;color:#9A3A2E">×</span></div>
+<div style="border:1px solid #D8DAD4;position:relative"><div style="aspect-ratio:4/3;background:#EDEEEA;overflow:hidden;position:relative"><img src="assets/room-05.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;opacity:.45"><span style="position:absolute;inset:0;display:flex;align-items:flex-end"><span style="width:100%;height:4px;background:#D8DAD4;display:block"><span style="width:62%;height:4px;background:#BE8A2E;display:block"></span></span></span></div><span style="position:absolute;left:0;bottom:8px;background:#fff;border-top:1px solid #D8DAD4;border-right:1px solid #D8DAD4;padding:5px 8px;font:600 11px/1 Archivo,sans-serif;color:#55606F">Uploading 62%</span></div>
+</div>
+<div style="display:flex;gap:11px;background:#F7EBE9;border:1px solid rgba(185,74,61,.35);border-radius:2px;padding:12px 14px;margin:16px 0 0">
+<span style="width:17px;height:17px;flex:none;border:2px solid #B94A3D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#B94A3D;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B"><b style="font-weight:600">facade-4.png</b> was not uploaded — 8.2 MB exceeds the 5 MB limit.</p>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">The cover is the only tile with a brass frame and a filled brass tag, so “which photo does the public see” is answered without reading. Every other tile carries a quiet “Make cover” affordance in its corner rather than a hover-only control — hover does not exist on the phones a lot of these owners use.</p>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t6">
+<div class="dv-thd"><a class="dv-tid" href="#t6">6</a><span class="dv-tname">Owner role request — identity documents, handled seriously</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2n">
+<div class="dv-olabel"><a class="dv-oid" href="#2n">2n</a>The single form — atomic submission, no draft</div>
+<div class="dv-card" style="width:760px;background:#F4F5F2;padding:0">
+<div style="padding:30px 26px 40px">
+<h1 style="margin:0 0 5px;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">Become an owner</h1>
+<p style="margin:0;font:400 15px/1.55 Archivo,sans-serif;color:#55606F;max-width:64ch">We verify every owner before their properties appear in the feed. This is what makes the seal on a listing worth anything.</p>
+<div style="display:flex;align-items:center;height:9px;width:120px;margin:14px 0 24px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:26px">
+<div style="display:flex;flex-direction:column;gap:17px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Phone <span style="color:#B94A3D">*</span></label><input value="+225 07 58 41 20 96" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"><p style="margin:6px 0 0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">This is the number seekers will see on your listings.</p></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Full legal name <span style="color:#B94A3D">*</span></label><input value="Fatou Koné" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Date of birth <span style="color:#B94A3D">*</span></label><input value="14 / 06 / 1988" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Document type <span style="color:#B94A3D">*</span></label><select style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none;appearance:none"><option>National ID card</option><option>Passport</option><option>Residence permit</option></select></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Document number <span style="color:#B94A3D">*</span></label><input value="CI0042189773" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;height:9px;margin:24px 0"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+
+<p style="margin:0 0 5px;font:600 15px/1.3 Archivo,sans-serif;color:#16233D">Your documents</p>
+<p style="margin:0 0 16px;font:400 13.5px/1.55 Archivo,sans-serif;color:#55606F;max-width:66ch">Two files: your identity document, and one proof of address dated within three months. They are read once by a member of our team, then stored encrypted. They are never shown on your listings and never sent to a seeker.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px">
+<div style="border:1px solid #D8DAD4;background:#fff;padding:14px;display:flex;gap:12px;align-items:center">
+<div style="width:44px;height:56px;flex:none;border:1px solid #BDC1BA;background:repeating-linear-gradient(135deg,#F1F2EE 0 4px,#fff 4px 8px)"></div>
+<div style="min-width:0"><p style="margin:0 0 2px;font:600 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">id-card-front.jpg</p><p style="margin:0 0 4px;font:400 12.5px/1.3 Archivo,sans-serif;color:#55606F">1.4 MB · uploaded</p><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E">Remove</span></div>
+<span style="width:22px;height:22px;flex:none;margin-left:auto;background:#2F6E4E;display:flex;align-items:center;justify-content:center"><span style="width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+</div>
+<div style="border:2px dashed #BDC1BA;background:#fff;padding:18px 14px;text-align:center">
+<p style="margin:0 0 2px;font:600 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">Proof of address</p>
+<p style="margin:0;font:400 12.5px/1.4 Archivo,sans-serif;color:#55606F">Drag here, or click to select</p>
+</div>
+</div>
+
+<div style="background:#F4F5F2;border:1px solid #BDC1BA;padding:14px 16px;margin:0 0 20px">
+<p style="margin:0 0 8px;font:600 13px/1.3 Archivo,sans-serif;color:#16233D">How your documents are handled</p>
+<p style="margin:0 0 5px;font:400 13px/1.55 Archivo,sans-serif;color:#1A1D1B">Read by one reviewer, for verification only.</p>
+<p style="margin:0 0 5px;font:400 13px/1.55 Archivo,sans-serif;color:#1A1D1B">Stored encrypted, deleted 90 days after a decision.</p>
+<p style="margin:0;font:400 13px/1.55 Archivo,sans-serif;color:#1A1D1B">Never published, never shared with other users.</p>
+</div>
+
+<label style="display:flex;gap:11px;align-items:flex-start;margin:0 0 20px">
+<span style="width:20px;height:20px;flex:none;border:1px solid #55606F;background:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><span style="width:9px;height:5px;border-left:2px solid #16233D;border-bottom:2px solid #16233D;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+<span style="font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B;max-width:70ch">I confirm the information above is accurate and that I am entitled to rent out the properties I will publish.</span>
+</label>
+
+<div style="display:flex;gap:12px;align-items:center">
+<span style="display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:14px 20px">Submit the request</span>
+<span style="font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F;max-width:34ch">Submitted in one go — there is no draft, so check your files before sending.</span>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">No padlock icons, no shields, no green “100% secure” ribbon. The reassurance is a plain panel that states what actually happens to the files, in the same type as the rest of the form — which is what a person about to upload their ID actually wants to read.</p>
+</div>
+
+<div class="dv-opt" id="2o">
+<div class="dv-olabel"><a class="dv-oid" href="#2o">2o</a>Status — pending, approved, rejected</div>
+<div class="dv-card" style="width:520px;background:#F4F5F2;padding:24px">
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px;margin:0 0 16px">
+<div style="display:flex;align-items:center;gap:0;margin:0 0 20px">
+<span style="width:20px;height:20px;background:#16233D;display:flex;align-items:center;justify-content:center;font:700 11px/1 Archivo,sans-serif;color:#fff;flex:none">1</span>
+<span style="flex:1;height:1px;background:#BDC1BA"></span>
+<span style="width:20px;height:20px;background:#C77D1D;display:flex;align-items:center;justify-content:center;font:700 11px/1 Archivo,sans-serif;color:#fff;flex:none">2</span>
+<span style="flex:1;height:1px;background:#BDC1BA"></span>
+<span style="width:20px;height:20px;background:#fff;border:1px solid #BDC1BA;display:flex;align-items:center;justify-content:center;font:700 11px/1 Archivo,sans-serif;color:#55606F;flex:none">3</span>
+</div>
+<div style="display:flex;align-items:center;gap:9px;margin:0 0 8px"><span style="width:9px;height:9px;background:#C77D1D;display:block"></span><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12">UNDER REVIEW</span></div>
+<h2 style="margin:0 0 6px;font:700 20px/1.25 Archivo,sans-serif;color:#16233D">Your request is being reviewed</h2>
+<p style="margin:0 0 16px;font:400 14.5px/1.55 Archivo,sans-serif;color:#1A1D1B;max-width:52ch">Submitted 6 September at 14:20. A reviewer reads every request by hand, usually within two working days. You will get an email as soon as there is a decision.</p>
+<div style="background:#F4F5F2;border:1px solid #D8DAD4;padding:12px 14px">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:0 0 7px;border-bottom:1px solid #E7E8E4"><span style="font:400 13px Archivo,sans-serif;color:#55606F">Phone</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">+225 07 58 41 20 96</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0 7px;border-bottom:1px solid #E7E8E4"><span style="font:400 13px Archivo,sans-serif;color:#55606F">Document</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">National ID card</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0 0"><span style="font:400 13px Archivo,sans-serif;color:#55606F">Files</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">2 received</span></div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px;margin:0 0 16px">
+<div style="display:flex;align-items:center;gap:13px;margin:0 0 14px">
+<span style="width:44px;height:44px;border:2px solid #BE8A2E;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:8px;border-left:2.5px solid #16233D;border-bottom:2.5px solid #16233D;transform:rotate(-45deg);display:block;margin-top:-3px"></span></span>
+<div><h2 style="margin:0 0 2px;font:700 20px/1.25 Archivo,sans-serif;color:#16233D">You are a verified owner</h2><p style="margin:0;font:400 13.5px/1.4 Archivo,sans-serif;color:#55606F">Approved 7 September at 09:05</p></div>
+</div>
+<p style="margin:0 0 16px;font:400 14.5px/1.55 Archivo,sans-serif;color:#1A1D1B;max-width:52ch">Your listings will carry the verified seal. Your phone number becomes visible to seekers who open one of your properties.</p>
+<span style="display:inline-flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:13px 18px">Post your first property</span>
+</div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:24px">
+<div style="display:flex;align-items:center;gap:9px;margin:0 0 8px"><span style="width:9px;height:9px;background:#B94A3D;display:block"></span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E">NOT APPROVED</span></div>
+<h2 style="margin:0 0 6px;font:700 20px/1.25 Archivo,sans-serif;color:#16233D">We could not verify your request</h2>
+<p style="margin:0 0 14px;font:400 14.5px/1.55 Archivo,sans-serif;color:#1A1D1B;max-width:52ch">Reviewed 7 September at 11:40. You can submit a new request with corrected documents.</p>
+<div style="background:#F7EBE9;border:1px solid rgba(185,74,61,.3);padding:13px 15px;margin:0 0 18px">
+<p style="margin:0 0 4px;font:600 12.5px/1 Archivo,sans-serif;color:#9A3A2E">Reviewer's note</p>
+<p style="margin:0;font:400 14px/1.55 Archivo,sans-serif;color:#1A1D1B">The photo of the ID card is cut off on the right and the document number is unreadable. Please send a flat, fully visible photo of the whole card.</p>
+</div>
+<span style="display:inline-flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:13px 18px">Submit a new request</span>
+</div>
+<p class="dv-note" style="max-width:none">Three real sequential states, so the 1–2–3 marker is earned here too. The rejection quotes the reviewer's note in full and verbatim — an owner who is told only “rejected” has no way to fix anything, and support pays for it.</p>
+</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t7">
+<div class="dv-thd"><a class="dv-tid" href="#t7">7</a><span class="dv-tname">Admin back-office — density first, same tokens</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2p">
+<div class="dv-olabel"><a class="dv-oid" href="#2p">2p</a>Owner requests — queue, document viewer, decision</div>
+<div class="dv-card" style="width:1180px;background:#F4F5F2;padding:0">
+<header style="background:#16233D"><div style="padding:0 22px;height:52px;display:flex;align-items:center;gap:22px"><span style="display:flex;align-items:baseline;gap:6px;flex:none"><span style="font:800 15px/1 Archivo,sans-serif;color:#fff;letter-spacing:-.01em">MY HOUSE</span><span style="font:600 11px/1 Archivo,sans-serif;color:#BE8A2E;letter-spacing:.06em">ADMIN</span></span><nav style="display:flex;gap:2px;flex:1"><a href="#2p" style="font:600 13px/1 Archivo,sans-serif;color:#16233D;background:#F4F5F2;text-decoration:none;padding:9px 13px">Owner requests <span style="font:700 11px Archivo,sans-serif;color:#8F5A12;background:#F8F1E5;padding:2px 5px;margin-left:4px">7</span></a><a href="#2p" style="font:500 13px/1 Archivo,sans-serif;color:#B8C0CE;text-decoration:none;padding:9px 13px">Users</a><a href="#2p" style="font:500 13px/1 Archivo,sans-serif;color:#B8C0CE;text-decoration:none;padding:9px 13px">Properties</a></nav><span style="font:500 12.5px/1 Archivo,sans-serif;color:#8E9AAC;flex:none">admin@myhouse.app</span></div></header>
+<div style="display:grid;grid-template-columns:1fr 420px;gap:0;align-items:stretch">
+<div style="padding:20px 22px 26px;border-right:1px solid #D8DAD4">
+<div style="display:flex;align-items:baseline;gap:12px;margin:0 0 14px"><h1 style="margin:0;font:700 19px/1.2 Archivo,sans-serif;color:#16233D">Owner requests</h1><span style="font:500 12.5px Archivo,sans-serif;color:#55606F">7 pending · 132 processed</span></div>
+<div style="display:flex;gap:8px;margin:0 0 14px"><span style="font:600 12.5px/1 Archivo,sans-serif;color:#16233D;background:#fff;border:1px solid #16233D;border-radius:2px;padding:8px 11px">Pending 7</span><span style="font:500 12.5px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:8px 11px">Approved</span><span style="font:500 12.5px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:8px 11px">Rejected</span><span style="flex:1"></span><input placeholder="Search a name or email" style="width:210px;height:34px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 11px;font:400 13px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div style="background:#fff;border:1px solid #D8DAD4">
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:9px 14px;background:#F0F1EE;border-bottom:1px solid #D8DAD4"><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Applicant</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Document</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Submitted</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Files</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:11px 14px;border-bottom:1px solid #E7E8E4;background:#EEF1F5;border-left:3px solid #16233D"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Fatou Koné</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">fatou.kone@example.com</p></div><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">National ID card</span><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">6 Sep 14:20</span><span style="font:600 13px/1.4 Archivo,sans-serif;color:#1A1D1B">2</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:11px 14px;border-bottom:1px solid #E7E8E4"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Amadou Traoré</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">amadou.traore@example.com</p></div><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">Passport</span><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">6 Sep 09:02</span><span style="font:600 13px/1.4 Archivo,sans-serif;color:#1A1D1B">2</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:11px 14px;border-bottom:1px solid #E7E8E4"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Marie Boussou</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">m.boussou@example.com</p></div><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">Residence permit</span><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">5 Sep 18:44</span><span style="font:600 13px/1.4 Archivo,sans-serif;color:#9A3A2E">1</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:11px 14px;border-bottom:1px solid #E7E8E4"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Jean-Paul Kouassi</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">jp.kouassi@example.com</p></div><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">National ID card</span><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">5 Sep 11:17</span><span style="font:600 13px/1.4 Archivo,sans-serif;color:#1A1D1B">2</span></div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr .8fr .7fr;gap:12px;padding:11px 14px"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Aïcha Ndiaye</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">aicha.ndiaye@example.com</p></div><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">National ID card</span><span style="font:400 13px/1.4 Archivo,sans-serif;color:#1A1D1B">4 Sep 16:31</span><span style="font:600 13px/1.4 Archivo,sans-serif;color:#1A1D1B">2</span></div>
+</div>
+</div>
+
+<div style="padding:20px 22px 26px;background:#fff">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 4px"><h2 style="margin:0;font:700 17px/1.2 Archivo,sans-serif;color:#16233D">Fatou Koné</h2><span style="font:600 11.5px/1 Archivo,sans-serif;color:#8F5A12;background:#F8F1E5;border:1px solid rgba(199,125,29,.3);padding:4px 7px">PENDING</span></div>
+<p style="margin:0 0 16px;font:400 12.5px/1.4 Archivo,sans-serif;color:#55606F">fatou.kone@example.com · +225 07 58 41 20 96</p>
+<div style="border:1px solid #D8DAD4;background:#F4F5F2;margin:0 0 10px">
+<div style="height:230px;background:repeating-linear-gradient(135deg,#E9EAE6 0 7px,#F1F2EE 7px 14px);display:flex;align-items:center;justify-content:center"><span style="font:500 11px/1.5 ui-monospace,monospace;color:#7B8290;text-align:center;white-space:pre-line">identity document
+(admin-only, encrypted at rest)</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;border-top:1px solid #D8DAD4;background:#fff">
+<span style="font:600 12px/1 Archivo,sans-serif;color:#16233D;background:#fff;border:1px solid #16233D;padding:6px 9px">1 · ID card</span>
+<span style="font:500 12px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;padding:6px 9px">2 · Proof of address</span>
+<span style="flex:1"></span>
+<span style="font:600 12px/1 Archivo,sans-serif;color:#2E4A73">Zoom</span>
+<span style="font:600 12px/1 Archivo,sans-serif;color:#2E4A73">Rotate</span>
+</div>
+</div>
+<div style="border:1px solid #D8DAD4;padding:11px 13px;margin:0 0 16px">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:0 0 6px;border-bottom:1px solid #E7E8E4"><span style="font:400 12.5px Archivo,sans-serif;color:#55606F">Legal name</span><span style="font:600 12.5px Archivo,sans-serif;color:#1A1D1B">Fatou Koné</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #E7E8E4"><span style="font:400 12.5px Archivo,sans-serif;color:#55606F">Date of birth</span><span style="font:600 12.5px Archivo,sans-serif;color:#1A1D1B">14/06/1988</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0 0"><span style="font:400 12.5px Archivo,sans-serif;color:#55606F">Document number</span><span style="font:600 12.5px Archivo,sans-serif;color:#1A1D1B">CI0042189773</span></div>
+</div>
+<label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Note to the applicant</label>
+<textarea placeholder="Required when rejecting. Say exactly what is wrong so they can fix it." style="width:100%;box-sizing:border-box;height:74px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:10px 12px;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B;outline:none;resize:vertical;margin:0 0 14px"></textarea>
+<div style="display:flex;gap:10px">
+<span style="flex:1;display:flex;align-items:center;justify-content:center;font:600 14px/1 Archivo,sans-serif;color:#fff;background:#2F6E4E;border:1px solid #2F6E4E;border-radius:2px;padding:13px 16px">Approve</span>
+<span style="flex:1;display:flex;align-items:center;justify-content:center;font:600 14px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:13px 16px">Reject</span>
+</div>
+<p style="margin:12px 0 0;font:400 12px/1.5 Archivo,sans-serif;color:#55606F">Approving grants the owner role immediately and makes the applicant's phone number public on their listings.</p>
+</div>
+</div>
+</div>
+<p class="dv-note">Queue on the left, the one open request on the right — no modal, because a reviewer works through seven of these in a row and a dialog would mean seven open-and-close cycles. Approve is the only solid-filled semantic button in the whole product; it is also the only action here with a public, irreversible effect, which is exactly when a solid fill is warranted.</p>
+</div>
+
+<div class="dv-opt" id="2q">
+<div class="dv-olabel"><a class="dv-oid" href="#2q">2q</a>Users — suspend, reactivate, delete</div>
+<div class="dv-card" style="width:1010px;background:#fff;padding:0">
+<div style="padding:20px 22px 24px">
+<div style="display:flex;align-items:baseline;gap:12px;margin:0 0 14px"><h1 style="margin:0;font:700 19px/1.2 Archivo,sans-serif;color:#16233D">Users</h1><span style="font:500 12.5px Archivo,sans-serif;color:#55606F">2 481 accounts · 34 suspended</span><span style="flex:1"></span><input placeholder="Search email or name" style="width:230px;height:34px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 11px;font:400 13px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div style="border:1px solid #D8DAD4">
+<div style="display:grid;grid-template-columns:1.5fr .7fr .8fr .9fr 1.1fr;gap:12px;padding:9px 14px;background:#F0F1EE;border-bottom:1px solid #D8DAD4"><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">User</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Role</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Status</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Joined</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Actions</span></div>
+<div style="display:grid;grid-template-columns:1.5fr .7fr .8fr .9fr 1.1fr;gap:12px;padding:10px 14px;border-bottom:1px solid #E7E8E4;align-items:center"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Fatou Koné</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">fatou.kone@example.com</p></div><span style="font:600 12px/1 Archivo,sans-serif;color:#16233D;background:#F8F1E0;border:1px solid #BE8A2E;padding:4px 7px;justify-self:start">Owner</span><span style="font:500 13px Archivo,sans-serif;color:#2F6E4E">Active</span><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Mar 2026</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Suspend</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:1.5fr .7fr .8fr .9fr 1.1fr;gap:12px;padding:10px 14px;border-bottom:1px solid #E7E8E4;align-items:center;background:#FBF6F5"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#55606F">Karim Sissoko</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">k.sissoko@example.com</p></div><span style="font:600 12px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;padding:4px 7px;justify-self:start">Seeker</span><span style="font:500 13px Archivo,sans-serif;color:#9A3A2E">Suspended</span><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Jul 2026</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;padding:7px 9px">Reactivate</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:1.5fr .7fr .8fr .9fr 1.1fr;gap:12px;padding:10px 14px;border-bottom:1px solid #E7E8E4;align-items:center"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Amadou Traoré</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">amadou.traore@example.com</p></div><span style="font:600 12px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;padding:4px 7px;justify-self:start">Seeker</span><span style="font:500 13px Archivo,sans-serif;color:#2F6E4E">Active</span><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Sep 2026</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Suspend</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:1.5fr .7fr .8fr .9fr 1.1fr;gap:12px;padding:10px 14px;align-items:center"><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Marie Boussou</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">m.boussou@example.com</p></div><span style="font:600 12px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;padding:4px 7px;justify-self:start">Seeker</span><span style="font:500 13px Archivo,sans-serif;color:#2F6E4E">Active</span><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Aug 2026</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Suspend</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+</div>
+<div style="margin:18px 0 0;background:rgba(22,35,61,.5);padding:26px;display:flex;align-items:center;justify-content:center">
+<div style="width:420px;background:#fff;border:1px solid #D8DAD4;border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:22px">
+<h3 style="margin:0 0 6px;font:700 18px/1.25 Archivo,sans-serif;color:#16233D">Delete Karim Sissoko?</h3>
+<p style="margin:0 0 16px;font:400 14px/1.55 Archivo,sans-serif;color:#1A1D1B">The account, its listings and its photos are deleted permanently. This cannot be undone.</p>
+<label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Type DELETE to confirm</label>
+<input value="" style="width:100%;box-sizing:border-box;height:42px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 12px;font:400 14px Archivo,sans-serif;color:#1A1D1B;outline:none;margin:0 0 16px">
+<div style="display:flex;gap:10px;justify-content:flex-end"><span style="font:600 14px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:12px 16px">Cancel</span><span style="font:600 14px/1 Archivo,sans-serif;color:#fff;background:#B94A3D;border:1px solid #B94A3D;border-radius:2px;padding:12px 16px">Delete permanently</span></div>
+</div>
+</div>
+</div>
+</div>
+<p class="dv-note">Rows are 42px, borders 1px, no card wrapper per row — this is a table and it should read as one. Suspended rows take a faint error tint so the eye finds them while scrolling, and destructive confirmation asks for a typed word rather than a second click.</p>
+</div>
+
+<div class="dv-opt" id="2r">
+<div class="dv-olabel"><a class="dv-oid" href="#2r">2r</a>Properties — moderate or remove</div>
+<div class="dv-card" style="width:1010px;background:#fff;padding:0">
+<div style="padding:20px 22px 24px">
+<div style="display:flex;align-items:baseline;gap:12px;margin:0 0 14px"><h1 style="margin:0;font:700 19px/1.2 Archivo,sans-serif;color:#16233D">Properties</h1><span style="font:500 12.5px Archivo,sans-serif;color:#55606F">1 204 listings · 3 reported</span><span style="flex:1"></span><span style="font:600 12.5px/1 Archivo,sans-serif;color:#9A3A2E;background:#F7EBE9;border:1px solid rgba(185,74,61,.3);border-radius:2px;padding:8px 11px">Reported 3</span><span style="font:500 12.5px/1 Archivo,sans-serif;color:#55606F;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:8px 11px">All</span></div>
+<div style="border:1px solid #D8DAD4">
+<div style="display:grid;grid-template-columns:56px 1.6fr 1fr .8fr .7fr 1fr;gap:12px;padding:9px 14px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;align-items:center"><span></span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Listing</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Owner</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Price</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Status</span><span style="font:600 11.5px/1 Archivo,sans-serif;color:#55606F">Actions</span></div>
+<div style="display:grid;grid-template-columns:56px 1.6fr 1fr .8fr .7fr 1fr;gap:12px;padding:9px 14px;border-bottom:1px solid #E7E8E4;align-items:center;background:#FBF6F5"><div style="width:56px;height:42px;background:#EDEEEA;overflow:hidden"><img src="assets/room-05.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Room with a host family</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#9A3A2E">2 reports · “price does not match the photos”</p></div><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Aïcha Ndiaye</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">60 000</span><span style="font:500 13px Archivo,sans-serif;color:#2F6E4E">Available</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Unpublish</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:56px 1.6fr 1fr .8fr .7fr 1fr;gap:12px;padding:9px 14px;border-bottom:1px solid #E7E8E4;align-items:center"><div style="width:56px;height:42px;background:#EDEEEA;overflow:hidden"><img src="assets/room-01.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Furnished studio near the market</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">Studio · Cocody, Abidjan</p></div><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Fatou Koné</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">180 000</span><span style="font:500 13px Archivo,sans-serif;color:#2F6E4E">Available</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#8F5A12;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Unpublish</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:56px 1.6fr 1fr .8fr .7fr 1fr;gap:12px;padding:9px 14px;border-bottom:1px solid #E7E8E4;align-items:center"><div style="width:56px;height:42px;background:#EDEEEA;overflow:hidden"><img src="assets/room-06.webp" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1);opacity:.8"></div><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#55606F">Two-room, Yopougon</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">Apartment · Yopougon, Abidjan</p></div><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Fatou Koné</span><span style="font:600 13px Archivo,sans-serif;color:#55606F">120 000</span><span style="font:500 13px Archivo,sans-serif;color:#55606F">Unavailable</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#BDC1BA;background:#fff;border:1px solid #E7E8E4;padding:7px 9px">Unpublish</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+<div style="display:grid;grid-template-columns:56px 1.6fr 1fr .8fr .7fr 1fr;gap:12px;padding:9px 14px;align-items:center"><div style="width:56px;height:42px;background:repeating-linear-gradient(135deg,#E4E6E1 0 5px,#EDEEEA 5px 10px)"></div><div><p style="margin:0;font:600 13.5px/1.3 Archivo,sans-serif;color:#16233D">Bright 3-room, 64 m²</p><p style="margin:0;font:400 12px/1.3 Archivo,sans-serif;color:#55606F">Apartment · Doulon, Nantes · no photo</p></div><span style="font:400 13px Archivo,sans-serif;color:#1A1D1B">Marie Boussou</span><span style="font:600 13px Archivo,sans-serif;color:#1A1D1B">510 000</span><span style="font:500 13px Archivo,sans-serif;color:#55606F">Draft</span><div style="display:flex;gap:7px"><span style="font:600 12px/1 Archivo,sans-serif;color:#BDC1BA;background:#fff;border:1px solid #E7E8E4;padding:7px 9px">Unpublish</span><span style="font:600 12px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #D8DAD4;padding:7px 9px">Delete</span></div></div>
+</div>
+</div>
+</div>
+<p class="dv-note">A 56×42 thumbnail is the fastest way to moderate a listing — the reported one is usually reported because of its photos. Actions that cannot apply are shown disabled rather than hidden, so the column stays scannable down its length.</p>
+</div>
+
+</div>
+<p class="dv-next">Next: “profile and account deletion” · “toast and modal inventory”. Decided: FCFA stays the single MVP currency everywhere, including French listings. About/Contact stay as bare, unlinked nav items for now — no pages, no router.tsx entries yet.</p>
+</section>
+
+<section class="dv-turn" id="t8">
+<div class="dv-thd"><a class="dv-tid" href="#t8">8</a><span class="dv-tname">Proposed shared components — full spec (none exist yet in <code style="font:500 11px ui-monospace,monospace">shared/components</code>)</span></div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,560px));gap:24px">
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">SiteHeader</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Built in <a class="dv-oid" href="#1g">1g</a> (public), <a class="dv-oid" href="#2a">2a</a>/<a class="dv-oid" href="#2b">2b</a> (seeker/owner), <a class="dv-oid" href="#2c">2c</a> (admin).</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">role</code><span>"public" | "seeker" | "owner" | "admin"</span><span>—</span><span>Required. Selects the whole nav + action set.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">user</code><span>{ initials, name } | null</span><span>null</span><span>Avatar + name for seeker/owner. Ignored for public/admin (admin shows email instead).</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">ownerRequestStatus</code><span>"pending" | null</span><span>null</span><span>Seeker only — renders the pending badge from <a class="dv-oid" href="#2a">2a</a>.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">verified</code><span>boolean</span><span>false</span><span>Owner only — renders the "Verified owner" chip from <a class="dv-oid" href="#2b">2b</a>.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">pendingRequestCount</code><span>number</span><span>0</span><span>Admin only — the queue-count chip on "Owner requests".</span></div>
+</div>
+<p style="margin:14px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">About/Contact render as plain, unlinked <code style="font:500 12px ui-monospace,monospace">&lt;a&gt;</code> items for now — no <code style="font:500 12px ui-monospace,monospace">to</code> prop resolves until the routes exist.</p>
+</div>
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">SiteFooter</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Built in <a class="dv-oid" href="#1b">1b</a>.</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">variant</code><span>"public" | "none"</span><span>"public"</span><span>"none" for admin/auth layouts, which render no footer at all.</span></div>
+</div>
+<p style="margin:14px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">Column content (Explore / Company / Owners / Legal) is fixed copy for MVP, not a prop — nothing in the brief needs it configurable yet. Same bare-link caveat on About/Contact.</p>
+</div>
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">Badge</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Built throughout: verified seals, pending/approved/rejected status, admin queue count.</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">tone</code><span>"neutral" | "success" | "warning" | "error" | "brass"</span><span>—</span><span>Required. Maps to the semantic pastel-fill / darker-text pairs from the token sheet, or the plain brass dot for "Verified".</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">dot</code><span>boolean</span><span>true</span><span>Leading colour dot. Set false for the admin count chip (number only).</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">size</code><span>"sm" | "md"</span><span>"sm"</span><span>"md" for the full brass seal on the listing-detail page.</span></div>
+</div>
+</div>
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">DimensionRule</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Approved treatment: <a class="dv-oid" href="#1j">1j</a>.</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">width</code><span>number | "full"</span><span>120</span><span>120px short lead-in under a title, "full" for a section separator. No other widths — exactly two permitted uses per the direction.</span></div>
+</div>
+<p style="margin:14px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">No colour/tone prop — it is always <code style="font:500 12px ui-monospace,monospace">rule-400</code>. Never place two on one screen doing different jobs (see the rejected <a class="dv-oid" href="#1l">1l</a> variant, held only for a future detail-page revisit).</p>
+</div>
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">EmptyState</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Built in the feed's no-results block (<a class="dv-oid" href="#1b">1b</a>) and the listing-gone page (<a class="dv-oid" href="#2j">2j</a>).</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">title</code><span>string</span><span>—</span><span>Required.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">description</code><span>string</span><span>—</span><span>Optional supporting line, capped ~46ch.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">primaryAction</code><span>{ label, onClick }</span><span>—</span><span>Brass button, e.g. "See all".</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">secondaryAction</code><span>{ label, onClick }</span><span>—</span><span>Outlined ink-600 button, e.g. "Clear filters" / "Back to listings".</span></div>
+</div>
+<p style="margin:14px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">Icon is always the same dashed-hatch square — no icon prop, so it never drifts into a generic illustration.</p>
+</div>
+
+<div class="dv-card" style="padding:22px 24px">
+<h3 style="margin:0 0 4px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">Skeleton</h3>
+<p style="margin:0 0 14px;font:400 13px/1.5 Archivo,sans-serif;color:#55606F">Built in the feed loading state (<a class="dv-oid" href="#1b">1b</a>).</p>
+<div style="border:1px solid #D8DAD4;background:#fff;font:400 12.5px/1.4 Archivo,sans-serif">
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:8px 12px;background:#F0F1EE;border-bottom:1px solid #D8DAD4;font:600 11px Archivo,sans-serif;color:#55606F"><span>Prop</span><span>Type</span><span>Default</span><span>Notes</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px;border-bottom:1px solid #E7E8E4"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">variant</code><span>"card" | "line" | "block"</span><span>—</span><span>Required. "card" = photo + two text lines (feed); "line"/"block" for smaller reuse elsewhere.</span></div>
+<div style="display:grid;grid-template-columns:1.1fr .9fr .6fr 1.6fr;gap:10px;padding:9px 12px"><code style="font:500 12px ui-monospace,monospace;color:#2E4A73">aspectRatio</code><span>string</span><span>"4/3"</span><span>Reserves the image box's exact final size, so nothing shifts once the real photo loads.</span></div>
+</div>
+<p style="margin:14px 0 0;font:400 12.5px/1.5 Archivo,sans-serif;color:#55606F">Colours fixed to <code style="font:500 12px ui-monospace,monospace">#EDEEEA</code> / <code style="font:500 12px ui-monospace,monospace">#F1F2EE</code> — no shimmer animation, to hold the performance budget and respect <code style="font:500 12px ui-monospace,monospace">prefers-reduced-motion</code> by default.</p>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t9">
+<div class="dv-thd"><a class="dv-tid" href="#t9">9</a><span class="dv-tname">Profile &amp; account deletion</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="3a">
+<div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Profile, desktop — seeker (owner adds only the note below)</div>
+<div class="dv-card" style="width:760px;background:#F4F5F2;padding:0">
+<header style="background:#fff;border-bottom:1px solid #D8DAD4"><div style="padding:0 26px;height:60px;display:flex;align-items:center;gap:24px"><span style="display:flex;align-items:baseline;gap:7px;flex:none"><span style="font:800 18px/1 Archivo,sans-serif;color:#16233D;letter-spacing:-.01em">MY HOUSE</span><span style="width:6px;height:6px;background:#BE8A2E;display:block"></span></span><nav style="display:flex;gap:18px;flex:1"><a href="#3a" style="font:500 14px/1 Archivo,sans-serif;color:#55606F;text-decoration:none">Listings</a></nav><span style="width:32px;height:32px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 12.5px/1 Archivo,sans-serif;color:#fff;flex:none">AT</span></div></header>
+<div style="padding:30px 26px 40px">
+<h1 style="margin:0;font:700 26px/1.2 Archivo,sans-serif;color:#16233D">My profile</h1>
+<div style="display:flex;align-items:center;height:9px;width:120px;margin:14px 0 24px"><span style="width:1px;height:9px;background:#BDC1BA"></span><span style="flex:1;height:1px;background:#BDC1BA"></span><span style="width:1px;height:9px;background:#BDC1BA"></span></div>
+
+<div style="background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:26px;margin:0 0 20px">
+<div style="display:flex;align-items:center;gap:14px;margin:0 0 22px"><span style="width:52px;height:52px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 16px/1 Archivo,sans-serif;color:#fff;flex:none">AT</span><div><p style="margin:0 0 2px;font:700 17px/1.25 Archivo,sans-serif;color:#16233D">Amadou Traoré</p><p style="margin:0;font:400 13px/1.4 Archivo,sans-serif;color:#55606F">Seeker · member since September 2026</p></div></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">First name</label><input value="Amadou" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Last name</label><input value="Traoré" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Email</label><input value="amadou.traore@example.com" style="width:100%;box-sizing:border-box;height:46px;background:#F1F2EE;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#55606F;outline:none"><p style="margin:6px 0 0;font:400 12.5px/1.4 Archivo,sans-serif;color:#55606F">Email is how you sign in — changing it starts a new verification.</p></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Phone</label><input value="+225 07 00 00 00 00" style="width:100%;box-sizing:border-box;height:46px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<span style="display:inline-flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:13px 20px;margin:22px 0 0">Save changes</span>
+</div>
+
+<div style="background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:20px 24px">
+<p style="margin:0 0 4px;font:700 15px/1.3 Archivo,sans-serif;color:#16233D">Delete my account</p>
+<p style="margin:0 0 14px;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B;max-width:56ch">Removes your profile permanently. If you are a verified owner, your listings and photos are removed with it — this cannot be undone.</p>
+<span style="display:inline-flex;align-items:center;justify-content:center;font:600 14px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:11px 16px">Delete my account</span>
+</div>
+</div>
+</div>
+<p class="dv-note">A seeker and an owner see the same form — the difference is only the warning text above the delete button, which names what an owner specifically loses. There is no separate "Owners" section, because most of a profile is identical either way.</p>
+</div>
+
+<div class="dv-opt" id="3b">
+<div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Profile, mobile 360</div>
+<div class="dv-card" style="width:360px;background:#F4F5F2;padding:0">
+<div style="background:#fff;border-bottom:1px solid #D8DAD4;height:56px;display:flex;align-items:center;gap:12px;padding:0 14px"><a href="#3b" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font:600 18px/1 Archivo,sans-serif;color:#16233D;text-decoration:none">←</a><span style="font:600 15px/1 Archivo,sans-serif;color:#16233D;flex:1">My profile</span></div>
+<div style="padding:20px 14px 28px">
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 20px"><span style="width:48px;height:48px;background:#16233D;display:flex;align-items:center;justify-content:center;font:600 15px/1 Archivo,sans-serif;color:#fff;flex:none">AT</span><div><p style="margin:0 0 2px;font:700 16px/1.25 Archivo,sans-serif;color:#16233D">Amadou Traoré</p><p style="margin:0;font:400 12.5px/1.4 Archivo,sans-serif;color:#55606F">Seeker since Sept. 2026</p></div></div>
+<div style="display:flex;flex-direction:column;gap:14px;margin:0 0 22px">
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">First name</label><input value="Amadou" style="width:100%;box-sizing:border-box;height:48px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+<div><label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Phone</label><input value="+225 07 00 00 00 00" style="width:100%;box-sizing:border-box;height:48px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 13px;font:400 15px Archivo,sans-serif;color:#1A1D1B;outline:none"></div>
+</div>
+<span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 15px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:15px 18px;margin:0 0 22px">Save changes</span>
+<div style="background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:16px"><p style="margin:0 0 10px;font:400 13px/1.5 Archivo,sans-serif;color:#1A1D1B">Deleting your account removes your profile and, if applicable, your listings — permanently.</p><span style="display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;font:600 14px/1 Archivo,sans-serif;color:#9A3A2E;background:#fff;border:1px solid #B94A3D;border-radius:2px;padding:13px 16px">Delete my account</span></div>
+</div>
+</div>
+<p class="dv-note">Fields stack to one column; the delete panel keeps its full warning text rather than hiding it behind a second tap — a 44px+ target either way.</p>
+</div>
+
+<div class="dv-opt" id="3c">
+<div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Delete-account confirmation — the one place a seeker sees this modal shell</div>
+<div class="dv-card" style="width:520px;background:rgba(22,35,61,.5);padding:40px">
+<div style="width:100%;background:#fff;border:1px solid #D8DAD4;border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:24px">
+<h3 style="margin:0 0 8px;font:700 19px/1.25 Archivo,sans-serif;color:#16233D">Delete your account?</h3>
+<p style="margin:0 0 16px;font:400 14px/1.55 Archivo,sans-serif;color:#1A1D1B">Your profile is removed permanently. You are a verified owner — your 3 listings and their photos are removed with it. This cannot be undone.</p>
+<label style="display:block;margin:0 0 6px;font:600 13px/1.3 Archivo,sans-serif;color:#1A1D1B">Type DELETE to confirm</label>
+<input value="" style="width:100%;box-sizing:border-box;height:44px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:0 12px;font:400 14px Archivo,sans-serif;color:#1A1D1B;outline:none;margin:0 0 18px">
+<div style="display:flex;gap:10px;justify-content:flex-end"><span style="font:600 14px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:12px 16px">Cancel</span><span style="font:600 14px/1 Archivo,sans-serif;color:#fff;background:#B94A3D;border:1px solid #B94A3D;border-radius:2px;padding:12px 16px">Delete permanently</span></div>
+</div>
+</div>
+<p class="dv-note" style="max-width:none">Same modal shell as the admin's user-delete in <a class="dv-oid" href="#2q">2q</a> — one destructive-confirm pattern in the whole product, typed word included, not two. The listing count is interpolated into the copy so an owner cannot miss what else is at stake.</p>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="t10">
+<div class="dv-thd"><a class="dv-tid" href="#t10">10</a><span class="dv-tname">Toast &amp; modal inventory</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="4a">
+<div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>Toast — four semantic tones, one shell</div>
+<div class="dv-card" style="width:420px;background:#EDEEEA;padding:26px">
+<div style="display:flex;flex-direction:column;gap:10px">
+
+<div style="display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid rgba(47,110,78,.3);border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:13px 14px">
+<span style="width:18px;height:18px;flex:none;background:#2F6E4E;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px"><span style="width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);display:block;margin-top:-2px"></span></span>
+<p style="margin:0;font:400 13.5px/1.45 Archivo,sans-serif;color:#1A1D1B;flex:1">Property published — it now appears in the feed.</p>
+<span style="font:600 13px/1 Archivo,sans-serif;color:#BDC1BA;flex:none">×</span>
+</div>
+
+<div style="display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid rgba(199,125,29,.35);border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:13px 14px">
+<span style="width:18px;height:18px;flex:none;border:2px solid #C77D1D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#8F5A12;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.45 Archivo,sans-serif;color:#1A1D1B;flex:1">Photo removed — this property now needs a new cover.</p>
+<span style="font:600 13px/1 Archivo,sans-serif;color:#BDC1BA;flex:none">×</span>
+</div>
+
+<div style="display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid rgba(185,74,61,.35);border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:13px 14px">
+<span style="width:18px;height:18px;flex:none;border:2px solid #B94A3D;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#B94A3D;margin-top:1px">!</span>
+<p style="margin:0;font:400 13.5px/1.45 Archivo,sans-serif;color:#1A1D1B;flex:1">Could not save changes. Check your connection and try again.</p>
+<span style="font:600 13px/1 Archivo,sans-serif;color:#BDC1BA;flex:none">×</span>
+</div>
+
+<div style="display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid rgba(46,74,115,.3);border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:13px 14px">
+<span style="width:18px;height:18px;flex:none;border:2px solid #2E4A73;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px Archivo,sans-serif;color:#2E4A73;margin-top:1px">i</span>
+<p style="margin:0;font:400 13.5px/1.45 Archivo,sans-serif;color:#1A1D1B;flex:1">Phone number copied to clipboard.</p>
+<span style="font:600 13px/1 Archivo,sans-serif;color:#BDC1BA;flex:none">×</span>
+</div>
+
+</div>
+<p style="margin:18px 0 0;font:400 12.5px/1.55 Archivo,sans-serif;color:#55606F">Bottom-left on desktop, bottom-centre above the tab bar on mobile. Auto-dismiss at 4s for success/info, and stays until closed for warning/error — the same icon-and-border language as <code style="font:500 12px ui-monospace,monospace">Alert</code>, just floating instead of inline, so the two never compete for the same job.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="4b">
+<div class="dv-olabel"><a class="dv-oid" href="#4b">4b</a>Modal — "Report this listing", the one dialog with a form inside</div>
+<div class="dv-card" style="width:520px;background:rgba(22,35,61,.5);padding:40px">
+<div style="width:100%;background:#fff;border:1px solid #D8DAD4;border-radius:6px;box-shadow:0 10px 26px -8px rgba(22,35,61,.26),0 2px 6px -2px rgba(22,35,61,.14);padding:24px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 6px"><h3 style="margin:0;font:700 19px/1.25 Archivo,sans-serif;color:#16233D">Report this listing</h3><span style="font:600 15px/1 Archivo,sans-serif;color:#55606F">×</span></div>
+<p style="margin:0 0 18px;font:400 13.5px/1.5 Archivo,sans-serif;color:#55606F">Tell us what's wrong with "Furnished studio near the market". A moderator reviews every report.</p>
+<div style="display:flex;flex-direction:column;gap:9px;margin:0 0 16px">
+<label style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #2E4A73;background:#EEF1F5;border-radius:2px"><span style="width:16px;height:16px;border-radius:50%;border:1px solid #2E4A73;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;background:#2E4A73;border-radius:50%;display:block"></span></span><span style="font:500 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">Price doesn't match the photos</span></label>
+<label style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #D8DAD4;border-radius:2px"><span style="width:16px;height:16px;border-radius:50%;border:1px solid #BDC1BA;flex:none"></span><span style="font:500 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">Property no longer available</span></label>
+<label style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #D8DAD4;border-radius:2px"><span style="width:16px;height:16px;border-radius:50%;border:1px solid #BDC1BA;flex:none"></span><span style="font:500 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">Suspected scam</span></label>
+<label style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid #D8DAD4;border-radius:2px"><span style="width:16px;height:16px;border-radius:50%;border:1px solid #BDC1BA;flex:none"></span><span style="font:500 13.5px/1.3 Archivo,sans-serif;color:#1A1D1B">Other</span></label>
+</div>
+<textarea placeholder="Optional — add detail that would help a reviewer." style="width:100%;box-sizing:border-box;height:74px;background:#fff;border:1px solid #D8DAD4;border-radius:2px;padding:10px 12px;font:400 13.5px/1.5 Archivo,sans-serif;color:#1A1D1B;outline:none;resize:vertical;margin:0 0 18px"></textarea>
+<div style="display:flex;gap:10px;justify-content:flex-end"><span style="font:600 14px/1 Archivo,sans-serif;color:#2E4A73;background:#fff;border:1px solid #2E4A73;border-radius:2px;padding:12px 16px">Cancel</span><span style="font:600 14px/1 Archivo,sans-serif;color:#16233D;background:#BE8A2E;border:1px solid #9C7327;border-radius:2px;padding:12px 16px">Submit report</span></div>
+</div>
+</div>
+<p class="dv-note" style="max-width:none">Closes the loop left open by <a class="dv-oid" href="#2h">2h</a>'s "Report this listing" link, which had no destination yet. Radio options over a free-text dropdown, because most reports fall into one of three known reasons and typing one out is friction the reporter usually doesn't need.</p>
+</div>
+
+</div>
+<p class="dv-next">Everything from the brief's screen list plus the follow-on gaps (profile, account deletion, toasts, the report modal) is now built. Still explicitly out of scope: About, Contact and Search pages/routes — the nav items stay bare.</p>
+</section>
+</x-dc>
+</body>
+</html>
