@@ -8,9 +8,10 @@ import { useUploadAvatar } from "../hooks/useUploadAvatar";
 
 interface AvatarUploadProps {
   avatarUrl: string | null;
+  initials?: string;
 }
 
-function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
+function AvatarUpload({ avatarUrl, initials }: AvatarUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -61,7 +62,7 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
   return (
     <section className="flex flex-col gap-4 border-b border-border pb-6">
       <div className="flex items-center gap-4">
-        <div className="size-20 shrink-0 overflow-hidden rounded-full border border-border bg-surface">
+        <div className="size-13 shrink-0 overflow-hidden bg-ink-900">
           {displayedUrl ? (
             <img
               src={displayedUrl}
@@ -73,9 +74,16 @@ function AvatarUpload({ avatarUrl }: AvatarUploadProps) {
                 if (!previewUrl) setBrokenUrl(avatarUrl);
               }}
             />
+          ) : initials ? (
+            <div
+              className="flex size-full items-center justify-center text-base font-semibold text-white"
+              aria-hidden="true"
+            >
+              {initials}
+            </div>
           ) : (
             <div className="flex size-full items-center justify-center" aria-hidden="true">
-              <UserRound className="size-8 text-text-muted" />
+              <UserRound className="size-8 text-white" />
             </div>
           )}
         </div>

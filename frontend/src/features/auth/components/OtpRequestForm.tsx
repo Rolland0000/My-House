@@ -48,10 +48,8 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h2 className="text-lg font-bold text-text">Find your next home</h2>
-        <p className="text-sm text-text-muted">
-          Enter your email, we'll send you a 6-digit code. No password needed.
-        </p>
+        <h1 className="text-[22px] font-bold text-ink-900">Sign in or create an account</h1>
+        <p className="text-sm text-text-muted">We send a six-digit code. No password to remember.</p>
       </div>
 
       <FormField label="Email address" required error={formError ?? undefined}>
@@ -74,11 +72,11 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
       {genericError && <Alert variant="error">{genericError}</Alert>}
 
       <Button type="submit" isLoading={otpRequest.isPending} disabled={isCoolingDown}>
-        {isCoolingDown ? `Retry in ${formatCountdown(secondsLeft)}` : "Get the code"}
+        {isCoolingDown ? `Retry in ${formatCountdown(secondsLeft)}` : "Send the code"}
       </Button>
 
-      <p className="text-center text-sm text-text-muted">
-        By continuing, you agree to MyHouse's Terms of Service.
+      <p className="text-sm text-text-muted">
+        By continuing you accept the terms of use.
       </p>
     </form>
   );

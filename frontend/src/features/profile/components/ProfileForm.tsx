@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   Card,
+  DimensionRule,
   FormField,
   Input,
   Spinner,
@@ -11,6 +12,7 @@ import {
 } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { MAX_NAME_LENGTH, MAX_PHONE_LENGTH } from "../../../shared/api/constants";
+import { formatInitials } from "../../../shared/utils/format";
 import type { Profile } from "../api";
 import { useProfile } from "../hooks/useProfile";
 import {
@@ -71,28 +73,34 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h1 className="text-lg font-bold text-text">My profile</h1>
-        <p className="text-sm text-text-muted">Your contact information.</p>
+        <h1 className="text-2xl font-bold text-ink-900">My profile</h1>
+        <DimensionRule width={120} className="mt-3.5 mb-1" />
       </div>
 
-      <FormField label="First name" error={fieldErrors.firstName}>
-        <Input
-          value={firstName}
-          maxLength={MAX_NAME_LENGTH}
-          onChange={(event) => setFirstName(event.target.value)}
-          disabled={update.isPending}
-          hasError={Boolean(fieldErrors.firstName)}
-        />
-      </FormField>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormField label="First name" error={fieldErrors.firstName}>
+          <Input
+            value={firstName}
+            maxLength={MAX_NAME_LENGTH}
+            onChange={(event) => setFirstName(event.target.value)}
+            disabled={update.isPending}
+            hasError={Boolean(fieldErrors.firstName)}
+          />
+        </FormField>
 
-      <FormField label="Last name" required error={fieldErrors.lastName}>
-        <Input
-          value={lastName}
-          maxLength={MAX_NAME_LENGTH}
-          onChange={(event) => setLastName(event.target.value)}
-          disabled={update.isPending}
-          hasError={Boolean(fieldErrors.lastName)}
-        />
+        <FormField label="Last name" required error={fieldErrors.lastName}>
+          <Input
+            value={lastName}
+            maxLength={MAX_NAME_LENGTH}
+            onChange={(event) => setLastName(event.target.value)}
+            disabled={update.isPending}
+            hasError={Boolean(fieldErrors.lastName)}
+          />
+        </FormField>
+      </div>
+
+      <FormField label="Email" hint="Email is how you sign in — changing it starts a new verification.">
+        <Input value={profile.email} readOnly />
       </FormField>
 
       <FormField label="Phone" required error={fieldErrors.phone}>
@@ -107,21 +115,12 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
         />
       </FormField>
 
-      <dl className="flex flex-col gap-3 border-t border-border pt-4">
-        <div className="flex flex-col gap-1.5">
-          <dt className="text-sm font-semibold text-text">Email</dt>
-          <dd className="text-base text-text-muted">{profile.email}</dd>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <dt className="text-sm font-semibold text-text">Role</dt>
-          <dd className="text-base text-text-muted">{ROLE_LABELS[profile.role]}</dd>
-        </div>
-      </dl>
+      <p className="text-sm text-text-muted">{ROLE_LABELS[profile.role]}</p>
 
       {bannerError && <Alert variant="error">{GENERIC_ERROR_MESSAGE}</Alert>}
 
-      <Button type="submit" isLoading={update.isPending}>
-        Save
+      <Button type="submit" isLoading={update.isPending} className="self-start">
+        Save changes
       </Button>
     </form>
   );
@@ -145,9 +144,12 @@ function ProfileForm() {
         )}
         {data && (
           <div className="flex flex-col gap-6">
-            <AvatarUpload avatarUrl={data.avatar_url ?? null} />
+            <AvatarUpload
+              avatarUrl={data.avatar_url ?? null}
+              initials={formatInitials(data.first_name, data.last_name)}
+            />
             <ProfileFields profile={data} />
-            <DeleteAccountSection />
+            <DeleteAccountSection isOwner={data.role === "owner"} />
           </div>
         )}
       </Card>

@@ -2,9 +2,11 @@ import type { HTMLAttributes } from "react";
 import { cn } from "../utils/cn";
 
 type CardPadding = "none" | "sm" | "md";
+type CardRadius = "none" | "sm";
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   padding?: CardPadding;
+  radius?: CardRadius;
 }
 
 const paddingClasses: Record<CardPadding, string> = {
@@ -13,11 +15,17 @@ const paddingClasses: Record<CardPadding, string> = {
   md: "p-6",
 };
 
-function Card({ padding = "md", className, children, ...rest }: CardProps) {
+const radiusClasses: Record<CardRadius, string> = {
+  none: "rounded-none",
+  sm: "rounded-sm",
+};
+
+function Card({ padding = "md", radius = "sm", className, children, ...rest }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-surface",
+        "border border-border bg-surface",
+        radiusClasses[radius],
         paddingClasses[padding],
         className
       )}
@@ -29,4 +37,4 @@ function Card({ padding = "md", className, children, ...rest }: CardProps) {
 }
 
 export { Card };
-export type { CardProps };
+export type { CardProps, CardRadius };

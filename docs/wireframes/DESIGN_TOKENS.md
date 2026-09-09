@@ -1,72 +1,76 @@
-# MyHouse — Design Tokens (MH-17)
+# MyHouse — Design Tokens ("Plan & Brass")
 
-Minimal token set derived from the low-fidelity wireframes (`mh-12-auth-flow.html`,
-`mh-13-feed-detail.html`, `mh-14-listing-management.html`, `mh-15-owner-request.html`), which
-already share one consistent CSS custom-property palette. Feeds directly into the Tailwind
-config in MH-18 — no separate design-token tooling at this scale.
+Token set for the "Plan & Brass" visual identity — ink/brass palette, Archivo type,
+the dimension-rule graphic device — delivered as a high-fidelity design handoff in
+`frontend/docs-frontend/design_handoff_my_house/` and applied token-for-token in
+`frontend/src/index.css`'s `@theme` block. Supersedes the original MH-17 minimal
+cream/terracotta set derived from the low-fidelity wireframes.
 
 ## Color
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| `color-bg` | `#f5f4f0` | `#1c1b18` | page background |
-| `color-surface` | `#ffffff` | `#26241f` | cards, inputs, panels |
-| `color-text` | `#201f1c` | `#ece8df` | primary text |
-| `color-text-muted` | `#57544c` | `#a8a297` | secondary/meta text |
-| `color-border` | `#cdc9bf` | `#43403a` | default borders |
-| `color-border-strong` | `#a39d8e` | `#5b574d` | emphasized borders, dashed dropzones |
-| `color-primary` | `#a8380f` | `#e2794a` | brand, CTAs, links |
-| `color-primary-soft` | `#f0ded4` | `#3a2a1f` | primary tint backgrounds |
-| `color-success` | `#3f6b2e` | `#8fbf6d` | approved/validated states |
-| `color-success-soft` | `#dfe8d5` | `#223a1c` | success tint backgrounds |
-| `color-warning` | `#8a5a00` | `#d9ab4a` | pending/attention states |
-| `color-warning-soft` | `#f2e4c4` | `#3a2f16` | warning tint backgrounds |
-| `color-error` | `#a3241d` | `#e08076` | errors, rejected states |
-| `color-error-soft` | `#f3dcd9` | `#3a2321` | error tint backgrounds |
-| `color-focus` | `#1d4ed8` | `#6f9bff` | focus rings only |
+| Token | Hex | Usage |
+|---|---|---|
+| `ink-900` | `#16233D` | Headings, dark section backgrounds (footer, admin header) |
+| `ink-600` | `#2E4A73` | Links, secondary/outline buttons, focus ring |
+| `ink-500` | `#55606F` | Metadata/secondary text (5.4:1 on white) |
+| `brass-500` | `#BE8A2E` | Single accent — primary CTA, verified seal, price plate border. Label text on brass is always `ink-900`, never white (white-on-brass is 2.4:1, under AA) |
+| `brass-600` | `#9C7327` | Brass hover/active + border under brass fills |
+| `paper-50` | `#F4F5F2` | Page background |
+| `text-900` | `#1A1D1B` | Body text (15.8:1 on paper) |
+| `rule-300` | `#D8DAD4` | Default 1px border (cards, fields, table rows) |
+| `rule-400` | `#BDC1BA` | Hover border, dimension-rule line, dropzone border |
+| success | `#2F6E4E` (icon/text) on `#EAF0EC` fill | Approved / available / published |
+| warning | icon `#C77D1D`, on-fill text `#8F5A12`, fill `#F8F1E5` | Pending / caution |
+| error | icon `#B94A3D`, on-fill text `#9A3A2E`, fill `#F7EBE9` | Rejected / destructive / failure |
+| info | `#2E4A73` (ink-600) on `#EEF1F5` fill | Neutral notices |
 
-`color-success` / `color-success-soft` have no equivalent in the wireframes (the wireframe
-`--accent` doubles as a mockup-annotation "built" marker, not a semantic success state) — new
-values chosen to match the desaturation level of the existing warning/error pair.
+Cards are pure white `#FFFFFF` on `paper-50` — depth comes from that contrast, not
+shadow. Warning/error on-fill text steps one shade darker than the icon color to
+hold 4.5:1 at body size.
+
+No dark mode: the palette is a light, paper/ink aesthetic by definition, so the
+previous `prefers-color-scheme: dark` override block has been removed.
 
 ## Typography
 
-- `font-sans` — `-apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif` — body/UI text
-- `font-mono` — `ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace` —
-  eyebrows, status tags, ticket references
+Single family: **Archivo** (variable, weights 400/500/600/700/800), loaded via
+Google Fonts in `frontend/index.html`. Picked partly for French diacritics, so no
+type change is needed when the app ships French copy.
 
-| Token | Size | Usage |
+| Role | Size/weight | Line-height |
 |---|---|---|
-| `text-sm` | 12px | labels, meta text, captions |
-| `text-base` | 14px | body copy (collapses the wireframes' 13.5–14.5px range) |
-| `text-lg` | 24px | page headings (rounds the wireframes' 26px) |
-
-Capped at 3 sizes for MVP. The wireframes use a wider range (10–26px) because they are
-detailed mockups, not tokens — anything outside this scale in a wireframe is incidental detail,
-not a token to preserve.
-
-Weights: `400` (body), `600` (labels, buttons), `700` (headings, strong emphasis).
+| display | 34px / 800 | 1.12, letter-spacing -.015em |
+| h1 | 26px / 700 | 1.2 |
+| h2 | 19px / 700 | 1.25 |
+| body | 15px / 400 | 1.55, max 70–80ch |
+| ui (buttons/labels) | 14px / 600 | 1.3 |
+| meta | 12.5px / 500 | 1.4 |
 
 ## Spacing
 
-No custom scale — reuse Tailwind's default 4px-based spacing scale directly. Every spacing
-value used consistently across the wireframes (4/8/12/16/24/32/48px) already lands on a stock
-Tailwind step. Semantic convention for MH-18:
+Stock Tailwind scale only — 4/8/12/16/24/32/48px. No custom values.
 
-| Alias | Value | Tailwind step |
-|---|---|---|
-| `xs` | 4px | `1` |
-| `sm` | 8px | `2` |
-| `md` | 12px | `3` |
-| `lg` | 16px | `4` |
-| `xl` | 24px | `6` |
-| `2xl` | 32px | `8` |
-| `3xl` | 48px | `12` |
+## Radius & elevation
 
-## Border radius
+- `0px` (`rounded-none`) — listing cards only. No radius, no shadow; the photo
+  carries the depth.
+- `2px` (`rounded-sm`) — fields, buttons, and most cards/panels.
+- `6px` + `shadow-elevated` (`rounded-lg`) — floating elements only: modal,
+  dropdown menu, toast. `--shadow-elevated: 0 10px 26px -8px rgba(22,35,61,.26),
+  0 2px 6px -2px rgba(22,35,61,.14)` — the one shadow in the whole product, tinted
+  ink rather than neutral grey.
 
-| Token | Value | Usage |
-|---|---|---|
-| `radius-sm` | 4px | inputs, chips, small controls (rounds the wireframes' 3px) |
-| `radius-md` | 8px | cards, panels, containers (rounds the wireframes' 6px) |
-| `radius-full` | 9999px | pills, badges, avatars |
+## Motion
+
+120ms ease-out for hover border/fill changes only (no lift/scale/translate on
+hover). 200ms ease-out for floating elements entering. Exactly one orchestrated
+animation in the whole product: a 320ms brass-stamp confirmation on OTP success
+(`--animate-mh-stamp` in `index.css`). Everything collapses to ~0ms under
+`prefers-reduced-motion` (enforced globally in `index.css`, not per-component).
+
+## The dimension rule
+
+Signature device: a 1px `rule-400` line with two 9px perpendicular end-ticks,
+styled like an architectural dimension line (`shared/components/DimensionRule.tsx`).
+Exactly two permitted placements — a 120px short lead-in directly under a page
+title, or full-width as a section separator. Never both, never a third use.

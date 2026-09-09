@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Input, Pagination, Select, Spinner } from "../../../shared/components";
+import {
+  Alert,
+  DimensionRule,
+  EmptyState,
+  Input,
+  Pagination,
+  Select,
+  Skeleton,
+} from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { cn } from "../../../shared/utils/cn";
 import { usePagination } from "../../../shared/hooks/usePagination";
@@ -37,10 +45,13 @@ function ListingFeed() {
   const hasActiveFilters = Boolean(filters.city || filters.type);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-      <h1 className="text-lg font-bold text-text">Discover rentals</h1>
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-7 py-8">
+      <div>
+        <h1 className="text-2xl font-bold text-ink-900">Listings</h1>
+        <DimensionRule width={120} className="mt-3.5" />
+      </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Input
           value={cityInput}
           onChange={(event) => setCityInput(event.target.value)}
@@ -55,6 +66,13 @@ function ListingFeed() {
           aria-label="Filter by property type"
           className="max-w-xs"
         />
+        <span className="flex-1" />
+        {data && (
+          <span className="text-sm font-medium text-ink-500">
+            {data.pagination.total} propert{data.pagination.total === 1 ? "y" : "ies"} · page{" "}
+            {data.pagination.page} of {data.pagination.total_pages}
+          </span>
+        )}
       </div>
 
       {error && (
@@ -64,13 +82,15 @@ function ListingFeed() {
       )}
 
       {isPending ? (
-        <div className="flex justify-center py-16">
-          <Spinner size="lg" label="Loading listings…" />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} variant="card" />
+          ))}
         </div>
       ) : data && data.data.length > 0 ? (
         <div
           className={cn(
-            "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3",
+            "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3",
             isPlaceholderData && "opacity-60"
           )}
         >
@@ -79,11 +99,23 @@ function ListingFeed() {
           ))}
         </div>
       ) : data ? (
-        <p className="py-16 text-center text-text-muted">
-          {hasActiveFilters
-            ? "No results for these filters."
-            : "No properties available right now."}
-        </p>
+        <EmptyState
+          title={hasActiveFilters ? "No properties match these filters" : "No properties available right now"}
+          description={
+            hasActiveFilters ? "Widen the city or drop the type filter." : "Check back again soon."
+          }
+          secondaryAction={
+            hasActiveFilters
+              ? {
+                  label: "Clear filters",
+                  onClick: () => {
+                    setCityInput("");
+                    setType("");
+                  },
+                }
+              : undefined
+          }
+        />
       ) : null}
 
       {data && data.pagination.total_pages > 1 && (

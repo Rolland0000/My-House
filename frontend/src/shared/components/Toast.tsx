@@ -22,14 +22,37 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-const variantConfig: Record<ToastVariant, { icon: typeof Info; classes: string }> = {
-  success: { icon: CheckCircle2, classes: "border-success bg-success-soft text-success" },
-  warning: { icon: TriangleAlert, classes: "border-warning bg-warning-soft text-warning" },
-  error: { icon: CircleX, classes: "border-error bg-error-soft text-error" },
-  info: { icon: Info, classes: "border-focus bg-primary-soft text-text" },
+const variantConfig: Record<
+  ToastVariant,
+  { icon: typeof Info; classes: string; iconClasses: string; persistent: boolean }
+> = {
+  success: {
+    icon: CheckCircle2,
+    classes: "border-success/30",
+    iconClasses: "text-success",
+    persistent: false,
+  },
+  warning: {
+    icon: TriangleAlert,
+    classes: "border-warning/35",
+    iconClasses: "text-warning-text",
+    persistent: true,
+  },
+  error: {
+    icon: CircleX,
+    classes: "border-error/35",
+    iconClasses: "text-error-text",
+    persistent: true,
+  },
+  info: {
+    icon: Info,
+    classes: "border-ink-600/30",
+    iconClasses: "text-ink-600",
+    persistent: false,
+  },
 };
 
-const DEFAULT_DURATION_MS = 5000;
+const DEFAULT_DURATION_MS = 4000;
 
 function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -42,10 +65,14 @@ function ToastProvider({ children }: { children: ReactNode }) {
     (message: string, options?: ToastOptions) => {
       const id = crypto.randomUUID();
       const variant = options?.variant ?? "info";
-      const durationMs = options?.durationMs ?? DEFAULT_DURATION_MS;
 
       setToasts((current) => [...current, { id, message, variant }]);
-      window.setTimeout(() => dismissToast(id), durationMs);
+
+      // Warning/error stay until manually closed unless a duration is forced explicitly.
+      const durationMs = options?.durationMs ?? (variantConfig[variant].persistent ? null : DEFAULT_DURATION_MS);
+      if (durationMs !== null) {
+        window.setTimeout(() => dismissToast(id), durationMs);
+      }
     },
     [dismissToast]
   );
@@ -57,21 +84,21 @@ function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {createPortal(
         <div
-          className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2"
+          className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 sm:inset-x-auto sm:left-4 sm:items-start"
           aria-live="polite"
         >
           {toasts.map((toast) => {
-            const { icon: Icon, classes } = variantConfig[toast.variant];
+            const { icon: Icon, classes, iconClasses } = variantConfig[toast.variant];
             return (
               <div
                 key={toast.id}
                 role="status"
                 className={cn(
-                  "pointer-events-auto flex w-80 items-start gap-3 rounded-md border px-4 py-3 text-sm shadow-lg",
+                  "pointer-events-auto flex w-80 max-w-[calc(100vw-2rem)] items-start gap-3 rounded-lg border bg-surface px-4 py-3 text-sm shadow-elevated",
                   classes
                 )}
               >
-                <Icon className="size-5 shrink-0" aria-hidden="true" />
+                <Icon className={cn("size-5 shrink-0", iconClasses)} aria-hidden="true" />
                 <p className="flex-1 text-text">{toast.message}</p>
                 <button
                   type="button"

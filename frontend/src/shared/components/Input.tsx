@@ -12,11 +12,19 @@ const baseClasses =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus " +
   "disabled:cursor-not-allowed disabled:opacity-50";
 
-function Input({ hasError = false, leftIcon, rightIcon, className, ...rest }: InputProps) {
+function Input({ hasError = false, leftIcon, rightIcon, readOnly, className, ...rest }: InputProps) {
+  const readOnlyClasses = readOnly && "bg-paper-50 text-text-muted";
+
   if (!leftIcon && !rightIcon) {
     return (
       <input
-        className={cn(baseClasses, hasError ? "border-error" : "border-border", className)}
+        readOnly={readOnly}
+        className={cn(
+          baseClasses,
+          hasError ? "border-error" : "border-border",
+          readOnlyClasses,
+          className
+        )}
         {...rest}
       />
     );
@@ -30,9 +38,11 @@ function Input({ hasError = false, leftIcon, rightIcon, className, ...rest }: In
         </span>
       )}
       <input
+        readOnly={readOnly}
         className={cn(
           baseClasses,
           hasError ? "border-error" : "border-border",
+          readOnlyClasses,
           leftIcon && "pl-9",
           rightIcon && "pr-9",
           className
