@@ -50,7 +50,10 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
           // prefers-reduced-motion (see index.css).
           setJustVerified(true);
           const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          window.setTimeout(() => onVerified(data.registration_ticket ?? null), reduceMotion ? 0 : 450);
+          window.setTimeout(
+            () => onVerified(data.registration_ticket ?? null),
+            reduceMotion ? 0 : 450
+          );
         },
         onError: () => setCode(emptyCode()),
       }

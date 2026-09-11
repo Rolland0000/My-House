@@ -14,7 +14,13 @@ interface EmptyStateProps {
   className?: string;
 }
 
-function EmptyState({ title, description, primaryAction, secondaryAction, className }: EmptyStateProps) {
+function EmptyState({
+  title,
+  description,
+  primaryAction,
+  secondaryAction,
+  className,
+}: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -26,8 +32,7 @@ function EmptyState({ title, description, primaryAction, secondaryAction, classN
         aria-hidden="true"
         className="mb-5 size-11 border border-border-strong"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(135deg, #f1f2ee 0 5px, #ffffff 5px 10px)",
+          backgroundImage: "repeating-linear-gradient(135deg, #f1f2ee 0 5px, #ffffff 5px 10px)",
         }}
       />
       <h2 className="text-lg font-bold text-text">{title}</h2>

@@ -12,7 +12,14 @@ const baseClasses =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus " +
   "disabled:cursor-not-allowed disabled:opacity-50";
 
-function Input({ hasError = false, leftIcon, rightIcon, readOnly, className, ...rest }: InputProps) {
+function Input({
+  hasError = false,
+  leftIcon,
+  rightIcon,
+  readOnly,
+  className,
+  ...rest
+}: InputProps) {
   const readOnlyClasses = readOnly && "bg-paper-50 text-text-muted";
 
   if (!leftIcon && !rightIcon) {

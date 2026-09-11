@@ -24,8 +24,7 @@ function SiteFooter({ variant = "public" }: SiteFooterProps) {
               <span className="size-[5px] bg-primary" aria-hidden="true" />
             </div>
             <p className="text-sm text-[#B8C0CE]">
-              Direct contact between owners and renters, across France and French-speaking
-              Africa.
+              Direct contact between owners and renters, across France and French-speaking Africa.
             </p>
           </div>
 

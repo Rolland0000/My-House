@@ -11,7 +11,11 @@ export function RootLayout() {
   const { data: profile } = useProfile({ enabled: status === "authenticated" });
 
   const role: SiteHeaderRole =
-    status === "authenticated" && profile?.role === "owner" ? "owner" : status === "authenticated" ? "seeker" : "public";
+    status === "authenticated" && profile?.role === "owner"
+      ? "owner"
+      : status === "authenticated"
+        ? "seeker"
+        : "public";
 
   const user =
     status === "authenticated" && profile

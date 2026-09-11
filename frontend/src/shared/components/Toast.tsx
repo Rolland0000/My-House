@@ -69,7 +69,8 @@ function ToastProvider({ children }: { children: ReactNode }) {
       setToasts((current) => [...current, { id, message, variant }]);
 
       // Warning/error stay until manually closed unless a duration is forced explicitly.
-      const durationMs = options?.durationMs ?? (variantConfig[variant].persistent ? null : DEFAULT_DURATION_MS);
+      const durationMs =
+        options?.durationMs ?? (variantConfig[variant].persistent ? null : DEFAULT_DURATION_MS);
       if (durationMs !== null) {
         window.setTimeout(() => dismissToast(id), durationMs);
       }

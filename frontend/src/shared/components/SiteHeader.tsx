@@ -42,7 +42,9 @@ const wordmark = (
 function NavItem({ to, current, children }: { to?: string; current?: boolean; children: string }) {
   const classes = cn(
     "border-b-2 py-1.5 text-sm",
-    current ? "border-ink-900 font-semibold text-ink-900" : "border-transparent font-medium text-ink-500"
+    current
+      ? "border-ink-900 font-semibold text-ink-900"
+      : "border-transparent font-medium text-ink-500"
   );
 
   if (!to) {
@@ -57,7 +59,15 @@ function NavItem({ to, current, children }: { to?: string; current?: boolean; ch
 
 /** Below `sm`, the nav/actions row would overflow — collapse it into a hamburger
  *  toggle instead (matches the mockup's mobile header, id `1c`). */
-function MobileMenu({ links, onClose, children }: { links: NavLinkSpec[]; onClose: () => void; children?: ReactNode }) {
+function MobileMenu({
+  links,
+  onClose,
+  children,
+}: {
+  links: NavLinkSpec[];
+  onClose: () => void;
+  children?: ReactNode;
+}) {
   return (
     <div className="border-t border-border bg-surface px-7 py-4 sm:hidden">
       <nav className="flex flex-col">
@@ -75,7 +85,10 @@ function MobileMenu({ links, onClose, children }: { links: NavLinkSpec[]; onClos
               {link.label}
             </Link>
           ) : (
-            <span key={link.label} className="border-b border-[#E7E8E4] py-3 text-sm font-medium text-ink-500">
+            <span
+              key={link.label}
+              className="border-b border-[#E7E8E4] py-3 text-sm font-medium text-ink-500"
+            >
               {link.label}
             </span>
           )
@@ -86,7 +99,15 @@ function MobileMenu({ links, onClose, children }: { links: NavLinkSpec[]; onClos
   );
 }
 
-function UserMenu({ user, profileHref, onSignOut }: { user: SiteHeaderUser; profileHref: string; onSignOut?: () => void }) {
+function UserMenu({
+  user,
+  profileHref,
+  onSignOut,
+}: {
+  user: SiteHeaderUser;
+  profileHref: string;
+  onSignOut?: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +132,10 @@ function UserMenu({ user, profileHref, onSignOut }: { user: SiteHeaderUser; prof
   }, [isOpen]);
 
   return (
-    <div ref={containerRef} className="relative flex flex-none items-center gap-2.5 border-l border-[#E7E8E4] pl-4">
+    <div
+      ref={containerRef}
+      className="relative flex flex-none items-center gap-2.5 border-l border-[#E7E8E4] pl-4"
+    >
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
@@ -160,7 +184,11 @@ function HamburgerButton({ isOpen, onClick }: { isOpen: boolean; onClick: () => 
       aria-expanded={isOpen}
       className="flex size-11 flex-none items-center justify-center text-ink-900 sm:hidden"
     >
-      {isOpen ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+      {isOpen ? (
+        <X className="size-5" aria-hidden="true" />
+      ) : (
+        <Menu className="size-5" aria-hidden="true" />
+      )}
     </button>
   );
 }
@@ -271,7 +299,11 @@ function SeekerHeader({
           {ownerRequestStatus === "pending" && <Badge tone="warning">Owner request pending</Badge>}
           {user && (
             <>
-              <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="py-2 text-sm text-text">
+              <Link
+                to="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="py-2 text-sm text-text"
+              >
                 My profile
               </Link>
               <button
@@ -349,7 +381,11 @@ function OwnerHeader({
           </span>
           {user && (
             <>
-              <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="py-2 text-sm text-text">
+              <Link
+                to="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="py-2 text-sm text-text"
+              >
                 My profile
               </Link>
               <button
@@ -370,7 +406,13 @@ function OwnerHeader({
   );
 }
 
-function AdminHeader({ pendingRequestCount, onSignOut }: { pendingRequestCount?: number; onSignOut?: () => void }) {
+function AdminHeader({
+  pendingRequestCount,
+  onSignOut,
+}: {
+  pendingRequestCount?: number;
+  onSignOut?: () => void;
+}) {
   return (
     <div className="flex h-13 items-center gap-5.5 px-5.5">
       <span className="flex flex-none items-baseline gap-1.5">
@@ -402,7 +444,14 @@ function AdminHeader({ pendingRequestCount, onSignOut }: { pendingRequestCount?:
   );
 }
 
-function SiteHeader({ role, user, ownerRequestStatus, verified, pendingRequestCount, onSignOut }: SiteHeaderProps) {
+function SiteHeader({
+  role,
+  user,
+  ownerRequestStatus,
+  verified,
+  pendingRequestCount,
+  onSignOut,
+}: SiteHeaderProps) {
   if (role === "admin") {
     return (
       <header className="bg-ink-900">

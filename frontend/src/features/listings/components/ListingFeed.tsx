@@ -100,7 +100,11 @@ function ListingFeed() {
         </div>
       ) : data ? (
         <EmptyState
-          title={hasActiveFilters ? "No properties match these filters" : "No properties available right now"}
+          title={
+            hasActiveFilters
+              ? "No properties match these filters"
+              : "No properties available right now"
+          }
           description={
             hasActiveFilters ? "Widen the city or drop the type filter." : "Check back again soon."
           }

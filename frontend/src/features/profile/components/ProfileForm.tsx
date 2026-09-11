@@ -99,7 +99,10 @@ function ProfileFields({ profile }: ProfileFieldsProps) {
         </FormField>
       </div>
 
-      <FormField label="Email" hint="Email is how you sign in — changing it starts a new verification.">
+      <FormField
+        label="Email"
+        hint="Email is how you sign in — changing it starts a new verification."
+      >
         <Input value={profile.email} readOnly />
       </FormField>
 

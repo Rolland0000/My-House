@@ -49,7 +49,9 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
         <h1 className="text-[22px] font-bold text-ink-900">Sign in or create an account</h1>
-        <p className="text-sm text-text-muted">We send a six-digit code. No password to remember.</p>
+        <p className="text-sm text-text-muted">
+          We send a six-digit code. No password to remember.
+        </p>
       </div>
 
       <FormField label="Email address" required error={formError ?? undefined}>
@@ -75,9 +77,7 @@ function OtpRequestForm({ initialEmail = "", onRequested }: OtpRequestFormProps)
         {isCoolingDown ? `Retry in ${formatCountdown(secondsLeft)}` : "Send the code"}
       </Button>
 
-      <p className="text-sm text-text-muted">
-        By continuing you accept the terms of use.
-      </p>
+      <p className="text-sm text-text-muted">By continuing you accept the terms of use.</p>
     </form>
   );
 }

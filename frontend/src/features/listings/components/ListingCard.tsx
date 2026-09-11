@@ -23,7 +23,11 @@ function ListingCard({ listing }: ListingCardProps) {
       to={`/listings/${listing.id}`}
       className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
     >
-      <Card radius="none" padding="none" className="transition-colors group-hover:border-border-strong">
+      <Card
+        radius="none"
+        padding="none"
+        className="transition-colors group-hover:border-border-strong"
+      >
         <div className="relative aspect-4/3 overflow-hidden bg-primary-soft">
           {coverPhotoUrl ? (
             <img
@@ -46,7 +50,8 @@ function ListingCard({ listing }: ListingCardProps) {
             </span>
           )}
           <span className="absolute bottom-0 left-3 border border-b-0 border-brass-600 bg-surface px-3 py-2 text-[17px] leading-none font-bold text-ink-900">
-            {formatPrice(listing.price)} <span className="text-[11.5px] font-medium text-ink-500">FCFA / month</span>
+            {formatPrice(listing.price)}{" "}
+            <span className="text-[11.5px] font-medium text-ink-500">FCFA / month</span>
           </span>
         </div>
         <div className="flex flex-col gap-1.5 p-4">
