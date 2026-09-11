@@ -17,3 +17,12 @@ export function formatCountdown(totalSeconds: number): string {
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
+
+/** Initials for the ink-900 avatar square used throughout the header/profile/detail. */
+export function formatInitials(firstName?: string | null, lastName?: string | null): string {
+  return [firstName, lastName]
+    .map((part) => part?.trim()?.[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+}

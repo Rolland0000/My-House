@@ -57,7 +57,7 @@ function RegistrationForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <h2 className="text-lg font-bold text-text">Create your account</h2>
+        <h1 className="text-[22px] font-bold text-ink-900">Create your account</h1>
         <p className="text-sm text-text-muted">Last step before you get started.</p>
       </div>
 
@@ -81,7 +81,7 @@ function RegistrationForm({
       </FormField>
 
       <FormField label="Email">
-        <Input value={email} disabled readOnly />
+        <Input value={email} readOnly />
       </FormField>
 
       <FormField label="Phone" required error={fieldErrors.phone}>

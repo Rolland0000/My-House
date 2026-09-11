@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import { Alert, Button } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { useCountdown } from "../../../shared/hooks/useCountdown";
@@ -25,6 +26,7 @@ function emptyCode(): string[] {
 
 function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
   const [code, setCode] = useState<string[]>(emptyCode);
+  const [justVerified, setJustVerified] = useState(false);
   const verifyOtp = useOtpVerify();
   const resendOtp = useOtpRequest();
   const { secondsLeft: resendCooldown, start: startResendCooldown } = useCountdown();
@@ -42,9 +44,33 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
     verifyOtp.mutate(
       { email, code: fullCode },
       {
-        onSuccess: ({ data }) => onVerified(data.registration_ticket ?? null),
+        onSuccess: ({ data }) => {
+          // The one orchestrated animation in the product: a brief brass-stamp
+          // confirmation before moving on. Collapses to ~0ms under
+          // prefers-reduced-motion (see index.css).
+          setJustVerified(true);
+          const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          window.setTimeout(
+            () => onVerified(data.registration_ticket ?? null),
+            reduceMotion ? 0 : 450
+          );
+        },
         onError: () => setCode(emptyCode()),
       }
+    );
+  }
+
+  if (justVerified) {
+    return (
+      <div className="flex items-center gap-3.5 py-2">
+        <span className="flex size-13 flex-none items-center justify-center border-2 border-primary animate-mh-stamp">
+          <Check className="size-4 text-ink-900" strokeWidth={3} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="font-semibold text-ink-900">Email confirmed</p>
+          <p className="text-sm text-text-muted">Taking you to the next step…</p>
+        </div>
+      </div>
     );
   }
 
@@ -70,7 +96,7 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
       </button>
 
       <div>
-        <h2 className="text-lg font-bold text-text">Check your inbox</h2>
+        <h1 className="text-[22px] font-bold text-ink-900">Check your inbox</h1>
         <p className="text-sm text-text-muted">
           Code sent to <span className="font-semibold text-text">{email}</span>
         </p>

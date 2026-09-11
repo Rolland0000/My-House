@@ -67,11 +67,11 @@ function FileDropzone({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed px-6 py-8 text-center",
+        "flex flex-col items-center justify-center gap-2 rounded-sm border-2 border-dashed px-6 py-8 text-center",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
         disabled
-          ? "cursor-not-allowed border-border bg-surface opacity-50"
-          : "cursor-pointer border-border bg-surface hover:bg-primary-soft",
+          ? "cursor-not-allowed border-border-strong bg-surface opacity-50"
+          : "cursor-pointer border-border-strong bg-surface hover:bg-primary-soft",
         isDragActive && !disabled && "border-primary bg-primary-soft",
         hasError && "border-error",
         className

@@ -46,7 +46,7 @@ function Pagination({
             className={cn(
               "inline-flex size-8 items-center justify-center rounded-sm text-sm font-semibold",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-              item === page ? "bg-primary text-white" : "text-text hover:bg-primary-soft"
+              item === page ? "bg-ink-900 text-white" : "text-text hover:bg-primary-soft"
             )}
             onClick={() => onPageChange(item)}
           >

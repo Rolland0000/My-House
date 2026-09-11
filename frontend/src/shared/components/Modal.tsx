@@ -81,7 +81,7 @@ function Modal({ isOpen, onClose, title, children, footer, size = "md" }: ModalP
         aria-labelledby={title ? "modal-title" : undefined}
         tabIndex={-1}
         className={cn(
-          "w-full rounded-md border border-border bg-surface p-6 shadow-lg focus-visible:outline-none",
+          "w-full rounded-lg border border-border bg-surface p-6 shadow-elevated focus-visible:outline-none",
           sizeClasses[size]
         )}
         onClick={(event) => event.stopPropagation()}

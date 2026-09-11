@@ -94,7 +94,7 @@ function OtpCodeInput({
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
           aria-label={`Digit ${index + 1}`}
-          className="h-12 w-10 rounded-sm border border-border bg-surface text-center text-lg font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-14 flex-1 rounded-sm border border-border bg-surface text-center text-xl font-bold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50"
         />
       ))}
     </div>
