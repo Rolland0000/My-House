@@ -1,0 +1,99 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            orq.id,\n            u.email,\n            u.first_name,\n            u.last_name,\n            orq.phone,\n            orq.secondary_phone,\n            orq.identity_data AS \"identity_data: sqlx::types::Json<ValidatedIdentityData>\",\n            orq.identity_documents,\n            orq.status AS \"status: OwnerRequestStatus\",\n            to_char(orq.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\",\n            to_char(orq.reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"reviewed_at\",\n            orq.admin_note\n        FROM owner_requests orq\n        JOIN users u ON u.id = orq.user_id\n        WHERE orq.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "secondary_phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "identity_data: sqlx::types::Json<ValidatedIdentityData>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "identity_documents",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "status: OwnerRequestStatus",
+        "type_info": {
+          "Custom": {
+            "name": "owner_request_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "reviewed_at",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "admin_note",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "18b7466f85fea3f3bf14fecf8ad3221a3d43f970e42af4da859aa1a00f797ae6"
+}

@@ -9,13 +9,15 @@ use crate::shared::errors::AppError;
 use crate::shared::file_validation::{
     validate_image, validate_pdf, MAX_IMAGE_SIZE_BYTES, MAX_PDF_SIZE_BYTES,
 };
+use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::storage_key::owner_request_document_key;
 use crate::shared::types::OwnerRequestId;
 use crate::shared::validation::{optional_phone, required_name, required_phone};
 
+use super::dto::{AdminOwnerRequestDetailDto, AdminOwnerRequestDto};
 use super::model::{
-    IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestSubmission, UploadedDocument,
-    ValidatedIdentityData,
+    IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestStatus,
+    OwnerRequestSubmission, UploadedDocument, ValidatedIdentityData,
 };
 use super::repository;
 
@@ -108,6 +110,50 @@ pub async fn submit(
 
 pub async fn get_status(pool: &PgPool, user_id: Uuid) -> Result<Option<OwnerRequestRow>, AppError> {
     repository::find_current_for_user(pool, user_id).await
+}
+
+/// Backs `GET /admin/owner-requests`. `raw_status` comes straight off the
+/// query string; an unrecognized value is a client error, not a silently
+/// ignored filter.
+pub async fn list_for_admin(
+    pool: &PgPool,
+    raw_status: Option<&str>,
+    page: Option<u32>,
+    per_page: Option<u32>,
+) -> Result<PaginatedResponse<AdminOwnerRequestDto>, AppError> {
+    let status = parse_status_filter(raw_status)?;
+
+    let total = repository::count_for_admin(pool, status).await?;
+    let meta = PaginationMeta::new(page, per_page, total as u64);
+
+    let rows = repository::list_for_admin(pool, status, meta.per_page as i64, meta.offset() as i64)
+        .await?;
+    let data = rows.into_iter().map(AdminOwnerRequestDto::from).collect();
+    Ok(PaginatedResponse::new(data, meta))
+}
+
+/// Backs `GET /admin/owner-requests/:id` — the only place `identity_data`
+/// and document descriptors are exposed, one request at a time.
+pub async fn get_for_admin(
+    pool: &PgPool,
+    request_id: Uuid,
+) -> Result<AdminOwnerRequestDetailDto, AppError> {
+    let row = repository::find_by_id_for_admin(pool, request_id)
+        .await?
+        .ok_or(AppError::OwnerRequestNotFound)?;
+    Ok(AdminOwnerRequestDetailDto::from(row))
+}
+
+fn parse_status_filter(raw: Option<&str>) -> Result<Option<OwnerRequestStatus>, AppError> {
+    match raw {
+        None => Ok(None),
+        Some("pending") => Ok(Some(OwnerRequestStatus::Pending)),
+        Some("approved") => Ok(Some(OwnerRequestStatus::Approved)),
+        Some("rejected") => Ok(Some(OwnerRequestStatus::Rejected)),
+        Some(other) => Err(AppError::InvalidQueryParam(format!(
+            "status must be one of pending, approved, rejected (got `{other}`)."
+        ))),
+    }
 }
 
 fn parse_identity_data(raw: &str) -> Result<ValidatedIdentityData, AppError> {
@@ -265,6 +311,35 @@ mod tests {
         assert!(matches!(
             parse_identity_data("not json"),
             Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn status_filter_accepts_the_three_known_values() {
+        assert_eq!(
+            parse_status_filter(Some("pending")).unwrap(),
+            Some(OwnerRequestStatus::Pending)
+        );
+        assert_eq!(
+            parse_status_filter(Some("approved")).unwrap(),
+            Some(OwnerRequestStatus::Approved)
+        );
+        assert_eq!(
+            parse_status_filter(Some("rejected")).unwrap(),
+            Some(OwnerRequestStatus::Rejected)
+        );
+    }
+
+    #[test]
+    fn status_filter_defaults_to_none_when_absent() {
+        assert_eq!(parse_status_filter(None).unwrap(), None);
+    }
+
+    #[test]
+    fn status_filter_rejects_an_unknown_value() {
+        assert!(matches!(
+            parse_status_filter(Some("archived")),
+            Err(AppError::InvalidQueryParam(_))
         ));
     }
 }

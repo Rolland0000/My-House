@@ -14,7 +14,7 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
-use crate::modules::{auth, listings, owner_requests, users};
+use crate::modules::{admin, auth, listings, owner_requests, users};
 use crate::shared::file_validation::MAX_IMAGE_SIZE_BYTES;
 
 /// Headroom for multipart part headers and boundaries on top of the image
@@ -115,15 +115,16 @@ fn owner_router() -> Router<AppState> {
 
 /// Routes restricted to platform administrators.
 ///
-/// Protected by: `AuthUser` extractor + `require_role(Role::Admin)` layer.
-/// Examples: validate owner upgrade requests, deactivate users, audit logs.
-fn admin_router() -> Router<AppState> {
-    Router::new()
-    // TODO EP-02: .route("/api/v1/admin/owner-requests",      get(admin::list_owner_requests))
-    // TODO EP-02: .route("/api/v1/admin/owner-requests/:id",  patch(admin::review_owner_request))
-    // TODO EP-02: .route("/api/v1/admin/users/:id/deactivate", patch(admin::deactivate_user))
-    // Layer added here before merge:
-    // .layer(middleware::from_fn_with_state(state, require_admin))
+/// Protected by: `AuthUser` extractor, with the role check made inline in
+/// each handler (`user.require_role(&[Role::Admin])`) — the same pattern
+/// used by every other role-scoped handler in this codebase, rather than a
+/// separate Tower layer.
+fn admin_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(admin::handler::list_owner_requests))
+        .routes(routes!(admin::handler::get_owner_request))
+    // TODO EP-07 (MH-49-BE): .routes(routes!(admin::handler::review_owner_request))
+    // TODO EP-12: .routes(routes!(admin::handler::deactivate_user))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -154,7 +155,7 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
         .merge(avatar_router())
         .merge(owner_request_router())
         .merge(OpenApiRouter::from(owner_router()))
-        .merge(OpenApiRouter::from(admin_router()));
+        .merge(admin_router());
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::check))

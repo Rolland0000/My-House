@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            orq.id,\n            u.email,\n            u.first_name,\n            u.last_name,\n            orq.phone,\n            orq.secondary_phone,\n            orq.status AS \"status: OwnerRequestStatus\",\n            to_char(orq.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\",\n            to_char(orq.reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"reviewed_at\",\n            orq.admin_note\n        FROM owner_requests orq\n        JOIN users u ON u.id = orq.user_id\n        WHERE ($1::owner_request_status IS NULL OR orq.status = $1)\n        ORDER BY orq.created_at DESC\n        LIMIT $2 OFFSET $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "secondary_phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "status: OwnerRequestStatus",
+        "type_info": {
+          "Custom": {
+            "name": "owner_request_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "reviewed_at",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "admin_note",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "owner_request_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            }
+          }
+        },
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "f087655c9a27a25035c6292512569bea8644f7398aced8c1938f53c0dadb8c06"
+}

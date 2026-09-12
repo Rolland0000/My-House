@@ -12,6 +12,7 @@ frontend/dist/
 backend/.env
 frontend/.env
 .envrc
+backend/storage/
 graphify-out/cache
 graphify-out/cost.json
 graphify-out/*/cost.json
