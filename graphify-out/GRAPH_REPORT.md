@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-09-12)
 
 ## Corpus Check
-- 14 files · ~129,133 words
+- 1 files · ~129,206 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1575 nodes · 3018 edges · 149 communities (100 shown, 49 thin omitted)
+- 1576 nodes · 3019 edges · 150 communities (101 shown, 49 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 93 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
@@ -86,7 +86,7 @@
 - Feed/Detail Wireframe
 - Frontend Root tsconfig
 - README Project Overview
-- Architecture Doc: Auth Extractor & Roles
+- OpenAPI Codegen Binary
 - Architecture Doc: No-Proxy Media Rule
 - Architecture Doc: Search Vector Trigger
 - Architecture Doc: Refresh Token Cookie
@@ -96,13 +96,13 @@
 - React DOM Types Dep
 - typescript-eslint Dep
 - Vite Dep
-- Pre-Commit Hook Script
-- Duration Type
+- Admin Layout (Frontend)
+- Infra Module Root
 - Response Type
 - Arc Type
 - Request Type
 - Generic T
-- Graphify Trigger in CLAUDE.md
+- Shared Module Root
 - Backend Review Checklist Reference
 - AppError Central Error Type Doc
 - Graceful Shutdown Doc
@@ -125,7 +125,7 @@
 - Rustic Bedroom Photo (OIP 8)
 - Bedroom Interior Photo (OIP 9)
 - Bedroom Reference Photo (OIP)
-- Multipart Type
+- Frontend ESLint Config
 - MultipartError Type
 - OtpRequestResponse Type
 - OtpVerifyResponse Type
@@ -133,6 +133,7 @@
 - RefreshResponse Type
 - RegisterResponse Type
 - Value Type
+- Generic Value Reference
 
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 119 edges
@@ -184,11 +185,11 @@
 - **Notifications Module Email Template Set** — backend_src_modules_notifications_templates_otp, backend_src_modules_notifications_templates_welcome, backend_src_modules_notifications_templates_owner_request_approved, backend_src_modules_notifications_templates_owner_request_received, backend_src_modules_notifications_templates_owner_request_rejected [INFERRED 0.80]
 - **Dev Environment Docker Compose Stack** — backend_compose_backend_backend_dev, frontend_compose_frontend_frontend_dev, docker_compose_db, docker_compose_mailhog [INFERRED 0.85]
 
-## Communities (149 total, 49 thin omitted)
+## Communities (150 total, 49 thin omitted)
 
 ### Community 0 - "Owner Request API Client"
 Cohesion: 0.05
-Nodes (58): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, submitOwnerRequest(), FileWithPreview, FormValues, ID_TYPE_OPTIONS (+50 more)
+Nodes (60): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, submitOwnerRequest(), FileWithPreview, FormValues, ID_TYPE_OPTIONS (+52 more)
 
 ### Community 1 - "User Profile DTOs & Validation"
 Cohesion: 0.06
@@ -219,20 +220,20 @@ Cohesion: 0.08
 Nodes (37): Algorithm, NewAccount, RefreshTokenLookup, Option, Uuid, hash_otp_code(), hash_refresh_token(), hashes_deterministically_to_a_64_char_hex_digest() (+29 more)
 
 ### Community 8 - "Alert & Badge Components"
-Cohesion: 0.08
-Nodes (36): AlertProps, AlertVariant, variantConfig, Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses (+28 more)
+Cohesion: 0.09
+Nodes (33): Badge(), BadgeProps, BadgeSize, BadgeTone, sizeClasses, toneClasses, DimensionRuleProps, FileDropzone() (+25 more)
 
 ### Community 9 - "Database Rules Doc"
 Cohesion: 0.05
 Nodes (44): Cascade and Filesystem Cleanup Ordering, Migration Conventions, MyHouse Database Rules (sqlx/PostgreSQL), Listings/Search Index Performance Rules, sqlx Query Conventions (query!/query_as!), Schema Conventions (UUID PK, timestamps, enums, partial unique indexes), SQL Injection Prevention / Sensitive Column Exclusion, Repository Test Transaction Rollback Pattern (+36 more)
 
 ### Community 10 - "App Shell & Query Providers"
-Cohesion: 0.11
-Nodes (29): App(), Providers(), ProvidersProps, queryClient, router, logout(), OtpRequestResponse, OtpVerifyResponse (+21 more)
+Cohesion: 0.14
+Nodes (26): logout(), OtpRequestResponse, OtpVerifyResponse, OtpVerifyToken, RefreshResponse, refreshSession(), registerAccount(), RegisterPayload (+18 more)
 
 ### Community 11 - "Auth Flow Wizard (Frontend)"
-Cohesion: 0.09
-Nodes (25): AuthFlow(), AuthStepIndicator(), markInterrupted(), readInterrupted(), Screen, STEP_ORDER, OtpCodeInput(), OtpCodeInputProps (+17 more)
+Cohesion: 0.15
+Nodes (24): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+16 more)
 
 ### Community 12 - "IP Rate Limiter"
 Cohesion: 0.14
@@ -243,8 +244,8 @@ Cohesion: 0.17
 Nodes (22): delete_on_missing_key_returns_typed_error_not_panic(), delete_removes_existing_file(), LocalFsStorage, presigned_url_returns_not_implemented_error(), read_rejects_key_with_parent_dir_component(), read_returns_previously_uploaded_bytes(), Bytes, Duration (+14 more)
 
 ### Community 14 - "Listings API Client"
-Cohesion: 0.17
-Nodes (21): getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings(), ListListingsParams, ListListingsResult (+13 more)
+Cohesion: 0.11
+Nodes (20): AuthFlow(), AuthStepIndicator(), markInterrupted(), readInterrupted(), Screen, STEP_ORDER, OtpCodeInput(), OtpCodeInputProps (+12 more)
 
 ### Community 15 - "Owner Request Document Classification"
 Cohesion: 0.15
@@ -267,24 +268,24 @@ Cohesion: 0.10
 Nodes (21): eslint, @eslint/js, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-refresh, openapi-typescript (+13 more)
 
 ### Community 20 - "Frontend Node tsconfig"
+Cohesion: 0.11
+Nodes (10): RootLayout(), NavLinkSpec, OWNER_LINKS, PUBLIC_LINKS, SiteHeader(), SiteHeaderProps, SiteHeaderRole, SiteHeaderUser (+2 more)
+
+### Community 21 - "Mailer & SMTP Config"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, lib, module, moduleDetection, moduleResolution, noEmit, noFallthroughCasesInSwitch (+11 more)
 
-### Community 21 - "Mailer & SMTP Config"
+### Community 22 - "Auth HTTP Handlers"
 Cohesion: 0.16
 Nodes (15): Address, AddressError, AsyncSmtpTransport, builds_successfully_with_valid_config(), Mailer, MailerError, rejects_malformed_smtp_from(), Formatter (+7 more)
 
-### Community 22 - "Auth HTTP Handlers"
+### Community 23 - "Notifications Service & Templates"
 Cohesion: 0.27
 Nodes (17): logout(), otp_request(), otp_verify(), refresh(), register(), AppState, CookieJar, Json (+9 more)
 
-### Community 23 - "Notifications Service & Templates"
+### Community 24 - "Root Layout & Site Header"
 Cohesion: 0.18
 Nodes (18): NotificationTemplate, OtpTemplate, OwnerRequestApprovedTemplate, OwnerRequestReceivedTemplate, OwnerRequestRejectedTemplate, render(), renders_otp_template_with_sample_context(), renders_owner_request_approved_template_with_sample_context() (+10 more)
-
-### Community 24 - "Root Layout & Site Header"
-Cohesion: 0.12
-Nodes (9): RootLayout(), NavLinkSpec, OWNER_LINKS, PUBLIC_LINKS, SiteHeader(), SiteHeaderProps, SiteHeaderRole, SiteHeaderUser (+1 more)
 
 ### Community 25 - "AppState Bootstrap"
 Cohesion: 0.22
@@ -299,16 +300,16 @@ Cohesion: 0.15
 Nodes (16): DATABASE_URI, GITHUB_PERSONAL_ACCESS_TOKEN, npx, uvx, context7, filesystem, git, github (+8 more)
 
 ### Community 28 - "Auth Layout & Router"
-Cohesion: 0.12
-Nodes (13): AuthLayout(), AuthFlow, ListingDetail, ListingFeed, OwnerRequestForm, OwnerRequestStatus, ProfileForm, Card() (+5 more)
-
-### Community 29 - "OpenAPI Doc & Route Wiring"
 Cohesion: 0.34
 Nodes (14): ApiDoc, admin_router(), avatar_router(), build_router(), merged_router(), openapi_spec(), owner_request_router(), owner_router() (+6 more)
 
-### Community 30 - "Profile Field Validation"
+### Community 29 - "OpenAPI Doc & Route Wiring"
 Cohesion: 0.19
 Nodes (10): optional_name(), optional_phone(), repeat(), required_name(), required_name_trims_and_accepts_the_upper_bound(), required_phone(), required_phone_trims_and_accepts_the_upper_bound(), Option (+2 more)
+
+### Community 30 - "Profile Field Validation"
+Cohesion: 0.15
+Nodes (12): App(), Providers(), ProvidersProps, queryClient, router, ToastContext, ToastContextValue, ToastItem (+4 more)
 
 ### Community 31 - "Frontend UI Deps (clsx, lucide-react)"
 Cohesion: 0.13
@@ -319,28 +320,28 @@ Cohesion: 0.15
 Nodes (15): MyHouse Design Tokens (Plan & Brass), Dimension Rule Signature Device, MH-17 Superseded Cream/Terracotta Palette, Design Handoff Repo Sync Log & Screen Map, My House - Plan & Laiton Design Mockup, My House - Screens Design Mockup, Design Handoff README, Admin Approve as Sole Solid Semantic Button (+7 more)
 
 ### Community 33 - "OTP Auth DTOs"
+Cohesion: 0.15
+Nodes (12): REASONS, ReportListingModal(), ReportListingModalProps, Button(), ButtonProps, ButtonSize, ButtonVariant, sizeClasses (+4 more)
+
+### Community 34 - "Listing Report Modal"
 Cohesion: 0.26
 Nodes (13): OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse, OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto (+5 more)
 
-### Community 34 - "Listing Report Modal"
-Cohesion: 0.15
-Nodes (12): REASONS, ReportListingModal(), ReportListingModalProps, Button(), ToastContext, ToastContextValue, ToastItem, ToastOptions (+4 more)
-
 ### Community 35 - "Owner Request DTOs"
+Cohesion: 0.16
+Nodes (10): AuthLayout(), RequireAuth(), RequireAuthProps, AuthFlow, ListingDetail, ListingFeed, OwnerRequestForm, OwnerRequestStatus (+2 more)
+
+### Community 36 - "Graphify Extraction Spec Doc"
 Cohesion: 0.22
 Nodes (11): OwnerRequestDto, OwnerRequestResponse, OwnerRequestSubmissionForm, From, Option, Self, String, Uuid (+3 more)
 
-### Community 36 - "Graphify Extraction Spec Doc"
+### Community 37 - "Frontend Package Scripts"
 Cohesion: 0.18
 Nodes (13): EXTRACTED/INFERRED/AMBIGUOUS confidence rubric, Extraction JSON schema, Node ID format rule ({stem}_{entity}), source_file verbatim rule, Extraction subagent prompt (full), Part A - Structural extraction for code files (AST), Part B - Semantic extraction (parallel subagents), Part C - Merge AST + semantic into final extraction (+5 more)
 
-### Community 37 - "Frontend Package Scripts"
+### Community 38 - "RequireAuth & Button Component"
 Cohesion: 0.15
 Nodes (13): scripts, build, dev, format, generate:types, generate:types:ci, lint, predev (+5 more)
-
-### Community 38 - "RequireAuth & Button Component"
-Cohesion: 0.17
-Nodes (10): RequireAuth(), RequireAuthProps, ButtonProps, ButtonSize, ButtonVariant, sizeClasses, variantClasses, sizeClasses (+2 more)
 
 ### Community 39 - "Owner Request Model Types"
 Cohesion: 0.29
@@ -423,62 +424,66 @@ Cohesion: 0.29
 Nodes (7): Multiple local subfolders (monorepo) flow, Multiple repos cross-repo graph merge, Step 0 - Clone GitHub repo(s), graphify.build.build_merge(), Replace-on-re-extract dedup fix (#1344/#1178), Step 0 - GitHub repos and multi-path merge, Step 0 - Clone GitHub repo(s) (Codex)
 
 ### Community 59 - "Frontend React/TS Rules"
-Cohesion: 0.40
-Nodes (6): react-typecrypt.md Rules File, Banned AI Marketing Words Rule, Embedded React/TypeScript Rules Content, Corrections vs Original React/TS Rule Files, README Writing Rules Skill, README Landing-Page Writing Principles
+Cohesion: 0.29
+Nodes (6): Card(), CardPadding, CardProps, CardRadius, paddingClasses, radiusClasses
 
 ### Community 60 - "Graphify Update/Cluster-Only Doc"
 Cohesion: 0.40
-Nodes (6): --cluster-only, --update (incremental re-extraction), Interpreter guard for subcommands, For --update and --cluster-only (section pointer), --cluster-only (Codex), --update (incremental re-extraction) (Codex)
+Nodes (6): react-typecrypt.md Rules File, Banned AI Marketing Words Rule, Embedded React/TypeScript Rules Content, Corrections vs Original React/TS Rule Files, README Writing Rules Skill, README Landing-Page Writing Principles
 
 ### Community 61 - "DB Connection Pool"
+Cohesion: 0.40
+Nodes (6): --cluster-only, --update (incremental re-extraction), Interpreter guard for subcommands, For --update and --cluster-only (section pointer), --cluster-only (Codex), --update (incremental re-extraction) (Codex)
+
+### Community 62 - "Graphify Honesty Rules"
 Cohesion: 0.50
 Nodes (4): connect_db(), Error, PgPool, Result
 
-### Community 62 - "Graphify Honesty Rules"
+### Community 63 - "Graphify Build/Cluster Steps Doc"
 Cohesion: 0.40
 Nodes (5): Honesty Rules, Stamped manifest files guard (#2015), Step 9 - Save manifest, update cost tracker, clean up, and report, Honesty Rules (Codex), Step 9 - Save manifest, update cost tracker, clean up (Codex)
 
-### Community 63 - "Graphify Build/Cluster Steps Doc"
+### Community 64 - "Codex Graphify Variant"
 Cohesion: 0.40
 Nodes (5): Shrink-guard (#479), Step 4.5 - Graph health check, Step 4 - Build graph, cluster, analyze, generate outputs, Step 5 - Label communities, Step 6 - Generate Obsidian vault and HTML
 
-### Community 64 - "Codex Graphify Variant"
+### Community 65 - "OTP Code Generation"
 Cohesion: 0.50
 Nodes (5): Compact prompt rationale (return inline, no CHUNK_PATH), Extraction subagent prompt (compact), spawn_agent / wait_agent / close_agent mechanism, Step B2 - Dispatch ALL subagents (Codex spawn_agent), multi_agent feature flag (~/.codex/config.toml)
 
-### Community 65 - "OTP Code Generation"
+### Community 66 - "Graphify Hooks Doc"
 Cohesion: 0.67
 Nodes (3): generate_otp_code(), generated_code_is_always_six_digits(), String
 
-### Community 66 - "Graphify Hooks Doc"
+### Community 67 - "Auth Flow Wireframe"
 Cohesion: 0.50
 Nodes (4): Native CLAUDE.md integration (graphify claude install), git commit hook (graphify hook install), For the commit hook and native CLAUDE.md integration (section pointer), git commit hook (Codex)
 
-### Community 67 - "Auth Flow Wireframe"
+### Community 68 - "CodeQL & Gitleaks Workflows"
 Cohesion: 0.50
 Nodes (4): mh-12-auth-flow.html wireframe, Email entry step page, OTP code verification step page, Profile completion step page
 
-### Community 68 - "CodeQL & Gitleaks Workflows"
+### Community 69 - "Docker Compose Files"
 Cohesion: 0.50
 Nodes (4): CodeQL Advanced Workflow, analyze job (rust + javascript-typescript matrix), Gitleaks Secret Scan Workflow, gitleaks job (secret scan)
 
-### Community 69 - "Docker Compose Files"
+### Community 70 - "Owner Request Email Templates"
 Cohesion: 0.67
 Nodes (3): Backend Docker Compose Config, Root Docker Compose, Frontend Docker Compose Config
 
-### Community 70 - "Owner Request Email Templates"
+### Community 71 - "Pre-Tool-Use Hook Script"
 Cohesion: 0.67
 Nodes (3): Owner Request Approved Email Template, Owner Request Received (Admin Notify) Email Template, Owner Request Rejected Email Template
 
-### Community 72 - "Architecture Doc: Atomic Registration"
+### Community 73 - "Feed/Detail Wireframe"
 Cohesion: 0.67
 Nodes (3): Atomic Registration via POST /auth/register, OTP Passwordless Authentication, Registration Ticket (opaque UUID)
 
-### Community 73 - "Feed/Detail Wireframe"
+### Community 74 - "Frontend Root tsconfig"
 Cohesion: 0.67
 Nodes (3): mh-13-feed-detail.html wireframe, Public feed page (grid of cover photos), Listing detail page
 
-### Community 75 - "README Project Overview"
+### Community 76 - "OpenAPI Codegen Binary"
 Cohesion: 0.67
 Nodes (3): README.md — Project Overview and Setup, Conventional Commits convention, Trunk-based development branching strategy
 
@@ -504,11 +509,11 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `README Writing Rules Skill` and `Embedded React/TypeScript Rules Content`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **Why does `AppError` connect `Storage Provider Abstraction` to `User Profile DTOs & Validation`, `Listing Detail DTOs`, `App Cache (moka)`, `Owner Request HTTP Handler`, `Auth Domain Model`, `File Magic-Byte Validation`, `Local Filesystem Storage`, `Owner Request Document Classification`, `Auth HTTP Handlers`, `Notifications Service & Templates`, `Profile Field Validation`?**
+- **Why does `AppError` connect `Storage Provider Abstraction` to `User Profile DTOs & Validation`, `Listing Detail DTOs`, `App Cache (moka)`, `Owner Request HTTP Handler`, `Auth Domain Model`, `File Magic-Byte Validation`, `Local Filesystem Storage`, `Owner Request Document Classification`, `Notifications Service & Templates`, `Root Layout & Site Header`, `OpenAPI Doc & Route Wiring`?**
   _High betweenness centrality (0.149) - this node is a cross-community bridge._
 - **Why does `AppCacheProvider` connect `App Cache (moka)` to `Cache Provider Trait`, `IP Rate Limiter`?**
   _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `Mailer` connect `Mailer & SMTP Config` to `AppState Bootstrap`, `App Cache (moka)`?**
+- **Why does `Mailer` connect `Auth HTTP Handlers` to `AppState Bootstrap`, `App Cache (moka)`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem` to the rest of the system?**
   _262 weakly-connected nodes found - possible documentation gaps or missing edges._
