@@ -169,6 +169,40 @@ pub async fn send_welcome_email(mailer: &Mailer, to: &str, user_name: &str) {
     mailer.send(address, "Bienvenue sur MyHouse", body).await;
 }
 
+/// Renders and sends the admin notification for a new owner request. Fixed
+/// recipient (`admin_email`), never the requester — best-effort like every
+/// other send in this module: a render or delivery failure is logged and
+/// swallowed, never propagated.
+pub async fn send_owner_request_received_email(
+    mailer: &Mailer,
+    requester_name: &str,
+    requester_email: &str,
+    admin_email: &str,
+) {
+    let body = match render(NotificationTemplate::OwnerRequestReceived {
+        requester_name,
+        requester_email,
+    }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, "notifications: failed to render owner_request_received email");
+            return;
+        }
+    };
+
+    let address: Address = match admin_email.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, admin_email, "notifications: invalid admin recipient address");
+            return;
+        }
+    };
+
+    mailer
+        .send(address, "New owner request received", body)
+        .await;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

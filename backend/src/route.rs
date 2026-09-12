@@ -14,12 +14,17 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
-use crate::modules::{auth, listings, users};
+use crate::modules::{auth, listings, owner_requests, users};
 use crate::shared::file_validation::MAX_IMAGE_SIZE_BYTES;
 
 /// Headroom for multipart part headers and boundaries on top of the image
 /// budget itself, so a file at exactly the limit still gets through.
 const MULTIPART_OVERHEAD_BYTES: usize = 16 * 1024;
+
+/// The largest valid owner-request submission is two 5 MB images (the photo
+/// modality); the PDF modality's 3 MB cap is smaller and never the binding
+/// constraint.
+const OWNER_REQUEST_BODY_LIMIT_BYTES: usize = MAX_IMAGE_SIZE_BYTES * 2 + MULTIPART_OVERHEAD_BYTES;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-routers by role
@@ -68,7 +73,16 @@ fn seeker_router() -> OpenApiRouter<AppState> {
             users::handler::update_me,
             users::handler::delete_me
         ))
-    // TODO EP-02: .routes(routes!(users::request_owner_upgrade))
+        .routes(routes!(owner_requests::handler::get_owner_request_status))
+}
+
+/// Owner request submission, kept in its own sub-router for the same reason
+/// as [`avatar_router`]: the raised body limit (two 5 MB images) must not
+/// apply to the rest of the seeker surface.
+fn owner_request_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(owner_requests::handler::submit_owner_request))
+        .layer(DefaultBodyLimit::max(OWNER_REQUEST_BODY_LIMIT_BYTES))
 }
 
 /// Avatar upload, kept in its own sub-router so the raised body limit applies
@@ -138,6 +152,7 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
         .merge(public_router())
         .merge(seeker_router())
         .merge(avatar_router())
+        .merge(owner_request_router())
         .merge(OpenApiRouter::from(owner_router()))
         .merge(OpenApiRouter::from(admin_router()));
 
