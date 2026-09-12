@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router";
 import {
   Alert,
   Button,
@@ -23,6 +22,7 @@ import {
 } from "../profileValidation";
 import { AvatarUpload } from "./AvatarUpload";
 import { DeleteAccountSection } from "./DeleteAccountSection";
+import { OwnerRequestStatusBlock } from "./OwnerRequestStatusBlock";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 
 const ROLE_LABELS: Record<Profile["role"], string> = {
@@ -153,13 +153,7 @@ function ProfileForm() {
               initials={formatInitials(data.first_name, data.last_name)}
             />
             <ProfileFields profile={data} />
-            {data.role === "seeker" && (
-              <div className="border-b border-border pb-6">
-                <Link to="/owner-request" className="text-sm font-semibold text-primary underline">
-                  Become an owner
-                </Link>
-              </div>
-            )}
+            <OwnerRequestStatusBlock role={data.role} />
             <DeleteAccountSection isOwner={data.role === "owner"} />
           </div>
         )}

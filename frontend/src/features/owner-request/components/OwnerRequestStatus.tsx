@@ -1,12 +1,8 @@
 import { Link, useNavigate } from "react-router";
-import { Alert, Card, EmptyState, Spinner } from "../../../shared/components";
-import { ApiError } from "../../../shared/api/client";
+import { Alert, Badge, Card, EmptyState, Spinner } from "../../../shared/components";
 import { useOwnerRequestStatus } from "../hooks/useOwnerRequestStatus";
+import { ownerRequestStatusView } from "../ownerRequestStatusView";
 
-/**
- * Minimal placeholder: only renders the "pending" state. Approved/rejected
- * views belong to a later ticket that extends this page.
- */
 function OwnerRequestStatus() {
   const navigate = useNavigate();
   const { data, isPending, error } = useOwnerRequestStatus();
@@ -19,34 +15,43 @@ function OwnerRequestStatus() {
     );
   }
 
-  const notFound = error instanceof ApiError && error.status === 404;
-
   return (
     <div className="mx-auto w-full max-w-md px-4 py-12">
       <Card>
-        {notFound && (
+        {error && <Alert variant="error">Status unavailable. Please try again.</Alert>}
+        {!error && data === null && (
           <EmptyState
             title="No request on file"
             description="Submit an owner request from your profile to see its status here."
             primaryAction={{ label: "Go to profile", onClick: () => navigate("/profile") }}
           />
         )}
-        {error && !notFound && <Alert variant="error">Status unavailable. Please try again.</Alert>}
-        {data && (
-          <div className="flex flex-col gap-3">
-            <h1 className="text-2xl font-bold text-ink-900">Your request is pending</h1>
-            <p className="text-sm text-text-muted">
-              Our team is reviewing your information. You'll be notified by email once a decision is
-              made.
-            </p>
-            <p className="text-sm text-text-muted">
-              Submitted on {new Date(data.created_at).toLocaleDateString()}.
-            </p>
-            <Link to="/profile" className="text-sm font-semibold text-primary underline">
-              Back to profile
-            </Link>
-          </div>
-        )}
+        {!error &&
+          data &&
+          (() => {
+            const view = ownerRequestStatusView(data);
+            return (
+              <div className="flex flex-col gap-3">
+                <Badge tone={view.badgeTone}>{view.badgeLabel}</Badge>
+                <h1 className="text-2xl font-bold text-ink-900">{view.title}</h1>
+                <p className="text-sm text-text-muted">{view.description}</p>
+                {view.adminNote && (
+                  <p className="text-sm text-text-muted">
+                    <span className="font-semibold">Admin note:</span> {view.adminNote}
+                  </p>
+                )}
+                <p className="text-sm text-text-muted">
+                  Submitted on {new Date(data.created_at).toLocaleDateString()}.
+                </p>
+                <Link
+                  to={view.showCta ? "/owner-request" : "/profile"}
+                  className="text-sm font-semibold text-primary underline"
+                >
+                  {view.showCta ? "Submit a new request" : "Back to profile"}
+                </Link>
+              </div>
+            );
+          })()}
       </Card>
     </div>
   );
