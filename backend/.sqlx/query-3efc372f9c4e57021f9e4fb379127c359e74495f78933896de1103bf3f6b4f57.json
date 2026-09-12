@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO owner_requests (id, user_id, phone, secondary_phone, identity_data, identity_documents)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, status AS \"status: OwnerRequestStatus\",\n                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\"\n        ",
+  "query": "\n        INSERT INTO owner_requests (id, user_id, phone, secondary_phone, identity_data, identity_documents)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, status AS \"status: OwnerRequestStatus\",\n                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\",\n                  to_char(reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"reviewed_at\",\n                  admin_note\n        ",
   "describe": {
     "columns": [
       {
@@ -28,6 +28,16 @@
         "ordinal": 2,
         "name": "created_at!",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "reviewed_at",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "admin_note",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -43,8 +53,10 @@
     "nullable": [
       false,
       false,
-      null
+      null,
+      null,
+      true
     ]
   },
-  "hash": "97707fef1808b181f12f1d1183964d4e3282477c9990f62c1918b83058cecd72"
+  "hash": "3efc372f9c4e57021f9e4fb379127c359e74495f78933896de1103bf3f6b4f57"
 }
