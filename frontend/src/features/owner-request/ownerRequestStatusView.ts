@@ -29,7 +29,8 @@ const VIEWS: Record<OwnerRequestViewState, BaseView> = {
     badgeTone: "warning",
     badgeLabel: "Pending",
     title: "Your request is pending",
-    description: "Our team is reviewing your information. You'll be notified by email once a decision is made.",
+    description:
+      "Our team is reviewing your information. You'll be notified by email once a decision is made.",
     showCta: false,
   },
   approved: {
