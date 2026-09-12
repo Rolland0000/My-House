@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { Link } from "react-router";
 import {
   Alert,
   Button,
@@ -152,6 +153,13 @@ function ProfileForm() {
               initials={formatInitials(data.first_name, data.last_name)}
             />
             <ProfileFields profile={data} />
+            {data.role === "seeker" && (
+              <div className="border-b border-border pb-6">
+                <Link to="/owner-request" className="text-sm font-semibold text-primary underline">
+                  Become an owner
+                </Link>
+              </div>
+            )}
             <DeleteAccountSection isOwner={data.role === "owner"} />
           </div>
         )}

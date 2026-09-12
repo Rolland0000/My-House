@@ -6,6 +6,9 @@ interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
   accept?: string;
   multiple?: boolean;
+  /** Forwarded to the input's `capture` attribute — opens the device camera
+   *  directly on mobile; ignored by browsers/desktop that don't support it. */
+  capture?: boolean | "user" | "environment";
   hasError?: boolean;
   disabled?: boolean;
   label?: string;
@@ -17,6 +20,7 @@ function FileDropzone({
   onFilesSelected,
   accept,
   multiple = false,
+  capture,
   hasError = false,
   disabled = false,
   label = "Drag and drop a file here, or click to select",
@@ -87,6 +91,7 @@ function FileDropzone({
         type="file"
         accept={accept}
         multiple={multiple}
+        capture={capture}
         disabled={disabled}
         className="sr-only"
         onChange={(event) => {

@@ -19,6 +19,16 @@ const AuthFlow = lazy(() =>
 const ProfileForm = lazy(() =>
   import("../features/profile/components/ProfileForm").then((m) => ({ default: m.ProfileForm }))
 );
+const OwnerRequestForm = lazy(() =>
+  import("../features/owner-request/components/OwnerRequestForm").then((m) => ({
+    default: m.OwnerRequestForm,
+  }))
+);
+const OwnerRequestStatus = lazy(() =>
+  import("../features/owner-request/components/OwnerRequestStatus").then((m) => ({
+    default: m.OwnerRequestStatus,
+  }))
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -44,6 +54,14 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <RequireAuth>{withSuspense(ProfileForm)}</RequireAuth>,
+      },
+      {
+        path: "owner-request",
+        element: <RequireAuth>{withSuspense(OwnerRequestForm)}</RequireAuth>,
+      },
+      {
+        path: "owner-request/status",
+        element: <RequireAuth>{withSuspense(OwnerRequestStatus)}</RequireAuth>,
       },
     ],
   },
