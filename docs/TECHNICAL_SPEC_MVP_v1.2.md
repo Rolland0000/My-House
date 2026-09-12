@@ -306,6 +306,7 @@ CREATE TABLE owner_requests (
     id                  UUID                 PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id             UUID                 NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     phone               VARCHAR(30)          NOT NULL,
+    secondary_phone     VARCHAR(30),                                -- ajouté par MH-45-BE, nullable, propre à la demande (jamais recopié sur users.phone)
     identity_data       JSONB                NOT NULL,             -- ex: { "full_name", "id_number", "id_type" }
     identity_documents  JSONB                NOT NULL DEFAULT '[]', -- [{ "storage_key", "original_filename" }]
     status              owner_request_status NOT NULL DEFAULT 'pending',
@@ -668,7 +669,13 @@ Invariant garanti en base par la contrainte `users_profile_complete_for_non_admi
 | `PUT`    | `/users/me`               | JWT  | tous       | Mise à jour du profil            |
 | `DELETE` | `/users/me`               | JWT  | tous       | Suppression du compte — cascade DB + nettoyage storage (listings, médias, avatar) |
 | `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage |
-| `GET`    | `/users/me/owner-request` | JWT  | `seeker` | Statut de la demande en cours     |
+| `GET`    | `/users/me/owner-request` | JWT  | tous¹      | Statut de la demande en cours     |
+
+¹ **Écart d'implémentation (MH-45-BE) :** l'endpoint n'impose aucun filtre de rôle — tout
+utilisateur authentifié peut lire sa propre demande, y compris `owner`/`admin` (utile après
+approbation/rejet, ou pour un admin qui aurait aussi déposé une demande). Le contrat d'origine
+ne visait que `seeker`. À trancher lors de la clôture de l'épic EP-07 : documenter l'élargissement
+comme définitif, ou restreindre le handler pour revenir au contrat initial.
 
 **`GET /users/me` — Response 200**
 
@@ -728,6 +735,7 @@ Mêmes contraintes de validation que les photos de listing (magic bytes, formats
 Content-Type: multipart/form-data
 Body: {
   phone: string,
+  secondary_phone?: string,        // ajouté par MH-45-BE — écrit sur owner_requests uniquement, jamais sur users.phone
   identity_data: <JSON string — { full_name, id_type, id_number }>,
   documents: <file[]>
 }
