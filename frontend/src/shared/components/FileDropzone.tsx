@@ -6,6 +6,9 @@ interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
   accept?: string;
   multiple?: boolean;
+  /** Forwarded to the input's `capture` attribute — opens the device camera
+   *  directly on mobile; ignored by browsers/desktop that don't support it. */
+  capture?: boolean | "user" | "environment";
   hasError?: boolean;
   disabled?: boolean;
   label?: string;
@@ -13,10 +16,38 @@ interface FileDropzoneProps {
   className?: string;
 }
 
+function isAcceptedFile(file: File, accept?: string): boolean {
+  if (!accept) return true;
+
+  const rules = accept
+    .split(",")
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (rules.length === 0) return true;
+
+  const fileName = file.name.toLowerCase();
+  const fileType = file.type.toLowerCase();
+
+  return rules.some((rule) => {
+    if (rule.startsWith(".")) {
+      return fileName.endsWith(rule);
+    }
+
+    if (rule.endsWith("/*")) {
+      const typePrefix = rule.slice(0, -1);
+      return fileType.startsWith(typePrefix);
+    }
+
+    return fileType === rule;
+  });
+}
+
 function FileDropzone({
   onFilesSelected,
   accept,
   multiple = false,
+  capture,
   hasError = false,
   disabled = false,
   label = "Drag and drop a file here, or click to select",
@@ -29,7 +60,9 @@ function FileDropzone({
 
   function handleFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
-    onFilesSelected(Array.from(fileList));
+    const safeFiles = Array.from(fileList).filter((file) => isAcceptedFile(file, accept));
+    if (safeFiles.length === 0) return;
+    onFilesSelected(safeFiles);
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
@@ -87,6 +120,7 @@ function FileDropzone({
         type="file"
         accept={accept}
         multiple={multiple}
+        capture={capture}
         disabled={disabled}
         className="sr-only"
         onChange={(event) => {
