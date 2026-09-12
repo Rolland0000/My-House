@@ -7,8 +7,11 @@
 
 use crate::shared::errors::AppError;
 
-/// Upper bound for image uploads (TECHNICAL_SPEC_MVP.md §4.2).
+/// Upper bound for image uploads.
 pub const MAX_IMAGE_SIZE_BYTES: usize = 5 * 1024 * 1024;
+
+/// Upper bound for PDF uploads (identity documents).
+pub const MAX_PDF_SIZE_BYTES: usize = 3 * 1024 * 1024;
 
 /// Accepted image formats, as `(detected mime, canonical extension)`.
 const ALLOWED_IMAGE_TYPES: [(&str, &str); 3] = [
@@ -16,6 +19,8 @@ const ALLOWED_IMAGE_TYPES: [(&str, &str); 3] = [
     ("image/png", "png"),
     ("image/webp", "webp"),
 ];
+
+const PDF_TYPE: (&str, &str) = ("application/pdf", "pdf");
 
 /// A payload whose format was identified from its own magic bytes.
 pub struct ValidatedFile {
@@ -45,6 +50,27 @@ pub fn validate_image(bytes: &[u8], max_size_bytes: usize) -> Result<ValidatedFi
             content_type,
         })
         .ok_or(AppError::InvalidFile)
+}
+
+/// Accepts `bytes` only if it is a non-empty, within-budget PDF, verified by
+/// magic bytes the same way [`validate_image`] verifies images.
+pub fn validate_pdf(bytes: &[u8], max_size_bytes: usize) -> Result<ValidatedFile, AppError> {
+    if bytes.is_empty() {
+        return Err(AppError::InvalidFile);
+    }
+    if bytes.len() > max_size_bytes {
+        return Err(AppError::PayloadTooLarge);
+    }
+
+    let detected = infer::get(bytes).ok_or(AppError::InvalidFile)?;
+    if detected.mime_type() != PDF_TYPE.0 {
+        return Err(AppError::InvalidFile);
+    }
+
+    Ok(ValidatedFile {
+        extension: PDF_TYPE.1,
+        content_type: PDF_TYPE.0,
+    })
 }
 
 #[cfg(test)]
@@ -98,6 +124,37 @@ mod tests {
 
         assert!(matches!(
             validate_image(&oversized, MAX_IMAGE_SIZE_BYTES),
+            Err(AppError::PayloadTooLarge)
+        ));
+    }
+
+    #[test]
+    fn accepts_pdf() {
+        let validated =
+            validate_pdf(PDF, MAX_PDF_SIZE_BYTES).expect("PDF header should be accepted");
+        assert_eq!(validated.extension, "pdf");
+        assert_eq!(validated.content_type, "application/pdf");
+    }
+
+    /// A file renamed to look like the expected type is still read by its
+    /// magic bytes, not its declared name or extension.
+    #[test]
+    fn rejects_a_non_pdf_payload() {
+        for bytes in [JPEG, SHELL_SCRIPT] {
+            assert!(matches!(
+                validate_pdf(bytes, MAX_PDF_SIZE_BYTES),
+                Err(AppError::InvalidFile)
+            ));
+        }
+    }
+
+    #[test]
+    fn rejects_pdf_over_max_size() {
+        let mut oversized = PDF.to_vec();
+        oversized.resize(MAX_PDF_SIZE_BYTES + 1, 0);
+
+        assert!(matches!(
+            validate_pdf(&oversized, MAX_PDF_SIZE_BYTES),
             Err(AppError::PayloadTooLarge)
         ));
     }

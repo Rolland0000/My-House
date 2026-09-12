@@ -19,6 +19,7 @@ use utoipa::OpenApi;
         (name = "listings", description = "Public read-only listings feed"),
         (name = "auth", description = "Authentication — OTP request, token refresh, logout"),
         (name = "users", description = "Authenticated user profile"),
+        (name = "owner_requests", description = "Owner upgrade request submission and status"),
     )
 )]
 pub struct ApiDoc;

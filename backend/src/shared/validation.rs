@@ -42,6 +42,14 @@ pub fn required_phone(raw: &str) -> Result<&str, AppError> {
     Ok(trimmed)
 }
 
+/// Same bound as [`required_phone`], but absent or blank is `None`, not an error.
+pub fn optional_phone(raw: Option<&str>) -> Result<Option<&str>, AppError> {
+    match raw.map(str::trim) {
+        None | Some("") => Ok(None),
+        Some(value) => required_phone(value).map(Some),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -99,6 +107,20 @@ mod tests {
         assert!(matches!(required_phone("  "), Err(AppError::BadRequest(_))));
         assert!(matches!(
             required_phone(&"0".repeat(MAX_PHONE_LENGTH + 1)),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn optional_phone_treats_absent_and_blank_as_cleared_but_still_bounds_a_value() {
+        assert_eq!(optional_phone(None).unwrap(), None);
+        assert_eq!(optional_phone(Some("  ")).unwrap(), None);
+        assert_eq!(
+            optional_phone(Some(" +33600000000 ")).unwrap(),
+            Some("+33600000000")
+        );
+        assert!(matches!(
+            optional_phone(Some(&"0".repeat(MAX_PHONE_LENGTH + 1))),
             Err(AppError::BadRequest(_))
         ));
     }
