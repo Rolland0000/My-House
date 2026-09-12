@@ -671,11 +671,10 @@ Invariant garanti en base par la contrainte `users_profile_complete_for_non_admi
 | `POST`   | `/users/me/avatar`        | JWT  | tous       | Upload / remplacement de l'avatar — l'ancien fichier est supprimé du storage |
 | `GET`    | `/users/me/owner-request` | JWT  | tous¹      | Statut de la demande en cours     |
 
-¹ **Écart d'implémentation (MH-45-BE) :** l'endpoint n'impose aucun filtre de rôle — tout
-utilisateur authentifié peut lire sa propre demande, y compris `owner`/`admin` (utile après
+¹ **Élargissement de rôle (MH-46-BE), définitif :** l'endpoint n'impose aucun filtre de rôle —
+tout utilisateur authentifié peut lire sa propre demande, y compris `owner`/`admin` (utile après
 approbation/rejet, ou pour un admin qui aurait aussi déposé une demande). Le contrat d'origine
-ne visait que `seeker`. À trancher lors de la clôture de l'épic EP-07 : documenter l'élargissement
-comme définitif, ou restreindre le handler pour revenir au contrat initial.
+ne visait que `seeker` ; cet élargissement le remplace.
 
 **`GET /users/me` — Response 200**
 
@@ -719,6 +718,27 @@ Mêmes contraintes de validation que les photos de listing (magic bytes, formats
 ```json
 // Response 200
 { "data": { "avatar_url": "https://..." } }
+```
+
+**`GET /users/me/owner-request` — Response 200**
+
+`admin_note` n'est renseigné que si `status` vaut `rejected`. `reviewed_at` et `admin_note`
+sont `null` tant que la demande n'a pas été traitée par un admin.
+
+```json
+// Une demande existe
+{
+  "data": {
+    "id": "uuid",
+    "status": "pending",
+    "created_at": "2026-09-01T10:00:00Z",
+    "reviewed_at": null,
+    "admin_note": null
+  }
+}
+
+// Aucune demande déposée — pas de 404
+{ "data": null }
 ```
 
 ---

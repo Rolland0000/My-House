@@ -80,6 +80,8 @@ pub enum AppError {
     #[error("Media not found.")]
     MediaNotFound,
 
+    /// Reserved for a lookup by request id; the current-user status lookup
+    /// returns `200` with `data: null` instead of raising this.
     #[error("Owner request not found.")]
     OwnerRequestNotFound,
 

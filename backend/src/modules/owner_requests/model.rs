@@ -18,6 +18,8 @@ pub struct OwnerRequestRow {
     /// Pre-formatted as ISO 8601 in SQL, like `UserRow::created_at` — no
     /// `chrono`/`time` feature enabled on `sqlx` in this crate.
     pub created_at: String,
+    pub reviewed_at: Option<String>,
+    pub admin_note: Option<String>,
 }
 
 /// One entry of the `identity_documents` JSONB array. `storage_key` must keep

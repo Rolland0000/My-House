@@ -50,7 +50,9 @@ pub async fn insert_pending(
         INSERT INTO owner_requests (id, user_id, phone, secondary_phone, identity_data, identity_documents)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id, status AS "status: OwnerRequestStatus",
-                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!"
+                  to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+                  to_char(reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "reviewed_at",
+                  admin_note
         "#,
         request_id,
         user_id,
@@ -83,7 +85,9 @@ pub async fn find_current_for_user(
         OwnerRequestRow,
         r#"
         SELECT id, status AS "status: OwnerRequestStatus",
-               to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!"
+               to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+               to_char(reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "reviewed_at",
+               admin_note
         FROM owner_requests
         WHERE user_id = $1
         ORDER BY created_at DESC

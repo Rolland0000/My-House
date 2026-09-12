@@ -9,7 +9,9 @@ use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
 use crate::shared::rbac::Role;
 
-use super::dto::{OwnerRequestDto, OwnerRequestResponse, OwnerRequestSubmissionForm};
+use super::dto::{
+    OwnerRequestDto, OwnerRequestResponse, OwnerRequestStatusResponse, OwnerRequestSubmissionForm,
+};
 use super::model::{OwnerRequestSubmission, UploadedDocument};
 use super::service;
 
@@ -69,19 +71,34 @@ pub async fn submit_owner_request(
     path = "/users/me/owner-request",
     tag = "owner_requests",
     responses(
-        (status = 200, description = "Caller's current or most recent request", body = OwnerRequestResponse),
+        (
+            status = 200,
+            description = "Caller's current or most recent request, or `data: null` if none exists",
+            body = OwnerRequestStatusResponse,
+            examples(
+                ("Populated" = (summary = "A request exists", value = json!({
+                    "data": {
+                        "id": "5b1f7e2a-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+                        "status": "pending",
+                        "created_at": "2026-09-01T10:00:00Z",
+                        "reviewed_at": null,
+                        "admin_note": null
+                    }
+                }))),
+                ("Empty" = (summary = "No request on file", value = json!({ "data": null })))
+            )
+        ),
         (status = 401, description = "Missing or invalid access token"),
-        (status = 404, description = "No request on file for this user"),
     )
 )]
 pub async fn get_owner_request_status(
     State(state): State<AppState>,
     user: AuthUser,
-) -> Result<Json<OwnerRequestResponse>, AppError> {
+) -> Result<Json<OwnerRequestStatusResponse>, AppError> {
     let row = service::get_status(state.db(), user.user_id).await?;
 
-    Ok(Json(OwnerRequestResponse {
-        data: OwnerRequestDto::from(row),
+    Ok(Json(OwnerRequestStatusResponse {
+        data: row.map(OwnerRequestDto::from),
     }))
 }
 
