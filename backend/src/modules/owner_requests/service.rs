@@ -106,10 +106,8 @@ pub async fn submit(
     Ok(row)
 }
 
-pub async fn get_status(pool: &PgPool, user_id: Uuid) -> Result<OwnerRequestRow, AppError> {
-    repository::find_current_for_user(pool, user_id)
-        .await?
-        .ok_or(AppError::OwnerRequestNotFound)
+pub async fn get_status(pool: &PgPool, user_id: Uuid) -> Result<Option<OwnerRequestRow>, AppError> {
+    repository::find_current_for_user(pool, user_id).await
 }
 
 fn parse_identity_data(raw: &str) -> Result<ValidatedIdentityData, AppError> {
