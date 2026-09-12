@@ -10,3 +10,5 @@ export {
   ownerRequestStatusQueryKey,
   type OwnerRequest,
 } from "./api";
+export { ownerRequestStatusView } from "./ownerRequestStatusView";
+export type { OwnerRequestStatusView, OwnerRequestViewState } from "./ownerRequestStatusView";
