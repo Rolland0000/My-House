@@ -38,7 +38,12 @@ function DocumentViewer({ requestId, doc }: DocumentViewerProps) {
         />
       )}
       {requested && url && !isImage && (
-        <a href={url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-primary underline">
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm font-semibold text-primary underline"
+        >
           Open document
         </a>
       )}

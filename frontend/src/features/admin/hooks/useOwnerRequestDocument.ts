@@ -15,10 +15,7 @@ export function useOwnerRequestDocument(id: string, docId: string, enabled: bool
     staleTime: Infinity,
   });
 
-  const url = useMemo(
-    () => (query.data ? URL.createObjectURL(query.data) : null),
-    [query.data]
-  );
+  const url = useMemo(() => (query.data ? URL.createObjectURL(query.data) : null), [query.data]);
 
   // Revoking only on cleanup (not via setState) avoids re-rendering just to
   // free the URL — the next render already has the new one from `useMemo`.

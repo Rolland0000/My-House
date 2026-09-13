@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Alert, Badge, Card, EmptyState, Pagination, Select, Spinner } from "../../../shared/components";
+import {
+  Alert,
+  Badge,
+  Card,
+  EmptyState,
+  Pagination,
+  Select,
+  Spinner,
+} from "../../../shared/components";
 import { useOwnerRequestQueue } from "../hooks/useOwnerRequestQueue";
 import { ownerRequestStatusBadge } from "../ownerRequestStatusBadge";
 
@@ -47,10 +55,7 @@ function OwnerRequestQueueList() {
       {error && <Alert variant="error">The queue is unavailable. Please try again.</Alert>}
 
       {!isPending && !error && data && data.data.length === 0 && (
-        <EmptyState
-          title="No requests"
-          description="No owner request matches this filter."
-        />
+        <EmptyState title="No requests" description="No owner request matches this filter." />
       )}
 
       {!isPending && !error && data && data.data.length > 0 && (

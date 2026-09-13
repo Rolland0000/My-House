@@ -17,8 +17,7 @@ export interface ListOwnerRequestsParams {
 export const ownerRequestQueueQueryKey = (params: ListOwnerRequestsParams) =>
   ["admin", "owner-requests", params] as const;
 
-export const ownerRequestDetailQueryKey = (id: string) =>
-  ["admin", "owner-requests", id] as const;
+export const ownerRequestDetailQueryKey = (id: string) => ["admin", "owner-requests", id] as const;
 
 export const ownerRequestDocumentQueryKey = (id: string, docId: string) =>
   ["admin", "owner-requests", id, "documents", docId] as const;
@@ -26,7 +25,11 @@ export const ownerRequestDocumentQueryKey = (id: string, docId: string) =>
 export function listOwnerRequests(
   params: ListOwnerRequestsParams
 ): Promise<OwnerRequestQueueResponse> {
-  return apiGet("/api/v1/admin/owner-requests", params);
+  return apiGet<OwnerRequestQueueResponse>("/api/v1/admin/owner-requests", {
+    status: params.status,
+    page: params.page,
+    per_page: params.per_page,
+  });
 }
 
 export function getOwnerRequest(id: string): Promise<AdminOwnerRequestDetailResponse> {
