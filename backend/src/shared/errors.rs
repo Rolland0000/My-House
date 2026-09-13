@@ -85,6 +85,13 @@ pub enum AppError {
     #[error("Owner request not found.")]
     OwnerRequestNotFound,
 
+    #[error("Owner request document not found.")]
+    OwnerRequestDocumentNotFound,
+
+    /// Distinct from `Storage` (which stays 500) — the key just has no object.
+    #[error("Storage key not found: {0}")]
+    StorageKeyNotFound(String),
+
     // ── 409 Conflict ─────────────────────────────────────────────────────────
     #[error("An owner request is already pending.")]
     OwnerRequestAlreadyPending,
@@ -155,6 +162,10 @@ impl AppError {
             Self::ListingNotFound => (StatusCode::NOT_FOUND, "LISTING_NOT_FOUND"),
             Self::MediaNotFound => (StatusCode::NOT_FOUND, "MEDIA_NOT_FOUND"),
             Self::OwnerRequestNotFound => (StatusCode::NOT_FOUND, "OWNER_REQUEST_NOT_FOUND"),
+            Self::OwnerRequestDocumentNotFound => {
+                (StatusCode::NOT_FOUND, "OWNER_REQUEST_DOCUMENT_NOT_FOUND")
+            }
+            Self::StorageKeyNotFound(_) => (StatusCode::NOT_FOUND, "STORAGE_KEY_NOT_FOUND"),
             // 409
             Self::OwnerRequestAlreadyPending => {
                 (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_PENDING")

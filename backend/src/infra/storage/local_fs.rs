@@ -84,8 +84,13 @@ impl StorageProvider for LocalFsStorage {
 
     async fn read(&self, key: &str) -> Result<Bytes, AppError> {
         let path = self.resolve(key)?;
-        let data = fs::read(&path).await?;
-        Ok(Bytes::from(data))
+        match fs::read(&path).await {
+            Ok(data) => Ok(Bytes::from(data)),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                Err(AppError::StorageKeyNotFound(key.to_string()))
+            }
+            Err(error) => Err(AppError::from(error)),
+        }
     }
 
     async fn delete(&self, key: &str) -> Result<(), AppError> {
@@ -174,6 +179,18 @@ mod tests {
         store.delete(key).await.expect("delete should succeed");
 
         assert!(store.read(key).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn read_on_missing_key_returns_not_found_not_generic_storage_error() {
+        let dir = tempdir();
+        let store = storage(dir.path());
+
+        let result = store
+            .read("owner-requests/does-not-exist/id-card.jpg")
+            .await;
+
+        assert!(matches!(result, Err(AppError::StorageKeyNotFound(_))));
     }
 
     #[tokio::test]

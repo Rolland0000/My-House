@@ -111,6 +111,54 @@
         }
       }
     },
+    "/api/v1/admin/owner-requests/{id}/documents/{doc_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Streams one identity document's raw bytes back to an admin — the sole\nbackend endpoint that proxies storage reads instead of leaving a file to\nbe served statically (`ARCHITECTURE.md` §7.3). `content_type` comes from\nthe upload-time magic-byte check, not from client input, so it's safe to\necho straight into the response header.",
+        "operationId": "get_owner_request_document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Owner request id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "doc_id",
+            "in": "path",
+            "description": "Document id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Raw document bytes",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin"
+          },
+          "404": {
+            "description": "No such request or document"
+          }
+        }
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "tags": [

@@ -17,7 +17,7 @@ use crate::shared::validation::{optional_phone, required_name, required_phone};
 use super::dto::{AdminOwnerRequestDetailDto, AdminOwnerRequestDto};
 use super::model::{
     IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestStatus,
-    OwnerRequestSubmission, UploadedDocument, ValidatedIdentityData,
+    OwnerRequestSubmission, StoredDocumentKey, UploadedDocument, ValidatedIdentityData,
 };
 use super::repository;
 
@@ -142,6 +142,82 @@ pub async fn get_for_admin(
         .await?
         .ok_or(AppError::OwnerRequestNotFound)?;
     Ok(AdminOwnerRequestDetailDto::from(row))
+}
+
+/// One identity document's bytes, ready to stream back as the HTTP response.
+pub struct OwnerRequestDocumentFile {
+    pub bytes: Bytes,
+    pub content_type: String,
+    pub original_filename: String,
+}
+
+/// Backs `GET /admin/owner-requests/:id/documents/:doc_id` — the one place
+/// `storage_key` leaves the database, used only to fetch the file itself. A
+/// `doc_id` that belongs to a different request never matches here, since
+/// the lookup is scoped to `request_id`'s own `identity_documents` array.
+pub async fn get_document_for_admin(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    request_id: Uuid,
+    doc_id: Uuid,
+) -> Result<OwnerRequestDocumentFile, AppError> {
+    let row = repository::find_by_id_for_admin(pool, request_id)
+        .await?
+        .ok_or(AppError::OwnerRequestNotFound)?;
+
+    let entry = find_document_entry(row.identity_documents, request_id, doc_id)?;
+    let bytes = storage
+        .read(&entry.storage_key)
+        .await
+        .map_err(|error| as_document_not_found(error, request_id, doc_id, &entry.storage_key))?;
+
+    Ok(OwnerRequestDocumentFile {
+        bytes,
+        content_type: entry.content_type,
+        original_filename: entry.original_filename,
+    })
+}
+
+/// A DB row pointing at a `storage_key` the storage backend no longer has is
+/// an ops inconsistency worth its own log line, not a generic 500 — surface
+/// it as the same 404 a missing `doc_id` would give. Any other storage error
+/// (disk full, permission denied) passes through unchanged.
+fn as_document_not_found(
+    error: AppError,
+    request_id: Uuid,
+    doc_id: Uuid,
+    storage_key: &str,
+) -> AppError {
+    match error {
+        AppError::StorageKeyNotFound(_) => {
+            tracing::error!(
+                %request_id, %doc_id, storage_key,
+                "identity document missing from storage"
+            );
+            AppError::OwnerRequestDocumentNotFound
+        }
+        other => other,
+    }
+}
+
+/// Resolves one document within a request's own `identity_documents` array.
+/// A `doc_id` from a different request simply isn't in this array, so this
+/// is where cross-request document access actually gets rejected.
+fn find_document_entry(
+    identity_documents: serde_json::Value,
+    request_id: Uuid,
+    doc_id: Uuid,
+) -> Result<StoredDocumentKey, AppError> {
+    let documents: Vec<StoredDocumentKey> =
+        serde_json::from_value(identity_documents).map_err(|error| {
+            tracing::warn!(%request_id, error = %error, "failed to parse identity_documents");
+            AppError::OwnerRequestDocumentNotFound
+        })?;
+
+    documents
+        .into_iter()
+        .find(|doc| doc.doc_id == doc_id)
+        .ok_or(AppError::OwnerRequestDocumentNotFound)
 }
 
 fn parse_status_filter(raw: Option<&str>) -> Result<Option<OwnerRequestStatus>, AppError> {
@@ -341,5 +417,63 @@ mod tests {
             parse_status_filter(Some("archived")),
             Err(AppError::InvalidQueryParam(_))
         ));
+    }
+
+    fn documents_json() -> serde_json::Value {
+        serde_json::json!([
+            {
+                "doc_id": "5b1f7e2a-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+                "storage_key": "owner-requests/req-1/front.jpg",
+                "original_filename": "front.jpg",
+                "content_type": "image/jpeg"
+            },
+            {
+                "doc_id": "6c2f8e3b-4d5e-5f6a-9b0c-1d2e3f4a5b6c",
+                "storage_key": "owner-requests/req-1/back.jpg",
+                "original_filename": "back.jpg",
+                "content_type": "image/jpeg"
+            }
+        ])
+    }
+
+    #[test]
+    fn finds_the_document_matching_doc_id_in_its_own_request() {
+        let doc_id = Uuid::parse_str("6c2f8e3b-4d5e-5f6a-9b0c-1d2e3f4a5b6c").unwrap();
+        let entry = find_document_entry(documents_json(), Uuid::nil(), doc_id).unwrap();
+        assert_eq!(entry.storage_key, "owner-requests/req-1/back.jpg");
+    }
+
+    #[test]
+    fn a_doc_id_from_a_different_request_does_not_resolve() {
+        let foreign_doc_id = Uuid::new_v4();
+        let result = find_document_entry(documents_json(), Uuid::nil(), foreign_doc_id);
+        assert!(matches!(
+            result,
+            Err(AppError::OwnerRequestDocumentNotFound)
+        ));
+    }
+
+    #[test]
+    fn a_missing_storage_object_surfaces_as_document_not_found() {
+        let error = AppError::StorageKeyNotFound("owner-requests/x/front.jpg".to_string());
+        let result = as_document_not_found(
+            error,
+            Uuid::nil(),
+            Uuid::nil(),
+            "owner-requests/x/front.jpg",
+        );
+        assert!(matches!(result, AppError::OwnerRequestDocumentNotFound));
+    }
+
+    #[test]
+    fn other_storage_errors_are_not_reinterpreted_as_not_found() {
+        let error = AppError::Storage("disk full".to_string());
+        let result = as_document_not_found(
+            error,
+            Uuid::nil(),
+            Uuid::nil(),
+            "owner-requests/x/front.jpg",
+        );
+        assert!(matches!(result, AppError::Storage(_)));
     }
 }
