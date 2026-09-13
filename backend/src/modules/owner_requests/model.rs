@@ -110,7 +110,9 @@ pub struct AdminOwnerRequestDetailRow {
 
 /// Read-side counterpart to [`OwnerRequestDocument`], used to parse
 /// `identity_documents` back out of the JSONB column. `storage_key` is
-/// deliberately absent — it is never re-exposed once written.
+/// deliberately absent — it is never re-exposed once written. Mirrors
+/// [`StoredDocumentKey`]'s fields other than `storage_key`; keep both in
+/// sync if a field is ever added to `identity_documents`.
 #[derive(Deserialize)]
 pub struct StoredDocumentEntry {
     pub doc_id: Uuid,
@@ -118,4 +120,16 @@ pub struct StoredDocumentEntry {
     pub content_type: String,
     #[serde(default)]
     pub side: Option<String>,
+}
+
+/// Another read-side counterpart to [`OwnerRequestDocument`], kept for the
+/// admin document-read endpoint — the one place `storage_key` needs to come
+/// back out of `identity_documents` to fetch the file. Never serialized,
+/// never sent to a client.
+#[derive(Deserialize)]
+pub struct StoredDocumentKey {
+    pub doc_id: Uuid,
+    pub storage_key: String,
+    pub original_filename: String,
+    pub content_type: String,
 }

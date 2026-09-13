@@ -1,4 +1,8 @@
 use axum::extract::{Path, Query, State};
+use axum::http::header::{
+    CACHE_CONTROL, CONTENT_DISPOSITION, CONTENT_TYPE, X_CONTENT_TYPE_OPTIONS,
+};
+use axum::response::IntoResponse;
 use axum::Json;
 use uuid::Uuid;
 
@@ -68,4 +72,65 @@ pub async fn get_owner_request(
 
     let data = service::get_for_admin(state.db(), id).await?;
     Ok(Json(AdminOwnerRequestDetailResponse { data }))
+}
+
+/// Streams one identity document's raw bytes back to an admin — the sole
+/// backend endpoint that proxies storage reads instead of leaving a file to
+/// be served statically (`ARCHITECTURE.md` §7.3). `content_type` comes from
+/// the upload-time magic-byte check, not from client input, so it's safe to
+/// echo straight into the response header.
+#[utoipa::path(
+    get,
+    path = "/admin/owner-requests/{id}/documents/{doc_id}",
+    tag = "admin",
+    params(
+        ("id" = Uuid, Path, description = "Owner request id"),
+        ("doc_id" = Uuid, Path, description = "Document id"),
+    ),
+    responses(
+        (status = 200, description = "Raw document bytes", content_type = "application/octet-stream"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+        (status = 404, description = "No such request or document"),
+    )
+)]
+pub async fn get_owner_request_document(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path((id, doc_id)): Path<(Uuid, Uuid)>,
+) -> Result<impl IntoResponse, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    let file =
+        service::get_document_for_admin(state.db(), state.storage().as_ref(), id, doc_id).await?;
+
+    tracing::info!(
+        admin_id = %user.user_id, request_id = %id, doc_id = %doc_id,
+        "identity document accessed"
+    );
+
+    let disposition = format!(
+        "inline; filename=\"{}\"",
+        sanitize_for_header(&file.original_filename)
+    );
+
+    Ok((
+        [
+            (CONTENT_TYPE, file.content_type),
+            (CONTENT_DISPOSITION, disposition),
+            (X_CONTENT_TYPE_OPTIONS, "nosniff".to_string()),
+            (CACHE_CONTROL, "no-store".to_string()),
+        ],
+        file.bytes,
+    ))
+}
+
+/// Strips characters that would break out of the quoted `filename="..."`
+/// value — `original_filename` is whatever the uploader's browser sent, so
+/// it reaches this header unsanitized otherwise.
+fn sanitize_for_header(filename: &str) -> String {
+    filename
+        .chars()
+        .filter(|c| !c.is_control() && *c != '"' && *c != '\\')
+        .collect()
 }

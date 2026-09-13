@@ -123,6 +123,7 @@ fn admin_router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(admin::handler::list_owner_requests))
         .routes(routes!(admin::handler::get_owner_request))
+        .routes(routes!(admin::handler::get_owner_request_document))
     // TODO EP-07 (MH-49-BE): .routes(routes!(admin::handler::review_owner_request))
     // TODO EP-12: .routes(routes!(admin::handler::deactivate_user))
 }
