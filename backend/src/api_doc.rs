@@ -20,6 +20,7 @@ use utoipa::OpenApi;
         (name = "auth", description = "Authentication — OTP request, token refresh, logout"),
         (name = "users", description = "Authenticated user profile"),
         (name = "owner_requests", description = "Owner upgrade request submission and status"),
+        (name = "admin", description = "Platform administration"),
     )
 )]
 pub struct ApiDoc;

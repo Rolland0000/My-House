@@ -3,7 +3,10 @@ use uuid::Uuid;
 
 use crate::shared::errors::AppError;
 
-use super::model::{OwnerRequestRow, OwnerRequestStatus};
+use super::model::{
+    AdminOwnerRequestDetailRow, AdminOwnerRequestRow, OwnerRequestRow, OwnerRequestStatus,
+    ValidatedIdentityData,
+};
 
 fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
@@ -94,6 +97,97 @@ pub async fn find_current_for_user(
         LIMIT 1
         "#,
         user_id
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// Count of requests matching `status` (or every request, when `None`) —
+/// paired with `list_for_admin` to build the pagination envelope.
+pub async fn count_for_admin(
+    pool: &PgPool,
+    status: Option<OwnerRequestStatus>,
+) -> Result<i64, AppError> {
+    sqlx::query_scalar!(
+        r#"
+        SELECT COUNT(*) AS "count!"
+        FROM owner_requests
+        WHERE ($1::owner_request_status IS NULL OR status = $1)
+        "#,
+        status as Option<OwnerRequestStatus>,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// One page of the admin queue, most recent first, optionally filtered by
+/// `status`. Never selects `identity_data`/`identity_documents` — those
+/// belong to a single applicant's own record, not to every row of a shared
+/// list, and stay behind [`find_by_id_for_admin`].
+pub async fn list_for_admin(
+    pool: &PgPool,
+    status: Option<OwnerRequestStatus>,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<AdminOwnerRequestRow>, AppError> {
+    sqlx::query_as!(
+        AdminOwnerRequestRow,
+        r#"
+        SELECT
+            orq.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            orq.phone,
+            orq.secondary_phone,
+            orq.status AS "status: OwnerRequestStatus",
+            to_char(orq.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+            to_char(orq.reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "reviewed_at",
+            orq.admin_note
+        FROM owner_requests orq
+        JOIN users u ON u.id = orq.user_id
+        WHERE ($1::owner_request_status IS NULL OR orq.status = $1)
+        ORDER BY orq.created_at DESC
+        LIMIT $2 OFFSET $3
+        "#,
+        status as Option<OwnerRequestStatus>,
+        limit,
+        offset,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// One request's full detail, `identity_data`/`identity_documents` included —
+/// the one place an admin can see them, fetched by id alone.
+pub async fn find_by_id_for_admin(
+    pool: &PgPool,
+    request_id: Uuid,
+) -> Result<Option<AdminOwnerRequestDetailRow>, AppError> {
+    sqlx::query_as!(
+        AdminOwnerRequestDetailRow,
+        r#"
+        SELECT
+            orq.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            orq.phone,
+            orq.secondary_phone,
+            orq.identity_data AS "identity_data: sqlx::types::Json<ValidatedIdentityData>",
+            orq.identity_documents,
+            orq.status AS "status: OwnerRequestStatus",
+            to_char(orq.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+            to_char(orq.reviewed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "reviewed_at",
+            orq.admin_note
+        FROM owner_requests orq
+        JOIN users u ON u.id = orq.user_id
+        WHERE orq.id = $1
+        "#,
+        request_id,
     )
     .fetch_optional(pool)
     .await
