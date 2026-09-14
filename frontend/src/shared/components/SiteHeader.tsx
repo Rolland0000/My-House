@@ -18,7 +18,7 @@ interface SiteHeaderProps {
   ownerRequestStatus?: "pending" | null;
   /** Owner only — no data source yet, accepted for a future verified-owner chip. */
   verified?: boolean;
-  /** Admin only — no admin pages are mounted yet, accepted for a future queue count. */
+  /** Admin only — count of pending owner requests, shown as a badge on the nav item. */
   pendingRequestCount?: number;
   onSignOut?: () => void;
 }
@@ -420,14 +420,17 @@ function AdminHeader({
         <span className="text-[11px] font-semibold tracking-[.06em] text-primary">ADMIN</span>
       </span>
       <nav className="hidden flex-1 items-center gap-0.5 sm:flex">
-        <span className="flex cursor-default items-center gap-1 bg-paper-50 px-3.5 py-2 text-sm font-semibold text-ink-900">
+        <Link
+          to="/admin/owner-requests"
+          className="flex items-center gap-1 bg-paper-50 px-3.5 py-2 text-sm font-semibold text-ink-900"
+        >
           Owner requests
           {Boolean(pendingRequestCount) && (
             <span className="bg-warning-soft px-1.5 py-0.5 text-xs font-bold text-warning-text">
               {pendingRequestCount}
             </span>
           )}
-        </span>
+        </Link>
         <span className="cursor-default px-3.5 py-2 text-sm text-[#B8C0CE]">Users</span>
         <span className="cursor-default px-3.5 py-2 text-sm text-[#B8C0CE]">Properties</span>
       </nav>

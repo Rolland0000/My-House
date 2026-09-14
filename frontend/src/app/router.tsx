@@ -1,8 +1,10 @@
 import { lazy, Suspense, type ComponentType } from "react";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { AuthLayout } from "./layout/AuthLayout";
 import { RequireAuth } from "./RequireAuth";
+import { RequireAdmin } from "./RequireAdmin";
 import { RootLayout } from "./layout/RootLayout";
+import { AdminLayout } from "./layout/AdminLayout";
 import { Spinner } from "../shared/components";
 
 const ListingFeed = lazy(() =>
@@ -27,6 +29,16 @@ const OwnerRequestForm = lazy(() =>
 const OwnerRequestStatus = lazy(() =>
   import("../features/owner-request/components/OwnerRequestStatus").then((m) => ({
     default: m.OwnerRequestStatus,
+  }))
+);
+const OwnerRequestQueueList = lazy(() =>
+  import("../features/admin/components/OwnerRequestQueueList").then((m) => ({
+    default: m.OwnerRequestQueueList,
+  }))
+);
+const OwnerRequestDetail = lazy(() =>
+  import("../features/admin/components/OwnerRequestDetail").then((m) => ({
+    default: m.OwnerRequestDetail,
   }))
 );
 
@@ -69,5 +81,20 @@ export const router = createBrowserRouter([
     path: "/login",
     Component: AuthLayout,
     children: [{ index: true, element: withSuspense(AuthFlow) }],
+  },
+  {
+    path: "/admin",
+    element: (
+      <RequireAuth>
+        <RequireAdmin>
+          <AdminLayout />
+        </RequireAdmin>
+      </RequireAuth>
+    ),
+    children: [
+      { index: true, element: <Navigate to="owner-requests" replace /> },
+      { path: "owner-requests", element: withSuspense(OwnerRequestQueueList) },
+      { path: "owner-requests/:id", element: withSuspense(OwnerRequestDetail) },
+    ],
   },
 ]);

@@ -71,7 +71,7 @@ function send(path: string, init?: RequestInit): Promise<Response> {
   });
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function sendWithRetry(path: string, init?: RequestInit): Promise<Response> {
   let response = await send(path, init);
 
   if (response.status === 401 && handleUnauthorized && !isAuthPath(path)) {
@@ -90,6 +90,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       readRetryAfter(response)
     );
   }
+
+  return response;
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await sendWithRetry(path, init);
 
   if (response.status === 204) {
     return undefined as T;
@@ -144,4 +150,11 @@ export function apiDelete<T>(path: string): Promise<T> {
 // sends the same body rather than an already-consumed stream.
 export function apiUpload<T>(path: string, formData: FormData): Promise<T> {
   return request<T>(path, { method: "POST", body: formData });
+}
+
+// For binary responses (the admin identity-document endpoint) — the caller
+// turns the blob into an object URL rather than this module parsing JSON.
+export async function apiGetBlob(path: string): Promise<Blob> {
+  const response = await sendWithRetry(path);
+  return response.blob();
 }
