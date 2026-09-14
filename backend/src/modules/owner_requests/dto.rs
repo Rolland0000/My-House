@@ -59,6 +59,25 @@ pub struct OwnerRequestSubmissionForm {
 }
 
 // ─────────────────────────────
+// PATCH /admin/owner-requests/:id
+// ─────────────────────────────
+
+/// Only `approved`/`rejected` are constructible, so `serde` itself rejects
+/// `"pending"` or any other value as a 400 — no separate validation needed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum ReviewDecision {
+    Approved,
+    Rejected,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ReviewOwnerRequestRequest {
+    pub status: ReviewDecision,
+    pub admin_note: Option<String>,
+}
+
+// ─────────────────────────────
 // GET /admin/owner-requests
 // ─────────────────────────────
 
@@ -314,5 +333,28 @@ mod tests {
         let dto =
             AdminOwnerRequestDetailDto::from(admin_detail_row(serde_json::json!("not an array")));
         assert!(dto.documents.is_empty());
+    }
+
+    #[test]
+    fn review_request_accepts_approved_and_rejected() {
+        let approved: ReviewOwnerRequestRequest =
+            serde_json::from_value(serde_json::json!({"status": "approved"})).unwrap();
+        assert_eq!(approved.status, ReviewDecision::Approved);
+
+        let rejected: ReviewOwnerRequestRequest = serde_json::from_value(
+            serde_json::json!({"status": "rejected", "admin_note": "Blurry ID photo"}),
+        )
+        .unwrap();
+        assert_eq!(rejected.status, ReviewDecision::Rejected);
+        assert_eq!(rejected.admin_note.as_deref(), Some("Blurry ID photo"));
+    }
+
+    #[test]
+    fn review_request_rejects_pending_and_unknown_status_values() {
+        for value in ["pending", "archived"] {
+            let result: Result<ReviewOwnerRequestRequest, _> =
+                serde_json::from_value(serde_json::json!({"status": value}));
+            assert!(result.is_err());
+        }
     }
 }

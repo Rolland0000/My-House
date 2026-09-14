@@ -161,12 +161,77 @@ pub async fn list_for_admin(
     .map_err(db_err)
 }
 
-/// One request's full detail, `identity_data`/`identity_documents` included —
-/// the one place an admin can see them, fetched by id alone.
-pub async fn find_by_id_for_admin(
+/// Records an admin's approve/reject decision and, on approval, promotes the
+/// user to `owner` — in the same transaction, so a request never ends up
+/// `approved` with its user still a `seeker`. `FOR UPDATE` locks the row for
+/// the duration of the transaction, so a second reviewer racing the first
+/// blocks here and then sees the now-updated status instead of double-writing.
+pub async fn review_for_admin(
     pool: &PgPool,
     request_id: Uuid,
-) -> Result<Option<AdminOwnerRequestDetailRow>, AppError> {
+    admin_id: Uuid,
+    new_status: OwnerRequestStatus,
+    admin_note: Option<&str>,
+) -> Result<AdminOwnerRequestDetailRow, AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let current = sqlx::query!(
+        r#"SELECT user_id, status AS "status: OwnerRequestStatus" FROM owner_requests WHERE id = $1 FOR UPDATE"#,
+        request_id
+    )
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(db_err)?
+    .ok_or(AppError::OwnerRequestNotFound)?;
+
+    if current.status != OwnerRequestStatus::Pending {
+        return Err(AppError::OwnerRequestAlreadyReviewed);
+    }
+
+    sqlx::query!(
+        r#"
+        UPDATE owner_requests
+        SET status = $2, admin_note = $3, reviewed_by = $4, reviewed_at = now()
+        WHERE id = $1
+        "#,
+        request_id,
+        new_status as OwnerRequestStatus,
+        admin_note,
+        admin_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(db_err)?;
+
+    if new_status == OwnerRequestStatus::Approved {
+        sqlx::query!(
+            "UPDATE users SET role = 'owner' WHERE id = $1 AND role = 'seeker'",
+            current.user_id
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(db_err)?;
+    }
+
+    let row = find_by_id_for_admin(&mut *tx, request_id)
+        .await?
+        .ok_or(AppError::OwnerRequestNotFound)?;
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(row)
+}
+
+/// One request's full detail, `identity_data`/`identity_documents` included —
+/// the one place an admin can see them, fetched by id alone. Generic over the
+/// executor so `review_for_admin` can reuse it inside its own transaction,
+/// before commit, instead of racing a separate post-commit query.
+pub async fn find_by_id_for_admin<'e, E>(
+    executor: E,
+    request_id: Uuid,
+) -> Result<Option<AdminOwnerRequestDetailRow>, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
     sqlx::query_as!(
         AdminOwnerRequestDetailRow,
         r#"
@@ -189,7 +254,7 @@ pub async fn find_by_id_for_admin(
         "#,
         request_id,
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await
     .map_err(db_err)
 }
