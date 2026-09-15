@@ -141,6 +141,10 @@ export function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, jsonInit("PUT", body));
 }
 
+export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, jsonInit("PATCH", body));
+}
+
 export function apiDelete<T>(path: string): Promise<T> {
   return request<T>(path, { method: "DELETE" });
 }
