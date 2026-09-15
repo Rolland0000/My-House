@@ -96,6 +96,12 @@ pub enum AppError {
     #[error("An owner request is already pending.")]
     OwnerRequestAlreadyPending,
 
+    /// Distinct from `OwnerRequestAlreadyPending` (that's a duplicate
+    /// submission) — this is a review landing on a request that's no longer
+    /// pending, e.g. a second admin reviewing the same request.
+    #[error("This owner request has already been reviewed.")]
+    OwnerRequestAlreadyReviewed,
+
     #[error("An account already exists for this email.")]
     EmailAlreadyExists,
 
@@ -169,6 +175,9 @@ impl AppError {
             // 409
             Self::OwnerRequestAlreadyPending => {
                 (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_PENDING")
+            }
+            Self::OwnerRequestAlreadyReviewed => {
+                (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_REVIEWED")
             }
             Self::EmailAlreadyExists => (StatusCode::CONFLICT, "EMAIL_ALREADY_EXISTS"),
             // 413
@@ -298,6 +307,15 @@ mod tests {
             .as_str()
             .unwrap_or("")
             .contains(&detail));
+    }
+
+    #[tokio::test]
+    async fn test_owner_request_already_reviewed_is_409_distinct_from_already_pending() {
+        let response = AppError::OwnerRequestAlreadyReviewed.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "OWNER_REQUEST_ALREADY_REVIEWED");
     }
 
     #[tokio::test]

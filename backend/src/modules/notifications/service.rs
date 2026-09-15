@@ -46,12 +46,13 @@ struct OwnerRequestApprovedTemplate<'a> {
     user_name: &'a str,
 }
 
-/// Context for `owner_request_rejected.html`.
+/// Context for `owner_request_rejected.html`. `None` falls back to the
+/// template's own default line.
 #[derive(Template)]
 #[template(path = "owner_request_rejected.html")]
 struct OwnerRequestRejectedTemplate<'a> {
     user_name: &'a str,
-    reason: &'a str,
+    reason: Option<&'a str>,
 }
 
 /// One of the five MVP notification templates, carrying the context data it
@@ -76,7 +77,7 @@ pub enum NotificationTemplate<'a> {
     },
     OwnerRequestRejected {
         user_name: &'a str,
-        reason: &'a str,
+        reason: Option<&'a str>,
     },
 }
 
@@ -203,6 +204,59 @@ pub async fn send_owner_request_received_email(
         .await;
 }
 
+/// Renders and sends the approval email, once the admin decision has been
+/// committed — best-effort like every other send in this module.
+pub async fn send_owner_request_approved_email(mailer: &Mailer, to: &str, user_name: &str) {
+    let body = match render(NotificationTemplate::OwnerRequestApproved { user_name }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: failed to render owner_request_approved email");
+            return;
+        }
+    };
+
+    let address: Address = match to.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: invalid owner_request_approved recipient address");
+            return;
+        }
+    };
+
+    mailer
+        .send(address, "Your owner request has been approved", body)
+        .await;
+}
+
+/// Renders and sends the rejection email, once the admin decision has been
+/// committed — best-effort like every other send in this module.
+pub async fn send_owner_request_rejected_email(
+    mailer: &Mailer,
+    to: &str,
+    user_name: &str,
+    reason: Option<&str>,
+) {
+    let body = match render(NotificationTemplate::OwnerRequestRejected { user_name, reason }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: failed to render owner_request_rejected email");
+            return;
+        }
+    };
+
+    let address: Address = match to.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, to, "notifications: invalid owner_request_rejected recipient address");
+            return;
+        }
+    };
+
+    mailer
+        .send(address, "Your owner request has been rejected", body)
+        .await;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -255,11 +309,23 @@ mod tests {
     fn renders_owner_request_rejected_template_with_sample_context() {
         let html = render(NotificationTemplate::OwnerRequestRejected {
             user_name: "Moussa Traore",
-            reason: "Documents illisibles",
+            reason: Some("Documents illisibles"),
         })
         .expect("owner_request_rejected template should render");
 
         assert!(html.contains("Moussa Traore"));
         assert!(html.contains("Documents illisibles"));
+    }
+
+    #[test]
+    fn renders_owner_request_rejected_template_without_a_reason() {
+        let html = render(NotificationTemplate::OwnerRequestRejected {
+            user_name: "Moussa Traore",
+            reason: None,
+        })
+        .expect("owner_request_rejected template should render");
+
+        assert!(html.contains("Moussa Traore"));
+        assert!(!html.contains("Motif :"));
     }
 }

@@ -12,9 +12,9 @@ use crate::shared::file_validation::{
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::storage_key::owner_request_document_key;
 use crate::shared::types::OwnerRequestId;
-use crate::shared::validation::{optional_phone, required_name, required_phone};
+use crate::shared::validation::{optional_note, optional_phone, required_name, required_phone};
 
-use super::dto::{AdminOwnerRequestDetailDto, AdminOwnerRequestDto};
+use super::dto::{AdminOwnerRequestDetailDto, AdminOwnerRequestDto, ReviewDecision};
 use super::model::{
     IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestStatus,
     OwnerRequestSubmission, StoredDocumentKey, UploadedDocument, ValidatedIdentityData,
@@ -141,6 +141,49 @@ pub async fn get_for_admin(
     let row = repository::find_by_id_for_admin(pool, request_id)
         .await?
         .ok_or(AppError::OwnerRequestNotFound)?;
+    Ok(AdminOwnerRequestDetailDto::from(row))
+}
+
+/// Backs `PATCH /admin/owner-requests/:id`: records the admin's decision,
+/// promotes the user on approval, and sends the matching email once the
+/// decision is durably committed.
+pub async fn review(
+    pool: &PgPool,
+    mailer: &Mailer,
+    request_id: Uuid,
+    admin_id: Uuid,
+    status: ReviewDecision,
+    admin_note: Option<&str>,
+) -> Result<AdminOwnerRequestDetailDto, AppError> {
+    let new_status = match status {
+        ReviewDecision::Approved => OwnerRequestStatus::Approved,
+        ReviewDecision::Rejected => OwnerRequestStatus::Rejected,
+    };
+    let admin_note = optional_note(admin_note, "admin_note")?;
+
+    let row =
+        repository::review_for_admin(pool, request_id, admin_id, new_status, admin_note).await?;
+
+    match status {
+        ReviewDecision::Approved => {
+            notifications::service::send_owner_request_approved_email(
+                mailer,
+                &row.email,
+                &row.identity_data.0.full_name,
+            )
+            .await;
+        }
+        ReviewDecision::Rejected => {
+            notifications::service::send_owner_request_rejected_email(
+                mailer,
+                &row.email,
+                &row.identity_data.0.full_name,
+                admin_note,
+            )
+            .await;
+        }
+    }
+
     Ok(AdminOwnerRequestDetailDto::from(row))
 }
 

@@ -5,6 +5,7 @@ use crate::shared::errors::AppError;
 
 pub const MAX_NAME_LENGTH: usize = 100;
 pub const MAX_PHONE_LENGTH: usize = 30;
+pub const MAX_ADMIN_NOTE_LENGTH: usize = 1000;
 
 /// Trims and rejects an empty or over-long mandatory name field.
 pub fn required_name<'a>(raw: &'a str, field: &str) -> Result<&'a str, AppError> {
@@ -47,6 +48,17 @@ pub fn optional_phone(raw: Option<&str>) -> Result<Option<&str>, AppError> {
     match raw.map(str::trim) {
         None | Some("") => Ok(None),
         Some(value) => required_phone(value).map(Some),
+    }
+}
+
+/// Trims a freeform admin note; absent or blank is `None`, over-length is an error.
+pub fn optional_note<'a>(raw: Option<&'a str>, field: &str) -> Result<Option<&'a str>, AppError> {
+    match raw.map(str::trim) {
+        None | Some("") => Ok(None),
+        Some(value) if value.chars().count() > MAX_ADMIN_NOTE_LENGTH => Err(AppError::BadRequest(
+            format!("{field} must be at most {MAX_ADMIN_NOTE_LENGTH} characters."),
+        )),
+        Some(value) => Ok(Some(value)),
     }
 }
 
@@ -121,6 +133,29 @@ mod tests {
         );
         assert!(matches!(
             optional_phone(Some(&"0".repeat(MAX_PHONE_LENGTH + 1))),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn optional_note_treats_absent_and_blank_as_cleared() {
+        assert_eq!(optional_note(None, "admin_note").unwrap(), None);
+        assert_eq!(optional_note(Some("   "), "admin_note").unwrap(), None);
+        assert_eq!(
+            optional_note(Some(" Blurry ID photo "), "admin_note").unwrap(),
+            Some("Blurry ID photo")
+        );
+    }
+
+    #[test]
+    fn optional_note_accepts_the_upper_bound_and_rejects_over_length() {
+        let at_bound = repeat(MAX_ADMIN_NOTE_LENGTH);
+        assert_eq!(
+            optional_note(Some(&at_bound), "admin_note").unwrap(),
+            Some(at_bound.as_str())
+        );
+        assert!(matches!(
+            optional_note(Some(&repeat(MAX_ADMIN_NOTE_LENGTH + 1)), "admin_note"),
             Err(AppError::BadRequest(_))
         ));
     }

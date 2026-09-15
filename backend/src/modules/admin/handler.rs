@@ -9,10 +9,11 @@ use uuid::Uuid;
 use crate::app_state::AppState;
 use crate::modules::owner_requests::dto::{
     AdminOwnerRequestDetailResponse, AdminOwnerRequestDto, ListOwnerRequestsQuery,
+    ReviewOwnerRequestRequest,
 };
 use crate::modules::owner_requests::service;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
@@ -123,6 +124,50 @@ pub async fn get_owner_request_document(
         ],
         file.bytes,
     ))
+}
+
+/// Records an admin's approve/reject decision. Delegates the whole
+/// transaction (status write, role promotion on approval, notification) to
+/// `owner_requests::service::review` — this handler only authorizes and logs.
+#[utoipa::path(
+    patch,
+    path = "/admin/owner-requests/{id}",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "Owner request id")),
+    request_body = ReviewOwnerRequestRequest,
+    responses(
+        (status = 200, description = "Updated request detail", body = AdminOwnerRequestDetailResponse),
+        (status = 400, description = "`status` is neither `approved` nor `rejected`"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+        (status = 404, description = "No request with this id"),
+        (status = 409, description = "Request is no longer pending"),
+    )
+)]
+pub async fn review_owner_request(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+    AppJson(body): AppJson<ReviewOwnerRequestRequest>,
+) -> Result<Json<AdminOwnerRequestDetailResponse>, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    let data = service::review(
+        state.db(),
+        state.mailer(),
+        id,
+        user.user_id,
+        body.status,
+        body.admin_note.as_deref(),
+    )
+    .await?;
+
+    tracing::info!(
+        admin_id = %user.user_id, request_id = %id, status = ?body.status,
+        "owner request reviewed"
+    );
+
+    Ok(Json(AdminOwnerRequestDetailResponse { data }))
 }
 
 /// Strips characters that would break out of the quoted `filename="..."`

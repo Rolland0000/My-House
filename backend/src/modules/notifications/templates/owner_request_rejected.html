@@ -7,7 +7,12 @@
 <body>
   <p>Bonjour {{ user_name }},</p>
   <p>Après examen, votre demande de statut propriétaire n'a pas été retenue.</p>
+  {% match reason %}
+  {% when Some with (reason) %}
   <p>Motif : {{ reason }}</p>
+  {% when None %}
+  <p>Aucun motif n'a été fourni.</p>
+  {% endmatch %}
   <p>Vous pouvez soumettre une nouvelle demande une fois la situation corrigée.</p>
 </body>
 </html>
