@@ -1,9 +1,10 @@
-import { apiGet, apiGetBlob } from "../../shared/api/client";
+import { apiGet, apiGetBlob, apiPatch } from "../../shared/api/client";
 import type { components } from "../../shared/api/types";
 
 export type AdminOwnerRequest = components["schemas"]["AdminOwnerRequestDto"];
 export type AdminOwnerRequestDetail = components["schemas"]["AdminOwnerRequestDetailDto"];
 export type AdminOwnerRequestDocument = components["schemas"]["AdminOwnerRequestDocumentDto"];
+export type ReviewDecision = components["schemas"]["ReviewDecision"];
 
 type OwnerRequestQueueResponse = components["schemas"]["PaginatedResponse_AdminOwnerRequestDto"];
 type AdminOwnerRequestDetailResponse = components["schemas"]["AdminOwnerRequestDetailResponse"];
@@ -38,4 +39,12 @@ export function getOwnerRequest(id: string): Promise<AdminOwnerRequestDetailResp
 
 export function getOwnerRequestDocument(id: string, docId: string): Promise<Blob> {
   return apiGetBlob(`/api/v1/admin/owner-requests/${id}/documents/${docId}`);
+}
+
+export function reviewOwnerRequest(
+  id: string,
+  status: ReviewDecision,
+  adminNote?: string
+): Promise<AdminOwnerRequestDetailResponse> {
+  return apiPatch(`/api/v1/admin/owner-requests/${id}`, { status, admin_note: adminNote });
 }
