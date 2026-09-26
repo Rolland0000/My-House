@@ -14,7 +14,7 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
-use crate::modules::{admin, auth, listings, owner_requests, users};
+use crate::modules::{admin, auth, listings, media, owner_requests, users};
 use crate::shared::file_validation::MAX_IMAGE_SIZE_BYTES;
 
 /// Headroom for multipart part headers and boundaries on top of the image
@@ -101,16 +101,17 @@ fn avatar_router() -> OpenApiRouter<AppState> {
 
 /// Routes restricted to validated owners.
 ///
-/// Protected by: `AuthUser` extractor + `require_role(Role::Owner)` layer.
-/// Examples: create/edit/delete own listings, manage media uploads.
-fn owner_router() -> Router<AppState> {
-    Router::new()
+/// Protected by: `AuthUser` extractor, with the role check made inline in
+/// each handler (`user.require_role(&[Role::Owner])`).
+fn owner_router() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(media::handler::upload_media))
+        .layer(DefaultBodyLimit::max(
+            MAX_IMAGE_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES,
+        ))
     // TODO EP-03: .route("/api/v1/listings",         post(listings::create))
     // TODO EP-03: .route("/api/v1/listings/:id",     patch(listings::update))
     // TODO EP-03: .route("/api/v1/listings/:id",     delete(listings::delete))
-    // TODO EP-04: .route("/api/v1/media",            post(media::upload))
-    // Layer added here before merge:
-    // .layer(middleware::from_fn_with_state(state, require_owner))
 }
 
 /// Routes restricted to platform administrators.
@@ -155,7 +156,7 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
         .merge(seeker_router())
         .merge(avatar_router())
         .merge(owner_request_router())
-        .merge(OpenApiRouter::from(owner_router()))
+        .merge(owner_router())
         .merge(admin_router());
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())

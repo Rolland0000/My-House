@@ -105,6 +105,12 @@ pub enum AppError {
     #[error("An account already exists for this email.")]
     EmailAlreadyExists,
 
+    #[error("Photo quota exceeded (maximum 5 per listing).")]
+    MediaQuotaExceeded,
+
+    #[error("Cannot remove cover photo without designating another one.")]
+    CoverPhotoRequired,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
     #[error("File exceeds the maximum allowed size.")]
     PayloadTooLarge,
@@ -115,12 +121,6 @@ pub enum AppError {
 
     #[error("Invalid file (unsupported format or size).")]
     InvalidFile,
-
-    #[error("Photo quota exceeded (maximum 5 per listing).")]
-    MediaQuotaExceeded,
-
-    #[error("Cannot remove cover photo without designating another one.")]
-    CoverPhotoRequired,
 
     // ── 429 Too Many Requests ─────────────────────────────────────────────────
     /// Carries the wait time, emitted as a `Retry-After` header.
@@ -180,13 +180,13 @@ impl AppError {
                 (StatusCode::CONFLICT, "OWNER_REQUEST_ALREADY_REVIEWED")
             }
             Self::EmailAlreadyExists => (StatusCode::CONFLICT, "EMAIL_ALREADY_EXISTS"),
+            Self::MediaQuotaExceeded => (StatusCode::CONFLICT, "MEDIA_QUOTA_EXCEEDED"),
+            Self::CoverPhotoRequired => (StatusCode::CONFLICT, "COVER_PHOTO_REQUIRED"),
             // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
             Self::InvalidFile => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_FILE"),
-            Self::MediaQuotaExceeded => (StatusCode::UNPROCESSABLE_ENTITY, "MEDIA_QUOTA_EXCEEDED"),
-            Self::CoverPhotoRequired => (StatusCode::UNPROCESSABLE_ENTITY, "COVER_PHOTO_REQUIRED"),
             // 429
             Self::OtpRateLimited { .. } => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
