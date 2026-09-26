@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT m.listing_id, l.owner_id, m.storage_key, m.is_cover\n        FROM listing_media m\n        JOIN listings l ON l.id = m.listing_id\n        WHERE m.id = $1\n        FOR UPDATE OF l, m\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "storage_key",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_cover",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0a635599d7ae4b892d8b6c0e6ccf7087ef2509d109e574dc6a8f4768796d9ebb"
+}

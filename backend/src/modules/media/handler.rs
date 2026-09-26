@@ -1,4 +1,4 @@
-use axum::extract::{Multipart, State};
+use axum::extract::{Multipart, Path, State};
 use axum::http::StatusCode;
 use axum::Json;
 use uuid::Uuid;
@@ -60,6 +60,31 @@ pub async fn upload_media(
             data: MediaDto::from(row),
         }),
     ))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/media/{id}",
+    tag = "media",
+    params(("id" = Uuid, Path, description = "Media id")),
+    responses(
+        (status = 204, description = "Photo deleted"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Media not found, or not owned by the caller"),
+        (status = 409, description = "The cover cannot be deleted while other photos remain"),
+    )
+)]
+pub async fn delete_media(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(media_id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    user.require_role(&[Role::Owner])?;
+
+    service::delete(state.db(), state.storage().as_ref(), media_id, user.user_id).await?;
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn read_submission(multipart: &mut Multipart) -> Result<UploadMediaSubmission, AppError> {
