@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -26,6 +26,11 @@ impl From<MediaRow> for MediaDto {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct MediaResponse {
     pub data: MediaDto,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct PromoteCoverRequest {
+    pub media_id: Uuid,
 }
 
 /// Documents the upload body for the OpenAPI schema. Nothing deserializes

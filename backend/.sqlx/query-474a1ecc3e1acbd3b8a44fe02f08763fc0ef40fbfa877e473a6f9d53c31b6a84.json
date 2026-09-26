@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE listing_media SET is_cover = TRUE\n        WHERE id = $1\n        RETURNING id, url, is_cover, position\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_cover",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "position",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "474a1ecc3e1acbd3b8a44fe02f08763fc0ef40fbfa877e473a6f9d53c31b6a84"
+}

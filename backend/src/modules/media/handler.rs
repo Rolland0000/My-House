@@ -8,7 +8,7 @@ use crate::shared::errors::AppError;
 use crate::shared::extractors::AuthUser;
 use crate::shared::rbac::Role;
 
-use super::dto::{MediaDto, MediaResponse, UploadMediaForm};
+use super::dto::{MediaDto, MediaResponse, PromoteCoverRequest, UploadMediaForm};
 use super::model::UploadMediaSubmission;
 use super::service;
 
@@ -85,6 +85,35 @@ pub async fn delete_media(
     service::delete(state.db(), state.storage().as_ref(), media_id, user.user_id).await?;
 
     Ok(StatusCode::NO_CONTENT)
+}
+
+#[utoipa::path(
+    patch,
+    path = "/listings/{id}/cover",
+    tag = "listings",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    request_body = PromoteCoverRequest,
+    responses(
+        (status = 200, description = "New cover photo", body = MediaResponse),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Listing not owned by the caller, or media not on this listing"),
+    )
+)]
+pub async fn promote_cover(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(listing_id): Path<Uuid>,
+    Json(payload): Json<PromoteCoverRequest>,
+) -> Result<Json<MediaResponse>, AppError> {
+    user.require_role(&[Role::Owner])?;
+
+    let row =
+        service::promote_cover(state.db(), listing_id, payload.media_id, user.user_id).await?;
+
+    Ok(Json(MediaResponse {
+        data: MediaDto::from(row),
+    }))
 }
 
 async fn read_submission(multipart: &mut Multipart) -> Result<UploadMediaSubmission, AppError> {

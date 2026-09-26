@@ -170,9 +170,61 @@ pub async fn delete(
     Ok(())
 }
 
+enum CoverPromotion {
+    AlreadyCover(MediaRow),
+    Promote,
+}
+
+/// `target` is `None` when the photo doesn't exist or sits on another listing.
+fn cover_promotion(target: Option<MediaRow>) -> Result<CoverPromotion, AppError> {
+    match target {
+        None => Err(AppError::MediaNotFound),
+        Some(row) if row.is_cover => Ok(CoverPromotion::AlreadyCover(row)),
+        Some(_) => Ok(CoverPromotion::Promote),
+    }
+}
+
+/// Makes `media_id` the cover of `listing_id`, owned by `caller_id`.
+///
+/// The listing lock serializes this with uploads and deletes on the same
+/// listing, and the demote/promote pair commits as one change.
+pub async fn promote_cover(
+    pool: &PgPool,
+    listing_id: Uuid,
+    media_id: Uuid,
+    caller_id: Uuid,
+) -> Result<MediaRow, AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let owner_id = repository::lock_listing_owner(&mut *tx, listing_id)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+    verify_ownership(owner_id, caller_id)?;
+
+    let target = repository::find_listing_media(&mut *tx, listing_id, media_id).await?;
+    if let CoverPromotion::AlreadyCover(row) = cover_promotion(target)? {
+        return Ok(row);
+    }
+
+    repository::demote_other_covers(&mut *tx, listing_id, media_id).await?;
+    let row = repository::promote_cover(&mut *tx, media_id).await?;
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(row)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn photo(is_cover: bool, position: i16) -> MediaRow {
+        MediaRow {
+            id: Uuid::new_v4(),
+            url: "https://media.example/listings/photo.jpg".to_string(),
+            is_cover,
+            position,
+        }
+    }
 
     fn media_owned_by(owner_id: Uuid) -> MediaForDeletion {
         MediaForDeletion {
@@ -266,6 +318,33 @@ mod tests {
     fn unknown_media_id_is_reported_as_not_found() {
         assert!(matches!(
             resolve_owned_media(None, Uuid::new_v4()),
+            Err(AppError::MediaNotFound)
+        ));
+    }
+
+    #[test]
+    fn non_cover_photo_of_a_three_photo_listing_is_promoted() {
+        let third_photo = photo(false, 2);
+        assert!(matches!(
+            cover_promotion(Some(third_photo)),
+            Ok(CoverPromotion::Promote)
+        ));
+    }
+
+    #[test]
+    fn promoting_the_current_cover_changes_nothing() {
+        let cover = photo(true, 0);
+        let cover_id = cover.id;
+        match cover_promotion(Some(cover)) {
+            Ok(CoverPromotion::AlreadyCover(row)) => assert_eq!(row.id, cover_id),
+            _ => panic!("the current cover should be returned untouched"),
+        }
+    }
+
+    #[test]
+    fn media_from_another_listing_is_reported_as_not_found() {
+        assert!(matches!(
+            cover_promotion(None),
             Err(AppError::MediaNotFound)
         ));
     }
