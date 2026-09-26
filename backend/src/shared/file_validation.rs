@@ -13,6 +13,14 @@ pub const MAX_IMAGE_SIZE_BYTES: usize = 5 * 1024 * 1024;
 /// Upper bound for PDF uploads (identity documents).
 pub const MAX_PDF_SIZE_BYTES: usize = 3 * 1024 * 1024;
 
+/// Headroom for multipart part headers and boundaries on top of the file
+/// budget itself, so a file at exactly the limit still gets through.
+pub const MULTIPART_OVERHEAD_BYTES: usize = 16 * 1024;
+
+/// Request body limit for a single-image multipart upload. Axum's 2 MB
+/// default would otherwise reject a valid 5 MB image.
+pub const SINGLE_IMAGE_BODY_LIMIT_BYTES: usize = MAX_IMAGE_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES;
+
 /// Accepted image formats, as `(detected mime, canonical extension)`.
 const ALLOWED_IMAGE_TYPES: [(&str, &str); 3] = [
     ("image/jpeg", "jpg"),

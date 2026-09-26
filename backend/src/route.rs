@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use axum::extract::DefaultBodyLimit;
 use axum::Router;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -15,149 +14,25 @@ use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
 use crate::modules::{admin, auth, listings, media, owner_requests, users};
-use crate::shared::file_validation::MAX_IMAGE_SIZE_BYTES;
 
-/// Headroom for multipart part headers and boundaries on top of the image
-/// budget itself, so a file at exactly the limit still gets through.
-const MULTIPART_OVERHEAD_BYTES: usize = 16 * 1024;
-
-/// The largest valid owner-request submission is two 5 MB images (the photo
-/// modality); the PDF modality's 3 MB cap is smaller and never the binding
-/// constraint.
-const OWNER_REQUEST_BODY_LIMIT_BYTES: usize = MAX_IMAGE_SIZE_BYTES * 2 + MULTIPART_OVERHEAD_BYTES;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Sub-routers by role
-//
-// Each sub-router is built in isolation so that role-scoped middleware
-// (auth guards, RBAC checks) can be added as a `.layer()` on the sub-router
-// *before* it is merged into the global router — without polluting the other
-// role groups.
-//
-// Layering order reminder (Axum / Tower):
-//   router.layer(middleware)  →  middleware wraps the *entire* sub-router.
-//   Add auth check as a layer here; add tracing/logging at the global level.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Routes accessible without authentication, mounted under the global
-/// `/api/v1` prefix (see [`merged_router`]) — everything except `/health`,
-/// which lives outside it per `TECHNICAL_SPEC_MVP.md §4` ("Hors `/api/v1`").
-///
-/// Examples: OTP request/verify, public listing browse.
-///
-/// Built as an [`OpenApiRouter`] so every handler carrying a `#[utoipa::path]`
-/// annotation is automatically collected into the OpenAPI schema served at
-/// `/api/docs/openapi.json` — no manual schema maintenance required.
-fn public_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(listings::handler::list))
-        .routes(routes!(listings::handler::get_by_id))
-        .routes(routes!(auth::handler::otp_request))
-        .routes(routes!(auth::handler::otp_verify))
-        .routes(routes!(auth::handler::register))
-        .routes(routes!(auth::handler::refresh))
-}
-
-/// Routes requiring a valid session (any authenticated user — seeker by default).
-///
-/// Protected by: `AuthUser` extractor (re-validates `is_active` on every request).
-/// Examples: profile read/update, saved searches, logout.
-fn seeker_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(auth::handler::logout))
-        // Same path, three methods: one `routes!` call — each call contributes
-        // a single OpenAPI path item, so splitting them would drop a method
-        // from the schema.
-        .routes(routes!(
-            users::handler::get_me,
-            users::handler::update_me,
-            users::handler::delete_me
-        ))
-        .routes(routes!(owner_requests::handler::get_owner_request_status))
-}
-
-/// Owner request submission, kept in its own sub-router for the same reason
-/// as [`avatar_router`]: the raised body limit (two 5 MB images) must not
-/// apply to the rest of the seeker surface.
-fn owner_request_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(owner_requests::handler::submit_owner_request))
-        .layer(DefaultBodyLimit::max(OWNER_REQUEST_BODY_LIMIT_BYTES))
-}
-
-/// Avatar upload, kept in its own sub-router so the raised body limit applies
-/// to this route alone and not to the rest of the seeker surface.
-///
-/// The limit is a Tower layer rather than a check inside the handler: it cuts
-/// the stream off instead of letting an oversized body buffer first. Axum's
-/// 2 MB default would otherwise reject a valid 5 MB upload.
-fn avatar_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(users::handler::upload_avatar))
-        .layer(DefaultBodyLimit::max(
-            MAX_IMAGE_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES,
-        ))
-}
-
-/// Routes restricted to validated owners.
-///
-/// Protected by: `AuthUser` extractor, with the role check made inline in
-/// each handler (`user.require_role(&[Role::Owner])`).
-fn owner_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(media::handler::upload_media))
-        .layer(DefaultBodyLimit::max(
-            MAX_IMAGE_SIZE_BYTES + MULTIPART_OVERHEAD_BYTES,
-        ))
-    // TODO EP-03: .route("/api/v1/listings",         post(listings::create))
-    // TODO EP-03: .route("/api/v1/listings/:id",     patch(listings::update))
-    // TODO EP-03: .route("/api/v1/listings/:id",     delete(listings::delete))
-}
-
-/// Routes restricted to platform administrators.
-///
-/// Protected by: `AuthUser` extractor, with the role check made inline in
-/// each handler (`user.require_role(&[Role::Admin])`) — the same pattern
-/// used by every other role-scoped handler in this codebase, rather than a
-/// separate Tower layer.
-fn admin_router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new()
-        .routes(routes!(admin::handler::list_owner_requests))
-        .routes(routes!(admin::handler::get_owner_request))
-        .routes(routes!(admin::handler::get_owner_request_document))
-        .routes(routes!(admin::handler::review_owner_request))
-    // TODO EP-12: .routes(routes!(admin::handler::deactivate_user))
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Root router
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Merges all sub-routers and returns both the assembled router and the
+/// Merges the module routers under `/api/v1` and returns the router with the
 /// collected OpenAPI schema.
 ///
-/// Every role-scoped sub-router is nested under the global `/api/v1` prefix
-/// (`TECHNICAL_SPEC_MVP.md §4`) — `.nest()` on an [`OpenApiRouter`] prepends
-/// the prefix to both the live routes and the collected OpenAPI paths, so
-/// handlers keep declaring bare paths (e.g. `/listings`) in `#[utoipa::path]`.
-/// `/health` is the sole exception, mounted outside the prefix so it matches
-/// the dedicated `location /health` block in the prod nginx config.
+/// Each module owns its routes, public and protected. Role checks run inline
+/// in the handlers, and each route in a module router is tagged with its
+/// access level. `/health` stays outside the prefix to match the dedicated
+/// `location /health` block in the prod nginx config.
 ///
-/// Merge order does not affect routing precedence in Axum (routes are matched
-/// by specificity, not insertion order), but keep it consistent for readability:
-/// public → seeker → owner → admin.
-///
-/// Building this graph never touches `AppState` — only `.with_state()` at the
-/// call site does — so [`openapi_spec`] can reuse it to produce the schema
-/// without a database or a running server.
+/// Building this graph never touches `AppState` (only `.with_state()` does),
+/// so [`openapi_spec`] can reuse it without a database or a running server.
 fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
     let api_v1 = OpenApiRouter::new()
-        .merge(public_router())
-        .merge(seeker_router())
-        .merge(avatar_router())
-        .merge(owner_request_router())
-        .merge(owner_router())
-        .merge(admin_router());
+        .merge(auth::router::router())
+        .merge(listings::router::router())
+        .merge(users::router::router())
+        .merge(owner_requests::router::router())
+        .merge(media::router::router())
+        .merge(admin::router::router());
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::check))
