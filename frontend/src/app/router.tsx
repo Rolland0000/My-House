@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router";
 import { AuthLayout } from "./layout/AuthLayout";
 import { RequireAuth } from "./RequireAuth";
 import { RequireAdmin } from "./RequireAdmin";
+import { RequireOwner } from "./RequireOwner";
 import { RootLayout } from "./layout/RootLayout";
 import { AdminLayout } from "./layout/AdminLayout";
 import { Spinner } from "../shared/components";
@@ -29,6 +30,11 @@ const OwnerRequestForm = lazy(() =>
 const OwnerRequestStatus = lazy(() =>
   import("../features/owner-request/components/OwnerRequestStatus").then((m) => ({
     default: m.OwnerRequestStatus,
+  }))
+);
+const CreateListingForm = lazy(() =>
+  import("../features/listings/components/CreateListingForm").then((m) => ({
+    default: m.CreateListingForm,
   }))
 );
 const OwnerRequestQueueList = lazy(() =>
@@ -74,6 +80,14 @@ export const router = createBrowserRouter([
       {
         path: "owner-request/status",
         element: <RequireAuth>{withSuspense(OwnerRequestStatus)}</RequireAuth>,
+      },
+      {
+        path: "owner/listings/new",
+        element: (
+          <RequireAuth>
+            <RequireOwner>{withSuspense(CreateListingForm)}</RequireOwner>
+          </RequireAuth>
+        ),
       },
     ],
   },

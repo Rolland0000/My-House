@@ -5,11 +5,17 @@
 // nginx both forward `/api/*` to the backend, so no base URL or CORS
 // handling is needed here.
 
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
 interface ErrorEnvelope {
   error: {
     code: string;
     message: string;
     status: number;
+    fields?: FieldError[];
   };
 }
 
@@ -19,13 +25,22 @@ export class ApiError extends Error {
   readonly code: string;
   /** From the `Retry-After` header, on 429 responses. */
   readonly retryAfterSeconds?: number;
+  /** Populated only for `VALIDATION_FAILED`; empty for every other code. */
+  readonly fieldErrors: readonly FieldError[];
 
-  constructor(status: number, code: string, message: string, retryAfterSeconds?: number) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    retryAfterSeconds?: number,
+    fieldErrors: readonly FieldError[] = []
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.fieldErrors = fieldErrors;
   }
 }
 
@@ -87,7 +102,8 @@ async function sendWithRetry(path: string, init?: RequestInit): Promise<Response
       response.status,
       body?.error?.code ?? "UNKNOWN_ERROR",
       body?.error?.message ?? response.statusText,
-      readRetryAfter(response)
+      readRetryAfter(response),
+      body?.error?.fields ?? []
     );
   }
 
