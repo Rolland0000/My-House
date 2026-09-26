@@ -1,0 +1,45 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO listings\n            (owner_id, title, description, type, price, currency, city, neighborhood, surface_m2, rooms)\n        VALUES ($1, $2, $3, $4, $5::bigint::numeric, $6, $7, $8, $9, $10)\n        RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "listing_type",
+            "kind": {
+              "Enum": [
+                "apartment",
+                "studio",
+                "house",
+                "room",
+                "villa",
+                "other"
+              ]
+            }
+          }
+        },
+        "Int8",
+        "Bpchar",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8108196e0557b17714400ce13a47f94a87a1132c3ee42252ceacd8f3df3e66ef"
+}

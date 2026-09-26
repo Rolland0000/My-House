@@ -16,7 +16,7 @@ use utoipa::OpenApi;
     ),
     tags(
         (name = "health", description = "Service health check"),
-        (name = "listings", description = "Public read-only listings feed"),
+        (name = "listings", description = "Listings feed, detail and owner management"),
         (name = "auth", description = "Authentication — OTP request, token refresh, logout"),
         (name = "users", description = "Authenticated user profile"),
         (name = "owner_requests", description = "Owner upgrade request submission and status"),
