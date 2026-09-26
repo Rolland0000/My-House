@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::shared::errors::AppError;
 
-use super::model::MediaRow;
+use super::model::{MediaForDeletion, MediaRow};
 
 fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
@@ -75,4 +75,40 @@ where
     .fetch_one(executor)
     .await
     .map_err(db_err)
+}
+
+/// Locks the photo and its listing's row until the caller's transaction ends.
+/// Taking the listing lock serializes deletes with uploads on the same listing.
+pub async fn lock_media_for_deletion<'e, E>(
+    executor: E,
+    media_id: Uuid,
+) -> Result<Option<MediaForDeletion>, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_as!(
+        MediaForDeletion,
+        r#"
+        SELECT m.listing_id, l.owner_id, m.storage_key, m.is_cover
+        FROM listing_media m
+        JOIN listings l ON l.id = m.listing_id
+        WHERE m.id = $1
+        FOR UPDATE OF l, m
+        "#,
+        media_id
+    )
+    .fetch_optional(executor)
+    .await
+    .map_err(db_err)
+}
+
+pub async fn delete_media<'e, E>(executor: E, media_id: Uuid) -> Result<(), AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query!(r#"DELETE FROM listing_media WHERE id = $1"#, media_id)
+        .execute(executor)
+        .await
+        .map_err(db_err)?;
+    Ok(())
 }

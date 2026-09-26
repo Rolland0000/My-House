@@ -7,7 +7,9 @@ use crate::modules::media::handler;
 use crate::shared::file_validation::SINGLE_IMAGE_BODY_LIMIT_BYTES;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().merge(upload_router())
+    OpenApiRouter::new()
+        .routes(routes!(handler::delete_media)) // owner
+        .merge(upload_router())
 }
 
 /// Kept apart so the raised body limit wraps the photo upload only.

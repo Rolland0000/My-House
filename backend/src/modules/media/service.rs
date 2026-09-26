@@ -8,7 +8,7 @@ use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
 use crate::shared::storage_key::listing_media_key;
 use crate::shared::types::ListingId;
 
-use super::model::MediaRow;
+use super::model::{MediaForDeletion, MediaRow};
 use super::repository;
 
 const MAX_PHOTOS_PER_LISTING: i64 = 5;
@@ -122,9 +122,66 @@ async fn persist_media(
     Ok(row)
 }
 
+/// Another owner's photo is reported like a missing one, so media ids never leak.
+fn resolve_owned_media(
+    media: Option<MediaForDeletion>,
+    caller_id: Uuid,
+) -> Result<MediaForDeletion, AppError> {
+    media
+        .filter(|media| media.owner_id == caller_id)
+        .ok_or(AppError::MediaNotFound)
+}
+
+/// The cover can be deleted only when it is the listing's last photo.
+fn delete_decision(is_cover: bool, listing_photo_count: i64) -> Result<(), AppError> {
+    if is_cover && listing_photo_count > 1 {
+        return Err(AppError::CoverPhotoRequired);
+    }
+    Ok(())
+}
+
+/// Deletes one photo owned by `caller_id`.
+///
+/// The row is deleted and committed before the stored object, so a storage
+/// failure orphans a file and never leaves a row pointing at a missing object.
+pub async fn delete(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    media_id: Uuid,
+    caller_id: Uuid,
+) -> Result<(), AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let media = repository::lock_media_for_deletion(&mut *tx, media_id).await?;
+    let media = resolve_owned_media(media, caller_id)?;
+
+    let listing_photo_count = repository::count_media(&mut *tx, media.listing_id).await?;
+    delete_decision(media.is_cover, listing_photo_count)?;
+
+    repository::delete_media(&mut *tx, media_id).await?;
+    tx.commit().await.map_err(db_err)?;
+
+    if let Err(delete_error) = storage.delete(&media.storage_key).await {
+        tracing::warn!(
+            %media_id, key = media.storage_key, error = %delete_error,
+            "failed to delete listing photo from storage; leaving as orphan"
+        );
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn media_owned_by(owner_id: Uuid) -> MediaForDeletion {
+        MediaForDeletion {
+            listing_id: Uuid::new_v4(),
+            owner_id,
+            storage_key: "listings/some-listing/photo.jpg".to_string(),
+            is_cover: false,
+        }
+    }
 
     #[test]
     fn first_photo_becomes_the_cover_at_position_zero() {
@@ -168,6 +225,48 @@ mod tests {
         assert!(matches!(
             verify_ownership(owner, caller),
             Err(AppError::ListingNotFound)
+        ));
+    }
+
+    #[test]
+    fn cover_is_refused_while_other_photos_remain() {
+        assert!(matches!(
+            delete_decision(true, 3),
+            Err(AppError::CoverPhotoRequired)
+        ));
+    }
+
+    #[test]
+    fn cover_can_be_deleted_as_the_last_photo() {
+        assert!(delete_decision(true, 1).is_ok());
+    }
+
+    #[test]
+    fn non_cover_photo_can_always_be_deleted() {
+        assert!(delete_decision(false, 1).is_ok());
+        assert!(delete_decision(false, MAX_PHOTOS_PER_LISTING).is_ok());
+    }
+
+    #[test]
+    fn own_photo_is_resolved() {
+        let owner = Uuid::new_v4();
+        assert!(resolve_owned_media(Some(media_owned_by(owner)), owner).is_ok());
+    }
+
+    #[test]
+    fn another_owners_photo_is_reported_as_not_found() {
+        let media = media_owned_by(Uuid::new_v4());
+        assert!(matches!(
+            resolve_owned_media(Some(media), Uuid::new_v4()),
+            Err(AppError::MediaNotFound)
+        ));
+    }
+
+    #[test]
+    fn unknown_media_id_is_reported_as_not_found() {
+        assert!(matches!(
+            resolve_owned_media(None, Uuid::new_v4()),
+            Err(AppError::MediaNotFound)
         ));
     }
 }

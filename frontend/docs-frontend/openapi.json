@@ -519,6 +519,43 @@
         }
       }
     },
+    "/api/v1/media/{id}": {
+      "delete": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "delete_media",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Media id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Photo deleted"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Media not found, or not owned by the caller"
+          },
+          "409": {
+            "description": "The cover cannot be deleted while other photos remain"
+          }
+        }
+      }
+    },
     "/api/v1/owner-requests": {
       "post": {
         "tags": [
