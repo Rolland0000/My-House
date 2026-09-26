@@ -24,12 +24,46 @@ pub enum ListingType {
     Other,
 }
 
+impl ListingType {
+    /// Parses one of the six lowercase labels; anything else is `None`.
+    pub fn from_label(label: &str) -> Option<Self> {
+        match label {
+            "apartment" => Some(Self::Apartment),
+            "studio" => Some(Self::Studio),
+            "house" => Some(Self::House),
+            "room" => Some(Self::Room),
+            "villa" => Some(Self::Villa),
+            "other" => Some(Self::Other),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, sqlx::Type, ToSchema)]
 #[sqlx(type_name = "listing_status", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum ListingStatus {
     Available,
     Unavailable,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Validated input
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// A validated, normalized listing ready to insert. Carries no owner: the
+/// owner always comes from the authenticated user, never from the request.
+#[derive(Debug, PartialEq, Eq)]
+pub struct NewListing {
+    pub title: String,
+    pub description: String,
+    pub listing_type: ListingType,
+    /// Whole XAF; written to `NUMERIC(12,2)` via a SQL cast.
+    pub price: i64,
+    pub city: String,
+    pub neighborhood: String,
+    pub surface_m2: Option<i32>,
+    pub rooms: Option<i32>,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

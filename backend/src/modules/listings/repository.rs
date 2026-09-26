@@ -3,7 +3,10 @@ use uuid::Uuid;
 
 use crate::shared::errors::AppError;
 
-use super::model::{ListingDetailRow, ListingMediaRow, ListingSummaryRow, ListingType};
+use super::model::{ListingDetailRow, ListingMediaRow, ListingSummaryRow, ListingType, NewListing};
+
+/// The feed and the spec price everything in XAF; the column has no default.
+const LISTING_CURRENCY: &str = "XAF";
 
 /// Optional, combinable filters for `GET /listings` (owner_id, city, type —
 /// API contract §4.3). Built with `QueryBuilder` rather than static SQL
@@ -129,6 +132,37 @@ pub async fn find_media_for_listing(
         listing_id
     )
     .fetch_all(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Inserts a listing owned by `owner_id` and returns its id. `status` takes the
+/// column default (`available`); `search_vector` is maintained by trigger.
+pub async fn insert_listing(
+    pool: &PgPool,
+    owner_id: Uuid,
+    listing: &NewListing,
+) -> Result<Uuid, AppError> {
+    // `$5::bigint::numeric` keeps the bind an i64: a bare `numeric` bind would need a decimal crate.
+    sqlx::query_scalar!(
+        r#"
+        INSERT INTO listings
+            (owner_id, title, description, type, price, currency, city, neighborhood, surface_m2, rooms)
+        VALUES ($1, $2, $3, $4, $5::bigint::numeric, $6, $7, $8, $9, $10)
+        RETURNING id
+        "#,
+        owner_id,
+        listing.title,
+        listing.description,
+        listing.listing_type as ListingType,
+        listing.price,
+        LISTING_CURRENCY,
+        listing.city,
+        listing.neighborhood,
+        listing.surface_m2,
+        listing.rooms,
+    )
+    .fetch_one(pool)
     .await
     .map_err(|error| AppError::Database(error.to_string()))
 }

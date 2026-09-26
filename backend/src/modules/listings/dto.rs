@@ -23,6 +23,37 @@ pub struct ListListingsQuery {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// POST /listings — request body
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Body of `POST /listings`. Every field is optional at the serde level so a
+/// missing one is reported as a `422` field error rather than a `400`; the
+/// schema still marks the required ones. An `owner_id` in the body is ignored.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateListingRequest {
+    /// 5 to 120 characters after trimming.
+    #[schema(required = true)]
+    pub title: Option<String>,
+    /// 20 to 2,000 characters after trimming.
+    #[schema(required = true)]
+    pub description: Option<String>,
+    #[serde(rename = "type")]
+    #[schema(required = true, value_type = ListingType)]
+    pub listing_type: Option<String>,
+    /// Whole XAF, 1 to 9,999,999,999.
+    #[schema(required = true)]
+    pub price: Option<i64>,
+    #[schema(required = true)]
+    pub city: Option<String>,
+    #[schema(required = true)]
+    pub neighborhood: Option<String>,
+    /// 1 to 100,000.
+    pub surface_m2: Option<i64>,
+    /// 0 to 100.
+    pub rooms: Option<i64>,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Shared nested shapes
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -149,7 +180,7 @@ impl ListingDetailDto {
     }
 }
 
-/// Envelope for `GET /listings/:id` — single-object `{ "data": {...} }`,
+/// Envelope for `GET /listings/:id` and `POST /listings` — single-object `{ "data": {...} }`,
 /// distinct from the paginated list envelope used by `GET /listings`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ListingDetailResponse {
