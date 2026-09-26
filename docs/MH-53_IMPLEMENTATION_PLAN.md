@@ -11,12 +11,12 @@ Ce plan couvre les deux sous-tickets. Chaque sous-ticket est traité dans sa pro
 
 ## 1. Décisions tranchées
 
-| # | Sujet | Décision | Raison |
-|---|-------|----------|--------|
-| D1 | Format du 422 | Nouveau code `VALIDATION_FAILED`. L'enveloppe d'erreur reçoit un champ optionnel `fields: [{ field, message }]`, omis pour toutes les autres erreurs. | Rétrocompatible avec l'enveloppe actuelle, ordre stable, se mappe directement sur `setError` côté front. |
-| D2 | Type du prix | Entier XAF (`i64`), borné à `1..=9_999_999_999`. Écriture en SQL via `$n::numeric`. La lecture reste en `float8`, sans changement. | Le XAF n'a pas de centimes en usage courant. Aucun arrondi de float. `NUMERIC(12,2)` accepte au plus 9 999 999 999,99. |
-| D3 | Validation | Écrite à la main, sans le crate `validator` ni macro. Un petit accumulateur `FieldErrors` dans `shared/validation.rs`, avec une méthode par type de règle. | Aucune dépendance ajoutée, cohérent avec `shared/validation.rs`. Une ligne par champ, chaque règle testable comme fonction pure. Une proc-macro imposerait un crate séparé et `syn`/`quote` ; une `macro_rules!` deviendrait un mini-DSL. |
-| D4 | Redirection après succès | Vers `/listings/:id` (détail du bien) pour l'instant. MH-58 remplacera la cible par l'écran photos. | L'écran photos n'existe pas encore. |
+| #  | Sujet                      | Décision                                                                                                                                                           | Raison                                                                                                                                                                                                                                                 |
+| -- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D1 | Format du 422              | Nouveau code`VALIDATION_FAILED`. L'enveloppe d'erreur reçoit un champ optionnel `fields: [{ field, message }]`, omis pour toutes les autres erreurs.           | Rétrocompatible avec l'enveloppe actuelle, ordre stable, se mappe directement sur`setError` côté front.                                                                                                                                           |
+| D2 | Type du prix               | Entier XAF (`i64`), borné à `1..=9_999_999_999`. Écriture en SQL via `$n::numeric`. La lecture reste en `float8`, sans changement.                       | Le XAF n'a pas de centimes en usage courant. Aucun arrondi de float.`NUMERIC(12,2)` accepte au plus 9 999 999 999,99.                                                                                                                                |
+| D3 | Validation                 | Écrite à la main, sans le crate`validator` ni macro. Un petit accumulateur `FieldErrors` dans `shared/validation.rs`, avec une méthode par type de règle. | Aucune dépendance ajoutée, cohérent avec`shared/validation.rs`. Une ligne par champ, chaque règle testable comme fonction pure. Une proc-macro imposerait un crate séparé et `syn`/`quote` ; une `macro_rules!` deviendrait un mini-DSL. |
+| D4 | Redirection après succès | Vers`/listings/:id` (détail du bien) pour l'instant. MH-58 remplacera la cible par l'écran photos.                                                              | L'écran photos n'existe pas encore.                                                                                                                                                                                                                   |
 
 ### Décisions de conception prises pendant l'analyse (sans question)
 
@@ -92,12 +92,13 @@ Normalisation de la ville et du quartier : `split_whitespace().collect::<Vec<_>>
 ### 3.2 Fichiers, dans l'ordre (un fichier à la fois)
 
 1. **`shared/errors.rs`**
+
    - `pub struct FieldError { pub field: &'static str, pub message: String }` (`Serialize`, `Debug`).
    - Variante `Validation(Vec<FieldError>)`, avec la ligne `(StatusCode::UNPROCESSABLE_ENTITY, "VALIDATION_FAILED")` dans le bloc 422. Le message annonce le nombre de champs invalides.
    - `ErrorBody` reçoit `#[serde(skip_serializing_if = "Option::is_none")] fields: Option<Vec<FieldError>>`, rempli seulement par `Validation`.
    - Tests : un 422 porte `code`, `status` et un tableau `fields` avec une entrée par champ ; une autre erreur (par exemple `ListingNotFound`) n'a pas de clé `fields`.
-
 2. **`shared/validation.rs`** (ajouts, sans toucher aux fonctions existantes)
+
    - `pub fn normalize_place_name(raw: &str) -> String`.
    - `pub struct FieldErrors(Vec<FieldError>)` avec :
      - `required_text(field, Option<String>, RangeInclusive<usize>) -> Option<String>` : trim, puis compte en `chars()` ;
@@ -107,47 +108,45 @@ Normalisation de la ville et du quartier : `split_whitespace().collect::<Vec<_>>
      - `finish(self) -> Result<(), AppError>`, qui renvoie `Err(AppError::Validation(..))` si au moins une erreur a été accumulée.
    - Les commentaires de module sont mis à jour : le fichier ne sert plus seulement au profil.
    - Tests : trim, réduction des espaces (tabulation, retour à la ligne, U+00A0), valeur vide après normalisation, bornes de chaque méthode (limite, limite ±1), `finish` sans erreur, `finish` avec N erreurs.
-
 3. **`modules/listings/model.rs`**
+
    - `impl FromStr for ListingType`, ou une fonction `ListingType::from_label` qui fait un `match` sur les 6 labels en minuscules.
    - `pub struct NewListing { title, description, listing_type, price: i64, city, neighborhood: String, surface_m2: Option<i32>, rooms: Option<i32> }`. Cette structure n'a **pas** de champ `owner_id`.
-
 4. **`modules/listings/dto.rs`**
+
    - `CreateListingRequest` (`Deserialize`, `ToSchema`) : tous les champs en `Option`, `#[serde(rename = "type")]` sur `listing_type: Option<String>`, et `#[schema(required = true, value_type = ...)]` sur les champs requis pour que les types générés côté front restent justes. Pas de `owner_id`, pas de `deny_unknown_fields`.
    - La réponse réutilise `ListingDetailResponse`.
-
 5. **`modules/listings/repository.rs`**
+
    - `insert_listing(pool, owner_id: Uuid, listing: &NewListing) -> Result<Uuid, AppError>` avec `sqlx::query_scalar!` : `INSERT … VALUES (…, $n::numeric, …) RETURNING id`. Le statut vient du `DEFAULT 'available'` de la colonne.
    - Consulter le MCP PostgreSQL avant d'écrire la requête, pour vérifier le schéma et les triggers `search_vector` et `updated_at`. Aucun nouvel index n'est ajouté.
-
 6. **`modules/listings/service.rs`**
+
    - Constantes nommées pour les bornes (`TITLE_LENGTH`, `DESCRIPTION_LENGTH`, `PRICE_RANGE`, `SURFACE_RANGE`, `ROOMS_RANGE`, `PLACE_NAME_MAX_LENGTH`).
    - `pub fn validate_new_listing(request: CreateListingRequest) -> Result<NewListing, AppError>` : fonction pure, qui accumule toutes les erreurs avant de répondre. MH-55 la réutilisera pour la modification.
    - `pub async fn create_listing(pool, owner_id, request) -> Result<ListingDetailDto, AppError>` : valide, insère, puis appelle `get_listing_detail(pool, id)`.
-
 7. **`modules/listings/handler.rs`**
+
    - `const LISTING_WRITE_ROLES: &[Role] = &[Role::Owner];`
    - `create(State, user: AuthUser, AppJson(payload)) -> Result<(StatusCode, Json<ListingDetailResponse>), AppError>` : `user.require_role(LISTING_WRITE_ROLES)?`, puis appel au service, puis réponse 201.
    - `#[utoipa::path(post, path = "/listings", tag = "listings", request_body = CreateListingRequest, responses(201, 400, 401, 403, 422))]`.
-
 8. **`modules/listings/router.rs`**
+
    - `.routes(routes!(handler::list, handler::create))` : même chemin, deux méthodes, dans un seul `routes!`.
    - Le TODO est remplacé par ce qui reste réellement à faire (modification et suppression).
-
 9. **`api_doc.rs`** : la description du tag `listings` devient « Listings feed, detail and owner management ».
-
 10. **`.sqlx/`** : `cargo sqlx prepare` (base de dev lancée), pour que la nouvelle `query_scalar!` compile hors ligne.
 
 ### 3.3 Tests unitaires (logique pure, sans DB)
 
-| Critère d'acceptation | Test |
-|-----------------------|------|
-| Bornes de chaque champ | `validate_new_listing` : title 4/5/120/121, description 19/20/2000/2001, price 0/1/max/max+1, surface 0/1/100 000/100 001, rooms −1/0/100/101, type inconnu, chaque champ requis absent |
-| Normalisation ville et quartier | `normalize_place_name` et `validate_new_listing` renvoient `"Plateau Nord"` ; une valeur faite uniquement d'espaces est rejetée |
-| Une entrée par champ | un body avec 3 champs invalides donne exactement 3 `FieldError`, avec les bons noms de champ |
-| Refus du rôle | `require_role(Role::Seeker, LISTING_WRITE_ROLES)` et `require_role(Role::Admin, …)` renvoient `Forbidden` |
-| `owner_id` ignoré | un JSON contenant `owner_id` se désérialise en `CreateListingRequest` et passe la validation. `NewListing` n'a aucun champ owner : le propriétaire ne peut venir que de `AuthUser` |
-| Format du 422 | test d'enveloppe dans `errors.rs` (voir 3.2, point 1) |
+| Critère d'acceptation          | Test                                                                                                                                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bornes de chaque champ          | `validate_new_listing` : title 4/5/120/121, description 19/20/2000/2001, price 0/1/max/max+1, surface 0/1/100 000/100 001, rooms −1/0/100/101, type inconnu, chaque champ requis absent   |
+| Normalisation ville et quartier | `normalize_place_name` et `validate_new_listing` renvoient `"Plateau Nord"` ; une valeur faite uniquement d'espaces est rejetée                                                       |
+| Une entrée par champ           | un body avec 3 champs invalides donne exactement 3`FieldError`, avec les bons noms de champ                                                                                                |
+| Refus du rôle                  | `require_role(Role::Seeker, LISTING_WRITE_ROLES)` et `require_role(Role::Admin, …)` renvoient `Forbidden`                                                                             |
+| `owner_id` ignoré            | un JSON contenant`owner_id` se désérialise en `CreateListingRequest` et passe la validation. `NewListing` n'a aucun champ owner : le propriétaire ne peut venir que de `AuthUser` |
+| Format du 422                   | test d'enveloppe dans`errors.rs` (voir 3.2, point 1)                                                                                                                                       |
 
 Hors unitaires (ils demandent une vraie DB) : insertion réelle, `status = available` en base, 201 de bout en bout. Ces cas sont vérifiés à la main via Swagger ou curl, puis notés dans la mémoire de dette de tests pour l'epic des tests d'intégration.
 
@@ -168,39 +167,38 @@ Régénérer les types : `cargo run --bin gen_openapi` (depuis `backend/`), puis
 ### 4.2 Fichiers, dans l'ordre (un fichier à la fois)
 
 1. **`shared/api/client.ts`**
+
    - `ErrorEnvelope.error.fields?: { field: string; message: string }[]`.
    - `ApiError.fieldErrors: readonly FieldError[]` (vide par défaut), rempli dans `sendWithRetry`. Les autres appelants ne changent pas.
-
 2. **`features/listings/api.ts`**
+
    - `export type CreateListingRequest = components["schemas"]["CreateListingRequest"]`.
    - `createListing(body) => apiPost<{ data: ListingDetail }>("/api/v1/listings", body)`.
-
 3. **`features/listings/listingFormValidation.ts`** (pur, testé)
+
    - Constantes des bornes, qui reprennent celles du backend (`TITLE_MIN_LENGTH`, …, `PRICE_MAX`).
    - `normalizePlaceName(raw)` : même transformation que le backend (`trim` puis `/\s+/g → " "`).
    - `toCreateListingPayload(values)` : trim des textes, normalisation de la ville et du quartier, et un champ numérique optionnel vide ou `NaN` est omis.
    - `requestErrorMessage(error)` : message du bandeau par code (`VALIDATION_FAILED`, `FORBIDDEN` avec le message du cas « rôle pas encore actif dans cette session, déconnecte-toi puis reconnecte-toi », avec repli générique). Le texte brut du serveur n'est jamais affiché dans le bandeau.
-
 4. **`features/listings/hooks/useCreateListing.ts`**
-   - `useMutation({ mutationFn: createListing, onSuccess: invalidate ["listings"] })`, pour que le nouveau bien apparaisse dans le feed.
 
+   - `useMutation({ mutationFn: createListing, onSuccess: invalidate ["listings"] })`, pour que le nouveau bien apparaisse dans le feed.
 5. **`features/listings/components/CreateListingForm.tsx`**
+
    - react-hook-form, avec les règles `required`, `minLength`, `maxLength`, `min`, `max` et `validate` (entier) reprises des constantes.
    - Champs : titre, description (`TextArea`), type (`Select` avec `typeLabels`), prix (libellé **« Price (XAF) »**, entier), surface (m², optionnel), pièces (optionnel), ville, quartier.
    - **Verrouillage pendant l'envoi** : tous les champs sont dans un `<fieldset disabled={mutation.isPending}>`, et le bouton a `isLoading`.
    - **Erreur 422** : pour chaque `error.fieldErrors`, `setError(field, { type: "server", message })`. Le bandeau `Alert` en haut du formulaire résume les erreurs. Un champ serveur inconnu du formulaire n'apparaît que dans le bandeau.
    - **Succès** : `navigate(`/listings/${data.id}`)`. Un commentaire d'une ligne indique que MH-58 remplacera cette cible par l'écran photos.
    - Mise en page d'après le wireframe mh-14 « Publier un bien », écran ①. L'indicateur d'étape « ② Photos » verrouillé est optionnel ; s'il est ajouté, il reste statique.
-
 6. **`app/RequireOwner.tsx`** : copie du modèle `RequireAdmin`, avec `profile?.role !== "owner"` et une redirection vers `/`.
-
 7. **`app/router.tsx`** : import lazy de `CreateListingForm`, route `owner/listings/new` sous `RootLayout` : `<RequireAuth><RequireOwner>{withSuspense(CreateListingForm)}</RequireOwner></RequireAuth>`. Un visiteur non connecté va vers `/login`, un seeker ou un admin vers `/`.
-
 8. **`features/listings/index.ts`** : export de `CreateListingForm`, `createListing` et `useCreateListing`, selon ce qui est consommé hors de la feature.
 
 ### 4.3 Tests unitaires (vitest, logique pure)
 
 `listingFormValidation.test.ts` :
+
 - `normalizePlaceName` renvoie le même résultat que le backend sur les cas testés côté BE ;
 - `toCreateListingPayload` : trim, champs optionnels vides ou `NaN` omis, aucun `owner_id` émis ;
 - `requestErrorMessage` : `VALIDATION_FAILED`, `FORBIDDEN`, code inconnu, erreur autre qu'une `ApiError`.
@@ -217,7 +215,7 @@ Pas de test de composant : RTL n'est utilisé nulle part dans le projet. Cette d
 
 À suivre dans l'ordre, dans chaque session (BE puis FE).
 
-1. **Branche** : créer la branche du sous-ticket depuis `develop`.
+1. **Branche** : créer la branche du sous-ticket depuis `mh-53-create-a-listing`.
 2. **Orientation** : `graphify query "<question>"`, `graphify path` ou `graphify explain` avant tout grep de fichiers. Relire ce plan et le ticket GitHub.
 3. **Documentation des librairies (Context7)** avant d'écrire le code qui les utilise :
    - BE : ordre des extracteurs dans axum 0.7 (le body en dernier) ; `query_scalar!` de sqlx 0.8 avec `RETURNING` et le cast `numeric` ; `#[schema(required, value_type)]` de utoipa 5 ; `routes!` de utoipa-axum avec plusieurs méthodes.
@@ -226,7 +224,7 @@ Pas de test de composant : RTL n'est utilisé nulle part dans le projet. Cette d
    - BE : `.claude/rules/rust.md`, `.claude/rules/database.md`, `.claude/rules/general-coding.md`.
    - FE : `.claude/rules/react-typecrypt.md`, `.claude/rules/general-coding.md`.
    - Commentaires : une ou deux lignes au plus, uniquement là où le code ne s'explique pas seul, sans citer de fichier de règles ou de doc comme justification.
-5. **Tests unitaires** : uniquement la logique pure (sections 3.3 et 4.3). Pas de mock de DB.
+5. **Tests unitaires** : la logique pure (sections 3.3 et 4.3). Pas de mock de DB.
 6. **Vérifications** : sections 3.4 et 4.4.
 7. **`/simplify`** sur le diff : réutilisation, simplicité, KISS. Appliquer ses corrections.
 8. **`/humanizer:humanizer`** sur les commentaires, doc comments et messages d'erreur ajoutés : ton neutre, concis, fidèle au code, sans formule vague ni verbeuse.
@@ -250,6 +248,7 @@ Modification et suppression d'un bien (MH-55 et suivants), écran photos (MH-58)
 ## 7. Critères de fin
 
 **MH-53-BE**
+
 - [ ] `POST /listings` réservé au rôle owner ; `owner_id` jamais lu dans le body
 - [ ] Bornes de tous les champs appliquées ; ville et quartier normalisés, valeur vide rejetée
 - [ ] Un 422 avec une entrée par champ invalide
@@ -258,6 +257,7 @@ Modification et suppression d'un bien (MH-55 et suivants), écran photos (MH-58)
 - [ ] Tests unitaires du tableau 3.3 écrits ; fmt, check et clippy propres ; `.sqlx` à jour
 
 **MH-53-FE**
+
 - [ ] Tous les champs présents, avec les bornes vérifiées côté client
 - [ ] Prix saisi en XAF et libellé en XAF
 - [ ] Champs verrouillés pendant la requête
