@@ -112,3 +112,69 @@ where
         .map_err(db_err)?;
     Ok(())
 }
+
+/// Returns the photo only if it belongs to `listing_id`.
+pub async fn find_listing_media<'e, E>(
+    executor: E,
+    listing_id: Uuid,
+    media_id: Uuid,
+) -> Result<Option<MediaRow>, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_as!(
+        MediaRow,
+        r#"
+        SELECT id, url, is_cover, position
+        FROM listing_media
+        WHERE id = $1 AND listing_id = $2
+        "#,
+        media_id,
+        listing_id
+    )
+    .fetch_optional(executor)
+    .await
+    .map_err(db_err)
+}
+
+/// Must run before [`promote_cover`] in the same transaction: the one-cover
+/// index is checked row by row, so the old cover has to be cleared first.
+pub async fn demote_other_covers<'e, E>(
+    executor: E,
+    listing_id: Uuid,
+    media_id: Uuid,
+) -> Result<(), AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query!(
+        r#"
+        UPDATE listing_media SET is_cover = FALSE
+        WHERE listing_id = $1 AND is_cover AND id <> $2
+        "#,
+        listing_id,
+        media_id
+    )
+    .execute(executor)
+    .await
+    .map_err(db_err)?;
+    Ok(())
+}
+
+pub async fn promote_cover<'e, E>(executor: E, media_id: Uuid) -> Result<MediaRow, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_as!(
+        MediaRow,
+        r#"
+        UPDATE listing_media SET is_cover = TRUE
+        WHERE id = $1
+        RETURNING id, url, is_cover, position
+        "#,
+        media_id
+    )
+    .fetch_one(executor)
+    .await
+    .map_err(db_err)
+}

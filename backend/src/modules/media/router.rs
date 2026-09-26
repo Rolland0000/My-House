@@ -9,6 +9,8 @@ use crate::shared::file_validation::SINGLE_IMAGE_BODY_LIMIT_BYTES;
 pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(handler::delete_media)) // owner
+        // Served on the listings path so listing_media keeps one writer module.
+        .routes(routes!(handler::promote_cover)) // owner
         .merge(upload_router())
 }
 

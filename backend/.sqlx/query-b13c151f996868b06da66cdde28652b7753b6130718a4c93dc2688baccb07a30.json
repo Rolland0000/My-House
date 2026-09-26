@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE listing_media SET is_cover = FALSE\n        WHERE listing_id = $1 AND is_cover AND id <> $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b13c151f996868b06da66cdde28652b7753b6130718a4c93dc2688baccb07a30"
+}
