@@ -467,6 +467,57 @@
         }
       }
     },
+    "/api/v1/listings/{id}/cover": {
+      "patch": {
+        "tags": [
+          "listings"
+        ],
+        "operationId": "promote_cover",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCoverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "New cover photo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not owned by the caller, or media not on this listing"
+          }
+        }
+      }
+    },
     "/api/v1/media/upload": {
       "post": {
         "tags": [
@@ -1620,6 +1671,18 @@
             "type": "integer",
             "format": "int32",
             "minimum": 0
+          }
+        }
+      },
+      "PromoteCoverRequest": {
+        "type": "object",
+        "required": [
+          "media_id"
+        ],
+        "properties": {
+          "media_id": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
