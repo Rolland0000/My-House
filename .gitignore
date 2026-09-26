@@ -8,6 +8,7 @@ frontend/dist/
 # Environment files
 .env
 .env.*
+.venv
 !.env.example
 backend/.env
 frontend/.env
