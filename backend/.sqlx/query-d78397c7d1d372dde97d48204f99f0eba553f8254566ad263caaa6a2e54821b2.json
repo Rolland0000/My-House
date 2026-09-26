@@ -1,0 +1,45 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO listing_media (id, listing_id, storage_key, url, is_cover, position)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, url, is_cover, position\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_cover",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "position",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d78397c7d1d372dde97d48204f99f0eba553f8254566ad263caaa6a2e54821b2"
+}

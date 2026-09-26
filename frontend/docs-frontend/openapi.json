@@ -467,6 +467,58 @@
         }
       }
     },
+    "/api/v1/media/upload": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "operationId": "upload_media",
+        "requestBody": {
+          "description": "listing_id (uuid) and one image file (JPEG, PNG or WebP, 5 MB max)",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadMediaForm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Photo uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed multipart body or missing/invalid listing_id"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, or not owned by the caller"
+          },
+          "409": {
+            "description": "The listing already has 5 photos"
+          },
+          "413": {
+            "description": "File exceeds the maximum allowed size"
+          },
+          "422": {
+            "description": "Unsupported image format"
+          }
+        }
+      }
+    },
     "/api/v1/owner-requests": {
       "post": {
         "tags": [
@@ -1094,6 +1146,42 @@
           "other"
         ]
       },
+      "MediaDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "is_cover",
+          "position"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_cover": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MediaDto"
+          }
+        }
+      },
       "OtpRequestDto": {
         "type": "object",
         "required": [
@@ -1636,6 +1724,23 @@
           }
         }
       },
+      "UploadMediaForm": {
+        "type": "object",
+        "description": "Documents the upload body for the OpenAPI schema. Nothing deserializes\ninto it — the handler walks the multipart fields itself.",
+        "required": [
+          "listing_id",
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "listing_id": {
+            "type": "string"
+          }
+        }
+      },
       "UserDto": {
         "type": "object",
         "required": [
@@ -1741,6 +1846,10 @@
     {
       "name": "owner_requests",
       "description": "Owner upgrade request submission and status"
+    },
+    {
+      "name": "media",
+      "description": "Listing photo upload"
     },
     {
       "name": "admin",
