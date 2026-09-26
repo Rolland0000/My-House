@@ -7,6 +7,9 @@ export function useCreateListing() {
   return useMutation({
     mutationFn: createListing,
     retry: false,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["listings"] }),
+    onSuccess: () => {
+      // Not returned: the caller navigates without waiting for the feed refetch.
+      void queryClient.invalidateQueries({ queryKey: ["listings"] });
+    },
   });
 }

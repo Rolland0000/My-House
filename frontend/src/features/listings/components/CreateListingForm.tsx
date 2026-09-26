@@ -30,6 +30,7 @@ import {
   requestErrorMessage,
   serverFieldToFormField,
   toCreateListingPayload,
+  trimmedTextFieldRule,
   type ListingFormValues,
 } from "../listingFormValidation";
 
@@ -90,22 +91,28 @@ function CreateListingForm() {
               </p>
             </div>
 
-            {requestError && <Alert variant="error">{requestErrorMessage(requestError)}</Alert>}
+            {requestError && (
+              <Alert variant="error">
+                {requestErrorMessage(requestError)}
+                {requestError.fieldErrors.length > 0 && (
+                  <ul className="mt-1 list-disc pl-5">
+                    {requestError.fieldErrors.map((fieldError) => (
+                      <li key={`${fieldError.field}-${fieldError.message}`}>
+                        {fieldError.message}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Alert>
+            )}
 
             <FormField label="Title" required error={errors.title?.message}>
               <Input
                 hasError={Boolean(errors.title)}
-                {...register("title", {
-                  required: "Title is required.",
-                  minLength: {
-                    value: TITLE_MIN_LENGTH,
-                    message: `${TITLE_MIN_LENGTH} characters minimum.`,
-                  },
-                  maxLength: {
-                    value: TITLE_MAX_LENGTH,
-                    message: `${TITLE_MAX_LENGTH} characters maximum.`,
-                  },
-                })}
+                {...register(
+                  "title",
+                  trimmedTextFieldRule("Title", TITLE_MIN_LENGTH, TITLE_MAX_LENGTH)
+                )}
               />
             </FormField>
 
@@ -113,17 +120,14 @@ function CreateListingForm() {
               <TextArea
                 rows={5}
                 hasError={Boolean(errors.description)}
-                {...register("description", {
-                  required: "Description is required.",
-                  minLength: {
-                    value: DESCRIPTION_MIN_LENGTH,
-                    message: `${DESCRIPTION_MIN_LENGTH} characters minimum.`,
-                  },
-                  maxLength: {
-                    value: DESCRIPTION_MAX_LENGTH,
-                    message: `${DESCRIPTION_MAX_LENGTH} characters maximum.`,
-                  },
-                })}
+                {...register(
+                  "description",
+                  trimmedTextFieldRule(
+                    "Description",
+                    DESCRIPTION_MIN_LENGTH,
+                    DESCRIPTION_MAX_LENGTH
+                  )
+                )}
               />
             </FormField>
 

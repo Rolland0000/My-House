@@ -7,19 +7,7 @@ export type ListingType = components["schemas"]["ListingType"];
 export type ListingStatus = components["schemas"]["ListingStatus"];
 export type PaginationMeta = components["schemas"]["PaginationMeta"];
 
-// The backend endpoint doesn't exist yet, so this isn't in the generated
-// `types.ts` — replace with `components["schemas"]["CreateListingRequest"]`
-// once it ships and types are regenerated.
-export interface CreateListingRequest {
-  title: string;
-  description: string;
-  type: ListingType;
-  price: number;
-  city: string;
-  neighborhood: string;
-  surface_m2?: number;
-  rooms?: number;
-}
+export type CreateListingRequest = components["schemas"]["CreateListingRequest"];
 
 export interface ListListingsParams {
   city?: string;

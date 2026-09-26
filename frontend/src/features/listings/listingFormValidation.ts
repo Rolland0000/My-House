@@ -66,6 +66,21 @@ export function integerFieldRule(min: number, max: number, unit = "") {
   };
 }
 
+/** Title and description: required, and bounded on the trimmed length in
+ *  characters, as the backend counts it (not UTF-16 units). */
+export function trimmedTextFieldRule(label: string, min: number, max: number) {
+  return {
+    required: `${label} is required.`,
+    validate: (value: string) => {
+      const length = [...value.trim()].length;
+      if (length === 0) return `${label} is required.`;
+      if (length < min) return `${min} characters minimum.`;
+      if (length > max) return `${max} characters maximum.`;
+      return true;
+    },
+  };
+}
+
 /** Shared by city and neighborhood: required, bounded, and rejects a value
  *  that normalizes down to nothing (e.g. spaces only). */
 export function placeNameFieldRule(label: string) {

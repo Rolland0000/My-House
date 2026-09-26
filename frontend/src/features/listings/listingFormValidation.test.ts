@@ -10,6 +10,7 @@ import {
   requestErrorMessage,
   serverFieldToFormField,
   toCreateListingPayload,
+  trimmedTextFieldRule,
   type ListingFormValues,
 } from "./listingFormValidation";
 
@@ -89,6 +90,30 @@ describe("integerFieldRule", () => {
   it("formats bound messages with the given unit", () => {
     expect(rule.min.message).toBe("At least 1 m².");
     expect(rule.max.message).toBe("At most 100 m².");
+  });
+});
+
+describe("trimmedTextFieldRule", () => {
+  const rule = trimmedTextFieldRule("Title", 5, 10);
+
+  it("requires a value", () => {
+    expect(rule.required).toBe("Title is required.");
+  });
+
+  it("rejects a value made only of whitespace", () => {
+    expect(rule.validate("     ")).toBe("Title is required.");
+  });
+
+  it("checks both bounds on the trimmed length", () => {
+    expect(rule.validate("  abcd  ")).toBe("5 characters minimum.");
+    expect(rule.validate("  abcde  ")).toBe(true);
+    expect(rule.validate("a".repeat(10))).toBe(true);
+    expect(rule.validate("a".repeat(11))).toBe("10 characters maximum.");
+  });
+
+  it("counts characters, not UTF-16 units", () => {
+    expect(rule.validate("😀".repeat(5))).toBe(true);
+    expect(rule.validate("😀".repeat(10))).toBe(true);
   });
 });
 
