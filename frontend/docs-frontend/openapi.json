@@ -429,6 +429,47 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Creates a listing owned by the caller, with status `available`.",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Listing created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "422": {
+            "description": "One or more fields violate a rule; `error.fields` lists each one"
+          }
+        }
       }
     },
     "/api/v1/listings/{id}": {
@@ -1045,6 +1086,73 @@
           }
         }
       },
+      "CreateListingRequest": {
+        "type": "object",
+        "description": "Body of `POST /listings`. Every field is optional at the serde level so a\nmissing one is reported as a `422` field error rather than a `400`; the\nschema still marks the required ones. An `owner_id` in the body is ignored.",
+        "required": [
+          "title",
+          "description",
+          "type",
+          "price",
+          "city",
+          "neighborhood"
+        ],
+        "properties": {
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "20 to 2,000 characters after trimming."
+          },
+          "neighborhood": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Whole XAF, 1 to 9,999,999,999."
+          },
+          "rooms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "0 to 100."
+          },
+          "surface_m2": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "1 to 100,000."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "5 to 120 characters after trimming."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ListingType"
+          }
+        }
+      },
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
@@ -1131,7 +1239,7 @@
       },
       "ListingDetailResponse": {
         "type": "object",
-        "description": "Envelope for `GET /listings/:id` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
+        "description": "Envelope for `GET /listings/:id` and `POST /listings` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
         "required": [
           "data"
         ],
@@ -1933,7 +2041,7 @@
     },
     {
       "name": "listings",
-      "description": "Public read-only listings feed"
+      "description": "Listings feed, detail and owner management"
     },
     {
       "name": "auth",

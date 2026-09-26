@@ -13,11 +13,21 @@ use thiserror::Error;
 //   { "error": { "code": "SNAKE_UPPER_CASE", "message": "...", "status": 4xx } }
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// One rule violation on a request field, listed in `error.fields` of a
+/// `VALIDATION_FAILED` response.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct FieldError {
+    pub field: &'static str,
+    pub message: String,
+}
+
 #[derive(Debug, Serialize)]
 struct ErrorBody {
     code: &'static str,
     message: String,
     status: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    fields: Option<Vec<FieldError>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -122,6 +132,10 @@ pub enum AppError {
     #[error("Invalid file (unsupported format or size).")]
     InvalidFile,
 
+    /// One entry per offending field, so a form can show errors inline.
+    #[error("Validation failed for {} field(s).", .0.len())]
+    Validation(Vec<FieldError>),
+
     // ── 429 Too Many Requests ─────────────────────────────────────────────────
     /// Carries the wait time, emitted as a `Retry-After` header.
     #[error("Too many OTP requests. Please wait before trying again.")]
@@ -187,6 +201,7 @@ impl AppError {
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
             Self::InvalidFile => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_FILE"),
+            Self::Validation(_) => (StatusCode::UNPROCESSABLE_ENTITY, "VALIDATION_FAILED"),
             // 429
             Self::OtpRateLimited { .. } => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
@@ -219,11 +234,17 @@ impl IntoResponse for AppError {
             self.to_string()
         };
 
+        let fields = match self {
+            Self::Validation(field_errors) => Some(field_errors),
+            _ => None,
+        };
+
         let body = ErrorEnvelope {
             error: ErrorBody {
                 code,
                 message,
                 status: status.as_u16(),
+                fields,
             },
         };
 
@@ -316,6 +337,36 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "OWNER_REQUEST_ALREADY_REVIEWED");
+    }
+
+    #[tokio::test]
+    async fn test_validation_error_lists_one_entry_per_field() {
+        let response = AppError::Validation(vec![
+            FieldError {
+                field: "title",
+                message: "title is required.".to_owned(),
+            },
+            FieldError {
+                field: "price",
+                message: "price must be positive.".to_owned(),
+            },
+        ])
+        .into_response();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "VALIDATION_FAILED");
+        assert_eq!(json["error"]["status"], 422);
+        let fields = json["error"]["fields"].as_array().expect("fields array");
+        assert_eq!(fields.len(), 2);
+        assert_eq!(fields[0]["field"], "title");
+        assert_eq!(fields[1]["field"], "price");
+    }
+
+    #[tokio::test]
+    async fn test_errors_other_than_validation_omit_fields() {
+        let json = parse_envelope(AppError::ListingNotFound.into_response()).await;
+        assert!(json["error"].get("fields").is_none());
     }
 
     #[tokio::test]
