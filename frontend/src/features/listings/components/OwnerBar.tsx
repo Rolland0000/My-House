@@ -1,0 +1,35 @@
+import { Alert, Badge } from "../../../shared/components";
+import type { BadgeTone } from "../../../shared/components";
+import { listingVisibility, type ListingVisibility } from "../listingVisibility";
+
+interface OwnerBarProps {
+  publishedAt: string | null;
+  hasPhoto: boolean;
+}
+
+const VISIBILITY_BADGE: Record<ListingVisibility, { tone: BadgeTone; label: string }> = {
+  draft: { tone: "warning", label: "Draft" },
+  published: { tone: "success", label: "Published" },
+  hidden: { tone: "error", label: "Hidden — no photos" },
+};
+
+const VISIBILITY_MESSAGE: Record<ListingVisibility, string | null> = {
+  draft: "Only you can see this listing. Add at least one photo, then publish it.",
+  published: null,
+  hidden: "This listing is published but has no photos, so it's hidden from the public.",
+};
+
+function OwnerBar({ publishedAt, hasPhoto }: OwnerBarProps) {
+  const visibility = listingVisibility({ publishedAt, hasPhoto });
+  const badge = VISIBILITY_BADGE[visibility];
+  const message = VISIBILITY_MESSAGE[visibility];
+
+  return (
+    <div className="flex flex-col gap-3 border border-border bg-surface p-4">
+      <Badge tone={badge.tone}>{badge.label}</Badge>
+      {message && <Alert variant={visibility === "hidden" ? "warning" : "info"}>{message}</Alert>}
+    </div>
+  );
+}
+
+export { OwnerBar };

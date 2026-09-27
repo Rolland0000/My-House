@@ -1,13 +1,16 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Outlet, useNavigate } from "react-router";
 import { SiteFooter, SiteHeader } from "../../shared/components";
 import type { SiteHeaderRole } from "../../shared/components";
 import { logout, useAuth } from "../../features/auth";
+import { removeOwnerScopedQueries } from "../../features/listings";
 import { useProfile } from "../../features/profile";
 import { formatInitials } from "../../shared/utils/format";
 
 export function RootLayout() {
   const { status, clearSession } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: profile } = useProfile({ enabled: status === "authenticated" });
 
   const role: SiteHeaderRole =
@@ -30,6 +33,7 @@ export function RootLayout() {
       await logout();
     } finally {
       clearSession();
+      removeOwnerScopedQueries(queryClient);
       navigate("/");
     }
   }

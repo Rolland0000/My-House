@@ -5,8 +5,11 @@ import { Alert, DimensionRule, EmptyState, Spinner } from "../../../shared/compo
 import { ApiError } from "../../../shared/api/client";
 import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
+import { useAuth } from "../../auth";
+import { useProfile } from "../../profile";
 import { useListing } from "../hooks/useListings";
 import { typeLabels } from "../labels";
+import { OwnerBar } from "./OwnerBar";
 import { ReportListingModal } from "./ReportListingModal";
 
 const GENERIC_ERROR_MESSAGE = "Please try again in a moment.";
@@ -16,6 +19,8 @@ function ListingDetail() {
   const { data, isPending, error } = useListing(id);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const navigate = useNavigate();
+  const { status } = useAuth();
+  const { data: profile } = useProfile({ enabled: status === "authenticated" });
 
   if (isPending) {
     return (
@@ -49,6 +54,7 @@ function ListingDetail() {
 
   const listing = data.data;
   const displayableMedia = listing.media.filter((media) => isRemoteMediaUrl(media.url));
+  const isOwner = status === "authenticated" && profile?.id === listing.owner.id;
 
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
   const ownerName = [listing.owner.first_name, listing.owner.last_name].filter(Boolean).join(" ");
@@ -85,6 +91,10 @@ function ListingDetail() {
         <div className="flex h-64 items-center justify-center bg-primary-soft text-text-muted">
           No photos
         </div>
+      )}
+
+      {isOwner && (
+        <OwnerBar publishedAt={listing.published_at ?? null} hasPhoto={listing.media.length > 0} />
       )}
 
       <div className="flex flex-col gap-4">

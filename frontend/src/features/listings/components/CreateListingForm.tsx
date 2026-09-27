@@ -63,7 +63,6 @@ function CreateListingForm() {
   function onSubmit(values: ListingFormValues) {
     mutation.mutate(toCreateListingPayload(values), {
       onSuccess: (response) => {
-        // MH-58 will replace this target with the new listing's photo screen.
         navigate(`/listings/${response.data.id}`);
       },
       onError: (error) => {
@@ -87,7 +86,8 @@ function CreateListingForm() {
               <h1 className="text-2xl font-bold text-ink-900">Publish a listing</h1>
               <DimensionRule width={120} className="mt-3.5 mb-1" />
               <p className="text-sm text-text-muted">
-                Fill in the details below. You'll add photos on the next screen.
+                Fill in the details below. The listing is saved as a draft. You'll add photos and
+                publish it from its page.
               </p>
             </div>
 
