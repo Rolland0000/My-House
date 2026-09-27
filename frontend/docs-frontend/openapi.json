@@ -478,6 +478,7 @@
           "listings"
         ],
         "summary": "Full listing detail — description, media, owner info (no phone).",
+        "description": "Authentication is optional: the owner always sees their own listing,\nwhatever its state; anyone else gets a 404 for a draft or a published\nlisting with no photo, identical to the 404 for an unknown id.",
         "operationId": "get_by_id",
         "parameters": [
           {
@@ -502,8 +503,11 @@
               }
             }
           },
+          "401": {
+            "description": "Malformed, invalid, or expired access token, or suspended account"
+          },
           "404": {
-            "description": "Listing not found"
+            "description": "Listing not found, or not publicly visible to the caller"
           }
         }
       }
@@ -1211,6 +1215,13 @@
           "price": {
             "type": "number",
             "format": "double"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 8601 UTC, or `null` for a draft."
           },
           "rooms": {
             "type": [

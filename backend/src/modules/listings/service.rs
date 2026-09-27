@@ -39,11 +39,39 @@ pub async fn list_listings(
     Ok(PaginatedResponse::new(data, meta))
 }
 
-/// Fetches the full detail (owner + media) for one listing.
-pub async fn get_listing_detail(pool: &PgPool, id: Uuid) -> Result<ListingDetailDto, AppError> {
+/// True when `caller` may see a listing in this state: the owner always can;
+/// anyone else only once it's published and has at least one photo.
+pub fn is_visible_to(
+    caller: Option<Uuid>,
+    owner_id: Uuid,
+    is_published: bool,
+    has_photo: bool,
+) -> bool {
+    caller == Some(owner_id) || (is_published && has_photo)
+}
+
+/// Fetches the full detail (owner + media) for one listing, as seen by
+/// `caller` (`None` for an anonymous request). A listing that exists but
+/// isn't visible to `caller` is reported as not found, identical to a
+/// genuinely unknown id.
+pub async fn get_listing_detail(
+    pool: &PgPool,
+    id: Uuid,
+    caller: Option<Uuid>,
+) -> Result<ListingDetailDto, AppError> {
     let row = repository::find_listing_by_id(pool, id)
         .await?
         .ok_or(AppError::ListingNotFound)?;
+
+    if !is_visible_to(
+        caller,
+        row.owner_id,
+        row.published_at.is_some(),
+        row.has_photo,
+    ) {
+        return Err(AppError::ListingNotFound);
+    }
+
     let media = repository::find_media_for_listing(pool, id).await?;
 
     Ok(ListingDetailDto::from_row_and_media(row, media))
@@ -114,12 +142,48 @@ pub async fn create_listing(
 ) -> Result<ListingDetailDto, AppError> {
     let new_listing = validate_new_listing(request)?;
     let id = repository::insert_listing(pool, owner_id, &new_listing).await?;
-    get_listing_detail(pool, id).await
+    get_listing_detail(pool, id, Some(owner_id)).await
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn is_visible_to_the_owner_regardless_of_state_or_photos() {
+        let owner_id = Uuid::from_u128(1);
+        for is_published in [false, true] {
+            for has_photo in [false, true] {
+                assert!(is_visible_to(
+                    Some(owner_id),
+                    owner_id,
+                    is_published,
+                    has_photo
+                ));
+            }
+        }
+    }
+
+    #[test]
+    fn is_visible_to_a_non_owner_only_when_published_with_a_photo() {
+        let owner_id = Uuid::from_u128(1);
+        let other_id = Uuid::from_u128(2);
+
+        for caller in [None, Some(other_id)] {
+            for (is_published, has_photo, expected) in [
+                (false, false, false),
+                (false, true, false),
+                (true, false, false),
+                (true, true, true),
+            ] {
+                assert_eq!(
+                    is_visible_to(caller, owner_id, is_published, has_photo),
+                    expected,
+                    "caller={caller:?} is_published={is_published} has_photo={has_photo}"
+                );
+            }
+        }
+    }
 
     fn valid_request() -> CreateListingRequest {
         CreateListingRequest {

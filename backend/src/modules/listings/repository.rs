@@ -18,6 +18,19 @@ pub struct ListingFilters {
     pub listing_type: Option<ListingType>,
 }
 
+/// Public-visibility predicate: a listing is public once published and it has
+/// at least one photo (a cover row — the first upload is always marked cover).
+/// Shared by `count_listings` and `list_listings` so `total` stays aligned
+/// with the returned pages; `pub` so search (EP-10) and contact reveal (EP-11)
+/// can reuse it instead of re-deriving the rule.
+pub fn push_public_visibility(qb: &mut QueryBuilder<'_, Postgres>) {
+    qb.push(
+        " AND l.published_at IS NOT NULL AND EXISTS (\
+            SELECT 1 FROM listing_media c WHERE c.listing_id = l.id AND c.is_cover\
+        )",
+    );
+}
+
 fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
     if let Some(owner_id) = filters.owner_id {
         qb.push(" AND l.owner_id = ");
@@ -39,6 +52,7 @@ fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
 pub async fn count_listings(pool: &PgPool, filters: &ListingFilters) -> Result<i64, AppError> {
     let mut qb: QueryBuilder<Postgres> =
         QueryBuilder::new("SELECT COUNT(*) FROM listings l WHERE 1 = 1");
+    push_public_visibility(&mut qb);
     push_filters(&mut qb, filters);
 
     qb.build_query_scalar()
@@ -69,9 +83,10 @@ pub async fn list_listings(
             u.last_name AS owner_last_name \
          FROM listings l \
          JOIN users u ON u.id = l.owner_id \
-         LEFT JOIN listing_media lm ON lm.listing_id = l.id AND lm.is_cover = TRUE \
+         JOIN listing_media lm ON lm.listing_id = l.id AND lm.is_cover = TRUE \
          WHERE 1 = 1",
     );
+    push_public_visibility(&mut qb);
     push_filters(&mut qb, filters);
     qb.push(" ORDER BY l.created_at DESC LIMIT ");
     qb.push_bind(limit as i64);
@@ -105,6 +120,8 @@ pub async fn find_listing_by_id(
             l.surface_m2,
             l.rooms,
             to_char(l.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS published_at,
+            EXISTS (SELECT 1 FROM listing_media c WHERE c.listing_id = l.id AND c.is_cover) AS "has_photo!",
             u.id AS "owner_id!",
             u.first_name AS owner_first_name,
             u.last_name AS owner_last_name,
