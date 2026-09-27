@@ -339,6 +339,7 @@ CREATE TABLE listings (
     surface_m2    INTEGER,
     rooms         INTEGER,
     search_vector TSVECTOR,
+    published_at  TIMESTAMPTZ,   -- NULL = brouillon ; visible publiquement seulement si non NULL et au moins une photo
     created_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
@@ -781,13 +782,15 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | Méthode   | Endpoint                 | Auth | Rôle     | Description                                  |
 | ---------- | ------------------------ | ---- | --------- | -------------------------------------------- |
 | `GET`    | `/listings`            | Non  | —        | Feed public paginé (cover photo + résumé) |
-| `GET`    | `/listings/:id`        | Non  | —        | Détail complet + owner info (sans phone)    |
+| `GET`    | `/listings/:id`        | Optionnelle | —        | Détail complet + owner info (sans phone)    |
 | `POST`   | `/listings`            | JWT  | `owner` | Créer un bien                               |
 | `PUT`    | `/listings/:id`        | JWT  | `owner` | Modifier son bien                            |
 | `DELETE` | `/listings/:id`        | JWT  | `owner` | Supprimer son bien                           |
 | `GET`    | `/users/me/listings`   | JWT  | `owner` | Ses propres biens                            |
 | `PATCH`  | `/listings/:id/status` | JWT  | `owner` | Changer le statut                            |
 | `PATCH`  | `/listings/:id/cover`  | JWT  | `owner` | Définir la photo de couverture              |
+
+**Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL` et il a au moins une photo (une ligne de couverture). Elle s'applique au feed, à son total, au filtre `owner_id` et au détail. Sur `GET /listings/:id`, l'authentification est optionnelle : le propriétaire voit toujours son bien, quel que soit son état ; tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
 
 **`GET /listings` — Query params**
 
@@ -845,7 +848,8 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
       "last_name": "Diallo",
       "avatar_url": null
     },
-    "created_at": "2025-06-01T10:00:00Z"
+    "created_at": "2025-06-01T10:00:00Z",
+    "published_at": null
   }
 }
 ```
