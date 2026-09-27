@@ -190,7 +190,7 @@
     "semantic_hash": "f21ebd83b2bd9b8746bb38c3fe0e149b"
   },
   "frontend/package.json": {
-    "mtime": 1790513368.7029822,
+    "mtime": 1790515985.5657666,
     "ast_hash": "e29dd23b818bb53d4b4ccd6b3bf0e45c",
     "semantic_hash": ""
   },
@@ -210,8 +210,8 @@
     "semantic_hash": "0283005233539e53a7cf12b879eb1658"
   },
   "frontend/src/app/layout/RootLayout.tsx": {
-    "mtime": 1790510424.7993023,
-    "ast_hash": "49565aae0b2aa3779f3e4aa697ce5f86",
+    "mtime": 1790517223.9005787,
+    "ast_hash": "7bff8bf5f12aa8e194a479b056fd4a40",
     "semantic_hash": ""
   },
   "frontend/src/app/providers.tsx": {
@@ -380,7 +380,7 @@
     "semantic_hash": "04b51a340c0d2bac4cdf755b3ea90589"
   },
   "frontend/vite.config.ts": {
-    "mtime": 1790514227.1753855,
+    "mtime": 1790515985.7731843,
     "ast_hash": "3af60a51047afbe91ff68c30b242fa8b",
     "semantic_hash": ""
   },
@@ -605,7 +605,7 @@
     "semantic_hash": "77f3668f862ec7eaaf02eeb2a112863d"
   },
   "docs/TECHNICAL_SPEC_MVP_v1.2.md": {
-    "mtime": 1790513604.6519914,
+    "mtime": 1790515985.5390275,
     "ast_hash": "4187b3d4f24562817ed0d461fde301ec",
     "semantic_hash": ""
   },
@@ -995,9 +995,9 @@
     "semantic_hash": "cf0de445d41ba094543fde1344943165"
   },
   "frontend/src/features/auth/components/OtpCodeInput.tsx": {
-    "mtime": 1790513301.2450936,
-    "ast_hash": "4811713c79292f67bfe53a9336a608fb",
-    "semantic_hash": "4811713c79292f67bfe53a9336a608fb"
+    "mtime": 1790515988.4250407,
+    "ast_hash": "7f5f30c8c48c769206dc363e3267633d",
+    "semantic_hash": ""
   },
   "frontend/src/features/auth/components/OtpRequestForm.tsx": {
     "mtime": 1789210413.9503114,
@@ -1135,12 +1135,12 @@
     "semantic_hash": "54f3acb945a7cd0200c8ac9d1923c9e3"
   },
   "frontend/src/shared/utils/mediaUrl.test.ts": {
-    "mtime": 1790513429.4674022,
+    "mtime": 1790515985.5724957,
     "ast_hash": "d242f4641637c333e383df34b74b1bbe",
     "semantic_hash": ""
   },
   "frontend/src/shared/utils/mediaUrl.ts": {
-    "mtime": 1790514188.8277886,
+    "mtime": 1790515985.640608,
     "ast_hash": "bb70daf5235cd5f61bb0126d4b430ec7",
     "semantic_hash": ""
   },
@@ -1235,9 +1235,9 @@
     "semantic_hash": "e0d41ef128005f8593b81fb6509afd48"
   },
   "frontend/src/shared/components/SiteHeader.tsx": {
-    "mtime": 1790505497.0540326,
-    "ast_hash": "c17785c481bfd2e4e7ec1093ca3062b0",
-    "semantic_hash": "c17785c481bfd2e4e7ec1093ca3062b0"
+    "mtime": 1790517151.1214736,
+    "ast_hash": "7882b5c5ef4ea3ba45afecf4d8a767b6",
+    "semantic_hash": ""
   },
   "frontend/src/shared/components/Skeleton.tsx": {
     "mtime": 1789210414.148032,
@@ -1340,9 +1340,9 @@
     "semantic_hash": "f447f504bb137bbfd55cf6c2b937fb2e"
   },
   "frontend/src/features/owner-request/hooks/useOwnerRequestStatus.ts": {
-    "mtime": 1789210413.983612,
-    "ast_hash": "6340734408885dea84802015bac910d6",
-    "semantic_hash": "6340734408885dea84802015bac910d6"
+    "mtime": 1790517099.161852,
+    "ast_hash": "0869e9cf93defa2608df08c9116dd353",
+    "semantic_hash": ""
   },
   "frontend/src/features/owner-request/hooks/useSubmitOwnerRequest.ts": {
     "mtime": 1789210413.986886,
@@ -1420,14 +1420,14 @@
     "semantic_hash": "036b46d97d2cb1aedd0ed45f1bfdf0cb"
   },
   "frontend/src/features/admin/components/OwnerRequestDetail.tsx": {
-    "mtime": 1790505496.9058104,
-    "ast_hash": "a08dff4ded113fd5e4284f6c8832c86b",
-    "semantic_hash": "a08dff4ded113fd5e4284f6c8832c86b"
+    "mtime": 1790516498.5899324,
+    "ast_hash": "3db7eba6fce27565ea7bb1d5973c0062",
+    "semantic_hash": ""
   },
   "frontend/src/features/admin/components/OwnerRequestQueueList.tsx": {
-    "mtime": 1790505496.9075325,
-    "ast_hash": "042a6a6377d29e27262cb96785a1cd78",
-    "semantic_hash": "042a6a6377d29e27262cb96785a1cd78"
+    "mtime": 1790516493.6376677,
+    "ast_hash": "497f1f39ef92a6778d6ff87556a04f72",
+    "semantic_hash": ""
   },
   "frontend/src/features/admin/hooks/useOwnerRequestDetail.ts": {
     "mtime": 1790505496.909047,
@@ -1647,6 +1647,11 @@
   "frontend/src/features/listings/removeOwnerScopedQueries.ts": {
     "mtime": 1790510424.8114078,
     "ast_hash": "cbc2b5a31d7eb6165a0f0162e641486c",
+    "semantic_hash": ""
+  },
+  "frontend/docs-frontend/Screenshot 2026-09-27 at 12.42.17.png": {
+    "mtime": 1790515988.576308,
+    "ast_hash": "2d90b797d7941d347c5ef750e2c3c901",
     "semantic_hash": ""
   }
 }
