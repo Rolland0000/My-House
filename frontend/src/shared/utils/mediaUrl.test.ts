@@ -19,8 +19,16 @@ describe("isRemoteMediaUrl", () => {
     expect(isRemoteMediaUrl("blob:http://example.com/uuid")).toBe(false);
   });
 
-  it("rejects a relative path", () => {
-    expect(isRemoteMediaUrl("/uploads/a.jpg")).toBe(false);
+  it("accepts a root-relative path", () => {
+    expect(isRemoteMediaUrl("/media/avatars/a.jpg")).toBe(true);
+  });
+
+  it("rejects a protocol-relative URL", () => {
+    expect(isRemoteMediaUrl("//evil.example.com/a.jpg")).toBe(false);
+  });
+
+  it("rejects a backslash-leading URL", () => {
+    expect(isRemoteMediaUrl("/\\evil.example.com/a.jpg")).toBe(false);
   });
 });
 
@@ -37,5 +45,13 @@ describe("isDisplayableMediaUrl", () => {
 
   it("rejects a data: URL", () => {
     expect(isDisplayableMediaUrl("data:text/html,<script>alert(1)</script>")).toBe(false);
+  });
+
+  it("accepts a root-relative path", () => {
+    expect(isDisplayableMediaUrl("/media/avatars/a.jpg")).toBe(true);
+  });
+
+  it("rejects a protocol-relative URL", () => {
+    expect(isDisplayableMediaUrl("//evil.example.com/a.jpg")).toBe(false);
   });
 });
