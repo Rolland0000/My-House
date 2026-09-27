@@ -1,16 +1,16 @@
 # Graph Report - My-House  (2026-09-27)
 
 ## Corpus Check
-- 298 files · ~152,460 words
+- 298 files · ~152,728 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2000 nodes · 4214 edges · 170 communities (125 shown, 45 thin omitted)
+- 2005 nodes · 4219 edges · 173 communities (126 shown, 47 thin omitted)
 - Extraction: 97% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 104 edges (avg confidence: 0.83)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2c76404f`
+- Built from commit: `b8405670`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,13 +25,13 @@
 - media/service.rs
 - components/index.ts
 - Mailer
-- owner_requests/model.rs
+- UserRow
 - MyHouse Project Instructions (Agents)
 - jwt.rs
 - local_fs.rs
 - rate_limit.rs
 - listings/index.ts
-- AuthUser
+- extractors.rs
 - validation.rs
 - owner-request/api.ts
 - AppError
@@ -49,18 +49,18 @@
 - errors.rs
 - OwnerRequestForm.tsx
 - client.ts
-- admin/handler.rs
+- AuthUser
 - .mcp.json
 - MH-53 — Créer un bien : plan d'implémentation (BE + FE)
 - Design Handoff README
-- providers.tsx
+- FieldErrors
 - owner_requests/repository.rs
 - .new
 - users/handler.rs
 - dependencies
 - MH-54 — Garder les brouillons privés jusqu'à publication : plan d'implémentation (BE + FE)
 - admin identity-document read exception
-- OwnerRequestDetail.tsx
+- CreateListingForm.tsx
 - submit_owner_request
 - Extraction subagent prompt (full)
 - scripts
@@ -79,7 +79,7 @@
 - media/repository.rs
 - backend-dev service
 - MokaStore
-- OwnerRequestQueueList.tsx
+- OwnerRequestDetail.tsx
 - listings/handler.rs
 - Docker Rules Skill
 - /graphify command
@@ -97,7 +97,7 @@
 - Owner Request Rejected Email Template
 - Embedded React/TypeScript Rules Content
 - --update (incremental re-extraction)
-- media/handler.rs
+- review
 - connect_db
 - Step 9 - Save manifest, update cost tracker, clean up, and report
 - Step 4 - Build graph, cluster, analyze, generate outputs
@@ -121,11 +121,11 @@
 - R-08: search_vector trigger N+1 query
 - Refresh Token httpOnly Cookie
 - GET /users/me/owner-request
-- eslint-plugin-react-hooks
-- globals
-- tailwindcss
-- @types/react-dom
-- typescript-eslint
+- submit
+- OwnerBar.tsx
+- Pagination.tsx
+- find_document_entry
+- owner_requests/router.rs
 - vite
 - pre-commit
 - graphify Slash Command Trigger (.claude/CLAUDE.md)
@@ -158,10 +158,14 @@
 - Rustic Bedroom Reference Photo (OIP 8)
 - Bedroom Interior Photo (OIP 9)
 - OIP Bedroom Design Reference Photo
+- vite.config.ts
 - file_validation.rs
-- MediaRow
-- AvatarUpload.tsx
-- media/router.rs
+- @eslint/js
+- eslint-plugin-react-refresh
+- prettier
+- @tailwindcss/vite
+- @types/react
+- vitest
 
 ## God Nodes (most connected - your core abstractions)
 1. `AppError` - 172 edges
@@ -215,15 +219,15 @@
 - **Dimension Rule Signature Device Across Design Docs** — docs_wireframes_design_tokens_dimension_rule, frontend_docs_frontend_design_handoff_my_house_readme_dimensionrule, frontend_docs_frontend_design_handoff_my_house_my_house_plan_laiton_dc [INFERRED 0.85]
 - **Proposed Shared Component Library Spec** — frontend_docs_frontend_design_handoff_my_house_readme_siteheader, frontend_docs_frontend_design_handoff_my_house_readme_sitefooter, frontend_docs_frontend_design_handoff_my_house_readme_badge, frontend_docs_frontend_design_handoff_my_house_readme_dimensionrule, frontend_docs_frontend_design_handoff_my_house_readme_emptystate, frontend_docs_frontend_design_handoff_my_house_readme_skeleton [EXTRACTED 0.90]
 
-## Communities (170 total, 45 thin omitted)
+## Communities (173 total, 47 thin omitted)
 
 ### Community 0 - "listings/service.rs"
 Cohesion: 0.06
 Nodes (67): CreateListingRequest, ListingDetailDto, ListingDetailResponse, ListingMediaDto, ListingSummaryDto, ListListingsQuery, OwnerDetailDto, OwnerSummaryDto (+59 more)
 
 ### Community 1 - "owner_requests/dto.rs"
-Cohesion: 0.12
-Nodes (28): admin_detail_dto_falls_back_to_empty_documents_on_malformed_json(), admin_detail_dto_never_exposes_storage_key(), admin_detail_row(), admin_list_dto_omits_identity_data_and_documents(), admin_row(), AdminOwnerRequestDetailDto, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocumentDto (+20 more)
+Cohesion: 0.09
+Nodes (47): admin_detail_dto_falls_back_to_empty_documents_on_malformed_json(), admin_detail_dto_never_exposes_storage_key(), admin_detail_row(), admin_list_dto_omits_identity_data_and_documents(), admin_row(), AdminOwnerRequestDetailDto, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocumentDto (+39 more)
 
 ### Community 2 - "auth/index.ts"
 Cohesion: 0.19
@@ -234,32 +238,32 @@ Cohesion: 0.09
 Nodes (50): admin_bootstrap_defaults_to_disabled_when_absent(), app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, empty_trusted_proxies_trusts_nothing(), loads_admin_bootstrap_email_when_enabled(), loads_valid_config() (+42 more)
 
 ### Community 4 - "owner_requests/service.rs"
-Cohesion: 0.11
-Nodes (36): a_doc_id_from_a_different_request_does_not_resolve(), a_missing_storage_object_surfaces_as_document_not_found(), a_pdf_renamed_into_an_image_slot_is_a_shape_violation(), accepts_one_pdf_with_no_side(), accepts_two_images_as_front_and_back(), as_document_not_found(), as_shape_error(), ClassifiedDocument (+28 more)
+Cohesion: 0.13
+Nodes (16): a_missing_storage_object_surfaces_as_document_not_found(), a_pdf_renamed_into_an_image_slot_is_a_shape_violation(), accepts_one_pdf_with_no_side(), accepts_two_images_as_front_and_back(), as_document_not_found(), as_shape_error(), ClassifiedDocument, classify_documents() (+8 more)
 
 ### Community 5 - "users/service.rs"
-Cohesion: 0.05
-Nodes (73): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Self, String (+65 more)
+Cohesion: 0.06
+Nodes (54): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Self, String (+46 more)
 
 ### Community 6 - "AppCacheProvider"
 Cohesion: 0.10
 Nodes (43): AppCache, build_auth_challenge_cache(), build_cache_provider(), build_ip_rate_limit_cache(), build_otp_rate_limit_cache(), build_refresh_replay_cache(), Arc, AtomicU32 (+35 more)
 
 ### Community 7 - "media/service.rs"
-Cohesion: 0.11
-Nodes (27): another_owners_photo_is_reported_as_not_found(), check_upload_slot(), cover_promotion(), CoverPromotion, delete(), delete_decision(), first_photo_becomes_the_cover_at_position_zero(), media_owned_by() (+19 more)
+Cohesion: 0.06
+Nodes (56): MediaDto, MediaResponse, PromoteCoverRequest, From, Self, String, Uuid, UploadMediaForm (+48 more)
 
 ### Community 8 - "components/index.ts"
 Cohesion: 0.06
-Nodes (52): AlertProps, AlertVariant, variantConfig, ButtonProps, ButtonSize, ButtonVariant, sizeClasses, variantClasses (+44 more)
+Nodes (50): AlertProps, AlertVariant, variantConfig, ButtonProps, ButtonSize, ButtonVariant, sizeClasses, variantClasses (+42 more)
 
 ### Community 9 - "Mailer"
 Cohesion: 0.08
 Nodes (36): Address, AddressError, AsyncSmtpTransport, builds_successfully_with_valid_config(), Mailer, MailerError, rejects_malformed_smtp_from(), Formatter (+28 more)
 
-### Community 10 - "owner_requests/model.rs"
-Cohesion: 0.24
-Nodes (19): AdminOwnerRequestDetailRow, AdminOwnerRequestRow, IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestStatus, OwnerRequestSubmission, Bytes (+11 more)
+### Community 10 - "UserRow"
+Cohesion: 0.25
+Nodes (19): Option, String, Uuid, UserRow, admin_exists(), delete_by_id(), find_by_id(), find_is_active() (+11 more)
 
 ### Community 11 - "MyHouse Project Instructions (Agents)"
 Cohesion: 0.06
@@ -278,28 +282,28 @@ Cohesion: 0.14
 Nodes (28): allows_requests_under_the_limit_and_blocks_the_one_that_crosses_it(), distinct_clients_get_distinct_counters(), falls_back_to_peer_ip_when_trusted_header_is_missing(), headers_with_xff(), ignores_x_forwarded_for_from_an_untrusted_peer(), middleware_passes_then_rejects_with_429_and_retry_after(), peer(), rate_limit() (+20 more)
 
 ### Community 15 - "listings/index.ts"
-Cohesion: 0.10
-Nodes (38): createListing(), CreateListingRequest, getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType, listListings() (+30 more)
+Cohesion: 0.16
+Nodes (22): createListing(), CreateListingRequest, getListing(), ListingDetail, ListingStatus, ListingSummary, listListings(), ListListingsParams (+14 more)
 
-### Community 16 - "AuthUser"
+### Community 16 - "extractors.rs"
 Cohesion: 0.13
-Nodes (25): AppJson<T>, AuthState, AuthUser, bearer_token(), MaybeAuthUser, optional_bearer_token(), resolve_identity(), resolve_identity_rejects_an_undecodable_token_without_touching_cache_or_db() (+17 more)
+Nodes (24): AppJson<T>, AuthState, bearer_token(), MaybeAuthUser, optional_bearer_token(), resolve_identity(), resolve_identity_rejects_an_undecodable_token_without_touching_cache_or_db(), Arc (+16 more)
 
 ### Community 17 - "validation.rs"
-Cohesion: 0.10
-Nodes (20): FieldErrors, finish_reports_one_entry_per_recorded_violation(), normalize_place_name(), optional_name(), optional_note(), optional_note_accepts_the_upper_bound_and_rejects_over_length(), optional_phone(), repeat() (+12 more)
+Cohesion: 0.13
+Nodes (4): optional_note_accepts_the_upper_bound_and_rejects_over_length(), repeat(), required_name_trims_and_accepts_the_upper_bound(), required_phone_trims_and_accepts_the_upper_bound()
 
 ### Community 18 - "owner-request/api.ts"
-Cohesion: 0.24
-Nodes (10): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, OwnerRequestStatusResponse, submitOwnerRequest(), useSubmitOwnerRequest(), BaseView (+2 more)
+Cohesion: 0.19
+Nodes (15): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, OwnerRequestStatusResponse, submitOwnerRequest(), OwnerRequestStatus(), useOwnerRequestStatus() (+7 more)
 
 ### Community 19 - "AppError"
-Cohesion: 0.22
-Nodes (21): create_account(), db_err(), email_exists(), find_by_hash(), find_user_by_email(), insert_refresh_token(), revoke(), revoke_all_for_user() (+13 more)
+Cohesion: 0.25
+Nodes (19): create_account(), db_err(), email_exists(), find_by_hash(), find_user_by_email(), insert_refresh_token(), revoke(), revoke_all_for_user() (+11 more)
 
 ### Community 20 - "admin/api.ts"
-Cohesion: 0.15
-Nodes (22): AdminOwnerRequest, AdminOwnerRequestDetail, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocument, getOwnerRequest(), getOwnerRequestDocument(), listOwnerRequests(), ListOwnerRequestsParams (+14 more)
+Cohesion: 0.16
+Nodes (21): AdminOwnerRequest, AdminOwnerRequestDetail, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocument, getOwnerRequest(), getOwnerRequestDocument(), listOwnerRequests(), ListOwnerRequestsParams (+13 more)
 
 ### Community 21 - "AppState"
 Cohesion: 0.12
@@ -319,19 +323,19 @@ Nodes (4): MokaStore<K, V>, K, Option, V
 
 ### Community 25 - "devDependencies"
 Cohesion: 0.10
-Nodes (21): eslint, @eslint/js, eslint-plugin-react-refresh, devDependencies, eslint, @eslint/js, eslint-plugin-react-refresh, openapi-typescript (+13 more)
+Nodes (21): eslint, eslint-plugin-react-hooks, devDependencies, eslint, eslint-plugin-react-hooks, globals, openapi-typescript, tailwindcss (+13 more)
 
 ### Community 26 - "Module: users"
 Cohesion: 0.13
 Nodes (20): Account Deletion Cascade + Storage Cleanup, Single Admin Account Bootstrap, AwsS3Storage (V2), LocalFsStorage, Module: admin, Module: auth, Module: contact, Module: listings (+12 more)
 
 ### Community 27 - "ProfileForm.tsx"
-Cohesion: 0.21
-Nodes (15): OwnerRequestStatus(), useOwnerRequestStatus(), ownerRequestStatusView, Profile, OwnerRequestStatusBlock(), OwnerRequestStatusBlockProps, ProfileFields(), ProfileFieldsProps (+7 more)
+Cohesion: 0.16
+Nodes (17): REASONS, ReportListingModal(), ReportListingModalProps, Profile, DeleteAccountSection(), DeleteAccountSectionProps, OwnerRequestStatusBlock(), OwnerRequestStatusBlockProps (+9 more)
 
 ### Community 28 - "profile/api.ts"
-Cohesion: 0.19
-Nodes (15): RequireAdmin(), RequireAdminProps, RequireOwner(), RequireOwnerProps, deleteAccount(), getMe(), profileQueryKey, updateMe() (+7 more)
+Cohesion: 0.17
+Nodes (17): RequireAdmin(), RequireAdminProps, RequireOwner(), RequireOwnerProps, deleteAccount(), getMe(), profileQueryKey, updateMe() (+9 more)
 
 ### Community 29 - "compilerOptions"
 Cohesion: 0.10
@@ -346,16 +350,16 @@ Cohesion: 0.19
 Nodes (18): ErrorBody, ErrorEnvelope, FieldError, parse_envelope(), Option, Response, StatusCode, String (+10 more)
 
 ### Community 32 - "OwnerRequestForm.tsx"
-Cohesion: 0.19
-Nodes (12): FileWithPreview, FormValues, ID_TYPE_OPTIONS, ImageSlotProps, Modality, OwnerRequestForm(), PdfSlotProps, preCheckImage() (+4 more)
+Cohesion: 0.12
+Nodes (20): reviewErrorMessage(), FileWithPreview, FormValues, ID_TYPE_OPTIONS, ImageSlotProps, Modality, OwnerRequestForm(), PdfSlotProps (+12 more)
 
 ### Community 33 - "client.ts"
 Cohesion: 0.19
-Nodes (18): AccessTokenGetter, apiDelete(), apiGetBlob(), apiPatch(), apiPost(), apiPut(), apiUpload(), ErrorEnvelope (+10 more)
+Nodes (17): AccessTokenGetter, apiGetBlob(), apiPatch(), apiPost(), apiPut(), buildQueryString(), ErrorEnvelope, FieldError (+9 more)
 
-### Community 34 - "admin/handler.rs"
-Cohesion: 0.29
-Nodes (14): AdminOwnerRequestDetailResponse, get_owner_request(), get_owner_request_document(), list_owner_requests(), review_owner_request(), IntoResponse, Json, Path (+6 more)
+### Community 34 - "AuthUser"
+Cohesion: 0.28
+Nodes (15): AdminOwnerRequestDetailResponse, get_owner_request(), get_owner_request_document(), list_owner_requests(), review_owner_request(), IntoResponse, Json, Path (+7 more)
 
 ### Community 35 - ".mcp.json"
 Cohesion: 0.15
@@ -369,9 +373,9 @@ Nodes (17): 1. Décisions tranchées, 2. Existant sur lequel on s'appuie, 3.1 Co
 Cohesion: 0.14
 Nodes (16): MyHouse Design Tokens (Plan & Brass), Dimension Rule Signature Device, MH-17 Superseded Cream/Terracotta Palette, Design Handoff Repo Sync Log & Screen Map, My House - Plan & Laiton Design Mockup, My House - Screens Design Mockup, Design Handoff README, Admin Approve as Sole Solid Semantic Button (+8 more)
 
-### Community 38 - "providers.tsx"
-Cohesion: 0.38
-Nodes (4): App(), Providers(), ProvidersProps, router
+### Community 38 - "FieldErrors"
+Cohesion: 0.26
+Nodes (10): FieldErrors, finish_reports_one_entry_per_recorded_violation(), normalize_place_name(), Into, Option, String, Vec, violated_fields() (+2 more)
 
 ### Community 39 - "owner_requests/repository.rs"
 Cohesion: 0.28
@@ -397,9 +401,9 @@ Nodes (16): 1. Contexte et objectif, 2.1 MH-54-BE — Fichiers, dans l'ordre (un
 Cohesion: 0.15
 Nodes (14): admin identity-document read exception, ARCHITECTURE.md (referenced doc), backend/Dockerfile, docker-compose.yml, backend/.env.example variables, frontend/Dockerfile, GET /admin/owner-requests/:id/documents/:doc_id, infra/mailer.rs (lettre SMTP client) (+6 more)
 
-### Community 45 - "OwnerRequestDetail.tsx"
-Cohesion: 0.13
-Nodes (17): DocumentViewer(), reviewErrorMessage(), FieldErrors, RegistrationFormProps, REASONS, ReportListingModal(), ReportListingModalProps, DeleteAccountSection() (+9 more)
+### Community 45 - "CreateListingForm.tsx"
+Cohesion: 0.31
+Nodes (13): ListingType, CreateListingForm(), TYPE_OPTIONS, FORM_FIELD_NAMES, integerFieldRule(), ListingFormValues, normalizePlaceName(), placeNameFieldRule() (+5 more)
 
 ### Community 46 - "submit_owner_request"
 Cohesion: 0.26
@@ -414,8 +418,8 @@ Cohesion: 0.15
 Nodes (13): scripts, build, dev, format, generate:types, generate:types:ci, lint, predev (+5 more)
 
 ### Community 49 - "router.tsx"
-Cohesion: 0.10
-Nodes (20): AdminLayout(), AuthLayout(), RootLayout(), queryClient, RequireAuth(), RequireAuthProps, AuthFlow, CreateListingForm (+12 more)
+Cohesion: 0.08
+Nodes (24): App(), AdminLayout(), AuthLayout(), RootLayout(), Providers(), ProvidersProps, queryClient, RequireAuth() (+16 more)
 
 ### Community 50 - "route.rs"
 Cohesion: 0.46
@@ -473,9 +477,9 @@ Nodes (9): backend-dev service, backend-prod service, OTP Login Code Email Templ
 Cohesion: 0.25
 Nodes (7): MokaStore, MokaStore<K, V>, Duration, K, Self, V, Cache
 
-### Community 64 - "OwnerRequestQueueList.tsx"
-Cohesion: 0.13
-Nodes (15): OwnerRequestDetail(), OwnerRequestQueueList(), STATUS_OPTIONS, OwnerRequestStatus, ownerRequestStatusBadge(), STATUS_BADGE, OwnerBarProps, VISIBILITY_BADGE (+7 more)
+### Community 64 - "OwnerRequestDetail.tsx"
+Cohesion: 0.17
+Nodes (15): DocumentViewer(), OwnerRequestDetail(), OwnerRequestQueueList(), STATUS_OPTIONS, OwnerRequestStatus, ownerRequestStatusBadge(), STATUS_BADGE, FieldErrors (+7 more)
 
 ### Community 65 - "listings/handler.rs"
 Cohesion: 0.22
@@ -498,8 +502,8 @@ Cohesion: 0.25
 Nodes (7): name, typescript, overrides, openapi-typescript, private, type, version
 
 ### Community 70 - "SiteHeader.tsx"
-Cohesion: 0.13
-Nodes (8): MobileMenu(), NavItem(), NavLinkSpec, OWNER_LINKS, PUBLIC_LINKS, SiteHeaderProps, SiteHeaderRole, SiteHeaderUser
+Cohesion: 0.11
+Nodes (11): BadgeProps, BadgeSize, sizeClasses, toneClasses, MobileMenu(), NavItem(), NavLinkSpec, OWNER_LINKS (+3 more)
 
 ### Community 71 - "CI Job: Frontend OpenAPI Codegen"
 Cohesion: 0.43
@@ -545,9 +549,9 @@ Nodes (6): react-typecrypt.md Rules File, Banned AI Marketing Words Rule, Embedd
 Cohesion: 0.40
 Nodes (6): --cluster-only, --update (incremental re-extraction), Interpreter guard for subcommands, For --update and --cluster-only (section pointer), --cluster-only (Codex), --update (incremental re-extraction) (Codex)
 
-### Community 82 - "media/handler.rs"
-Cohesion: 0.30
-Nodes (13): delete_media(), multipart_error(), promote_cover(), read_submission(), Json, Multipart, MultipartError, Path (+5 more)
+### Community 82 - "review"
+Cohesion: 0.33
+Nodes (12): get_document_for_admin(), get_for_admin(), get_status(), list_for_admin(), parse_status_filter(), review(), Option, OwnerRequestStatus (+4 more)
 
 ### Community 83 - "connect_db"
 Cohesion: 0.50
@@ -609,21 +613,29 @@ Nodes (3): mh-13-feed-detail.html wireframe, Public feed page (grid of cover pho
 Cohesion: 0.67
 Nodes (3): README.md — Project Overview and Setup, Conventional Commits convention, Trunk-based development branching strategy
 
+### Community 107 - "submit"
+Cohesion: 0.33
+Nodes (9): parse_identity_data(), parses_and_trims_identity_data(), submit(), optional_name(), optional_note(), optional_phone(), required_name(), required_phone() (+1 more)
+
+### Community 108 - "OwnerBar.tsx"
+Cohesion: 0.31
+Nodes (6): OwnerBar(), OwnerBarProps, VISIBILITY_BADGE, VISIBILITY_MESSAGE, listingVisibility, ListingVisibilityInput
+
+### Community 109 - "Pagination.tsx"
+Cohesion: 0.36
+Nodes (4): Pagination(), PaginationProps, getPageItems(), PageItem
+
+### Community 110 - "find_document_entry"
+Cohesion: 0.60
+Nodes (5): a_doc_id_from_a_different_request_does_not_resolve(), documents_json(), find_document_entry(), finds_the_document_matching_doc_id_in_its_own_request(), Value
+
+### Community 111 - "owner_requests/router.rs"
+Cohesion: 1.00
+Nodes (3): router(), OpenApiRouter, submission_router()
+
 ### Community 166 - "file_validation.rs"
 Cohesion: 0.24
 Nodes (6): accepts_pdf(), accepts_supported_image_formats(), Result, validate_image(), validate_pdf(), ValidatedFile
-
-### Community 167 - "MediaRow"
-Cohesion: 0.20
-Nodes (14): MediaDto, MediaResponse, PromoteCoverRequest, From, Self, String, Uuid, UploadMediaForm (+6 more)
-
-### Community 168 - "AvatarUpload.tsx"
-Cohesion: 0.42
-Nodes (6): preCheck(), serverMessage(), AvatarUpload(), AvatarUploadProps, ACCEPTED_AVATAR_TYPES, isDisplayableMediaUrl()
-
-### Community 169 - "media/router.rs"
-Cohesion: 1.00
-Nodes (3): router(), OpenApiRouter, upload_router()
 
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
@@ -636,9 +648,9 @@ Nodes (3): router(), OpenApiRouter, upload_router()
   frontend/docs-frontend/photo_my_house/OIP (10).webp · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **341 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+336 more)
+- **344 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+339 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **47 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -651,9 +663,9 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `Modern Villa Night Exterior with Pool (OIP 10)` and `Modern Villa Night Exterior with Pool (OIP 10)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `AppError` connect `AppError` to `listings/service.rs`, `owner_requests/service.rs`, `users/service.rs`, `AppCacheProvider`, `media/service.rs`, `Mailer`, `jwt.rs`, `local_fs.rs`, `AuthUser`, `validation.rs`, `auth/handler.rs`, `errors.rs`, `admin/handler.rs`, `file_validation.rs`, `owner_requests/repository.rs`, `users/handler.rs`, `submit_owner_request`, `media/repository.rs`, `listings/handler.rs`, `media/handler.rs`, `UnimplementedStorage`?**
-  _High betweenness centrality (0.181) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `listings/service.rs`, `owner_requests/service.rs`, `users/service.rs`, `AppCacheProvider`, `media/service.rs`, `Mailer`, `UserRow`, `jwt.rs`, `local_fs.rs`, `extractors.rs`, `auth/handler.rs`, `errors.rs`, `AuthUser`, `file_validation.rs`, `owner_requests/repository.rs`, `FieldErrors`, `users/handler.rs`, `submit_owner_request`, `media/repository.rs`, `listings/handler.rs`, `review`, `UnimplementedStorage`, `submit`, `find_document_entry`?**
+  _High betweenness centrality (0.180) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `config/mod.rs` to `Mailer`, `users/service.rs`, `AppState`?**
   _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `AppState` connect `AppState` to `listings/handler.rs`, `admin/handler.rs`, `media/router.rs`, `users/handler.rs`, `submit_owner_request`, `AuthUser`, `media/handler.rs`, `route.rs`, `.run`, `health.rs`, `auth/handler.rs`?**
+- **Why does `AppState` connect `AppState` to `listings/handler.rs`, `AuthUser`, `media/service.rs`, `users/handler.rs`, `submit_owner_request`, `owner_requests/router.rs`, `extractors.rs`, `route.rs`, `.run`, `health.rs`, `auth/handler.rs`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._

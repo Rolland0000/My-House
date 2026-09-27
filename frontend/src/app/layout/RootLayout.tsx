@@ -4,6 +4,7 @@ import { SiteFooter, SiteHeader } from "../../shared/components";
 import type { SiteHeaderRole } from "../../shared/components";
 import { logout, useAuth } from "../../features/auth";
 import { removeOwnerScopedQueries } from "../../features/listings";
+import { ownerRequestStatusView, useOwnerRequestStatus } from "../../features/owner-request";
 import { useProfile } from "../../features/profile";
 import { formatInitials } from "../../shared/utils/format";
 
@@ -19,6 +20,12 @@ export function RootLayout() {
       : status === "authenticated"
         ? "seeker"
         : "public";
+
+  // Admins also browse with the seeker header, but can't apply — only real seekers get the CTA.
+  const isSeeker = status === "authenticated" && profile?.role === "seeker";
+  const { data: ownerRequest } = useOwnerRequestStatus({ enabled: isSeeker });
+  const ownerRequestView =
+    isSeeker && ownerRequest !== undefined ? ownerRequestStatusView(ownerRequest) : null;
 
   const user =
     status === "authenticated" && profile
@@ -40,7 +47,13 @@ export function RootLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader role={role} user={user} onSignOut={handleSignOut} />
+      <SiteHeader
+        role={role}
+        user={user}
+        ownerRequestStatus={ownerRequestView?.state === "pending" ? "pending" : null}
+        ownerRequestCta={ownerRequestView?.showCta ?? false}
+        onSignOut={handleSignOut}
+      />
       <main className="flex-1">
         <Outlet />
       </main>
