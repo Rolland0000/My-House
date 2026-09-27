@@ -142,6 +142,8 @@ pub struct ListingDetailDto {
     pub media: Vec<ListingMediaDto>,
     pub owner: OwnerDetailDto,
     pub created_at: String,
+    /// ISO 8601 UTC, or `null` for a draft.
+    pub published_at: Option<String>,
 }
 
 impl From<ListingMediaRow> for ListingMediaDto {
@@ -176,6 +178,7 @@ impl ListingDetailDto {
                 avatar_url: row.owner_avatar_url,
             },
             created_at: row.created_at,
+            published_at: row.published_at,
         }
     }
 }

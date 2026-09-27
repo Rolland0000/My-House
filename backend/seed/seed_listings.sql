@@ -3,7 +3,8 @@
 -- Dev-only fixture — never part of the sqlx migration chain (migrations run
 -- unconditionally on every boot, including staging/prod; seed data must not).
 -- Inserts owner users + listings + listing_media directly via SQL, with
--- placeholder image URLs (no media upload path exists yet).
+-- placeholder image URLs (no media upload path exists yet). Listings are
+-- seeded already published (MH-54) so the feed stays populated.
 --
 -- Usage (local dev, matches backend/.env):
 --   psql "$DATABASE_URL" -f backend/seed/seed_listings.sql
@@ -24,49 +25,49 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- Listings
 -- ============================================================
-INSERT INTO listings (id, owner_id, title, description, type, status, city, neighborhood, price, currency, surface_m2, rooms)
+INSERT INTO listings (id, owner_id, title, description, type, status, city, neighborhood, price, currency, surface_m2, rooms, published_at)
 VALUES
     (
         'a1111111-0000-0000-0000-000000000001',
         '11111111-1111-1111-1111-111111111111',
         'Studio meublé Plateau',
         'Studio lumineux entièrement meublé au cœur du Plateau, à deux pas des commerces et des transports. Cuisine équipée, salle d''eau moderne.',
-        'studio', 'available', 'Dakar', 'Plateau', 150000, 'XOF', 28, 1
+        'studio', 'available', 'Dakar', 'Plateau', 150000, 'XOF', 28, 1, NOW()
     ),
     (
         'a1111111-0000-0000-0000-000000000002',
         '22222222-2222-2222-2222-222222222222',
         'Appartement 3 pièces Almadies',
         'Bel appartement de 3 pièces avec vue dégagée, quartier calme et résidentiel des Almadies. Parking sécurisé inclus.',
-        'apartment', 'available', 'Dakar', 'Almadies', 420000, 'XOF', 85, 3
+        'apartment', 'available', 'Dakar', 'Almadies', 420000, 'XOF', 85, 3, NOW()
     ),
     (
         'a1111111-0000-0000-0000-000000000003',
         '33333333-3333-3333-3333-333333333333',
         'Villa avec jardin Cocody',
         'Villa spacieuse avec jardin privatif et piscine, idéale pour une famille. Quartier résidentiel sécurisé de Cocody.',
-        'villa', 'available', 'Abidjan', 'Cocody', 950000, 'XOF', 220, 5
+        'villa', 'available', 'Abidjan', 'Cocody', 950000, 'XOF', 220, 5, NOW()
     ),
     (
         'a1111111-0000-0000-0000-000000000004',
         '33333333-3333-3333-3333-333333333333',
         'Chambre meublée Yopougon',
         'Chambre meublée dans une maison partagée, accès cuisine et salon communs. Quartier animé et bien desservi.',
-        'room', 'unavailable', 'Abidjan', 'Yopougon', 65000, 'XOF', 14, 1
+        'room', 'unavailable', 'Abidjan', 'Yopougon', 65000, 'XOF', 14, 1, NOW()
     ),
     (
         'a1111111-0000-0000-0000-000000000005',
         '44444444-4444-4444-4444-444444444444',
         'Deux pièces rénové Belleville',
         'Deux pièces entièrement rénové, cuisine ouverte, proche métro et commerces. Immeuble ancien avec ascenseur.',
-        'apartment', 'available', 'Paris', 'Belleville', 1250, 'EUR', 38, 2
+        'apartment', 'available', 'Paris', 'Belleville', 1250, 'EUR', 38, 2, NOW()
     ),
     (
         'a1111111-0000-0000-0000-000000000006',
         '44444444-4444-4444-4444-444444444444',
         'Maison de ville Montreuil',
         'Maison de ville avec petite cour extérieure, proche de Paris. Trois chambres, double séjour.',
-        'house', 'available', 'Montreuil', NULL, 1850, 'EUR', 95, 4
+        'house', 'available', 'Montreuil', NULL, 1850, 'EUR', 95, 4, NOW()
     )
 ON CONFLICT (id) DO NOTHING;
 

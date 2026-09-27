@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::extractors::{AppJson, AuthUser, MaybeAuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
@@ -35,6 +35,10 @@ pub async fn list(
 }
 
 /// Full listing detail — description, media, owner info (no phone).
+///
+/// Authentication is optional: the owner always sees their own listing,
+/// whatever its state; anyone else gets a 404 for a draft or a published
+/// listing with no photo, identical to the 404 for an unknown id.
 #[utoipa::path(
     get,
     path = "/listings/{id}",
@@ -42,14 +46,17 @@ pub async fn list(
     params(("id" = Uuid, Path, description = "Listing id")),
     responses(
         (status = 200, description = "Listing detail", body = ListingDetailResponse),
-        (status = 404, description = "Listing not found"),
+        (status = 401, description = "Malformed, invalid, or expired access token, or suspended account"),
+        (status = 404, description = "Listing not found, or not publicly visible to the caller"),
     )
 )]
 pub async fn get_by_id(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
+    caller: MaybeAuthUser,
 ) -> Result<Json<ListingDetailResponse>, AppError> {
-    let data = service::get_listing_detail(state.db(), id).await?;
+    let data =
+        service::get_listing_detail(state.db(), id, caller.0.map(|user| user.user_id)).await?;
     Ok(Json(ListingDetailResponse { data }))
 }
 

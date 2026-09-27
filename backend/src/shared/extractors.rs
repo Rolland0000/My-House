@@ -34,6 +34,42 @@ impl AuthUser {
     }
 }
 
+/// Caller identity for routes with optional authentication, e.g.
+/// `GET /listings/:id`. `None` means no `Authorization` header was sent; a
+/// header that fails to parse or resolve still rejects with `AppError`
+/// (401), it is never downgraded to anonymous.
+///
+/// Deliberately not axum's blanket `Option<AuthUser>`: that impl's rejection
+/// is `Infallible`, so an expired or malformed token would silently become
+/// `None` instead of the 401 the frontend's refresh-and-retry relies on.
+#[derive(Debug, Clone, Copy)]
+pub struct MaybeAuthUser(pub Option<AuthUser>);
+
+#[async_trait]
+impl<S> FromRequestParts<S> for MaybeAuthUser
+where
+    S: Send + Sync,
+    AuthState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Some(token) = optional_bearer_token(parts)? else {
+            return Ok(Self(None));
+        };
+        let auth_state = AuthState::from_ref(state);
+
+        resolve_identity(
+            token,
+            auth_state.token_decoder.as_ref(),
+            auth_state.cache.as_ref(),
+            &auth_state.db,
+        )
+        .await
+        .map(|user| Self(Some(user)))
+    }
+}
+
 /// The slice of `AppState` `AuthUser` actually needs — `config`, `mailer`,
 /// `storage` stay unreachable from the auth path even though `AppState`
 /// carries them. Built per request from cheap `Arc`/`PgPool` clones.
@@ -99,12 +135,23 @@ where
 }
 
 fn bearer_token(parts: &Parts) -> Result<&str, AppError> {
-    parts
-        .headers
-        .get(axum::http::header::AUTHORIZATION)
-        .and_then(|value| value.to_str().ok())
+    optional_bearer_token(parts)?.ok_or(AppError::Unauthorized)
+}
+
+/// Same parsing as `bearer_token`, but distinguishes "no header" (`Ok(None)`,
+/// the anonymous case) from "header present and malformed" (`Err`, always a
+/// 401 — never downgraded to anonymous).
+fn optional_bearer_token(parts: &Parts) -> Result<Option<&str>, AppError> {
+    let Some(header) = parts.headers.get(axum::http::header::AUTHORIZATION) else {
+        return Ok(None);
+    };
+
+    header
+        .to_str()
+        .ok()
         .and_then(|value| value.strip_prefix("Bearer "))
         .filter(|token| !token.is_empty())
+        .map(Some)
         .ok_or(AppError::Unauthorized)
 }
 
@@ -147,5 +194,53 @@ mod tests {
         let request = axum::http::Request::builder().uri("/").body(()).unwrap();
         let (parts, _) = request.into_parts();
         assert!(matches!(bearer_token(&parts), Err(AppError::Unauthorized)));
+    }
+
+    #[tokio::test]
+    async fn optional_bearer_token_is_anonymous_without_a_header() {
+        let request = axum::http::Request::builder().uri("/").body(()).unwrap();
+        let (parts, _) = request.into_parts();
+        assert_eq!(optional_bearer_token(&parts).unwrap(), None);
+    }
+
+    #[tokio::test]
+    async fn optional_bearer_token_rejects_a_malformed_header() {
+        for value in ["Basic abc", "Bearer", "Bearer "] {
+            let request = axum::http::Request::builder()
+                .uri("/")
+                .header(axum::http::header::AUTHORIZATION, value)
+                .body(())
+                .unwrap();
+            let (parts, _) = request.into_parts();
+            assert!(
+                matches!(optional_bearer_token(&parts), Err(AppError::Unauthorized)),
+                "{value:?}"
+            );
+        }
+    }
+
+    struct UndecodableTokenDecoder;
+
+    impl TokenDecoder for UndecodableTokenDecoder {
+        fn decode(
+            &self,
+            _token: &str,
+        ) -> Result<crate::shared::token_decoder::TokenClaims, AppError> {
+            Err(AppError::Unauthorized)
+        }
+    }
+
+    /// A token that fails to decode is rejected before the cache or the DB
+    /// are ever consulted — `resolve_identity` short-circuits on `decoder
+    /// .decode`, so a lazily-connected, never-queried pool is enough here.
+    #[tokio::test]
+    async fn resolve_identity_rejects_an_undecodable_token_without_touching_cache_or_db() {
+        let cache = crate::infra::cache::build_cache_provider();
+        let db = PgPool::connect_lazy("postgres://localhost/unused").unwrap();
+
+        let result =
+            resolve_identity("garbage", &UndecodableTokenDecoder, cache.as_ref(), &db).await;
+
+        assert!(matches!(result, Err(AppError::Unauthorized)));
     }
 }

@@ -112,6 +112,11 @@ pub struct ListingDetailRow {
     /// in SQL, for the same reason `price` is cast to `float8`: no `chrono`/
     /// `time` feature enabled on `sqlx` in this crate.
     pub created_at: String,
+    /// `NULL` means draft; formatted the same way as `created_at`.
+    pub published_at: Option<String>,
+    /// True when the listing has a cover row — the public-visibility check
+    /// pairs this with `published_at` (see `service::is_visible_to`).
+    pub has_photo: bool,
     pub owner_id: Uuid,
     pub owner_first_name: Option<String>,
     pub owner_last_name: Option<String>,
