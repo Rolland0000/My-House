@@ -14,8 +14,10 @@ interface SiteHeaderUser {
 interface SiteHeaderProps {
   role: SiteHeaderRole;
   user?: SiteHeaderUser | null;
-  /** Seeker only — no data source yet, accepted for a future pending-request badge. */
+  /** Seeker only — shows the "Owner request pending" badge. */
   ownerRequestStatus?: "pending" | null;
+  /** Seeker only — shows the "Become an owner" CTA (no request yet, or the last one rejected). */
+  ownerRequestCta?: boolean;
   /** Owner only — no data source yet, accepted for a future verified-owner chip. */
   verified?: boolean;
   /** Admin only — count of pending owner requests, shown as a badge on the nav item. */
@@ -255,13 +257,18 @@ function PublicHeader() {
   );
 }
 
+const ownerRequestCtaClass =
+  "rounded-sm border border-brass-600 bg-primary text-sm font-semibold text-ink-900";
+
 function SeekerHeader({
   user,
   ownerRequestStatus,
+  ownerRequestCta,
   onSignOut,
 }: {
   user?: SiteHeaderUser | null;
   ownerRequestStatus?: "pending" | null;
+  ownerRequestCta?: boolean;
   onSignOut?: () => void;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -287,6 +294,14 @@ function SeekerHeader({
             Owner request pending
           </Badge>
         )}
+        {ownerRequestCta && (
+          <Link
+            to="/owner-request"
+            className={cn("hidden flex-none px-4.5 py-3 sm:inline-flex", ownerRequestCtaClass)}
+          >
+            Become an owner
+          </Link>
+        )}
         {user && (
           <div className="hidden sm:block">
             <UserMenu user={user} profileHref="/profile" onSignOut={onSignOut} />
@@ -297,6 +312,15 @@ function SeekerHeader({
       {isMenuOpen && (
         <MobileMenu links={PUBLIC_LINKS} onClose={() => setIsMenuOpen(false)}>
           {ownerRequestStatus === "pending" && <Badge tone="warning">Owner request pending</Badge>}
+          {ownerRequestCta && (
+            <Link
+              to="/owner-request"
+              onClick={() => setIsMenuOpen(false)}
+              className={cn("px-4 py-3 text-center", ownerRequestCtaClass)}
+            >
+              Become an owner
+            </Link>
+          )}
           {user && (
             <>
               <Link
@@ -451,6 +475,7 @@ function SiteHeader({
   role,
   user,
   ownerRequestStatus,
+  ownerRequestCta,
   verified,
   pendingRequestCount,
   onSignOut,
@@ -467,7 +492,12 @@ function SiteHeader({
     <header className="border-b border-border bg-surface">
       {role === "public" && <PublicHeader />}
       {role === "seeker" && (
-        <SeekerHeader user={user} ownerRequestStatus={ownerRequestStatus} onSignOut={onSignOut} />
+        <SeekerHeader
+          user={user}
+          ownerRequestStatus={ownerRequestStatus}
+          ownerRequestCta={ownerRequestCta}
+          onSignOut={onSignOut}
+        />
       )}
       {role === "owner" && <OwnerHeader user={user} verified={verified} onSignOut={onSignOut} />}
     </header>

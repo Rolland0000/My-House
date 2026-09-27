@@ -67,6 +67,8 @@
 @layer base {
   body {
     @apply bg-bg text-text font-sans;
+    /* Inherited: an unbreakable email, URL or ID wraps instead of overflowing its card. */
+    overflow-wrap: break-word;
   }
 
   /* The one orchestrated animation in the product (OTP success stamp) still

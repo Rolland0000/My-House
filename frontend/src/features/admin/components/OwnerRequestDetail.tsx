@@ -77,7 +77,7 @@ function OwnerRequestDetail() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
       <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-ink-900">{data.full_name}</h1>
+        <h1 className="min-w-0 text-2xl font-bold text-ink-900">{data.full_name}</h1>
         <Badge tone={badge.tone}>{badge.label}</Badge>
       </div>
 

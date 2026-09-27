@@ -68,12 +68,12 @@ function OwnerRequestQueueList() {
                   padding="sm"
                   className="flex items-center justify-between gap-4 transition hover:border-border-strong"
                 >
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <span className="font-semibold text-text">{request.full_name}</span>
                     <span className="text-sm text-text-muted">{request.email}</span>
                     <span className="text-sm text-text-muted">{request.phone}</span>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex shrink-0 flex-col items-end gap-2">
                     <Badge tone={badge.tone}>{badge.label}</Badge>
                     <span className="text-xs text-text-muted">
                       {new Date(request.created_at).toLocaleDateString()}
