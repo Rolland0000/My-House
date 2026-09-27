@@ -1175,7 +1175,7 @@ STORAGE_PROVIDER=local         # LocalFsStorage au MVP ; trait StorageProvider p
                                 # un autre provider object storage (ex. MinIO, AWS S3) en V2 sans
                                 # changer le code métier — s3 (V2, non implémenté au MVP)
 LOCAL_STORAGE_PATH=/app/storage
-PUBLIC_MEDIA_BASE_URL=http://localhost/media   # base des URLs publiques générées (listings, avatars)
+PUBLIC_MEDIA_BASE_URL=/media   # chemin relatif à l'origine — préfixe des URLs publiques générées (listings, avatars)
 
 # Object Storage V2 — réservé, non utilisé tant que STORAGE_PROVIDER=local
 AWS_REGION=eu-west-1
