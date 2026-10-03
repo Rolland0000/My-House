@@ -3,7 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::config::AppConfig;
-use crate::infra::storage::StorageProvider;
+use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
 use crate::shared::storage_key::{avatar_key, avatar_key_from_url};
@@ -114,23 +114,13 @@ pub async fn delete_account(
     keys.extend(repository::list_listing_media_keys_for_owner(pool, user_id).await?);
     keys.extend(repository::list_owner_request_document_keys(pool, user_id).await?);
 
-    delete_storage_objects(storage, keys, user_id).await;
+    delete_storage_objects(storage, &keys).await;
 
     if !repository::delete_by_id(pool, user_id).await? {
         return Err(AppError::UserNotFound);
     }
 
     Ok(())
-}
-
-/// Best-effort delete for every key in `keys`; a failure (including a file
-/// already absent) is logged and never aborts the remaining keys.
-async fn delete_storage_objects(storage: &dyn StorageProvider, keys: Vec<String>, user_id: Uuid) {
-    for key in keys {
-        if let Err(error) = storage.delete(&key).await {
-            tracing::warn!(%user_id, key, error = %error, "failed to delete storage object during account cleanup; continuing");
-        }
-    }
 }
 
 /// Best-effort cleanup: the replacement is already stored and referenced, so a
@@ -154,67 +144,8 @@ async fn delete_previous_avatar(
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-    use std::time::Duration;
-
-    use async_trait::async_trait;
-
     use super::*;
-
-    /// Records the keys `delete_previous_avatar` asks for; `fails` makes every
-    /// deletion return an error, standing in for a file already gone from disk.
-    struct RecordingStorage {
-        deleted: Mutex<Vec<String>>,
-        fails: bool,
-    }
-
-    impl RecordingStorage {
-        fn new(fails: bool) -> Self {
-            Self {
-                deleted: Mutex::new(Vec::new()),
-                fails,
-            }
-        }
-
-        fn deleted_keys(&self) -> Vec<String> {
-            self.deleted.lock().expect("lock poisoned").clone()
-        }
-    }
-
-    #[async_trait]
-    impl StorageProvider for RecordingStorage {
-        async fn upload(
-            &self,
-            key: &str,
-            _data: Bytes,
-            _content_type: &str,
-        ) -> Result<String, AppError> {
-            Ok(format!("http://localhost/media/{key}"))
-        }
-
-        async fn read(&self, _key: &str) -> Result<Bytes, AppError> {
-            unimplemented!("not exercised by these tests")
-        }
-
-        async fn delete(&self, key: &str) -> Result<(), AppError> {
-            self.deleted
-                .lock()
-                .expect("lock poisoned")
-                .push(key.to_string());
-            if self.fails {
-                return Err(AppError::Storage("backend unavailable".to_string()));
-            }
-            Ok(())
-        }
-
-        async fn presigned_url(
-            &self,
-            _key: &str,
-            _expires_in: Duration,
-        ) -> Result<String, AppError> {
-            unimplemented!("not exercised by these tests")
-        }
-    }
+    use crate::infra::storage::test_support::RecordingStorage;
 
     #[tokio::test]
     async fn deletes_the_key_behind_the_previous_avatar_url() {
@@ -262,42 +193,6 @@ mod tests {
         );
 
         delete_previous_avatar(&storage, Some(&url), Uuid::new_v4()).await;
-
-        assert!(storage.deleted_keys().is_empty());
-    }
-
-    #[tokio::test]
-    async fn deletes_every_enumerated_key() {
-        let storage = RecordingStorage::new(false);
-        let keys = vec![
-            "avatars/u/1.png".to_string(),
-            "listings/l/2.jpg".to_string(),
-            "owner-requests/r/3.pdf".to_string(),
-        ];
-
-        delete_storage_objects(&storage, keys.clone(), Uuid::new_v4()).await;
-
-        assert_eq!(storage.deleted_keys(), keys);
-    }
-
-    #[tokio::test]
-    async fn a_missing_or_failing_key_does_not_abort_the_remaining_keys() {
-        let storage = RecordingStorage::new(true);
-        let keys = vec![
-            "listings/l/1.jpg".to_string(),
-            "listings/l/2.jpg".to_string(),
-        ];
-
-        delete_storage_objects(&storage, keys.clone(), Uuid::new_v4()).await;
-
-        assert_eq!(storage.deleted_keys(), keys);
-    }
-
-    #[tokio::test]
-    async fn no_keys_is_a_no_op() {
-        let storage = RecordingStorage::new(false);
-
-        delete_storage_objects(&storage, Vec::new(), Uuid::new_v4()).await;
 
         assert!(storage.deleted_keys().is_empty());
     }

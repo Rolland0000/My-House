@@ -3,6 +3,7 @@ use uuid::Uuid;
 
 use std::ops::RangeInclusive;
 
+use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::FieldErrors;
@@ -216,6 +217,28 @@ pub async fn set_listing_status(
         .await?
         .ok_or(AppError::ListingNotFound)?;
     Ok(ListingStatusDto { id, status })
+}
+
+/// Deletes `owner_id`'s listing `id` and its photos, under the same row lock as uploads.
+/// Files are deleted after the commit, so a storage failure can only leave an orphaned file.
+pub async fn delete_listing(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    id: Uuid,
+    owner_id: Uuid,
+) -> Result<(), AppError> {
+    let db_err = |error: sqlx::Error| AppError::Database(error.to_string());
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    if !repository::lock_owned_listing(&mut *tx, id, owner_id).await? {
+        return Err(AppError::ListingNotFound);
+    }
+    let keys = repository::list_media_keys(&mut *tx, id).await?;
+    repository::delete_listing(&mut *tx, id).await?;
+    tx.commit().await.map_err(db_err)?;
+
+    delete_storage_objects(storage, &keys).await;
+    Ok(())
 }
 
 #[cfg(test)]
