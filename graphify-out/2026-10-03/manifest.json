@@ -312,9 +312,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/features/listings/api.ts": {
-    "mtime": 1791036358.6794183,
-    "seen": 1791037032.472957,
-    "ast_hash": "a507eff2c044d5b690d326518fe468ee",
+    "mtime": 1791041906.8981402,
+    "seen": 1791042368.299456,
+    "ast_hash": "e01bbd2c70ed985d0a2b4429c40e564f",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListings.ts": {
@@ -816,9 +816,9 @@
     "semantic_hash": ""
   },
   "backend/src/modules/listings/repository.rs": {
-    "mtime": 1791040114.234128,
-    "seen": 1791040144.775543,
-    "ast_hash": "48f64b2c264c382adb9286ab18aa8cb3",
+    "mtime": 1791040840.5646448,
+    "seen": 1791040859.103575,
+    "ast_hash": "162db5d61e744f382d54b207b04381b9",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/service.rs": {
@@ -2016,9 +2016,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListingRow.tsx": {
-    "mtime": 1791036351.621581,
-    "seen": 1791037032.473,
-    "ast_hash": "b767750bc513ce3be8a50dee9e499dea",
+    "mtime": 1791041906.8986037,
+    "seen": 1791042368.299486,
+    "ast_hash": "49b44a722d508885af555f3be89b9459",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListings.tsx": {
@@ -2106,9 +2106,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useUpdateListingStatus.ts": {
-    "mtime": 1791036940.0481162,
-    "seen": 1791037032.473019,
-    "ast_hash": "97f76887d36973f2fc5cc0f2af222c1f",
+    "mtime": 1791041906.8990674,
+    "seen": 1791042368.299505,
+    "ast_hash": "2c0da4c0f3db9f39c9400c4468b4ef1f",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/ownerListingsCache.test.ts": {
@@ -2157,6 +2157,30 @@
     "mtime": 1791039417.2330933,
     "seen": 1791040144.776147,
     "ast_hash": "c739af9bf603ce06f4e2de3a48b50557",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/DeleteListingAction.tsx": {
+    "mtime": 1791041856.1593354,
+    "seen": 1791042368.2994618,
+    "ast_hash": "dfd42857674db91ba6f495339892f706",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/hooks/useDeleteListing.ts": {
+    "mtime": 1791042335.6153684,
+    "seen": 1791042368.299495,
+    "ast_hash": "b63178cdd5399932f05972841048667c",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingDeletion.test.ts": {
+    "mtime": 1791041830.3538752,
+    "seen": 1791042368.299511,
+    "ast_hash": "ad8d9014337ce1738d9a61f4b5679186",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingDeletion.ts": {
+    "mtime": 1791041829.321835,
+    "seen": 1791042368.299513,
+    "ast_hash": "10a1794eb588097dd591092453c55288",
     "semantic_hash": ""
   }
 }
