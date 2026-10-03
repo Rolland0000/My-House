@@ -216,8 +216,8 @@
     "semantic_hash": "2b9cd9fbb8d08dd77868c4618748de1d"
   },
   "frontend/docs-frontend/openapi.json": {
-    "mtime": 1791032997.29646,
-    "seen": 1791033112.491349,
+    "mtime": 1791035989.3560588,
+    "seen": 1791037032.472859,
     "ast_hash": "39283a8850a0d1f5d3b2f137d0824e43",
     "semantic_hash": ""
   },
@@ -312,9 +312,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/features/listings/api.ts": {
-    "mtime": 1791032868.9245117,
-    "seen": 1791033112.491463,
-    "ast_hash": "60b0e7e973e37fbfaa7c2a1e3b2a663d",
+    "mtime": 1791036358.6794183,
+    "seen": 1791037032.472957,
+    "ast_hash": "a507eff2c044d5b690d326518fe468ee",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListings.ts": {
@@ -798,32 +798,32 @@
     "semantic_hash": "8247e89801d9ef22df93e1af200f9a21"
   },
   "backend/src/modules/listings/dto.rs": {
-    "mtime": 1791032900.9194582,
-    "seen": 1791033112.491231,
+    "mtime": 1791035989.3523335,
+    "seen": 1791037032.472744,
     "ast_hash": "8201c61e3fb429624b214c079a9f5803",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/handler.rs": {
-    "mtime": 1791032942.5219796,
-    "seen": 1791033112.491233,
+    "mtime": 1791035989.3528402,
+    "seen": 1791037032.472746,
     "ast_hash": "cbfbfef7bf77ec56a7e1ed77dcd58efb",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/model.rs": {
-    "mtime": 1791032894.8877563,
-    "seen": 1791033112.49124,
+    "mtime": 1791035989.353293,
+    "seen": 1791037032.4727511,
     "ast_hash": "985ef940b68d857865ef31cfe9287fca",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/repository.rs": {
-    "mtime": 1791032908.907277,
-    "seen": 1791033112.491244,
+    "mtime": 1791035989.3537965,
+    "seen": 1791037032.4727528,
     "ast_hash": "c3dadceff093404dd6fd693eea4ebc38",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/service.rs": {
-    "mtime": 1791033089.2513256,
-    "seen": 1791033112.49125,
+    "mtime": 1791035989.3546507,
+    "seen": 1791037032.472758,
     "ast_hash": "f71198aa96eb573bdd91aade4fb77802",
     "semantic_hash": ""
   },
@@ -1842,8 +1842,8 @@
     "semantic_hash": "82e1c41c7f3aa8cda6966d86195b65cb"
   },
   "backend/src/modules/listings/router.rs": {
-    "mtime": 1791032937.327687,
-    "seen": 1791033112.4912472,
+    "mtime": 1791035989.3542564,
+    "seen": 1791037032.472755,
     "ast_hash": "d17627dc76442692ec9b7ba0caaec9a8",
     "semantic_hash": ""
   },
@@ -2016,9 +2016,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListingRow.tsx": {
-    "mtime": 1791032868.9289567,
-    "seen": 1791033112.491482,
-    "ast_hash": "96415a45e827396dbb019b06197af4c5",
+    "mtime": 1791036351.621581,
+    "seen": 1791037032.473,
+    "ast_hash": "b767750bc513ce3be8a50dee9e499dea",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListings.tsx": {
@@ -2088,15 +2088,39 @@
     "semantic_hash": ""
   },
   "backend/.sqlx/query-4f04768a9cf7f939762b4b536e40b5c0fdb660457f9d9916c1e8890db62c3cbc.json": {
-    "mtime": 1791032973.864192,
-    "seen": 1791033112.491062,
+    "mtime": 1791035989.3517466,
+    "seen": 1791037032.4725718,
     "ast_hash": "14c2394735f1a8f7fdca75bc83745f96",
     "semantic_hash": ""
   },
   "docs/plans/MH-57-plan.md": {
-    "mtime": 1791032256.9241676,
-    "seen": 1791033112.491771,
+    "mtime": 1791035989.355292,
+    "seen": 1791037032.47332,
     "ast_hash": "88a4027d4bf173fffb6dfe428596809d",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/ListingStatusControl.tsx": {
+    "mtime": 1791037442.9263756,
+    "seen": 1791037485.056891,
+    "ast_hash": "4b6f2a3cd6a55d586c703db855514998",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/hooks/useUpdateListingStatus.ts": {
+    "mtime": 1791036940.0481162,
+    "seen": 1791037032.473019,
+    "ast_hash": "97f76887d36973f2fc5cc0f2af222c1f",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/ownerListingsCache.test.ts": {
+    "mtime": 1791036073.618938,
+    "seen": 1791037032.473035,
+    "ast_hash": "05559f9640b4e6f889a70af7fbf015fb",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/ownerListingsCache.ts": {
+    "mtime": 1791036052.4604967,
+    "seen": 1791037032.473037,
+    "ast_hash": "372af9fd19ce28be489aa0a6d2ae2f9f",
     "semantic_hash": ""
   }
 }
