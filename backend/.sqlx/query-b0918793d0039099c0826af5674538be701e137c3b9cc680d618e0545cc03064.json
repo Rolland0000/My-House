@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            l.id,\n            l.title,\n            l.type AS \"listing_type: ListingType\",\n            l.status AS \"status: ListingStatus\",\n            l.city,\n            l.neighborhood,\n            l.price::float8 AS \"price!\",\n            lm.url AS \"cover_photo_url?\",\n            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS published_at,\n            u.id AS \"owner_id!\",\n            u.first_name AS owner_first_name,\n            u.last_name AS owner_last_name\n        FROM listings l\n        JOIN users u ON u.id = l.owner_id\n        LEFT JOIN listing_media lm ON lm.listing_id = l.id AND lm.is_cover\n        WHERE l.owner_id = $1\n        -- id breaks created_at ties so OFFSET pages stay stable\n        ORDER BY l.created_at DESC, l.id DESC\n        LIMIT $2 OFFSET $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "listing_type: ListingType",
+        "type_info": {
+          "Custom": {
+            "name": "listing_type",
+            "kind": {
+              "Enum": [
+                "apartment",
+                "studio",
+                "house",
+                "room",
+                "villa",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status: ListingStatus",
+        "type_info": {
+          "Custom": {
+            "name": "listing_status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "city",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "neighborhood",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "price!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "cover_photo_url?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "published_at",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "owner_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "owner_first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "owner_last_name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      false,
+      null,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "b0918793d0039099c0826af5674538be701e137c3b9cc680d618e0545cc03064"
+}

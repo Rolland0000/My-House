@@ -74,8 +74,8 @@ pub struct NewListing {
 // of the flat columns a `SELECT` naturally produces.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// One row of the paginated `GET /listings` feed — joins the cover photo
-/// (if any) and the owner's public name.
+/// One row of a paginated listings page (`GET /listings`, `GET /users/me/listings`),
+/// with the cover photo (if any) and the owner's public name joined.
 #[derive(Debug, FromRow)]
 pub struct ListingSummaryRow {
     pub id: Uuid,
@@ -89,6 +89,8 @@ pub struct ListingSummaryRow {
     /// this is a read-only display value, not an arithmetic one.
     pub price: f64,
     pub cover_photo_url: Option<String>,
+    /// `NULL` means draft; formatted the same way as `ListingDetailRow::created_at`.
+    pub published_at: Option<String>,
     pub owner_id: Uuid,
     pub owner_first_name: Option<String>,
     pub owner_last_name: Option<String>,

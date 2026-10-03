@@ -3,7 +3,9 @@ use uuid::Uuid;
 
 use crate::shared::errors::AppError;
 
-use super::model::{ListingDetailRow, ListingMediaRow, ListingSummaryRow, ListingType, NewListing};
+use super::model::{
+    ListingDetailRow, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType, NewListing,
+};
 
 /// The feed and the spec price everything in XAF; the column has no default.
 const LISTING_CURRENCY: &str = "XAF";
@@ -78,6 +80,7 @@ pub async fn list_listings(
             l.neighborhood, \
             l.price::float8 AS price, \
             lm.url AS cover_photo_url, \
+            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS published_at, \
             u.id AS owner_id, \
             u.first_name AS owner_first_name, \
             u.last_name AS owner_last_name \
@@ -88,7 +91,8 @@ pub async fn list_listings(
     );
     push_public_visibility(&mut qb);
     push_filters(&mut qb, filters);
-    qb.push(" ORDER BY l.created_at DESC LIMIT ");
+    // Rows inserted in one transaction share `created_at`; `id` keeps the pages stable.
+    qb.push(" ORDER BY l.created_at DESC, l.id DESC LIMIT ");
     qb.push_bind(limit as i64);
     qb.push(" OFFSET ");
     qb.push_bind(offset as i64);
@@ -97,6 +101,58 @@ pub async fn list_listings(
         .fetch_all(pool)
         .await
         .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Total number of listings owned by `owner_id`, whatever their state.
+pub async fn count_owner_listings(pool: &PgPool, owner_id: Uuid) -> Result<i64, AppError> {
+    sqlx::query_scalar!(
+        r#"SELECT COUNT(*) AS "count!" FROM listings WHERE owner_id = $1"#,
+        owner_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// One page of `owner_id`'s listings, newest first. No public-visibility rule:
+/// drafts and listings without a photo are included.
+pub async fn list_owner_listings(
+    pool: &PgPool,
+    owner_id: Uuid,
+    limit: u32,
+    offset: u64,
+) -> Result<Vec<ListingSummaryRow>, AppError> {
+    sqlx::query_as!(
+        ListingSummaryRow,
+        r#"
+        SELECT
+            l.id,
+            l.title,
+            l.type AS "listing_type: ListingType",
+            l.status AS "status: ListingStatus",
+            l.city,
+            l.neighborhood,
+            l.price::float8 AS "price!",
+            lm.url AS "cover_photo_url?",
+            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS published_at,
+            u.id AS "owner_id!",
+            u.first_name AS owner_first_name,
+            u.last_name AS owner_last_name
+        FROM listings l
+        JOIN users u ON u.id = l.owner_id
+        LEFT JOIN listing_media lm ON lm.listing_id = l.id AND lm.is_cover
+        WHERE l.owner_id = $1
+        -- id breaks created_at ties so OFFSET pages stay stable
+        ORDER BY l.created_at DESC, l.id DESC
+        LIMIT $2 OFFSET $3
+        "#,
+        owner_id,
+        i64::from(limit),
+        offset as i64,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
 }
 
 /// Full detail for one listing (owner joined, media excluded — see
