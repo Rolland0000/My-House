@@ -147,6 +147,30 @@ pub async fn update_status(
     Ok(Json(ListingStatusResponse { data }))
 }
 
+/// Permanently deletes one of the caller's listings and its photos.
+#[utoipa::path(
+    delete,
+    path = "/listings/{id}",
+    tag = "listings",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    responses(
+        (status = 204, description = "Listing and its photos deleted"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Listing not found, already deleted, or owned by someone else"),
+    )
+)]
+pub async fn delete(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    user.require_role(OWNER_ROLES)?;
+
+    service::delete_listing(state.db(), state.storage().as_ref(), id, user.user_id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 /// The caller's listings in any state, drafts and listings without a photo included, newest first.
 #[utoipa::path(
     get,

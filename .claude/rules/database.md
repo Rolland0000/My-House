@@ -27,6 +27,7 @@ MyHouse uses `sqlx` directly against PostgreSQL — no ORM (Prisma/Supabase were
 ## Cascades and cleanup
 
 - `ON DELETE CASCADE` handles relational cleanup only. It never touches the filesystem/object storage — physical file deletion ( `StorageProvider::delete()`) must be called explicitly *before* the SQL `DELETE`, in the service layer. See ARCHITECTURE.md §8.1 "Suppression de compte".
+- Exception: deleting a listing or a photo commits the SQL `DELETE` first, then deletes the files best-effort. A storage failure can only leave an orphaned file; no row points at a missing one.
 - Never rely on cascade order to guarantee business invariants — make the sequence explicit in
   the service.
 

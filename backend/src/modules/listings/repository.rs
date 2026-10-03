@@ -298,3 +298,50 @@ pub async fn update_listing_status(
     .map(|row| row.map(|row| (row.id, row.status)))
     .map_err(|error| AppError::Database(error.to_string()))
 }
+
+/// Locks listing `id` until the transaction ends if `owner_id` owns it, and returns whether
+/// it did. Uploads, cover changes and photo deletes take the same row lock.
+pub async fn lock_owned_listing<'e, E>(
+    executor: E,
+    id: Uuid,
+    owner_id: Uuid,
+) -> Result<bool, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_scalar!(
+        r#"SELECT id FROM listings WHERE id = $1 AND owner_id = $2 FOR UPDATE"#,
+        id,
+        owner_id
+    )
+    .fetch_optional(executor)
+    .await
+    .map(|row| row.is_some())
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Storage keys of every photo attached to `listing_id`.
+pub async fn list_media_keys<'e, E>(executor: E, listing_id: Uuid) -> Result<Vec<String>, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_scalar!(
+        r#"SELECT storage_key FROM listing_media WHERE listing_id = $1"#,
+        listing_id
+    )
+    .fetch_all(executor)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Deletes `id`; the `listing_media` rows go with it through the cascade.
+pub async fn delete_listing<'e, E>(executor: E, id: Uuid) -> Result<(), AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query!(r#"DELETE FROM listings WHERE id = $1"#, id)
+        .execute(executor)
+        .await
+        .map(|_| ())
+        .map_err(|error| AppError::Database(error.to_string()))
+}

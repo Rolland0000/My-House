@@ -1,6 +1,10 @@
+mod cleanup;
 mod local_fs;
 mod provider;
+#[cfg(test)]
+pub(crate) mod test_support;
 
+pub use cleanup::delete_storage_objects;
 pub use local_fs::LocalFsStorage;
 pub use provider::StorageProvider;
 

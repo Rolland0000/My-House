@@ -566,6 +566,39 @@
             "description": "One or more fields violate a rule; `error.fields` lists each one"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Permanently deletes one of the caller's listings and its photos.",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Listing and its photos deleted"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, already deleted, or owned by someone else"
+          }
+        }
       }
     },
     "/api/v1/listings/{id}/cover": {
