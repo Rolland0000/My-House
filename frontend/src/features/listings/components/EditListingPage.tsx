@@ -16,7 +16,7 @@ function EditListingPage() {
   const { id = "" } = useParams<"id">();
   const navigate = useNavigate();
   const { data, isPending, error } = useListing(id);
-  const { data: profile, isPending: isProfilePending } = useProfile();
+  const { data: profile, isPending: isProfilePending, error: profileError } = useProfile();
   const mutation = useUpdateListing(id);
 
   if (isPending || isProfilePending) {
@@ -27,17 +27,11 @@ function EditListingPage() {
     );
   }
 
-  // A published listing is readable by anyone, so ownership is checked here too;
-  // the PUT still answers 404 for someone else's listing.
-  if (
-    isNotFound(error) ||
-    isNotFound(mutation.error) ||
-    (data && profile?.id !== data.data.owner.id)
-  ) {
+  if (isNotFound(error) || isNotFound(mutation.error)) {
     return <ListingNotFound />;
   }
 
-  if (error || !data) {
+  if (error || profileError || !data || !profile) {
     return (
       <div className="mx-auto max-w-2xl p-6">
         <Alert variant="error" title="Unable to load this listing">
@@ -45,6 +39,12 @@ function EditListingPage() {
         </Alert>
       </div>
     );
+  }
+
+  // A published listing is readable by anyone, so ownership is checked here too;
+  // the PUT still answers 404 for someone else's listing.
+  if (profile.id !== data.data.owner.id) {
+    return <ListingNotFound />;
   }
 
   return (
