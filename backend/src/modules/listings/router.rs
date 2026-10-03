@@ -9,6 +9,7 @@ pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(handler::list, handler::create)) // list is public, create is owner-only
         .routes(routes!(handler::get_by_id, handler::update)) // get is public, update is owner-only
+        .routes(routes!(handler::update_status)) // owner
         // Mounted under /users/me, but kept here because it reads listings.
         .routes(routes!(handler::list_mine)) // owner
 }

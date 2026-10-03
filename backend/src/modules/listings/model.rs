@@ -47,6 +47,17 @@ pub enum ListingStatus {
     Unavailable,
 }
 
+impl ListingStatus {
+    /// Parses one of the two lowercase labels; anything else is `None`.
+    pub fn from_label(label: &str) -> Option<Self> {
+        match label {
+            "available" => Some(Self::Available),
+            "unavailable" => Some(Self::Unavailable),
+            _ => None,
+        }
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Validated input
 // ─────────────────────────────────────────────────────────────────────────────

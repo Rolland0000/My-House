@@ -8,9 +8,10 @@ use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::FieldErrors;
 
 use super::dto::{
-    ListListingsQuery, ListingDetailDto, ListingRequest, ListingSummaryDto, OwnerListingsQuery,
+    ListListingsQuery, ListingDetailDto, ListingRequest, ListingStatusDto, ListingStatusRequest,
+    ListingSummaryDto, OwnerListingsQuery,
 };
-use super::model::{ListingFields, ListingType};
+use super::model::{ListingFields, ListingStatus, ListingType};
 use super::repository::{self, ListingFilters};
 
 const TITLE_LENGTH: RangeInclusive<usize> = 5..=120;
@@ -179,9 +180,83 @@ pub async fn update_listing(
     get_listing_detail(pool, id, Some(owner_id)).await
 }
 
+/// Parses the requested status; a missing or unknown label is a 422 on `status`.
+pub fn parse_status(request: ListingStatusRequest) -> Result<ListingStatus, AppError> {
+    let mut errors = FieldErrors::default();
+
+    let status = match request.status.as_deref() {
+        None => {
+            errors.push("status", "status is required.");
+            None
+        }
+        Some(label) => {
+            let parsed = ListingStatus::from_label(label);
+            if parsed.is_none() {
+                errors.push("status", "status must be one of available, unavailable.");
+            }
+            parsed
+        }
+    };
+
+    errors.finish()?;
+    status.ok_or(AppError::Internal)
+}
+
+/// Sets the status of `owner_id`'s listing `id`. Drafts are accepted and
+/// `published_at` is left alone. An unknown id and another owner's listing
+/// both give `ListingNotFound`.
+pub async fn set_listing_status(
+    pool: &PgPool,
+    id: Uuid,
+    owner_id: Uuid,
+    request: ListingStatusRequest,
+) -> Result<ListingStatusDto, AppError> {
+    let status = parse_status(request)?;
+    let (id, status) = repository::update_listing_status(pool, id, owner_id, status)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+    Ok(ListingStatusDto { id, status })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn status_request(status: Option<&str>) -> ListingStatusRequest {
+        ListingStatusRequest {
+            status: status.map(String::from),
+        }
+    }
+
+    #[test]
+    fn both_status_labels_are_accepted() {
+        for (label, expected) in [
+            ("available", ListingStatus::Available),
+            ("unavailable", ListingStatus::Unavailable),
+        ] {
+            assert_eq!(
+                parse_status(status_request(Some(label))).expect("known label"),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn an_unknown_or_missing_status_is_a_status_field_error() {
+        for status in [Some("rented"), Some("Available"), None] {
+            match parse_status(status_request(status)) {
+                Err(AppError::Validation(entries)) => assert_eq!(
+                    entries
+                        .into_iter()
+                        .map(|entry| entry.field)
+                        .collect::<Vec<_>>(),
+                    vec!["status"],
+                    "{status:?}"
+                ),
+                other => panic!("expected a validation error for {status:?}, got {other:?}"),
+            }
+        }
+    }
 
     #[test]
     fn is_visible_to_the_owner_regardless_of_state_or_photos() {

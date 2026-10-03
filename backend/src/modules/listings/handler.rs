@@ -10,7 +10,8 @@ use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
 use super::dto::{
-    ListListingsQuery, ListingDetailResponse, ListingRequest, ListingSummaryDto, OwnerListingsQuery,
+    ListListingsQuery, ListingDetailResponse, ListingRequest, ListingStatusRequest,
+    ListingStatusResponse, ListingSummaryDto, OwnerListingsQuery,
 };
 use super::service;
 
@@ -116,6 +117,36 @@ pub async fn update(
     Ok(Json(ListingDetailResponse { data }))
 }
 
+/// Marks one of the caller's listings as available or unavailable. Works on
+/// drafts too, and never changes the publication state.
+#[utoipa::path(
+    patch,
+    path = "/listings/{id}/status",
+    tag = "listings",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    request_body = ListingStatusRequest,
+    responses(
+        (status = 200, description = "Status set; setting the current status also returns 200", body = ListingStatusResponse),
+        (status = 400, description = "Malformed JSON body"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Listing not found, or owned by someone else"),
+        (status = 422, description = "`status` is missing or not one of the two labels"),
+    )
+)]
+pub async fn update_status(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+    // Consumes the request body, so it must stay the last argument.
+    AppJson(payload): AppJson<ListingStatusRequest>,
+) -> Result<Json<ListingStatusResponse>, AppError> {
+    user.require_role(OWNER_ROLES)?;
+
+    let data = service::set_listing_status(state.db(), id, user.user_id, payload).await?;
+    Ok(Json(ListingStatusResponse { data }))
+}
+
 /// The caller's listings in any state, drafts and listings without a photo included, newest first.
 #[utoipa::path(
     get,
@@ -145,7 +176,7 @@ mod tests {
     use crate::shared::rbac::require_role;
 
     #[test]
-    fn only_owners_may_create_list_or_edit_their_listings() {
+    fn only_owners_may_manage_their_listings() {
         assert!(require_role(Role::Owner, OWNER_ROLES).is_ok());
         for role in [Role::Seeker, Role::Admin] {
             assert!(matches!(
