@@ -503,7 +503,7 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
    → notifications::service::send_xxx_email(...)
    → Rendu du template HTML (modules/notifications/templates/*.html)
    → infra/mailer.rs (client SMTP — crate lettre)
-   → Serveur SMTP configuré (SMTP_HOST / SMTP_PORT / SMTP_FROM)
+   → Relais SMTP configuré (SMTP_HOST / SMTP_PORT / SMTP_SECURITY / SMTP_USERNAME / SMTP_PASSWORD / SMTP_FROM)
    → Boîte mail du destinataire
 ```
 
@@ -511,7 +511,7 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 
 | Aspect | Détail |
 | --- | --- |
-| Transport | SMTP uniquement (`lettre`), pas d'API transactionnelle tierce (SES/Postmark) au MVP — cf. R-03 ARCHITECTURE.md |
+| Transport | SMTP uniquement (`lettre`), vers n'importe quel relais conforme aux standards. Authentification (`SMTP_USERNAME`/`SMTP_PASSWORD`) et chiffrement (`SMTP_SECURITY` : `none` \| `starttls` \| `tls`) inclus au MVP (MH-113). Changer de relais ne demande qu'un changement de variables d'environnement. Identifiants obligatoires en staging/production, et alors `SMTP_SECURITY` ≠ `none`. Pas de SDK fournisseur ni d'API transactionnelle HTTP (cf. §3bis.3, R-03 ARCHITECTURE.md) |
 | Synchronicité | Envoi **synchrone** dans le flux de la requête HTTP qui le déclenche — pas de file d'attente, pas de retry automatique |
 | Échec d'envoi | Un échec SMTP **ne fait pas échouer** la requête métier (ex: `POST /owner-requests` reste `201` même si l'email de notification admin échoue) — l'envoi est best-effort, journalisé via `tracing`, jamais bloquant pour l'écriture DB |
 | Notification in-app | **Aucune** au MVP — pas de table `notifications`, pas d'endpoint de liste, pas de badge. Le seul canal est l'email. L'admin consulte l'état des demandes directement via `GET /admin/owner-requests?status=pending` (pas de flux de notifications séparé) |
@@ -535,7 +535,7 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 - Notifications push (FCM/APNs)
 - File d'attente / retry automatique sur échec d'envoi
 - Rappel mensuel de disponibilité (LIST-03) — tâche planifiée
-- Provider transactionnel tiers (SES/Postmark) — SMTP direct au MVP
+- SDK fournisseur ou API transactionnelle HTTP (SES/Postmark) — SMTP direct au MVP, relais authentifié/TLS compris (cf. §3bis.1)
 
 ---
 
@@ -1188,7 +1188,10 @@ COOKIE_DOMAIN=localhost        # domaine du cookie refresh_token (httpOnly, Secu
 
 # ── Email ────────────────────────────────────────────────────
 SMTP_HOST=localhost
-SMTP_PORT=1025
+SMTP_PORT=1025                 # toujours utilisé tel quel, quel que soit SMTP_SECURITY
+SMTP_SECURITY=none             # none | starttls | tls (TLS implicite) — défaut none
+SMTP_USERNAME=                 # les deux ou aucun — obligatoires en staging/production
+SMTP_PASSWORD=
 SMTP_FROM=noreply@myhouse.app
 ADMIN_NOTIFICATION_EMAIL=admin@myhouse.app     # destinataire fixe — admin unique au MVP (cf. §3bis.2)
 

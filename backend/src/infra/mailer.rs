@@ -8,11 +8,14 @@
 //! failures are logged via `tracing::error!` and otherwise swallowed.
 
 use lettre::message::Mailbox;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::transport::smtp::client::{Tls, TlsParameters};
+use lettre::transport::smtp::extension::ClientId;
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{Address, AsyncTransport};
 use lettre::{Message, Tokio1Executor};
 
-use crate::config::AppConfig;
+use crate::config::{AppConfig, SmtpSecurity};
 
 /// Errors that can occur while building the SMTP transport at startup.
 ///
@@ -22,6 +25,8 @@ use crate::config::AppConfig;
 pub enum MailerError {
     #[error("invalid SMTP_FROM address \"{0}\": {1}")]
     InvalidFrom(String, lettre::address::AddressError),
+    #[error("cannot set up TLS for the SMTP connection: {0}")]
+    TlsSetup(lettre::transport::smtp::Error),
 }
 
 /// Wraps an async SMTP client. Constructed once at boot and shared via
@@ -43,27 +48,30 @@ impl std::fmt::Debug for Mailer {
 }
 
 impl Mailer {
-    /// Builds the SMTP transport from `SMTP_HOST` / `SMTP_PORT` / `SMTP_FROM`.
+    /// Builds the SMTP transport from the `SMTP_*` variables: plain SMTP to any relay,
+    /// authenticated when credentials are set, encrypted according to `SMTP_SECURITY`.
     ///
-    /// Uses `builder_dangerous` (no TLS, no auth) rather than `relay()`
-    /// because direct SMTP with no third-party transactional provider
-    /// (SES/Postmark) is the *locked* MVP transport (TECHNICAL_SPEC_MVP.md
-    /// §3bis.1 "Transport", §3bis.3 "Hors scope MVP") — not a stopgap. The
-    /// config surface has no credentials/TLS variables by design; the local
-    /// dev target (Mailhog) speaks plaintext SMTP — see `.env.example`.
-    /// Adding auth/TLS is a V2 concern, not a follow-up MVP ticket.
+    /// `builder_dangerous` is used instead of `relay()` / `starttls_relay()`, which
+    /// each hard-wire one TLS mode; here both the mode and the port come from config.
     pub fn new(config: &AppConfig) -> Result<Self, MailerError> {
         let from_address: Address = config
             .smtp_from
             .parse()
             .map_err(|error| MailerError::InvalidFrom(config.smtp_from.clone(), error))?;
-        let from = Mailbox::new(None, from_address);
 
-        let transport = AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.smtp_host)
-            .port(config.smtp_port)
-            .build();
+        let mut builder =
+            AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.smtp_host)
+                .port(config.smtp_port)
+                .hello_name(hello_name(&from_address))
+                .tls(tls_mode(config.smtp_security, &config.smtp_host)?);
+        if let Some(credentials) = credentials(config) {
+            builder = builder.credentials(credentials);
+        }
 
-        Ok(Self { transport, from })
+        Ok(Self {
+            transport: builder.build(),
+            from: Mailbox::new(None, from_address),
+        })
     }
 
     /// Sends an email. Fire-and-forget: an SMTP failure is logged and never
@@ -89,10 +97,34 @@ impl Mailer {
     }
 }
 
+/// Maps `SMTP_SECURITY` to lettre's TLS mode. The relay's certificate is checked
+/// against `host` when connecting, not here.
+fn tls_mode(security: SmtpSecurity, host: &str) -> Result<Tls, MailerError> {
+    let parameters = || TlsParameters::new(host.to_string()).map_err(MailerError::TlsSetup);
+    Ok(match security {
+        SmtpSecurity::None => Tls::None,
+        SmtpSecurity::StartTls => Tls::Required(parameters()?),
+        SmtpSecurity::Tls => Tls::Wrapper(parameters()?),
+    })
+}
+
+/// EHLO name: the `SMTP_FROM` domain. Without lettre's `hostname` feature the
+/// default is `[127.0.0.1]`, which some strict relays reject.
+fn hello_name(from: &Address) -> ClientId {
+    ClientId::Domain(from.domain().to_string())
+}
+
+/// Relay login, or `None` to send unauthenticated.
+fn credentials(config: &AppConfig) -> Option<Credentials> {
+    config.smtp_credentials.as_ref().map(|credentials| {
+        Credentials::new(credentials.username.clone(), credentials.password.clone())
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{AppEnv, StorageProvider};
+    use crate::config::{AppEnv, SmtpCredentials, StorageProvider};
 
     fn test_config() -> AppConfig {
         AppConfig {
@@ -112,6 +144,8 @@ mod tests {
             allowed_origins: vec!["http://localhost".to_string()],
             smtp_host: "localhost".to_string(),
             smtp_port: 1025,
+            smtp_security: SmtpSecurity::None,
+            smtp_credentials: None,
             smtp_from: "noreply@myhouse.app".to_string(),
             admin_notification_email: "admin@myhouse.app".to_string(),
             admin_bootstrap_on_startup: false,
@@ -134,5 +168,63 @@ mod tests {
         config.smtp_from = "not-an-email".to_string();
         let err = Mailer::new(&config).expect_err("should fail on malformed SMTP_FROM");
         assert!(matches!(err, MailerError::InvalidFrom(_, _)));
+    }
+
+    #[test]
+    fn builds_with_credentials_and_each_security_mode() {
+        let mut config = test_config();
+        config.smtp_credentials = Some(SmtpCredentials {
+            username: "mailer".to_string(),
+            password: "s3cret".to_string(),
+        });
+        for security in [
+            SmtpSecurity::None,
+            SmtpSecurity::StartTls,
+            SmtpSecurity::Tls,
+        ] {
+            config.smtp_security = security;
+            assert!(Mailer::new(&config).is_ok(), "{security:?} should build");
+        }
+    }
+
+    #[test]
+    fn security_mode_selects_the_tls_mode() {
+        let host = "smtp.example.com";
+        assert!(matches!(tls_mode(SmtpSecurity::None, host), Ok(Tls::None)));
+        assert!(matches!(
+            tls_mode(SmtpSecurity::StartTls, host),
+            Ok(Tls::Required(_))
+        ));
+        assert!(matches!(
+            tls_mode(SmtpSecurity::Tls, host),
+            Ok(Tls::Wrapper(_))
+        ));
+    }
+
+    #[test]
+    fn hello_name_uses_the_smtp_from_domain() {
+        let from: Address = "noreply@myhouse.app".parse().unwrap();
+        assert_eq!(
+            hello_name(&from),
+            ClientId::Domain("myhouse.app".to_string())
+        );
+    }
+
+    #[test]
+    fn sends_unauthenticated_without_credentials() {
+        assert!(credentials(&test_config()).is_none());
+    }
+
+    #[test]
+    fn authenticates_with_configured_credentials() {
+        let mut config = test_config();
+        config.smtp_credentials = Some(SmtpCredentials {
+            username: "mailer".to_string(),
+            password: "s3cret".to_string(),
+        });
+        assert_eq!(
+            credentials(&config),
+            Some(Credentials::new("mailer".to_string(), "s3cret".to_string()))
+        );
     }
 }
