@@ -1,5 +1,5 @@
 import { ApiError } from "../../shared/api/client";
-import type { CreateListingRequest, ListingType } from "./api";
+import type { ListingDetail, ListingRequest, ListingType } from "./api";
 
 // Bounds mirroring `backend/src/modules/listings/service.rs` — the server
 // stays the authority; these only spare the user a round-trip.
@@ -104,8 +104,8 @@ export function normalizePlaceName(raw: string): string {
  *  `price`, `type`, `city` and `neighborhood` are never empty here. An
  *  optional numeric field left blank reads as `NaN` (react-hook-form's
  *  `valueAsNumber`) and is omitted rather than sent as `NaN`. */
-export function toCreateListingPayload(values: ListingFormValues): CreateListingRequest {
-  const payload: CreateListingRequest = {
+export function toListingPayload(values: ListingFormValues): ListingRequest {
+  const payload: ListingRequest = {
     title: values.title.trim(),
     description: values.description.trim(),
     type: values.type as ListingType,
@@ -116,6 +116,22 @@ export function toCreateListingPayload(values: ListingFormValues): CreateListing
   if (Number.isFinite(values.surfaceM2)) payload.surface_m2 = values.surfaceM2;
   if (Number.isFinite(values.rooms)) payload.rooms = values.rooms;
   return payload;
+}
+
+/** Prefill values for the edit form. Missing optional numbers become `NaN`,
+ *  the same value an empty number input reads as. */
+export function listingDetailToFormValues(listing: ListingDetail): ListingFormValues {
+  return {
+    title: listing.title,
+    description: listing.description,
+    type: listing.type,
+    // The API serializes price as a float; the form only accepts whole numbers.
+    price: Math.round(listing.price),
+    surfaceM2: listing.surface_m2 ?? NaN,
+    rooms: listing.rooms ?? NaN,
+    city: listing.city,
+    neighborhood: listing.neighborhood ?? "",
+  };
 }
 
 export const VALIDATION_FAILED_MESSAGE = "Please fix the highlighted fields below.";

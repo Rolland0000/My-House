@@ -440,7 +440,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateListingRequest"
+                "$ref": "#/components/schemas/ListingRequest"
               }
             }
           },
@@ -508,6 +508,62 @@
           },
           "404": {
             "description": "Listing not found, or not publicly visible to the caller"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Replaces the editable fields of one of the caller's listings. Status,\npublication state, owner and timestamps are never taken from the body.",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Listing updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, or owned by someone else"
+          },
+          "422": {
+            "description": "One or more fields violate a rule; `error.fields` lists each one"
           }
         }
       }
@@ -1139,73 +1195,6 @@
           }
         }
       },
-      "CreateListingRequest": {
-        "type": "object",
-        "description": "Body of `POST /listings`. Every field is optional at the serde level so a\nmissing one is reported as a `422` field error rather than a `400`; the\nschema still marks the required ones. An `owner_id` in the body is ignored.",
-        "required": [
-          "title",
-          "description",
-          "type",
-          "price",
-          "city",
-          "neighborhood"
-        ],
-        "properties": {
-          "city": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "20 to 2,000 characters after trimming."
-          },
-          "neighborhood": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "price": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "Whole XAF, 1 to 9,999,999,999."
-          },
-          "rooms": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "0 to 100."
-          },
-          "surface_m2": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "1 to 100,000."
-          },
-          "title": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "5 to 120 characters after trimming."
-          },
-          "type": {
-            "$ref": "#/components/schemas/ListingType"
-          }
-        }
-      },
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
@@ -1299,7 +1288,7 @@
       },
       "ListingDetailResponse": {
         "type": "object",
-        "description": "Envelope for `GET /listings/:id` and `POST /listings` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
+        "description": "Envelope for `GET /listings/:id`, `POST /listings` and `PUT /listings/:id` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
         "required": [
           "data"
         ],
@@ -1332,6 +1321,73 @@
           },
           "url": {
             "type": "string"
+          }
+        }
+      },
+      "ListingRequest": {
+        "type": "object",
+        "description": "Body of `POST /listings` and `PUT /listings/:id`. Every field is optional at\nthe serde level so a missing one is reported as a `422` field error rather\nthan a `400`; the schema still marks the required ones. `owner_id`, `status`\nand `published_at` in the body are ignored.",
+        "required": [
+          "title",
+          "description",
+          "type",
+          "price",
+          "city",
+          "neighborhood"
+        ],
+        "properties": {
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "20 to 2,000 characters after trimming."
+          },
+          "neighborhood": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Whole XAF, 1 to 9,999,999,999."
+          },
+          "rooms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "0 to 100."
+          },
+          "surface_m2": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "1 to 100,000."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "5 to 120 characters after trimming."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ListingType"
           }
         }
       },

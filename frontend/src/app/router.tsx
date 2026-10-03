@@ -32,9 +32,14 @@ const OwnerRequestStatus = lazy(() =>
     default: m.OwnerRequestStatus,
   }))
 );
-const CreateListingForm = lazy(() =>
-  import("../features/listings/components/CreateListingForm").then((m) => ({
-    default: m.CreateListingForm,
+const CreateListingPage = lazy(() =>
+  import("../features/listings/components/CreateListingPage").then((m) => ({
+    default: m.CreateListingPage,
+  }))
+);
+const EditListingPage = lazy(() =>
+  import("../features/listings/components/EditListingPage").then((m) => ({
+    default: m.EditListingPage,
   }))
 );
 const OwnerListings = lazy(() =>
@@ -98,7 +103,15 @@ export const router = createBrowserRouter([
         path: "owner/listings/new",
         element: (
           <RequireAuth>
-            <RequireOwner>{withSuspense(CreateListingForm)}</RequireOwner>
+            <RequireOwner>{withSuspense(CreateListingPage)}</RequireOwner>
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "owner/listings/:id/edit",
+        element: (
+          <RequireAuth>
+            <RequireOwner>{withSuspense(EditListingPage)}</RequireOwner>
           </RequireAuth>
         ),
       },

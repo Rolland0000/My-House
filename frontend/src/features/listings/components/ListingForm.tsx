@@ -1,5 +1,7 @@
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import type { UseMutationResult } from "@tanstack/react-query";
 import {
   Alert,
   Button,
@@ -11,9 +13,8 @@ import {
   TextArea,
 } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
-import { useCreateListing } from "../hooks/useCreateListing";
 import { typeLabels } from "../labels";
-import type { ListingType } from "../api";
+import type { ListingDetail, ListingRequest, ListingType } from "../api";
 import {
   DESCRIPTION_MAX_LENGTH,
   DESCRIPTION_MIN_LENGTH,
@@ -29,7 +30,7 @@ import {
   placeNameFieldRule,
   requestErrorMessage,
   serverFieldToFormField,
-  toCreateListingPayload,
+  toListingPayload,
   trimmedTextFieldRule,
   type ListingFormValues,
 } from "../listingFormValidation";
@@ -39,14 +40,38 @@ const TYPE_OPTIONS = (Object.keys(typeLabels) as ListingType[]).map((value) => (
   label: typeLabels[value],
 }));
 
-function CreateListingForm() {
+type ListingFormMode = "create" | "edit";
+
+const MODE_TEXT: Record<ListingFormMode, { title: string; intro: string; submit: string }> = {
+  create: {
+    title: "Publish a listing",
+    intro:
+      "Fill in the details below. The listing is saved as a draft. You'll add photos and publish it from its page.",
+    submit: "Publish listing",
+  },
+  edit: {
+    title: "Edit listing",
+    intro: "Update the details below. Saving doesn't change whether the listing is published.",
+    submit: "Save changes",
+  },
+};
+
+interface ListingFormProps {
+  mode: ListingFormMode;
+  mutation: UseMutationResult<{ data: ListingDetail }, Error, ListingRequest>;
+  initialValues?: ListingFormValues;
+  onCancel?: () => void;
+}
+
+function ListingForm({ mode, mutation, initialValues, onCancel }: ListingFormProps) {
   const navigate = useNavigate();
-  const mutation = useCreateListing();
+  const text = MODE_TEXT[mode];
 
   const {
     register,
     handleSubmit,
     setError,
+    reset,
     formState: { errors },
   } = useForm<ListingFormValues>({
     defaultValues: {
@@ -58,12 +83,21 @@ function CreateListingForm() {
     },
   });
 
+  // Prefill once: a later refetch of the listing must not wipe what the user typed.
+  const hasPrefilled = useRef(false);
+  useEffect(() => {
+    if (!initialValues || hasPrefilled.current) return;
+    hasPrefilled.current = true;
+    reset(initialValues);
+  }, [initialValues, reset]);
+
   const requestError = mutation.error instanceof ApiError ? mutation.error : null;
 
   function onSubmit(values: ListingFormValues) {
-    mutation.mutate(toCreateListingPayload(values), {
+    mutation.mutate(toListingPayload(values), {
       onSuccess: (response) => {
-        navigate(`/listings/${response.data.id}`);
+        // Replace in edit mode so Back from the detail page doesn't reopen the submitted form.
+        navigate(`/listings/${response.data.id}`, { replace: mode === "edit" });
       },
       onError: (error) => {
         if (!(error instanceof ApiError) || error.code !== "VALIDATION_FAILED") return;
@@ -83,12 +117,9 @@ function CreateListingForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <fieldset disabled={disabled} className="flex flex-col gap-5">
             <div>
-              <h1 className="text-2xl font-bold text-ink-900">Publish a listing</h1>
+              <h1 className="text-2xl font-bold text-ink-900">{text.title}</h1>
               <DimensionRule width={120} className="mt-3.5 mb-1" />
-              <p className="text-sm text-text-muted">
-                Fill in the details below. The listing is saved as a draft. You'll add photos and
-                publish it from its page.
-              </p>
+              <p className="text-sm text-text-muted">{text.intro}</p>
             </div>
 
             {requestError && (
@@ -140,7 +171,7 @@ function CreateListingForm() {
               />
             </FormField>
 
-            <FormField label="Price (XAF)" required error={errors.price?.message}>
+            <FormField label="Monthly rent (XAF)" required error={errors.price?.message}>
               <Input
                 type="number"
                 step={1}
@@ -192,9 +223,16 @@ function CreateListingForm() {
               />
             </FormField>
 
-            <Button type="submit" isLoading={mutation.isPending} className="self-start">
-              Publish listing
-            </Button>
+            <div className="flex gap-3">
+              <Button type="submit" isLoading={mutation.isPending}>
+                {text.submit}
+              </Button>
+              {onCancel && (
+                <Button type="button" variant="secondary" onClick={onCancel}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </fieldset>
         </form>
       </Card>
@@ -202,4 +240,5 @@ function CreateListingForm() {
   );
 }
 
-export { CreateListingForm };
+export { ListingForm };
+export type { ListingFormProps };

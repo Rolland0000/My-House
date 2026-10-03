@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "../../shared/api/client";
+import { apiGet, apiPost, apiPut } from "../../shared/api/client";
 import type { components } from "../../shared/api/types";
 
 export type ListingSummary = components["schemas"]["ListingSummaryDto"];
@@ -7,7 +7,7 @@ export type ListingType = components["schemas"]["ListingType"];
 export type ListingStatus = components["schemas"]["ListingStatus"];
 export type PaginationMeta = components["schemas"]["PaginationMeta"];
 
-export type CreateListingRequest = components["schemas"]["CreateListingRequest"];
+export type ListingRequest = components["schemas"]["ListingRequest"];
 
 export interface ListListingsParams {
   city?: string;
@@ -50,6 +50,10 @@ export function getListing(id: string): Promise<{ data: ListingDetail }> {
   return apiGet<{ data: ListingDetail }>(`/api/v1/listings/${encodeURIComponent(id)}`);
 }
 
-export function createListing(body: CreateListingRequest): Promise<{ data: ListingDetail }> {
+export function createListing(body: ListingRequest): Promise<{ data: ListingDetail }> {
   return apiPost<{ data: ListingDetail }>("/api/v1/listings", body);
+}
+
+export function updateListing(id: string, body: ListingRequest): Promise<{ data: ListingDetail }> {
+  return apiPut<{ data: ListingDetail }>(`/api/v1/listings/${encodeURIComponent(id)}`, body);
 }
