@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ImageOff } from "lucide-react";
+import { ImageOff, Pencil } from "lucide-react";
 import { Badge } from "../../../shared/components";
 import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
@@ -55,7 +55,16 @@ function OwnerListingRow({ listing }: OwnerListingRowProps) {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-none items-center gap-2" />
+      <div className="relative z-10 flex flex-none items-center gap-2">
+        <Link
+          to={`/owner/listings/${listing.id}/edit`}
+          aria-label={`Edit ${listing.title}`}
+          className="flex items-center gap-1 text-sm font-semibold text-ink-500 hover:text-ink-900"
+        >
+          <Pencil className="size-4" aria-hidden="true" />
+          Edit
+        </Link>
+      </div>
     </li>
   );
 }

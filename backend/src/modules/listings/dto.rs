@@ -35,14 +35,15 @@ pub struct OwnerListingsQuery {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /listings — request body
+// POST /listings, PUT /listings/:id — request body
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Body of `POST /listings`. Every field is optional at the serde level so a
-/// missing one is reported as a `422` field error rather than a `400`; the
-/// schema still marks the required ones. An `owner_id` in the body is ignored.
+/// Body of `POST /listings` and `PUT /listings/:id`. Every field is optional at
+/// the serde level so a missing one is reported as a `422` field error rather
+/// than a `400`; the schema still marks the required ones. `owner_id`, `status`
+/// and `published_at` in the body are ignored.
 #[derive(Debug, Deserialize, ToSchema)]
-pub struct CreateListingRequest {
+pub struct ListingRequest {
     /// 5 to 120 characters after trimming.
     #[schema(required = true)]
     pub title: Option<String>,
@@ -198,7 +199,7 @@ impl ListingDetailDto {
     }
 }
 
-/// Envelope for `GET /listings/:id` and `POST /listings` — single-object `{ "data": {...} }`,
+/// Envelope for `GET /listings/:id`, `POST /listings` and `PUT /listings/:id` — single-object `{ "data": {...} }`,
 /// distinct from the paginated list envelope used by `GET /listings`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ListingDetailResponse {

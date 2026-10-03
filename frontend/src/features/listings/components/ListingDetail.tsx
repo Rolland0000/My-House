@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
-import { Alert, DimensionRule, EmptyState, Spinner } from "../../../shared/components";
+import { Alert, DimensionRule, Spinner } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
@@ -9,6 +9,7 @@ import { useAuth } from "../../auth";
 import { useProfile } from "../../profile";
 import { useListing } from "../hooks/useListings";
 import { typeLabels } from "../labels";
+import { ListingNotFound } from "./ListingNotFound";
 import { OwnerBar } from "./OwnerBar";
 import { ReportListingModal } from "./ReportListingModal";
 
@@ -18,7 +19,6 @@ function ListingDetail() {
   const { id } = useParams<{ id: string }>();
   const { data, isPending, error } = useListing(id);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const navigate = useNavigate();
   const { status } = useAuth();
   const { data: profile } = useProfile({ enabled: status === "authenticated" });
 
@@ -31,15 +31,7 @@ function ListingDetail() {
   }
 
   if (error instanceof ApiError && error.status === 404) {
-    return (
-      <div className="mx-auto max-w-2xl px-6 py-16">
-        <EmptyState
-          title="This property is no longer available"
-          description="It may have been removed by the owner, or its status changed to “unavailable”."
-          secondaryAction={{ label: "Back to listings", onClick: () => navigate("/") }}
-        />
-      </div>
-    );
+    return <ListingNotFound />;
   }
 
   if (error || !data) {
@@ -94,7 +86,11 @@ function ListingDetail() {
       )}
 
       {isOwner && (
-        <OwnerBar publishedAt={listing.published_at ?? null} hasPhoto={listing.media.length > 0} />
+        <OwnerBar
+          listingId={listing.id}
+          publishedAt={listing.published_at ?? null}
+          hasPhoto={listing.media.length > 0}
+        />
       )}
 
       <div className="flex flex-col gap-4">
