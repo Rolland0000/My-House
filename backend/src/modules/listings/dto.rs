@@ -206,6 +206,29 @@ pub struct ListingDetailResponse {
     pub data: ListingDetailDto,
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /listings/:id/status
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Body of `PATCH /listings/:id/status`. `status` is read as a string so a
+/// missing or unknown label is reported as a `422` field error, not a `400`.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ListingStatusRequest {
+    #[schema(required = true, value_type = ListingStatus)]
+    pub status: Option<String>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ListingStatusDto {
+    pub id: Uuid,
+    pub status: ListingStatus,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ListingStatusResponse {
+    pub data: ListingStatusDto,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

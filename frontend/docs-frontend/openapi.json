@@ -619,6 +619,64 @@
         }
       }
     },
+    "/api/v1/listings/{id}/status": {
+      "patch": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Marks one of the caller's listings as available or unavailable. Works on\ndrafts too, and never changes the publication state.",
+        "operationId": "update_status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Status set; setting the current status also returns 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, or owned by someone else"
+          },
+          "422": {
+            "description": "`status` is missing or not one of the two labels"
+          }
+        }
+      }
+    },
     "/api/v1/media/upload": {
       "post": {
         "tags": [
@@ -1397,6 +1455,45 @@
           "available",
           "unavailable"
         ]
+      },
+      "ListingStatusDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ListingStatus"
+          }
+        }
+      },
+      "ListingStatusRequest": {
+        "type": "object",
+        "description": "Body of `PATCH /listings/:id/status`. `status` is read as a string so a\nmissing or unknown label is reported as a `422` field error, not a `400`.",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ListingStatus"
+          }
+        }
+      },
+      "ListingStatusResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ListingStatusDto"
+          }
+        }
       },
       "ListingSummaryDto": {
         "type": "object",

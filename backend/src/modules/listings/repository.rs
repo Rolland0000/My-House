@@ -272,3 +272,29 @@ pub async fn update_listing(
     .await
     .map_err(|error| AppError::Database(error.to_string()))
 }
+
+/// Sets the status of `id` if `owner_id` owns it and returns the stored values;
+/// `None` when the listing doesn't exist or belongs to another owner.
+pub async fn update_listing_status(
+    pool: &PgPool,
+    id: Uuid,
+    owner_id: Uuid,
+    status: ListingStatus,
+) -> Result<Option<(Uuid, ListingStatus)>, AppError> {
+    // Setting the current value still matches the row, so a repeated call returns it too.
+    sqlx::query!(
+        r#"
+        UPDATE listings
+        SET status = $3
+        WHERE id = $1 AND owner_id = $2
+        RETURNING id, status AS "status: ListingStatus"
+        "#,
+        id,
+        owner_id,
+        status as ListingStatus,
+    )
+    .fetch_optional(pool)
+    .await
+    .map(|row| row.map(|row| (row.id, row.status)))
+    .map_err(|error| AppError::Database(error.to_string()))
+}
