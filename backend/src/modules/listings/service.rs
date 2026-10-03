@@ -8,10 +8,9 @@ use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::FieldErrors;
 
 use super::dto::{
-    CreateListingRequest, ListListingsQuery, ListingDetailDto, ListingSummaryDto,
-    OwnerListingsQuery,
+    ListListingsQuery, ListingDetailDto, ListingRequest, ListingSummaryDto, OwnerListingsQuery,
 };
-use super::model::{ListingType, NewListing};
+use super::model::{ListingFields, ListingType};
 use super::repository::{self, ListingFilters};
 
 const TITLE_LENGTH: RangeInclusive<usize> = 5..=120;
@@ -96,9 +95,9 @@ pub async fn get_listing_detail(
     Ok(ListingDetailDto::from_row_and_media(row, media))
 }
 
-/// Checks every field of a creation request, collecting all violations
-/// before failing so the client can show them at once.
-pub fn validate_new_listing(request: CreateListingRequest) -> Result<NewListing, AppError> {
+/// Checks every field of a creation or edit request, collecting all
+/// violations before failing so the client can show them at once.
+pub fn validate_listing(request: ListingRequest) -> Result<ListingFields, AppError> {
     let mut errors = FieldErrors::default();
 
     let title = errors.required_text("title", request.title, TITLE_LENGTH);
@@ -138,7 +137,7 @@ pub fn validate_new_listing(request: CreateListingRequest) -> Result<NewListing,
             Some(price),
             Some(city),
             Some(neighborhood),
-        ) => Ok(NewListing {
+        ) => Ok(ListingFields {
             title,
             description,
             listing_type,
@@ -157,10 +156,26 @@ pub fn validate_new_listing(request: CreateListingRequest) -> Result<NewListing,
 pub async fn create_listing(
     pool: &PgPool,
     owner_id: Uuid,
-    request: CreateListingRequest,
+    request: ListingRequest,
 ) -> Result<ListingDetailDto, AppError> {
-    let new_listing = validate_new_listing(request)?;
-    let id = repository::insert_listing(pool, owner_id, &new_listing).await?;
+    let fields = validate_listing(request)?;
+    let id = repository::insert_listing(pool, owner_id, &fields).await?;
+    get_listing_detail(pool, id, Some(owner_id)).await
+}
+
+/// Validates and replaces the editable fields of `owner_id`'s listing `id`.
+/// An unknown id and another owner's listing both give `ListingNotFound`.
+pub async fn update_listing(
+    pool: &PgPool,
+    id: Uuid,
+    owner_id: Uuid,
+    request: ListingRequest,
+) -> Result<ListingDetailDto, AppError> {
+    let fields = validate_listing(request)?;
+    repository::update_listing(pool, id, owner_id, &fields)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+    // Owner-aware read: an edited draft still answers 200.
     get_listing_detail(pool, id, Some(owner_id)).await
 }
 
@@ -204,8 +219,8 @@ mod tests {
         }
     }
 
-    fn valid_request() -> CreateListingRequest {
-        CreateListingRequest {
+    fn valid_request() -> ListingRequest {
+        ListingRequest {
             title: Some("Studio meublé Plateau".into()),
             description: Some("d".repeat(20)),
             listing_type: Some("studio".into()),
@@ -217,8 +232,8 @@ mod tests {
         }
     }
 
-    fn violated_fields(request: CreateListingRequest) -> Vec<&'static str> {
-        match validate_new_listing(request) {
+    fn violated_fields(request: ListingRequest) -> Vec<&'static str> {
+        match validate_listing(request) {
             Err(AppError::Validation(entries)) => {
                 entries.into_iter().map(|entry| entry.field).collect()
             }
@@ -234,7 +249,7 @@ mod tests {
 
     #[test]
     fn a_valid_request_is_normalized() {
-        let listing = validate_new_listing(valid_request()).expect("valid request");
+        let listing = validate_listing(valid_request()).expect("valid request");
         assert_eq!(listing.city, "Dakar");
         assert_eq!(listing.neighborhood, "Plateau Nord");
         assert_eq!(listing.listing_type, ListingType::Studio);
@@ -245,7 +260,7 @@ mod tests {
 
     #[test]
     fn optional_fields_may_be_absent() {
-        let listing = validate_new_listing(CreateListingRequest {
+        let listing = validate_listing(ListingRequest {
             surface_m2: None,
             rooms: None,
             ..valid_request()
@@ -258,22 +273,22 @@ mod tests {
     #[test]
     fn title_bounds() {
         for (length, accepted) in [(4, false), (5, true), (120, true), (121, false)] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 title: Some("t".repeat(length)),
                 ..valid_request()
             };
-            assert_eq!(validate_new_listing(request).is_ok(), accepted, "{length}");
+            assert_eq!(validate_listing(request).is_ok(), accepted, "{length}");
         }
     }
 
     #[test]
     fn description_bounds() {
         for (length, accepted) in [(19, false), (20, true), (2000, true), (2001, false)] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 description: Some("d".repeat(length)),
                 ..valid_request()
             };
-            assert_eq!(validate_new_listing(request).is_ok(), accepted, "{length}");
+            assert_eq!(validate_listing(request).is_ok(), accepted, "{length}");
         }
     }
 
@@ -285,50 +300,50 @@ mod tests {
             (9_999_999_999, true),
             (10_000_000_000, false),
         ] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 price: Some(price),
                 ..valid_request()
             };
-            assert_eq!(validate_new_listing(request).is_ok(), accepted, "{price}");
+            assert_eq!(validate_listing(request).is_ok(), accepted, "{price}");
         }
     }
 
     #[test]
     fn surface_bounds() {
         for (surface, accepted) in [(0, false), (1, true), (100_000, true), (100_001, false)] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 surface_m2: Some(surface),
                 ..valid_request()
             };
-            assert_eq!(validate_new_listing(request).is_ok(), accepted, "{surface}");
+            assert_eq!(validate_listing(request).is_ok(), accepted, "{surface}");
         }
     }
 
     #[test]
     fn rooms_bounds() {
         for (rooms, accepted) in [(-1, false), (0, true), (100, true), (101, false)] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 rooms: Some(rooms),
                 ..valid_request()
             };
-            assert_eq!(validate_new_listing(request).is_ok(), accepted, "{rooms}");
+            assert_eq!(validate_listing(request).is_ok(), accepted, "{rooms}");
         }
     }
 
     #[test]
     fn an_unknown_type_is_rejected_and_every_label_is_accepted() {
-        let unknown = CreateListingRequest {
+        let unknown = ListingRequest {
             listing_type: Some("castle".into()),
             ..valid_request()
         };
         assert_eq!(violated_fields(unknown), vec!["type"]);
 
         for label in ["apartment", "studio", "house", "room", "villa", "other"] {
-            let request = CreateListingRequest {
+            let request = ListingRequest {
                 listing_type: Some(label.into()),
                 ..valid_request()
             };
-            assert!(validate_new_listing(request).is_ok(), "{label}");
+            assert!(validate_listing(request).is_ok(), "{label}");
         }
     }
 
@@ -337,42 +352,42 @@ mod tests {
         let cases = [
             (
                 "title",
-                CreateListingRequest {
+                ListingRequest {
                     title: None,
                     ..valid_request()
                 },
             ),
             (
                 "description",
-                CreateListingRequest {
+                ListingRequest {
                     description: None,
                     ..valid_request()
                 },
             ),
             (
                 "type",
-                CreateListingRequest {
+                ListingRequest {
                     listing_type: None,
                     ..valid_request()
                 },
             ),
             (
                 "price",
-                CreateListingRequest {
+                ListingRequest {
                     price: None,
                     ..valid_request()
                 },
             ),
             (
                 "city",
-                CreateListingRequest {
+                ListingRequest {
                     city: None,
                     ..valid_request()
                 },
             ),
             (
                 "neighborhood",
-                CreateListingRequest {
+                ListingRequest {
                     neighborhood: None,
                     ..valid_request()
                 },
@@ -385,7 +400,7 @@ mod tests {
 
     #[test]
     fn whitespace_only_place_names_are_rejected() {
-        let request = CreateListingRequest {
+        let request = ListingRequest {
             city: Some(" \t\u{00A0} ".into()),
             neighborhood: Some("   ".into()),
             ..valid_request()
@@ -395,7 +410,7 @@ mod tests {
 
     #[test]
     fn three_invalid_fields_yield_exactly_three_entries() {
-        let request = CreateListingRequest {
+        let request = ListingRequest {
             title: Some("abc".into()),
             price: Some(0),
             rooms: Some(101),
@@ -405,17 +420,32 @@ mod tests {
     }
 
     #[test]
-    fn an_owner_id_in_the_body_is_ignored() {
-        let request: CreateListingRequest = serde_json::from_value(serde_json::json!({
-            "owner_id": "00000000-0000-0000-0000-000000000001",
+    fn server_owned_fields_in_the_body_are_ignored() {
+        let clean = serde_json::json!({
             "title": "Studio meublé Plateau",
             "description": "d".repeat(20),
             "type": "studio",
             "price": 150000,
             "city": "Dakar",
             "neighborhood": "Plateau",
-        }))
-        .expect("body with an extra owner_id deserializes");
-        assert!(validate_new_listing(request).is_ok());
+        });
+        let mut with_foreign_fields = clean.clone();
+        with_foreign_fields
+            .as_object_mut()
+            .expect("body is an object")
+            .extend([
+                (
+                    "owner_id".into(),
+                    "00000000-0000-0000-0000-000000000001".into(),
+                ),
+                ("status".into(), "unavailable".into()),
+                ("published_at".into(), "2026-10-01T08:30:00Z".into()),
+            ]);
+
+        let validate = |body| {
+            let request: ListingRequest = serde_json::from_value(body).expect("body deserializes");
+            validate_listing(request).expect("valid request")
+        };
+        assert_eq!(validate(with_foreign_fields), validate(clean));
     }
 }

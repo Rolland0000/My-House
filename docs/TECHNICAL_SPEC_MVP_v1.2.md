@@ -883,6 +883,35 @@ Tous les biens de l'appelant, sans règle de visibilité publique : brouillons e
 }
 ```
 
+**`PUT /listings/:id`**
+
+Remplacement complet des champs éditables : même corps, même validation et même normalisation que `POST /listings`. Un `surface_m2` ou `rooms` absent est remis à `null`. `status`, `published_at`, `owner_id` et `created_at` ne sont jamais modifiés ; présents dans le corps, ils sont ignorés. Le contrôle de propriété et l'écriture se font dans un seul `UPDATE … WHERE id = $1 AND owner_id = $2`.
+
+```json
+// Request
+{
+  "title": "Studio meublé Plateau",
+  "description": "...",
+  "type": "studio",
+  "price": 150000,
+  "city": "Dakar",
+  "neighborhood": "Plateau",
+  "surface_m2": 35,
+  "rooms": 1
+}
+```
+
+Response 200 : même forme que `GET /listings/:id`, brouillon compris (lecture côté propriétaire).
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Bien mis à jour                                                                       |
+| `400` | Corps JSON mal formé                                                                 |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner (même réponse, jamais `403`) |
+| `422` | `VALIDATION_FAILED`, une entrée par champ invalide dans `error.fields`               |
+
 **`PATCH /listings/:id/cover`**
 
 ```json

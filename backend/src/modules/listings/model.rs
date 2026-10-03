@@ -51,10 +51,10 @@ pub enum ListingStatus {
 // Validated input
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// A validated, normalized listing ready to insert. Carries no owner: the
-/// owner always comes from the authenticated user, never from the request.
+/// The validated, normalized editable fields, shared by creation and edit.
+/// Carries no owner: it always comes from the authenticated user.
 #[derive(Debug, PartialEq, Eq)]
-pub struct NewListing {
+pub struct ListingFields {
     pub title: String,
     pub description: String,
     pub listing_type: ListingType,

@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::shared::errors::AppError;
 
 use super::model::{
-    ListingDetailRow, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType, NewListing,
+    ListingDetailRow, ListingFields, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType,
 };
 
 /// The feed and the spec price everything in XAF; the column has no default.
@@ -214,7 +214,7 @@ pub async fn find_media_for_listing(
 pub async fn insert_listing(
     pool: &PgPool,
     owner_id: Uuid,
-    listing: &NewListing,
+    listing: &ListingFields,
 ) -> Result<Uuid, AppError> {
     // `$5::bigint::numeric` keeps the bind an i64: a bare `numeric` bind would need a decimal crate.
     sqlx::query_scalar!(
@@ -236,6 +236,39 @@ pub async fn insert_listing(
         listing.rooms,
     )
     .fetch_one(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Replaces the editable fields of `id` if `owner_id` owns it; `None` otherwise.
+/// `updated_at` and `search_vector` are set by trigger.
+pub async fn update_listing(
+    pool: &PgPool,
+    id: Uuid,
+    owner_id: Uuid,
+    listing: &ListingFields,
+) -> Result<Option<Uuid>, AppError> {
+    // Ownership is part of the WHERE clause, so no read can race with the write.
+    sqlx::query_scalar!(
+        r#"
+        UPDATE listings
+        SET title = $3, description = $4, type = $5, price = $6::bigint::numeric,
+            city = $7, neighborhood = $8, surface_m2 = $9, rooms = $10
+        WHERE id = $1 AND owner_id = $2
+        RETURNING id
+        "#,
+        id,
+        owner_id,
+        listing.title,
+        listing.description,
+        listing.listing_type as ListingType,
+        listing.price,
+        listing.city,
+        listing.neighborhood,
+        listing.surface_m2,
+        listing.rooms,
+    )
+    .fetch_optional(pool)
     .await
     .map_err(|error| AppError::Database(error.to_string()))
 }
