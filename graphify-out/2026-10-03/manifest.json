@@ -918,9 +918,9 @@
     "semantic_hash": "8d3aa4494ad41e1c9909fc4f52ced817"
   },
   "backend/src/infra/mailer.rs": {
-    "mtime": 1791009319.1893568,
-    "seen": 1791009340.254663,
-    "ast_hash": "583f98eca0ad4d098e53bdda2417f809",
+    "mtime": 1791008559.562603,
+    "seen": 1791008605.656058,
+    "ast_hash": "02b53af56103eaa97ff2ea71a2f24fe9",
     "semantic_hash": ""
   },
   "backend/src/modules/notifications/service.rs": {
