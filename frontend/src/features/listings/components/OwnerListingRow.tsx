@@ -6,6 +6,7 @@ import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { VISIBILITY_BADGE } from "../labels";
 import { listingVisibility } from "../listingVisibility";
 import type { ListingSummary } from "../api";
+import { DeleteListingAction } from "./DeleteListingAction";
 import { ListingStatusControl } from "./ListingStatusControl";
 
 interface OwnerListingRowProps {
@@ -60,14 +61,17 @@ function OwnerListingRow({ listing }: OwnerListingRowProps) {
           listingTitle={listing.title}
           status={listing.status}
         />
-        <Link
-          to={`/owner/listings/${listing.id}/edit`}
-          aria-label={`Edit ${listing.title}`}
-          className="flex items-center gap-1 text-sm font-semibold text-ink-500 hover:text-ink-900"
-        >
-          <Pencil className="size-4" aria-hidden="true" />
-          Edit
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            to={`/owner/listings/${listing.id}/edit`}
+            aria-label={`Edit ${listing.title}`}
+            className="flex items-center gap-1 text-sm font-semibold text-ink-500 hover:text-ink-900"
+          >
+            <Pencil className="size-4" aria-hidden="true" />
+            Edit
+          </Link>
+          <DeleteListingAction listingId={listing.id} listingTitle={listing.title} />
+        </div>
       </div>
     </li>
   );

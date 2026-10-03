@@ -13,11 +13,17 @@ export function withListingStatus(
   };
 }
 
-/** Returns a copy without the matching row. */
+/** Returns a copy without the matching row. The counts drop with it so that removing the
+ *  last row shows the empty state right away. */
 export function withoutListing(
   result: ListListingsResult | undefined,
   id: string
 ): ListListingsResult | undefined {
   if (!result) return result;
-  return { ...result, data: result.data.filter((listing) => listing.id !== id) };
+  const data = result.data.filter((listing) => listing.id !== id);
+  if (data.length === result.data.length) return result;
+
+  const total = Math.max(result.pagination.total - 1, 0);
+  const totalPages = Math.ceil(total / result.pagination.per_page);
+  return { data, pagination: { ...result.pagination, total, total_pages: totalPages } };
 }

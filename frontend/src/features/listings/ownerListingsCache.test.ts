@@ -48,6 +48,20 @@ describe("withoutListing", () => {
     expect(output?.data).toEqual([input.data[1]]);
     expect(output?.data[0]).toBe(input.data[1]);
     expect(input.data).toHaveLength(2);
+    expect(output?.pagination).toMatchObject({ total: 1, total_pages: 1 });
+    expect(input.pagination.total).toBe(2);
+  });
+
+  it("drops the counts to zero when the last row goes", () => {
+    const output = withoutListing(withoutListing(page(), "a"), "b");
+
+    expect(output?.data).toEqual([]);
+    expect(output?.pagination).toMatchObject({ total: 0, total_pages: 0 });
+  });
+
+  it("returns the input unchanged for an unknown id", () => {
+    const input = page();
+    expect(withoutListing(input, "missing")).toBe(input);
   });
 
   it("passes undefined through", () => {

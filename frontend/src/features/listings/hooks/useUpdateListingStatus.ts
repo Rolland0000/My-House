@@ -5,7 +5,7 @@ import { updateListingStatus, type ListListingsResult, type ListingStatus } from
 import { withListingStatus, withoutListing } from "../ownerListingsCache";
 
 const OWNER_LISTINGS_KEY = ["owner-listings"];
-const MUTATION_KEY = ["listing-status"];
+export const LISTING_STATUS_MUTATION_KEY = ["listing-status"];
 
 interface StatusChange {
   status: ListingStatus;
@@ -21,7 +21,8 @@ export function useUpdateListingStatus(id: string) {
   ) => queryClient.setQueriesData<ListListingsResult>({ queryKey: OWNER_LISTINGS_KEY }, update);
 
   return useMutation({
-    mutationKey: MUTATION_KEY,
+    // The id lets a row see its own pending change; filters on the prefix still match every row.
+    mutationKey: [...LISTING_STATUS_MUTATION_KEY, id],
     mutationFn: ({ status }: StatusChange) => updateListingStatus(id, status),
     retry: false,
     onMutate: async ({ status }) => {
@@ -43,7 +44,7 @@ export function useUpdateListingStatus(id: string) {
       void queryClient.invalidateQueries({ queryKey: ["listing", id] });
       // Still counted as pending here. Only the last pending change refetches the list,
       // so the refetch can't overwrite another row's optimistic state.
-      if (queryClient.isMutating({ mutationKey: MUTATION_KEY }) === 1) {
+      if (queryClient.isMutating({ mutationKey: LISTING_STATUS_MUTATION_KEY }) === 1) {
         void queryClient.invalidateQueries({ queryKey: OWNER_LISTINGS_KEY });
       }
     },
