@@ -1,4 +1,4 @@
-# MH-56 — Modifier un bien : plan d'implémentation (BE + FE)
+# MH-56 — Modifier un bien : plan d'implémentation (BE + FE)  
 
 - **Epic** : EP-09 — Listings (#129)
 - **Ticket parent** : MH-56 — Edit a listing (#141)
@@ -20,12 +20,12 @@ Un owner peut aujourd'hui créer un bien et le retrouver dans « My properties �
 
 ### Décisions tranchées
 
-| #  | Sujet | Décision |
-| -- | ----- | -------- |
-| D1 | Branches | Sous-branches BE puis FE, mergées dans `141-mh-56-edit-a-listing`. Le FE régénère ses types depuis l'`openapi.json` du BE mergé dans le parent. Une seule PR vers `develop`. |
-| D2 | Renommages BE | Noms neutres partout : `CreateListingRequest` → `ListingRequest`, `validate_new_listing` → `validate_listing`, `NewListing` → `ListingFields`. |
-| D3 | Navigation après sauvegarde | `navigate(\`/listings/${id}\`, { replace: true })` en mode édition : le retour arrière depuis le détail ne rouvre pas le formulaire soumis. La création garde son `push` actuel. |
-| D4 | Specs | Dans MH-56-BE, TECHNICAL_SPEC §4.3 reçoit le corps et la réponse de `PUT /listings/:id` (codes 200/400/401/403/404/422). |
+| #  | Sujet                        | Décision                                                                                                                                                                              |
+| -- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1 | Branches                     | Sous-branches BE puis FE, mergées dans`141-mh-56-edit-a-listing`. Le FE régénère ses types depuis l'`openapi.json` du BE mergé dans le parent. Une seule PR vers `develop`. |
+| D2 | Renommages BE                | Noms neutres partout :`CreateListingRequest` → `ListingRequest`, `validate_new_listing` → `validate_listing`, `NewListing` → `ListingFields`.                           |
+| D3 | Navigation après sauvegarde | `navigate(\`/listings/${id}\`, { replace: true })`en mode édition : le retour arrière depuis le détail ne rouvre pas le formulaire soumis. La création garde son`push` actuel. |
+| D4 | Specs                        | Dans MH-56-BE, TECHNICAL_SPEC §4.3 reçoit le corps et la réponse de`PUT /listings/:id` (codes 200/400/401/403/404/422).                                                           |
 
 ### Décisions de conception prises pendant l'analyse
 
@@ -109,7 +109,7 @@ Le FE dépend du BE pour l'endpoint et pour le type renommé (`ListingRequest` d
    - 404 sur le détail, `profile.id !== listing.owner.id`, ou 404 sur le PUT (`mutation.error`) : même `EmptyState` « not found » que `ListingDetail` (extraire ce bloc dans un petit composant partagé du feature si la duplication dépasse quelques lignes).
    - Autre erreur de chargement : `Alert variant="error"`.
    - Sinon : `<ListingForm mode="edit" initialValues={listingDetailToFormValues(listing)} mutation={useUpdateListing(id)} onCancel={() => navigate(\`/listings/${id}\`)} />`.
-8. **`frontend/src/features/listings/components/OwnerListingRow.tsx`** : dans la zone d'actions, `<Link to={\`/owner/listings/${listing.id}/edit\`}>` « Edit » (icône `Pencil` de lucide-react, `aria-label` « Edit {title} »).
+8. **`frontend/src/features/listings/components/OwnerListingRow.tsx`** : dans la zone d'actions, `<Link to={\`/owner/listings/${listing.id}/edit\`}>`« Edit » (icône`Pencil`de lucide-react,`aria-label` « Edit {title} »).
 9. **`frontend/src/features/listings/components/OwnerBar.tsx`** : nouvelle prop `listingId` ; lien « Edit listing » vers `/owner/listings/:id/edit`. **`ListingDetail.tsx`** passe `listing.id`.
 10. **`frontend/src/features/listings/index.ts`** : exporter `CreateListingPage`, `EditListingPage`, `useUpdateListing`, `updateListing`, `ListingRequest` ; retirer `CreateListingForm` et `CreateListingRequest`.
 11. **`frontend/src/app/router.tsx`** : `owner/listings/new` pointe sur `CreateListingPage` ; nouvelle route `owner/listings/:id/edit` en `lazy`, `RequireAuth` > `RequireOwner` > `withSuspense(EditListingPage)`. Les redirections anonyme → `/login` et seeker/admin → `/` viennent de ces gardes.
@@ -139,23 +139,23 @@ Le FE dépend du BE pour l'endpoint et pour le type renommé (`ListingRequest` d
 
 ## 4. Points d'intégration avec l'existant
 
-| Zone | Existant | Changement MH-56 |
-| ---- | -------- | ---------------- |
-| `listings/dto.rs` | `CreateListingRequest` (champs `Option`, 422 plutôt que 400) | Renommé `ListingRequest`, partagé POST/PUT. |
-| `listings/service.rs` | `validate_new_listing`, `create_listing`, `get_listing_detail` (owner-aware) | Renommage ; `update_listing` réutilise le validateur et la lecture owner-aware. |
-| `listings/repository.rs` | `insert_listing` (cast `bigint::numeric`) | `update_listing`, même cast, prédicat `owner_id`. |
-| Triggers | `fn_set_updated_at`, `fn_update_listing_search_vector` sur UPDATE | Réutilisés, aucune migration. |
-| `AppJson` / `AuthUser` / `require_role` | 400 JSON mal formé ; 401 ; 403 | Réutilisés tels quels. |
-| `AppError::ListingNotFound` | 404 `LISTING_NOT_FOUND` | Réutilisé pour inconnu et non-propriétaire. |
-| Router listings | `/listings/{id}` = `get_by_id` | `update` ajouté sur le même chemin. |
-| `CreateListingForm` | Formulaire de création | Devient `ListingForm` à deux modes + `CreateListingPage`. |
-| `listingFormValidation.ts` | Règles, `toCreateListingPayload`, mapping 422 | `toListingPayload`, `listingDetailToFormValues`. |
-| `useListing` | Clé `["listing", id]`, pas de retry sur 404 | Réutilisé pour préremplir ; cache mis à jour par la réponse du PUT. |
-| `useCreateListing` | Invalide `["listings"]` et `["owner-listings"]` | Inchangé ; `useUpdateListing` suit le même modèle. |
-| `removeOwnerScopedQueries` | Retire `["listing"]` et `["owner-listings"]` au sign-out | Inchangé, couvre déjà le cache d'édition. |
-| `OwnerListingRow` | Zone d'actions vide en `relative z-10` | Lien « Edit ». |
-| `OwnerBar` / `ListingDetail` | Badge + message de visibilité ; `isOwner` via `useProfile` | Lien « Edit listing » ; même contrôle `isOwner` réutilisé dans la page d'édition. |
-| `RequireAuth` / `RequireOwner` | Redirections `/login` et `/` | Réutilisés pour la route d'édition. |
+| Zone                                          | Existant                                                                           | Changement MH-56                                                                          |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `listings/dto.rs`                           | `CreateListingRequest` (champs `Option`, 422 plutôt que 400)                  | Renommé`ListingRequest`, partagé POST/PUT.                                            |
+| `listings/service.rs`                       | `validate_new_listing`, `create_listing`, `get_listing_detail` (owner-aware) | Renommage ;`update_listing` réutilise le validateur et la lecture owner-aware.         |
+| `listings/repository.rs`                    | `insert_listing` (cast `bigint::numeric`)                                      | `update_listing`, même cast, prédicat `owner_id`.                                   |
+| Triggers                                      | `fn_set_updated_at`, `fn_update_listing_search_vector` sur UPDATE              | Réutilisés, aucune migration.                                                           |
+| `AppJson` / `AuthUser` / `require_role` | 400 JSON mal formé ; 401 ; 403                                                    | Réutilisés tels quels.                                                                  |
+| `AppError::ListingNotFound`                 | 404`LISTING_NOT_FOUND`                                                           | Réutilisé pour inconnu et non-propriétaire.                                            |
+| Router listings                               | `/listings/{id}` = `get_by_id`                                                 | `update` ajouté sur le même chemin.                                                   |
+| `CreateListingForm`                         | Formulaire de création                                                            | Devient`ListingForm` à deux modes + `CreateListingPage`.                             |
+| `listingFormValidation.ts`                  | Règles,`toCreateListingPayload`, mapping 422                                    | `toListingPayload`, `listingDetailToFormValues`.                                      |
+| `useListing`                                | Clé`["listing", id]`, pas de retry sur 404                                      | Réutilisé pour préremplir ; cache mis à jour par la réponse du PUT.                  |
+| `useCreateListing`                          | Invalide`["listings"]` et `["owner-listings"]`                                 | Inchangé ;`useUpdateListing` suit le même modèle.                                    |
+| `removeOwnerScopedQueries`                  | Retire`["listing"]` et `["owner-listings"]` au sign-out                        | Inchangé, couvre déjà le cache d'édition.                                             |
+| `OwnerListingRow`                           | Zone d'actions vide en`relative z-10`                                            | Lien « Edit ».                                                                          |
+| `OwnerBar` / `ListingDetail`              | Badge + message de visibilité ;`isOwner` via `useProfile`                     | Lien « Edit listing » ; même contrôle`isOwner` réutilisé dans la page d'édition. |
+| `RequireAuth` / `RequireOwner`            | Redirections`/login` et `/`                                                    | Réutilisés pour la route d'édition.                                                    |
 
 ---
 
@@ -186,17 +186,17 @@ Le FE dépend du BE pour l'endpoint et pour le type renommé (`ListingRequest` d
 
 ## 6. Risques et inconnues
 
-| #  | Risque / inconnue | Traitement |
-| -- | ----------------- | ---------- |
-| R1 | La page d'édition affiche les données d'un bien public d'un autre owner si le contrôle `profile.id === owner.id` est oublié ou évalué avant le chargement du profil. | Attendre le profil avant de rendre le formulaire ; état not-found sinon. Le PUT répond de toute façon 404 (pas de fuite en écriture). |
-| R2 | Un refetch du détail (focus de l'onglet) appelle `reset` et efface la saisie. | Reset unique par id, ou `keepDirtyValues` ; à trancher via Context7 (react-hook-form v7). |
-| R3 | `NaN` comme valeur de `reset` sur un `<input type="number">`. | La sanitization HTML d'un input number vide une valeur non numérique ; vérifier le rendu et `valueAsNumber` via Context7 et à la main. |
-| R4 | Rôle périmé : un owner approuvé pendant la session reçoit 403 (mémoire « Role not revalidated per request »). | Déjà couvert par la fenêtre de réactivation MH-55 ; `requestErrorMessage` affiche le message `FORBIDDEN` existant. |
-| R5 | Édition concurrente (deux onglets) : dernier écrit gagnant, pas de contrôle de version. | Accepté au MVP ; hors ticket. |
-| R6 | Le MCP PostgreSQL n'a pas pu se connecter pendant l'analyse. | Réessayer au début de MH-56-BE. Sinon, s'appuyer sur la migration de base et `cargo sqlx prepare`. L'`UPDATE` filtre sur la clé primaire : aucun nouvel index, pas de tri ni filtre sur le prix. |
-| R7 | Renommer `CreateListingRequest` casse les imports FE tant que `types.ts` n'est pas régénéré. | Régénération en premier fichier FE (2.3.1) ; `ts:check` le signale. |
-| R8 | La création est refactorée en même temps que l'édition est ajoutée. | Vérification manuelle de la création juste après l'étape 3.4, avant d'écrire la page d'édition. |
-| R9 | « Back to listings » sur le détail renvoie vers `/` (signalé dans MH-55). | Hors périmètre. |
+| #  | Risque / inconnue                                                                                                                                                           | Traitement                                                                                                                                                                                             |
+| -- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1 | La page d'édition affiche les données d'un bien public d'un autre owner si le contrôle`profile.id === owner.id` est oublié ou évalué avant le chargement du profil. | Attendre le profil avant de rendre le formulaire ; état not-found sinon. Le PUT répond de toute façon 404 (pas de fuite en écriture).                                                              |
+| R2 | Un refetch du détail (focus de l'onglet) appelle`reset` et efface la saisie.                                                                                             | Reset unique par id, ou`keepDirtyValues` ; à trancher via Context7 (react-hook-form v7).                                                                                                            |
+| R3 | `NaN` comme valeur de `reset` sur un `<input type="number">`.                                                                                                         | La sanitization HTML d'un input number vide une valeur non numérique ; vérifier le rendu et`valueAsNumber` via Context7 et à la main.                                                             |
+| R4 | Rôle périmé : un owner approuvé pendant la session reçoit 403 (mémoire « Role not revalidated per request »).                                                       | Déjà couvert par la fenêtre de réactivation MH-55 ;`requestErrorMessage` affiche le message `FORBIDDEN` existant.                                                                              |
+| R5 | Édition concurrente (deux onglets) : dernier écrit gagnant, pas de contrôle de version.                                                                                  | Accepté au MVP ; hors ticket.                                                                                                                                                                         |
+| R6 | Le MCP PostgreSQL n'a pas pu se connecter pendant l'analyse.                                                                                                                | Réessayer au début de MH-56-BE. Sinon, s'appuyer sur la migration de base et`cargo sqlx prepare`. L'`UPDATE` filtre sur la clé primaire : aucun nouvel index, pas de tri ni filtre sur le prix. |
+| R7 | Renommer`CreateListingRequest` casse les imports FE tant que `types.ts` n'est pas régénéré.                                                                         | Régénération en premier fichier FE (2.3.1) ;`ts:check` le signale.                                                                                                                                |
+| R8 | La création est refactorée en même temps que l'édition est ajoutée.                                                                                                    | Vérification manuelle de la création juste après l'étape 3.4, avant d'écrire la page d'édition.                                                                                                  |
+| R9 | « Back to listings » sur le détail renvoie vers`/` (signalé dans MH-55).                                                                                              | Hors périmètre.                                                                                                                                                                                      |
 
 ---
 
