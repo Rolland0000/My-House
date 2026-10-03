@@ -816,10 +816,39 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
       "neighborhood": "Plateau",
       "price": 150000,
       "cover_photo_url": "https://...",
+      "published_at": "2025-06-02T09:00:00Z",
       "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo" }
     }
   ],
   "pagination": { "page": 1, "per_page": 20, "total": 47, "total_pages": 3 }
+}
+```
+
+`published_at` n'est jamais `null` dans le feed (règle de visibilité publique).
+
+**`GET /users/me/listings` — Query params** : `page` et `per_page`, avec les mêmes défauts et bornes que le feed. Le propriétaire est toujours l'appelant ; aucun paramètre ne permet de le changer.
+
+**`GET /users/me/listings` — Response 200**
+
+Tous les biens de l'appelant, sans règle de visibilité publique : brouillons et biens sans photo compris, quel que soit le statut, triés par `created_at` décroissant. Même forme qu'un élément du feed ; `published_at` vaut `null` pour un brouillon et `cover_photo_url` vaut `null` pour un bien sans photo. `403` pour un seeker ou un admin, `401` sans jeton.
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Studio meublé Plateau",
+      "type": "studio",
+      "status": "available",
+      "city": "Dakar",
+      "neighborhood": "Plateau",
+      "price": 150000,
+      "cover_photo_url": null,
+      "published_at": null,
+      "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo" }
+    }
+  ],
+  "pagination": { "page": 1, "per_page": 20, "total": 1, "total_pages": 1 }
 }
 ```
 

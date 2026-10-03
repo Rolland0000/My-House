@@ -23,6 +23,18 @@ pub struct ListListingsQuery {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /users/me/listings — query params
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Pagination for `GET /users/me/listings`. The owner is always the caller.
+#[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct OwnerListingsQuery {
+    pub page: Option<u32>,
+    pub per_page: Option<u32>,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /listings — request body
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -85,7 +97,7 @@ pub struct ListingMediaDto {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET /listings — response item
+// GET /listings, GET /users/me/listings — response item
 // ─────────────────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -99,6 +111,8 @@ pub struct ListingSummaryDto {
     pub neighborhood: Option<String>,
     pub price: f64,
     pub cover_photo_url: Option<String>,
+    /// ISO 8601 UTC, or `null` for a draft. Never `null` in the public feed.
+    pub published_at: Option<String>,
     pub owner: OwnerSummaryDto,
 }
 
@@ -113,6 +127,7 @@ impl From<ListingSummaryRow> for ListingSummaryDto {
             neighborhood: row.neighborhood,
             price: row.price,
             cover_photo_url: row.cover_photo_url,
+            published_at: row.published_at,
             owner: OwnerSummaryDto {
                 id: row.owner_id,
                 first_name: row.owner_first_name,
@@ -188,4 +203,40 @@ impl ListingDetailDto {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ListingDetailResponse {
     pub data: ListingDetailDto,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn summary_row(published_at: Option<String>) -> ListingSummaryRow {
+        ListingSummaryRow {
+            id: Uuid::from_u128(1),
+            title: "Studio meublé Plateau".into(),
+            listing_type: ListingType::Studio,
+            status: ListingStatus::Available,
+            city: "Dakar".into(),
+            neighborhood: Some("Plateau".into()),
+            price: 150_000.0,
+            cover_photo_url: None,
+            published_at,
+            owner_id: Uuid::from_u128(2),
+            owner_first_name: None,
+            owner_last_name: None,
+        }
+    }
+
+    #[test]
+    fn a_draft_summary_serializes_published_at_as_null() {
+        let json = serde_json::to_value(ListingSummaryDto::from(summary_row(None)))
+            .expect("summary serializes");
+        assert_eq!(json.get("published_at"), Some(&serde_json::Value::Null));
+    }
+
+    #[test]
+    fn a_published_summary_keeps_its_published_at() {
+        let published_at = "2026-10-01T08:30:00Z".to_string();
+        let dto = ListingSummaryDto::from(summary_row(Some(published_at.clone())));
+        assert_eq!(dto.published_at, Some(published_at));
+    }
 }

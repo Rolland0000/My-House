@@ -828,6 +828,55 @@
         }
       }
     },
+    "/api/v1/users/me/listings": {
+      "get": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "The caller's listings in any state, drafts and listings without a photo included, newest first.",
+        "operationId": "list_mine",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of the caller's listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ListingSummaryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          }
+        }
+      }
+    },
     "/api/v1/users/me/owner-request": {
       "get": {
         "tags": [
@@ -1331,6 +1380,13 @@
             "type": "number",
             "format": "double"
           },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 8601 UTC, or `null` for a draft. Never `null` in the public feed."
+          },
           "status": {
             "$ref": "#/components/schemas/ListingStatus"
           },
@@ -1743,6 +1799,13 @@
                 "price": {
                   "type": "number",
                   "format": "double"
+                },
+                "published_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "ISO 8601 UTC, or `null` for a draft. Never `null` in the public feed."
                 },
                 "status": {
                   "$ref": "#/components/schemas/ListingStatus"

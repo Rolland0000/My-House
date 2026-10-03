@@ -11,10 +11,11 @@ use crate::shared::rbac::Role;
 
 use super::dto::{
     CreateListingRequest, ListListingsQuery, ListingDetailResponse, ListingSummaryDto,
+    OwnerListingsQuery,
 };
 use super::service;
 
-const LISTING_WRITE_ROLES: &[Role] = &[Role::Owner];
+const OWNER_ROLES: &[Role] = &[Role::Owner];
 
 /// Public paginated feed of listings (cover photo + summary).
 #[utoipa::path(
@@ -80,10 +81,33 @@ pub async fn create(
     // Consumes the request body, so it must stay the last argument.
     AppJson(payload): AppJson<CreateListingRequest>,
 ) -> Result<(StatusCode, Json<ListingDetailResponse>), AppError> {
-    user.require_role(LISTING_WRITE_ROLES)?;
+    user.require_role(OWNER_ROLES)?;
 
     let data = service::create_listing(state.db(), user.user_id, payload).await?;
     Ok((StatusCode::CREATED, Json(ListingDetailResponse { data })))
+}
+
+/// The caller's listings in any state, drafts and listings without a photo included, newest first.
+#[utoipa::path(
+    get,
+    path = "/users/me/listings",
+    tag = "listings",
+    params(OwnerListingsQuery),
+    responses(
+        (status = 200, description = "Paginated list of the caller's listings", body = PaginatedResponse<ListingSummaryDto>),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+    )
+)]
+pub async fn list_mine(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Query(query): Query<OwnerListingsQuery>,
+) -> Result<Json<PaginatedResponse<ListingSummaryDto>>, AppError> {
+    user.require_role(OWNER_ROLES)?;
+
+    let response = service::list_owner_listings(state.db(), user.user_id, query).await?;
+    Ok(Json(response))
 }
 
 #[cfg(test)]
@@ -92,11 +116,11 @@ mod tests {
     use crate::shared::rbac::require_role;
 
     #[test]
-    fn only_owners_may_create_a_listing() {
-        assert!(require_role(Role::Owner, LISTING_WRITE_ROLES).is_ok());
+    fn only_owners_may_create_or_list_their_listings() {
+        assert!(require_role(Role::Owner, OWNER_ROLES).is_ok());
         for role in [Role::Seeker, Role::Admin] {
             assert!(matches!(
-                require_role(role, LISTING_WRITE_ROLES),
+                require_role(role, OWNER_ROLES),
                 Err(AppError::Forbidden)
             ));
         }

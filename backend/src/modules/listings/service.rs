@@ -7,7 +7,10 @@ use crate::shared::errors::AppError;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::FieldErrors;
 
-use super::dto::{CreateListingRequest, ListListingsQuery, ListingDetailDto, ListingSummaryDto};
+use super::dto::{
+    CreateListingRequest, ListListingsQuery, ListingDetailDto, ListingSummaryDto,
+    OwnerListingsQuery,
+};
 use super::model::{ListingType, NewListing};
 use super::repository::{self, ListingFilters};
 
@@ -34,6 +37,22 @@ pub async fn list_listings(
     let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
 
     let rows = repository::list_listings(pool, &filters, meta.per_page, meta.offset()).await?;
+    let data = rows.into_iter().map(ListingSummaryDto::from).collect();
+
+    Ok(PaginatedResponse::new(data, meta))
+}
+
+/// Fetches one page of `owner_id`'s listings, drafts and photo-less ones included.
+pub async fn list_owner_listings(
+    pool: &PgPool,
+    owner_id: Uuid,
+    query: OwnerListingsQuery,
+) -> Result<PaginatedResponse<ListingSummaryDto>, AppError> {
+    let total = repository::count_owner_listings(pool, owner_id).await?;
+    let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
+
+    let rows =
+        repository::list_owner_listings(pool, owner_id, meta.per_page, meta.offset()).await?;
     let data = rows.into_iter().map(ListingSummaryDto::from).collect();
 
     Ok(PaginatedResponse::new(data, meta))
