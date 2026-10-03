@@ -10,6 +10,7 @@
 use lettre::message::Mailbox;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::transport::smtp::client::{Tls, TlsParameters};
+use lettre::transport::smtp::extension::ClientId;
 use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{Address, AsyncTransport};
 use lettre::{Message, Tokio1Executor};
@@ -57,11 +58,11 @@ impl Mailer {
             .smtp_from
             .parse()
             .map_err(|error| MailerError::InvalidFrom(config.smtp_from.clone(), error))?;
-        let from = Mailbox::new(None, from_address);
 
         let mut builder =
             AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.smtp_host)
                 .port(config.smtp_port)
+                .hello_name(hello_name(&from_address))
                 .tls(tls_mode(config.smtp_security, &config.smtp_host)?);
         if let Some(credentials) = credentials(config) {
             builder = builder.credentials(credentials);
@@ -69,7 +70,7 @@ impl Mailer {
 
         Ok(Self {
             transport: builder.build(),
-            from,
+            from: Mailbox::new(None, from_address),
         })
     }
 
@@ -105,6 +106,12 @@ fn tls_mode(security: SmtpSecurity, host: &str) -> Result<Tls, MailerError> {
         SmtpSecurity::StartTls => Tls::Required(parameters()?),
         SmtpSecurity::Tls => Tls::Wrapper(parameters()?),
     })
+}
+
+/// EHLO name: the `SMTP_FROM` domain. Without lettre's `hostname` feature the
+/// default is `[127.0.0.1]`, which some strict relays reject.
+fn hello_name(from: &Address) -> ClientId {
+    ClientId::Domain(from.domain().to_string())
 }
 
 /// Relay login, or `None` to send unauthenticated.
@@ -192,6 +199,15 @@ mod tests {
             tls_mode(SmtpSecurity::Tls, host),
             Ok(Tls::Wrapper(_))
         ));
+    }
+
+    #[test]
+    fn hello_name_uses_the_smtp_from_domain() {
+        let from: Address = "noreply@myhouse.app".parse().unwrap();
+        assert_eq!(
+            hello_name(&from),
+            ClientId::Domain("myhouse.app".to_string())
+        );
     }
 
     #[test]
