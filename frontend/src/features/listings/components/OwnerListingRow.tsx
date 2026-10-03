@@ -3,9 +3,10 @@ import { ImageOff, Pencil } from "lucide-react";
 import { Badge } from "../../../shared/components";
 import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
-import { AVAILABILITY_BADGE, VISIBILITY_BADGE } from "../labels";
+import { VISIBILITY_BADGE } from "../labels";
 import { listingVisibility } from "../listingVisibility";
 import type { ListingSummary } from "../api";
+import { ListingStatusControl } from "./ListingStatusControl";
 
 interface OwnerListingRowProps {
   listing: ListingSummary;
@@ -24,10 +25,9 @@ function OwnerListingRow({ listing }: OwnerListingRowProps) {
         hasPhoto: (listing.cover_photo_url ?? null) !== null,
       })
     ];
-  const availabilityBadge = AVAILABILITY_BADGE[listing.status];
 
   return (
-    <li className="relative flex items-center gap-4 border border-border bg-surface p-3 transition-colors has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-focus hover:border-border-strong">
+    <li className="relative flex flex-wrap items-center gap-4 border border-border bg-surface p-3 transition-colors has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-focus hover:border-border-strong">
       <div className="flex h-18 w-24 flex-none items-center justify-center overflow-hidden bg-primary-soft text-text-muted">
         {coverPhotoUrl ? (
           <img src={coverPhotoUrl} alt="" loading="lazy" className="size-full object-cover" />
@@ -51,11 +51,15 @@ function OwnerListingRow({ listing }: OwnerListingRowProps) {
         </p>
         <div className="flex flex-wrap gap-2">
           <Badge tone={visibilityBadge.tone}>{visibilityBadge.label}</Badge>
-          <Badge tone={availabilityBadge.tone}>{availabilityBadge.label}</Badge>
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-none items-center gap-2">
+      <div className="relative z-10 flex w-full flex-none items-center justify-between gap-3 sm:w-auto">
+        <ListingStatusControl
+          listingId={listing.id}
+          listingTitle={listing.title}
+          status={listing.status}
+        />
         <Link
           to={`/owner/listings/${listing.id}/edit`}
           aria-label={`Edit ${listing.title}`}
