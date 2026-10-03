@@ -3,11 +3,13 @@ export type { ListingCardProps } from "./components/ListingCard";
 
 export { ListingFeed } from "./components/ListingFeed";
 export { ListingDetail } from "./components/ListingDetail";
-export { CreateListingForm } from "./components/CreateListingForm";
+export { CreateListingPage } from "./components/CreateListingPage";
+export { EditListingPage } from "./components/EditListingPage";
 export { OwnerListings } from "./components/OwnerListings";
 
 export { useListings, useListing } from "./hooks/useListings";
 export { useCreateListing } from "./hooks/useCreateListing";
+export { useUpdateListing } from "./hooks/useUpdateListing";
 export { useOwnerListings } from "./hooks/useOwnerListings";
 
 export { listingVisibility, type ListingVisibility } from "./listingVisibility";
@@ -17,6 +19,7 @@ export {
   listListings,
   getListing,
   createListing,
+  updateListing,
   listOwnerListings,
   type ListingSummary,
   type ListingDetail as ListingDetailData,
@@ -25,5 +28,5 @@ export {
   type ListListingsParams,
   type ListListingsResult,
   type ListOwnerListingsParams,
-  type CreateListingRequest,
+  type ListingRequest,
 } from "./api";
