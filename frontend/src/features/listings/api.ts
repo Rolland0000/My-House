@@ -32,6 +32,20 @@ export function listListings(params: ListListingsParams = {}): Promise<ListListi
   });
 }
 
+export interface ListOwnerListingsParams {
+  page?: number;
+  perPage?: number;
+}
+
+export function listOwnerListings(
+  params: ListOwnerListingsParams = {}
+): Promise<ListListingsResult> {
+  return apiGet<ListListingsResult>("/api/v1/users/me/listings", {
+    page: params.page,
+    per_page: params.perPage,
+  });
+}
+
 export function getListing(id: string): Promise<{ data: ListingDetail }> {
   return apiGet<{ data: ListingDetail }>(`/api/v1/listings/${encodeURIComponent(id)}`);
 }

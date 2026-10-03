@@ -10,6 +10,7 @@ export function useCreateListing() {
     onSuccess: () => {
       // Not returned: the caller navigates without waiting for the feed refetch.
       void queryClient.invalidateQueries({ queryKey: ["listings"] });
+      void queryClient.invalidateQueries({ queryKey: ["owner-listings"] });
     },
   });
 }

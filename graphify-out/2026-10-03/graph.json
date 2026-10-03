@@ -20248,7 +20248,7 @@
       "file_type": "code",
       "norm_label": "list_mine()",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103"
+      "source_location": "L102"
     },
     {
       "id": "backend_src_modules_listings_handler_only_owners_may_create_or_list_their_listings",
@@ -20259,7 +20259,7 @@
       "file_type": "code",
       "norm_label": "only_owners_may_create_or_list_their_listings()",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L120"
+      "source_location": "L119"
     },
     {
       "id": "backend_src_modules_listings_handler_owner_roles",
@@ -30341,7 +30341,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L111",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -41043,7 +41043,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -41055,7 +41055,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -41067,7 +41067,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -41079,7 +41079,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -41091,7 +41091,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -51144,7 +51144,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L116",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -51156,7 +51156,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L117",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -59582,7 +59582,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -59594,7 +59594,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -59606,7 +59606,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -65200,7 +65200,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -69661,7 +69661,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -69672,7 +69672,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/modules/listings/handler.rs",
-      "source_location": "L120",
+      "source_location": "L119",
       "weight": 1.0
     },
     {

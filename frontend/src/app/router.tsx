@@ -37,6 +37,11 @@ const CreateListingForm = lazy(() =>
     default: m.CreateListingForm,
   }))
 );
+const OwnerListings = lazy(() =>
+  import("../features/listings/components/OwnerListings").then((m) => ({
+    default: m.OwnerListings,
+  }))
+);
 const OwnerRequestQueueList = lazy(() =>
   import("../features/admin/components/OwnerRequestQueueList").then((m) => ({
     default: m.OwnerRequestQueueList,
@@ -80,6 +85,14 @@ export const router = createBrowserRouter([
       {
         path: "owner-request/status",
         element: <RequireAuth>{withSuspense(OwnerRequestStatus)}</RequireAuth>,
+      },
+      {
+        path: "owner/listings",
+        element: (
+          <RequireAuth>
+            <RequireOwner>{withSuspense(OwnerListings)}</RequireOwner>
+          </RequireAuth>
+        ),
       },
       {
         path: "owner/listings/new",
