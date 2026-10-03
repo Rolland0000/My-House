@@ -110,6 +110,47 @@ impl StorageProvider {
     }
 }
 
+/// `SMTP_SECURITY` — how the connection to the SMTP relay is encrypted.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SmtpSecurity {
+    /// Plaintext, e.g. a local dev catcher.
+    None,
+    /// Plaintext connection upgraded with STARTTLS.
+    StartTls,
+    /// Implicit TLS from the first byte (SMTPS).
+    Tls,
+}
+
+impl SmtpSecurity {
+    fn parse(raw: &str) -> Result<Self, String> {
+        match raw {
+            "none" => Ok(SmtpSecurity::None),
+            "starttls" => Ok(SmtpSecurity::StartTls),
+            "tls" => Ok(SmtpSecurity::Tls),
+            other => Err(format!(
+                "expected \"none\", \"starttls\" or \"tls\", got \"{other}\""
+            )),
+        }
+    }
+}
+
+/// `SMTP_USERNAME` / `SMTP_PASSWORD` for an authenticated relay.
+#[derive(Clone)]
+pub struct SmtpCredentials {
+    pub username: String,
+    pub password: String,
+}
+
+// Hand-written so the password never ends up in logs through `AppConfig`'s `Debug`.
+impl fmt::Debug for SmtpCredentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SmtpCredentials")
+            .field("username", &self.username)
+            .field("password", &"<redacted>")
+            .finish()
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AppConfig
 // ─────────────────────────────────────────────────────────────────────────────
@@ -162,6 +203,10 @@ pub struct AppConfig {
     // ── Email / SMTP ─────────────────────────────────────────────────────────
     pub smtp_host: String,
     pub smtp_port: u16,
+    /// Connection encryption (`SMTP_SECURITY`, defaults to `none`).
+    pub smtp_security: SmtpSecurity,
+    /// Relay login. `None` sends unauthenticated, which only development allows.
+    pub smtp_credentials: Option<SmtpCredentials>,
     /// Sender address for outgoing mail (e.g. `noreply@myhouse.app`).
     pub smtp_from: String,
     /// Fixed recipient for admin notifications (owner-request received, …).
@@ -196,9 +241,46 @@ fn require(key: &str) -> Result<String, ConfigError> {
 }
 
 /// Read an optional variable, returning `default` if absent.
-#[allow(dead_code)] // used by optional vars added in future tickets
 fn optional_or(key: &str, default: &str) -> String {
     env::var(key).unwrap_or_else(|_| default.to_string())
+}
+
+/// Read an optional variable, treating an empty value (`KEY=` in `.env`) as absent.
+fn optional_non_empty(key: &str) -> Option<String> {
+    env::var(key).ok().filter(|value| !value.is_empty())
+}
+
+/// Read `SMTP_USERNAME` / `SMTP_PASSWORD`. They must come as a pair. Outside
+/// development they are mandatory and need an encrypted connection: lettre
+/// sends AUTH over plaintext without complaint, which would leak the password.
+fn smtp_credentials(
+    app_env: &AppEnv,
+    smtp_security: SmtpSecurity,
+) -> Result<Option<SmtpCredentials>, ConfigError> {
+    let credentials = match (
+        optional_non_empty("SMTP_USERNAME"),
+        optional_non_empty("SMTP_PASSWORD"),
+    ) {
+        (Some(username), Some(password)) => SmtpCredentials { username, password },
+        (Some(_), None) => return Err(ConfigError::Missing("SMTP_PASSWORD".to_string())),
+        (None, Some(_)) => return Err(ConfigError::Missing("SMTP_USERNAME".to_string())),
+        (None, None) if app_env.is_dev() => return Ok(None),
+        (None, None) => {
+            return Err(ConfigError::Missing(
+                "SMTP_USERNAME and SMTP_PASSWORD".to_string(),
+            ))
+        }
+    };
+
+    if smtp_security == SmtpSecurity::None && !app_env.is_dev() {
+        return Err(ConfigError::Invalid {
+            key: "SMTP_SECURITY".to_string(),
+            reason: format!(
+                "must be \"starttls\" or \"tls\" when SMTP credentials are set (APP_ENV={app_env})"
+            ),
+        });
+    }
+    Ok(Some(credentials))
 }
 
 /// Parse an optional variable as `bool`, falling back to `default`.
@@ -373,6 +455,14 @@ impl AppConfig {
         // ── Email / SMTP ──────────────────────────────────────────────────────
         let smtp_host = require("SMTP_HOST")?;
         let smtp_port = require_u16("SMTP_PORT")?;
+        let smtp_security =
+            SmtpSecurity::parse(&optional_or("SMTP_SECURITY", "none")).map_err(|reason| {
+                ConfigError::Invalid {
+                    key: "SMTP_SECURITY".to_string(),
+                    reason,
+                }
+            })?;
+        let smtp_credentials = smtp_credentials(&app_env, smtp_security)?;
         let smtp_from = require("SMTP_FROM")?;
         let admin_notification_email = require("ADMIN_NOTIFICATION_EMAIL")?;
 
@@ -422,6 +512,8 @@ impl AppConfig {
             allowed_origins,
             smtp_host,
             smtp_port,
+            smtp_security,
+            smtp_credentials,
             smtp_from,
             admin_notification_email,
             admin_bootstrap_on_startup,
@@ -471,6 +563,9 @@ mod tests {
         env::set_var("ALLOWED_ORIGINS", "http://localhost,http://localhost:5173");
         env::set_var("SMTP_HOST", "localhost");
         env::set_var("SMTP_PORT", "1025");
+        env::remove_var("SMTP_SECURITY");
+        env::remove_var("SMTP_USERNAME");
+        env::remove_var("SMTP_PASSWORD");
         env::set_var("SMTP_FROM", "noreply@myhouse.app");
         env::set_var("ADMIN_NOTIFICATION_EMAIL", "admin@myhouse.app");
         env::remove_var("ADMIN_BOOTSTRAP_ON_STARTUP");
@@ -532,6 +627,115 @@ mod tests {
         let err =
             AppConfig::from_env(AppEnv::Development).expect_err("should fail on invalid SMTP_PORT");
         assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "SMTP_PORT"));
+    }
+
+    /// Sets both SMTP credentials.
+    fn set_smtp_credentials() {
+        env::set_var("SMTP_USERNAME", "mailer");
+        env::set_var("SMTP_PASSWORD", "s3cret");
+    }
+
+    #[test]
+    fn dev_without_smtp_credentials_sends_plaintext_unauthenticated() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert_eq!(cfg.smtp_security, SmtpSecurity::None);
+        assert!(cfg.smtp_credentials.is_none());
+    }
+
+    #[test]
+    fn empty_smtp_credentials_count_as_absent() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("SMTP_USERNAME", "");
+        env::set_var("SMTP_PASSWORD", "");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert!(cfg.smtp_credentials.is_none());
+    }
+
+    #[test]
+    fn rejects_smtp_username_without_password() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("SMTP_USERNAME", "mailer");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail when only SMTP_USERNAME is set");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "SMTP_PASSWORD"));
+    }
+
+    #[test]
+    fn rejects_smtp_password_without_username() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("SMTP_PASSWORD", "s3cret");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail when only SMTP_PASSWORD is set");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "SMTP_USERNAME"));
+    }
+
+    #[test]
+    fn staging_and_production_require_smtp_credentials() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("SMTP_SECURITY", "starttls");
+        for app_env in [AppEnv::Staging, AppEnv::Production] {
+            let err = AppConfig::from_env(app_env).expect_err("should fail without credentials");
+            assert!(matches!(err, ConfigError::Missing(key) if key.contains("SMTP_USERNAME")));
+        }
+    }
+
+    #[test]
+    fn production_rejects_smtp_credentials_over_plaintext() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        set_smtp_credentials();
+        let err = AppConfig::from_env(AppEnv::Production)
+            .expect_err("should refuse to send credentials unencrypted");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "SMTP_SECURITY"));
+    }
+
+    #[test]
+    fn dev_allows_smtp_credentials_over_plaintext() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        set_smtp_credentials();
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
+        assert!(cfg.smtp_credentials.is_some());
+    }
+
+    #[test]
+    fn production_loads_authenticated_encrypted_smtp() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        set_smtp_credentials();
+        env::set_var("SMTP_SECURITY", "tls");
+        let cfg = AppConfig::from_env(AppEnv::Production).expect("should load without error");
+        assert_eq!(cfg.smtp_security, SmtpSecurity::Tls);
+        let credentials = cfg.smtp_credentials.expect("credentials should be set");
+        assert_eq!(credentials.username, "mailer");
+        assert_eq!(credentials.password, "s3cret");
+    }
+
+    #[test]
+    fn rejects_unknown_smtp_security() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("SMTP_SECURITY", "ssl");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("should fail on an unknown SMTP_SECURITY");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "SMTP_SECURITY"));
+    }
+
+    #[test]
+    fn smtp_credentials_debug_redacts_password() {
+        let credentials = SmtpCredentials {
+            username: "mailer".to_string(),
+            password: "s3cret".to_string(),
+        };
+        let rendered = format!("{credentials:?}");
+        assert!(rendered.contains("mailer"));
+        assert!(!rendered.contains("s3cret"));
     }
 
     #[test]
