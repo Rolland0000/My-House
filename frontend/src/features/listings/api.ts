@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost, apiPut } from "../../shared/api/client";
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "../../shared/api/client";
 import type { components } from "../../shared/api/types";
 
 export type ListingSummary = components["schemas"]["ListingSummaryDto"];
@@ -66,4 +66,8 @@ export function updateListingStatus(
   return apiPatch<{ data: ListingStatusDto }>(`/api/v1/listings/${encodeURIComponent(id)}/status`, {
     status,
   });
+}
+
+export function deleteListing(id: string): Promise<void> {
+  return apiDelete<void>(`/api/v1/listings/${encodeURIComponent(id)}`);
 }
