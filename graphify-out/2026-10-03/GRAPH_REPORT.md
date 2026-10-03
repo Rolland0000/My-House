@@ -1,7 +1,7 @@
 # Graph Report - My-House  (2026-10-03)
 
 ## Corpus Check
-- 312 files · ~165,072 words
+- 312 files · ~165,047 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 24 file(s) not represented in the graph (top: (none) 15, .toml 5, .example 2)
 
@@ -701,8 +701,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **What is the exact relationship between `react-typecrypt.md Rules File` and `README Writing Rules Skill`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **Why does `AppError` connect `AppError` to `listings/service.rs`, `owner_requests/service.rs`, `users/service.rs`, `AppCacheProvider`, `media/service.rs`, `Mailer`, `auth/repository.rs`, `jwt.rs`, `super`, `users/repository.rs`, `extractors.rs`, `FieldErrors`, `errors.rs`, `owner_requests/repository.rs`, `media/handler.rs`, `auth/handler.rs`, `admin/handler.rs`, `file_validation.rs`, `users/handler.rs`, `owner_requests/handler.rs`, `media/repository.rs`, `submit`, `classify_documents`, `listings/handler.rs`, `rbac.rs`?**
-  _High betweenness centrality (0.133) - this node is a cross-community bridge._
+  _High betweenness centrality (0.134) - this node is a cross-community bridge._
 - **Why does `AppState` connect `AppState` to `listings/handler.rs`, `admin/handler.rs`, `users/handler.rs`, `health.rs`, `owner_requests/handler.rs`, `extractors.rs`, `app_server.rs`, `route.rs`, `media/handler.rs`, `auth/handler.rs`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Why does `AppConfig` connect `config/mod.rs` to `Mailer`, `users/service.rs`, `AppState`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
