@@ -1,17 +1,11 @@
 import { Alert, Badge } from "../../../shared/components";
-import type { BadgeTone } from "../../../shared/components";
+import { VISIBILITY_BADGE } from "../labels";
 import { listingVisibility, type ListingVisibility } from "../listingVisibility";
 
 interface OwnerBarProps {
   publishedAt: string | null;
   hasPhoto: boolean;
 }
-
-const VISIBILITY_BADGE: Record<ListingVisibility, { tone: BadgeTone; label: string }> = {
-  draft: { tone: "warning", label: "Draft" },
-  published: { tone: "success", label: "Published" },
-  hidden: { tone: "error", label: "Hidden — no photos" },
-};
 
 const VISIBILITY_MESSAGE: Record<ListingVisibility, string | null> = {
   draft: "Only you can see this listing. Add at least one photo, then publish it.",

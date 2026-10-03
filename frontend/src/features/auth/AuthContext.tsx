@@ -10,11 +10,15 @@ import {
 } from "react";
 import { setAccessTokenGetter, setUnauthorizedHandler } from "../../shared/api/client";
 import { refreshSession } from "./api";
+import { readTokenRole } from "./tokenRole";
 
 type AuthStatus = "bootstrapping" | "authenticated" | "anonymous";
+type SessionRole = ReturnType<typeof readTokenRole>;
 
 interface AuthContextValue {
   status: AuthStatus;
+  /** Role claimed by the current access token; may lag behind the role stored in DB. */
+  sessionRole: SessionRole;
   setSession: (accessToken: string) => void;
   clearSession: () => void;
   refresh: () => Promise<string | null>;
@@ -24,16 +28,19 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("bootstrapping");
+  const [sessionRole, setSessionRole] = useState<SessionRole>(null);
   const tokenRef = useRef<string | null>(null);
   const refreshInFlight = useRef<Promise<string | null> | null>(null);
 
   const clearSession = useCallback(() => {
     tokenRef.current = null;
+    setSessionRole(null);
     setStatus("anonymous");
   }, []);
 
   const setSession = useCallback((accessToken: string) => {
     tokenRef.current = accessToken;
+    setSessionRole(readTokenRole(accessToken));
     setStatus("authenticated");
   }, []);
 
@@ -66,8 +73,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const value = useMemo(
-    () => ({ status, setSession, clearSession, refresh }),
-    [status, setSession, clearSession, refresh]
+    () => ({ status, sessionRole, setSession, clearSession, refresh }),
+    [status, sessionRole, setSession, clearSession, refresh]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

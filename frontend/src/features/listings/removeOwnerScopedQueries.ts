@@ -4,4 +4,5 @@ import type { QueryClient } from "@tanstack/react-query";
 // cached owner view until the refetch resolves.
 export function removeOwnerScopedQueries(queryClient: QueryClient) {
   queryClient.removeQueries({ queryKey: ["listing"] });
+  queryClient.removeQueries({ queryKey: ["owner-listings"] });
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Badge } from "./Badge";
 import { cn } from "../utils/cn";
@@ -348,12 +348,20 @@ function SeekerHeader({
   );
 }
 
-const OWNER_LINKS: NavLinkSpec[] = [
-  { label: "Listings", to: "/", current: true },
-  { label: "My properties" },
-  { label: "About" },
-  { label: "Contact" },
-];
+const OWNER_LISTINGS_PATH = "/owner/listings";
+const ADD_PROPERTY_PATH = "/owner/listings/new";
+
+function ownerLinks(pathname: string): NavLinkSpec[] {
+  return [
+    { label: "Listings", to: "/", current: pathname === "/" },
+    { label: "My properties", to: OWNER_LISTINGS_PATH, current: pathname === OWNER_LISTINGS_PATH },
+    { label: "About" },
+    { label: "Contact" },
+  ];
+}
+
+const addPropertyClass =
+  "rounded-sm border border-brass-600 bg-primary px-4 py-3 text-sm font-semibold text-ink-900";
 
 function OwnerHeader({
   user,
@@ -365,13 +373,14 @@ function OwnerHeader({
   onSignOut?: () => void;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const links = ownerLinks(useLocation().pathname);
 
   return (
     <>
       <div className="mx-auto flex h-[66px] max-w-[1112px] items-center gap-6 px-4 sm:px-7">
         {wordmark}
         <nav className="hidden flex-1 items-center gap-5 sm:flex">
-          {OWNER_LINKS.map((link) =>
+          {links.map((link) =>
             link.to ? (
               <NavItem key={link.label} to={link.to} current={link.current}>
                 {link.label}
@@ -387,9 +396,12 @@ function OwnerHeader({
             Verified owner
           </Badge>
         )}
-        <span className="hidden flex-none cursor-default rounded-sm border border-brass-600 bg-primary px-4 py-3 text-sm font-semibold text-ink-900 sm:inline-flex">
+        <Link
+          to={ADD_PROPERTY_PATH}
+          className={cn("hidden flex-none sm:inline-flex", addPropertyClass)}
+        >
           Add a property
-        </span>
+        </Link>
         {user && (
           <div className="hidden sm:block">
             <UserMenu user={user} profileHref="/profile" onSignOut={onSignOut} />
@@ -398,11 +410,15 @@ function OwnerHeader({
         <HamburgerButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen((open) => !open)} />
       </div>
       {isMenuOpen && (
-        <MobileMenu links={OWNER_LINKS} onClose={() => setIsMenuOpen(false)}>
+        <MobileMenu links={links} onClose={() => setIsMenuOpen(false)}>
           {verified && <Badge tone="brass">Verified owner</Badge>}
-          <span className="cursor-default rounded-sm border border-brass-600 bg-primary px-4 py-3 text-center text-sm font-semibold text-ink-900">
+          <Link
+            to={ADD_PROPERTY_PATH}
+            onClick={() => setIsMenuOpen(false)}
+            className={cn("text-center", addPropertyClass)}
+          >
             Add a property
-          </span>
+          </Link>
           {user && (
             <>
               <Link

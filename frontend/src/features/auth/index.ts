@@ -4,6 +4,8 @@ export type { AuthStatus, AuthContextValue } from "./AuthContext";
 // AuthFlow is deliberately not re-exported: router.tsx lazy-loads it by path,
 // and a static re-export here would pull it into the eager bundle.
 
+export { OwnerActivationModal } from "./components/OwnerActivationModal";
+
 export { useAuth } from "./hooks/useAuth";
 export { useOtpRequest } from "./hooks/useOtpRequest";
 export { useOtpVerify } from "./hooks/useOtpVerify";
