@@ -2202,7 +2202,7 @@
       },
       "ReorderMediaRequest": {
         "type": "object",
-        "description": "`Option` so a missing or `null` list is a 422 on `media_ids`, not a 400.",
+        "description": "A missing or `null` list deserializes to `None`, which the service reports\nas a 422 on `media_ids`.",
         "properties": {
           "media_ids": {
             "type": [
