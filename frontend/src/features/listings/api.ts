@@ -69,6 +69,10 @@ export function updateListingStatus(
   });
 }
 
+export function publishListing(id: string): Promise<{ data: ListingDetail }> {
+  return apiPost<{ data: ListingDetail }>(`/api/v1/listings/${encodeURIComponent(id)}/publish`);
+}
+
 export function deleteListing(id: string): Promise<void> {
   return apiDelete<void>(`/api/v1/listings/${encodeURIComponent(id)}`);
 }
