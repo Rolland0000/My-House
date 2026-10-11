@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use super::model::MediaRow;
+use super::model::{MediaRow, OrderedMediaRow};
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct MediaDto {
@@ -23,9 +23,32 @@ impl From<MediaRow> for MediaDto {
     }
 }
 
+impl From<OrderedMediaRow> for MediaDto {
+    fn from(row: OrderedMediaRow) -> Self {
+        Self {
+            id: row.id,
+            url: row.url,
+            is_cover: row.is_cover,
+            position: row.position,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct MediaResponse {
     pub data: MediaDto,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MediaListResponse {
+    pub data: Vec<MediaDto>,
+}
+
+/// A missing or `null` list deserializes to `None`, which the service reports
+/// as a 422 on `media_ids`.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ReorderMediaRequest {
+    pub media_ids: Option<Vec<Uuid>>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

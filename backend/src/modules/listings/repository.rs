@@ -193,15 +193,20 @@ pub async fn find_listing_by_id(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
-/// All media attachments for a listing, ordered for display (cover first via
-/// `position`, which the owner-write path — out of scope here — keeps in sync).
+/// All media attachments for a listing, unsorted; the service applies the
+/// display order.
 pub async fn find_media_for_listing(
     pool: &PgPool,
     listing_id: Uuid,
 ) -> Result<Vec<ListingMediaRow>, AppError> {
     sqlx::query_as!(
         ListingMediaRow,
-        r#"SELECT id, url, is_cover, position FROM listing_media WHERE listing_id = $1 ORDER BY position ASC"#,
+        r#"
+        SELECT id, url, is_cover, position,
+            (EXTRACT(EPOCH FROM created_at) * 1000000)::bigint AS "created_at_micros!"
+        FROM listing_media
+        WHERE listing_id = $1
+        "#,
         listing_id
     )
     .fetch_all(pool)

@@ -652,6 +652,67 @@
         }
       }
     },
+    "/api/v1/listings/{id}/media/order": {
+      "put": {
+        "tags": [
+          "listings"
+        ],
+        "operationId": "reorder_media",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Every photo id of the listing, in the new order",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderMediaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Photos in display order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body, including an invalid UUID"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, or not owned by the caller"
+          },
+          "409": {
+            "description": "The ids don't match the listing's current photos"
+          },
+          "422": {
+            "description": "media_ids is missing, empty or has a duplicate"
+          }
+        }
+      }
+    },
     "/api/v1/listings/{id}/status": {
       "patch": {
         "tags": [
@@ -1620,6 +1681,20 @@
           }
         }
       },
+      "MediaListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaDto"
+            }
+          }
+        }
+      },
       "MediaResponse": {
         "type": "object",
         "required": [
@@ -2122,6 +2197,22 @@
         "properties": {
           "access_token": {
             "type": "string"
+          }
+        }
+      },
+      "ReorderMediaRequest": {
+        "type": "object",
+        "description": "`Option` so a missing or `null` list is a 422 on `media_ids`, not a 400.",
+        "properties": {
+          "media_ids": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },

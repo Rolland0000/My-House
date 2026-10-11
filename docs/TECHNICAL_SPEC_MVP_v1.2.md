@@ -789,6 +789,7 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | `GET`    | `/users/me/listings`   | JWT  | `owner` | Ses propres biens                            |
 | `PATCH`  | `/listings/:id/status` | JWT  | `owner` | Changer le statut                            |
 | `PATCH`  | `/listings/:id/cover`  | JWT  | `owner` | Définir la photo de couverture              |
+| `PUT`    | `/listings/:id/media/order` | JWT | `owner` | Réordonner les photos                  |
 
 **Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL` et il a au moins une photo (une ligne de couverture). Elle s'applique au feed, à son total, au filtre `owner_id` et au détail. Sur `GET /listings/:id`, l'authentification est optionnelle : le propriétaire voit toujours son bien, quel que soit son état ; tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
 
@@ -965,6 +966,8 @@ Contraintes : formats JPEG / PNG / WebP validés par **magic bytes** (crate `inf
 
 **Sélection automatique de la cover :** la première photo uploadée sur un listing (`listing_media` vide pour ce `listing_id`) est automatiquement marquée `is_cover = true`. Les uploads suivants sont `is_cover = false` par défaut. L'owner peut ensuite désigner une autre photo existante comme cover via `PATCH /listings/:id/cover` (§4.3) — aucune action manuelle n'est requise pour qu'un listing ait une cover dès sa première photo.
 La cover ne peut pas être supprimée sans en avoir désigné une autre au préalable.
+
+**Ordre d'affichage :** la cover d'abord, puis `position` croissante, puis la date d'upload, puis `id`. `PUT /listings/:id/media/order` réécrit les positions de 0 à n−1 dans l'ordre envoyé ; un upload prend la position qui suit la plus haute existante.
 
 ```json
 // Response 201 — première photo du listing (cover automatique)

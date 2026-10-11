@@ -143,4 +143,6 @@ pub struct ListingMediaRow {
     pub url: String,
     pub is_cover: bool,
     pub position: i16,
+    /// Upload time in microseconds since the Unix epoch; breaks position ties.
+    pub created_at_micros: i64,
 }

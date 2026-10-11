@@ -11,6 +11,7 @@ pub fn router() -> OpenApiRouter<AppState> {
         .routes(routes!(handler::delete_media)) // owner
         // Served on the listings path so listing_media keeps one writer module.
         .routes(routes!(handler::promote_cover)) // owner
+        .routes(routes!(handler::reorder_media)) // owner
         .merge(upload_router())
 }
 
