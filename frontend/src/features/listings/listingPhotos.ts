@@ -10,6 +10,8 @@ export const QUOTA_MESSAGE = `This listing already has ${MAX_PHOTOS_PER_LISTING}
 export const LISTING_GONE_MESSAGE = "This listing no longer exists.";
 export const GENERIC_UPLOAD_MESSAGE = "Upload failed. Please try again.";
 export const COVER_REQUIRED_MESSAGE = "Choose another cover before deleting this photo.";
+export const ORDER_CONFLICT_MESSAGE = "Your photos changed elsewhere. They've been reloaded.";
+export const ORDER_SAVE_FAILED_MESSAGE = "Couldn't save the new order. Please try again.";
 
 export const PROBLEM_MESSAGES: Record<ImageFileProblem, string> = {
   format: FORMAT_MESSAGE,
@@ -51,4 +53,8 @@ export function photoUploadErrorMessage(error: unknown): string {
 
 export function isCoverRequiredError(error: unknown): boolean {
   return error instanceof ApiError && error.code === "COVER_PHOTO_REQUIRED";
+}
+
+export function isMediaOrderConflict(error: unknown): boolean {
+  return error instanceof ApiError && error.code === "MEDIA_ORDER_CONFLICT";
 }

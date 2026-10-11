@@ -1,8 +1,9 @@
 import { useId, type ReactNode } from "react";
-import { Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { Alert, Badge, Button, Spinner } from "../../../shared/components";
 import type { ListingMedia } from "../api";
 import { COVER_REQUIRED_MESSAGE } from "../listingPhotos";
+import { moveControl } from "../photoOrder";
 
 interface TileFrameProps {
   imageUrl: string;
@@ -28,13 +29,47 @@ function TileFrame({ imageUrl, alt, overlay, actions, footer }: TileFrameProps) 
 interface PhotoTileProps {
   photo: ListingMedia;
   alt: string;
-  /** Another cover change or deletion is in flight. */
+  /** A cover change, deletion or order save is in flight. */
   actionsDisabled: boolean;
   isMakingCover: boolean;
   /** The cover can't be deleted while other photos remain. */
   isDeleteBlocked: boolean;
   onMakeCover: () => void;
   onDelete: () => void;
+  /** 1-based place in the grid, used in the move buttons' labels. */
+  displayPosition: number;
+  canMoveEarlier: boolean;
+  canMoveLater: boolean;
+  /** Another photo change is in flight: the move buttons stay focusable but ignore clicks. */
+  isMoveLocked: boolean;
+  onMoveEarlier: () => void;
+  onMoveLater: () => void;
+}
+
+interface MoveButtonProps {
+  label: string;
+  control: string;
+  canMove: boolean;
+  isLocked: boolean;
+  onMove: () => void;
+  children: ReactNode;
+}
+
+function MoveButton({ label, control, canMove, isLocked, onMove, children }: MoveButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+      onClick={isLocked ? undefined : onMove}
+      disabled={!canMove}
+      aria-disabled={canMove && isLocked ? true : undefined}
+      aria-label={label}
+      data-move-control={control}
+    >
+      {children}
+    </Button>
+  );
 }
 
 function PhotoTile({
@@ -45,6 +80,12 @@ function PhotoTile({
   isDeleteBlocked,
   onMakeCover,
   onDelete,
+  displayPosition,
+  canMoveEarlier,
+  canMoveLater,
+  isMoveLocked,
+  onMoveEarlier,
+  onMoveLater,
 }: PhotoTileProps) {
   const hintId = useId();
 
@@ -69,6 +110,28 @@ function PhotoTile({
             >
               Make cover
             </Button>
+          )}
+          {!photo.is_cover && (
+            <>
+              <MoveButton
+                label={`Move photo ${displayPosition} earlier`}
+                control={moveControl(photo.id, -1)}
+                canMove={canMoveEarlier}
+                isLocked={isMoveLocked}
+                onMove={onMoveEarlier}
+              >
+                <ArrowLeft className="size-4" aria-hidden="true" />
+              </MoveButton>
+              <MoveButton
+                label={`Move photo ${displayPosition} later`}
+                control={moveControl(photo.id, 1)}
+                canMove={canMoveLater}
+                isLocked={isMoveLocked}
+                onMove={onMoveLater}
+              >
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </MoveButton>
+            </>
           )}
           <Button
             variant="ghost"

@@ -11,6 +11,7 @@ import { useListing } from "../hooks/useListings";
 import {
   LISTING_PHOTOS_MUTATION_KEY,
   useDeleteListingPhoto,
+  useReorderListingPhotos,
   useSetListingCover,
   useUploadListingPhoto,
 } from "../hooks/useListingPhotoMutations";
@@ -21,6 +22,7 @@ import {
   photoUploadErrorMessage,
   planPhotoSelection,
 } from "../listingPhotos";
+import { moveControl, movePhoto, type MoveDirection } from "../photoOrder";
 import { DeletePhotoModal } from "./DeletePhotoModal";
 import { ListingNotFound } from "./ListingNotFound";
 import { PendingPhotoTile, PhotoTile } from "./PhotoTile";
@@ -30,6 +32,13 @@ interface PendingUpload {
   file: File;
   previewUrl: string;
   error: string | null;
+}
+
+interface MoveFocusTarget {
+  mediaId: string;
+  /** Index the photo lands on, so focus waits for the optimistic order to render. */
+  index: number;
+  direction: MoveDirection;
 }
 
 interface SelectionNotice {
@@ -55,6 +64,7 @@ function ListingPhotosPage() {
   const upload = useUploadListingPhoto(id);
   const coverChange = useSetListingCover(id);
   const deletion = useDeleteListingPhoto(id);
+  const reorder = useReorderListingPhotos(id);
   const isMutatingPhotos = useIsMutating({ mutationKey: [...LISTING_PHOTOS_MUTATION_KEY, id] }) > 0;
 
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
@@ -62,12 +72,27 @@ function ListingPhotosPage() {
   const [photoToDelete, setPhotoToDelete] = useState<string | null>(null);
   const nextUploadKey = useRef(0);
   const previewUrls = useRef(new Set<string>());
+  const [moveAnnouncement, setMoveAnnouncement] = useState({ id: 0, text: "" });
+  const moveFocusTarget = useRef<MoveFocusTarget | null>(null);
+  const gridRef = useRef<HTMLUListElement>(null);
 
   // Frees every preview still alive when the screen unmounts, uploads in flight included.
   useEffect(() => {
     const urls = previewUrls.current;
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, []);
+
+  // React may re-insert the moved tile, which drops keyboard focus; put it back on a usable button.
+  useEffect(() => {
+    const target = moveFocusTarget.current;
+    if (!target || data?.data.media[target.index]?.id !== target.mediaId) return;
+    moveFocusTarget.current = null;
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(
+        `[data-move-control="${moveControl(target.mediaId, target.direction)}"]`
+      )
+      ?.focus();
+  });
 
   if (isPending || isProfilePending) {
     return (
@@ -105,7 +130,10 @@ function ListingPhotosPage() {
   const displayablePhotos = listing.media.filter((photo) => isRemoteMediaUrl(photo.url));
   const inFlightCount = pendingUploads.filter((pending) => !pending.error).length;
   const freeSlots = freePhotoSlots(photoCount, inFlightCount);
-  const isPhotoActionPending = coverChange.isPending || deletion.isPending;
+  // No cover change or deletion during an order save: rolling back a failed save would undo
+  // the cover change, and a deletion makes the save fail with 409.
+  const isPhotoActionPending = coverChange.isPending || deletion.isPending || reorder.isPending;
+  const isMoveLocked = isMutatingPhotos || inFlightCount > 0;
 
   function dropPendingUpload(pending: PendingUpload) {
     URL.revokeObjectURL(pending.previewUrl);
@@ -158,6 +186,30 @@ function ListingPhotosPage() {
     });
   }
 
+  // The order sent covers every photo, hidden ones included: the server answers 409 for a partial list.
+  function handleMove(mediaId: string, direction: MoveDirection) {
+    const reordered = movePhoto(listing.media, mediaId, direction);
+    if (!reordered) return;
+    const index = reordered.findIndex((photo) => photo.id === mediaId);
+    const canMoveAgain = movePhoto(reordered, mediaId, direction) !== null;
+    moveFocusTarget.current = {
+      mediaId,
+      index,
+      direction: canMoveAgain ? direction : direction === 1 ? -1 : 1,
+    };
+    const visibleOrder = reordered.filter((photo) => isRemoteMediaUrl(photo.url));
+    const visibleIndex = visibleOrder.findIndex((photo) => photo.id === mediaId);
+    setMoveAnnouncement((previous) => ({
+      id: previous.id + 1,
+      text: `Photo moved to position ${visibleIndex + 1} of ${visibleOrder.length}.`,
+    }));
+    reorder.mutate(reordered, {
+      onSettled: () => {
+        moveFocusTarget.current = null;
+      },
+    });
+  }
+
   function openDeleteModal(mediaId: string) {
     deletion.reset();
     setPhotoToDelete(mediaId);
@@ -190,7 +242,7 @@ function ListingPhotosPage() {
       )}
 
       {(displayablePhotos.length > 0 || pendingUploads.length > 0) && (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul ref={gridRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {displayablePhotos.map((photo, index) => (
             <PhotoTile
               key={photo.id}
@@ -201,6 +253,12 @@ function ListingPhotosPage() {
               isDeleteBlocked={photo.is_cover && photoCount > 1}
               onMakeCover={() => handleMakeCover(photo.id)}
               onDelete={() => openDeleteModal(photo.id)}
+              displayPosition={index + 1}
+              canMoveEarlier={movePhoto(listing.media, photo.id, -1) !== null}
+              canMoveLater={movePhoto(listing.media, photo.id, 1) !== null}
+              isMoveLocked={isMoveLocked}
+              onMoveEarlier={() => handleMove(photo.id, -1)}
+              onMoveLater={() => handleMove(photo.id, 1)}
             />
           ))}
           {pendingUploads.map((pending) => (
@@ -244,6 +302,11 @@ function ListingPhotosPage() {
           </ul>
         </Alert>
       )}
+
+      {/* A new key re-inserts the text, so the same message is announced again. */}
+      <p role="status" className="sr-only">
+        <span key={moveAnnouncement.id}>{moveAnnouncement.text}</span>
+      </p>
 
       <div className="flex justify-end">
         <Button onClick={() => navigate(`/listings/${id}`)} disabled={isMutatingPhotos}>

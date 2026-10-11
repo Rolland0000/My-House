@@ -95,3 +95,13 @@ export function setListingCover(
     }
   );
 }
+
+export function reorderListingPhotos(
+  listingId: string,
+  mediaIds: string[]
+): Promise<{ data: ListingMedia[] }> {
+  return apiPut<{ data: ListingMedia[] }>(
+    `/api/v1/listings/${encodeURIComponent(listingId)}/media/order`,
+    { media_ids: mediaIds }
+  );
+}

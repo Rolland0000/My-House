@@ -9,6 +9,7 @@ import {
   SIZE_MESSAGE,
   freePhotoSlots,
   isCoverRequiredError,
+  isMediaOrderConflict,
   photoUploadErrorMessage,
   planPhotoSelection,
 } from "./listingPhotos";
@@ -111,5 +112,17 @@ describe("isCoverRequiredError", () => {
     expect(isCoverRequiredError(new ApiError(409, "MEDIA_QUOTA_EXCEEDED", "x"))).toBe(false);
     expect(isCoverRequiredError(new ApiError(404, "MEDIA_NOT_FOUND", "x"))).toBe(false);
     expect(isCoverRequiredError(new Error("x"))).toBe(false);
+  });
+});
+
+describe("isMediaOrderConflict", () => {
+  it("recognizes MEDIA_ORDER_CONFLICT", () => {
+    expect(isMediaOrderConflict(new ApiError(409, "MEDIA_ORDER_CONFLICT", "x"))).toBe(true);
+  });
+
+  it("ignores other errors", () => {
+    expect(isMediaOrderConflict(new ApiError(409, "COVER_PHOTO_REQUIRED", "x"))).toBe(false);
+    expect(isMediaOrderConflict(new ApiError(500, "INTERNAL_ERROR", "x"))).toBe(false);
+    expect(isMediaOrderConflict(new TypeError("Failed to fetch"))).toBe(false);
   });
 });
