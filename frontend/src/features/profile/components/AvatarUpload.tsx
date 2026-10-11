@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { UserRound } from "lucide-react";
 import { Alert, Button, FileDropzone, useToast } from "../../../shared/components";
-import { ACCEPTED_AVATAR_TYPES } from "../../../shared/api/constants";
+import { ACCEPTED_IMAGE_TYPES } from "../../../shared/api/constants";
 import { isDisplayableMediaUrl } from "../../../shared/utils/mediaUrl";
 import { preCheck, serverMessage } from "../avatarValidation";
 import { useUploadAvatar } from "../hooks/useUploadAvatar";
@@ -104,7 +104,7 @@ function AvatarUpload({ avatarUrl, initials }: AvatarUploadProps) {
         </div>
       ) : (
         <FileDropzone
-          accept={ACCEPTED_AVATAR_TYPES.join(",")}
+          accept={ACCEPTED_IMAGE_TYPES.join(",")}
           onFilesSelected={handleFilesSelected}
           hasError={Boolean(errorMessage)}
           label="Drag an image here, or click to choose one"

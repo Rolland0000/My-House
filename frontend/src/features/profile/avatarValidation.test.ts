@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../../shared/api/client";
-import { MAX_AVATAR_SIZE_BYTES } from "../../shared/api/constants";
+import { MAX_IMAGE_SIZE_BYTES } from "../../shared/api/constants";
 import {
   FORMAT_MESSAGE,
   GENERIC_ERROR_MESSAGE,
@@ -14,20 +14,16 @@ function file(bytes: number, type = "image/png"): File {
 }
 
 describe("preCheck", () => {
-  it("accepts a valid image under the size limit", () => {
+  it("returns no message for a valid image", () => {
     expect(preCheck(file(1024, "image/jpeg"))).toBeNull();
   });
 
-  it("rejects an unsupported MIME type", () => {
+  it("maps a format problem to the format message", () => {
     expect(preCheck(file(1024, "image/gif"))).toBe(FORMAT_MESSAGE);
   });
 
-  it("rejects a file over the size limit", () => {
-    expect(preCheck(file(MAX_AVATAR_SIZE_BYTES + 1))).toBe(SIZE_MESSAGE);
-  });
-
-  it("accepts a file exactly at the size limit", () => {
-    expect(preCheck(file(MAX_AVATAR_SIZE_BYTES))).toBeNull();
+  it("maps a size problem to the size message", () => {
+    expect(preCheck(file(MAX_IMAGE_SIZE_BYTES + 1))).toBe(SIZE_MESSAGE);
   });
 });
 
