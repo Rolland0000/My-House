@@ -1,17 +1,19 @@
 import { ApiError } from "../../shared/api/client";
-import { ACCEPTED_AVATAR_TYPES, MAX_AVATAR_SIZE_BYTES } from "../../shared/api/constants";
+import { imageFileProblem, type ImageFileProblem } from "../../shared/utils/imageFileCheck";
 
 export const FORMAT_MESSAGE = "Unsupported format. Choose a JPEG, PNG, or WebP image.";
 export const SIZE_MESSAGE = "Image too large. Maximum size is 5 MB.";
 export const GENERIC_ERROR_MESSAGE = "Upload failed. Please try again.";
 
-/** Pre-checks that spare an obviously doomed round-trip. The server re-runs
- *  both on the actual bytes, so a file that slips through here still gets
- *  rejected — see `serverMessage`. */
+const PROBLEM_MESSAGES: Record<ImageFileProblem, string> = {
+  format: FORMAT_MESSAGE,
+  size: SIZE_MESSAGE,
+};
+
+/** The server can still reject a file that passes here; see `serverMessage`. */
 export function preCheck(file: File): string | null {
-  if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) return FORMAT_MESSAGE;
-  if (file.size > MAX_AVATAR_SIZE_BYTES) return SIZE_MESSAGE;
-  return null;
+  const problem = imageFileProblem(file);
+  return problem ? PROBLEM_MESSAGES[problem] : null;
 }
 
 /** Distinct messages per backend error code (`shared/errors.rs`); unmapped

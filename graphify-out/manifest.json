@@ -264,9 +264,9 @@
     "semantic_hash": "4ebc4ea5deff4cd133bcbed57233d9db"
   },
   "frontend/src/app/router.tsx": {
-    "mtime": 1791032868.9238508,
-    "seen": 1791033112.491374,
-    "ast_hash": "a48a54b6f421b0ed893033d5493d29b5",
+    "mtime": 1791713894.6086693,
+    "seen": 1791714318.206212,
+    "ast_hash": "6f425678519faf7653d301f02569fb46",
     "semantic_hash": ""
   },
   "frontend/src/features/admin/api.ts": {
@@ -312,9 +312,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/features/listings/api.ts": {
-    "mtime": 1791041906.8981402,
-    "seen": 1791042368.299456,
-    "ast_hash": "e01bbd2c70ed985d0a2b4429c40e564f",
+    "mtime": 1791713917.0950692,
+    "seen": 1791714318.206332,
+    "ast_hash": "f2c4500bf993f9dcd7464994550467d3",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListings.ts": {
@@ -324,9 +324,9 @@
     "semantic_hash": "271d48498583f1628c02137700aecd7f"
   },
   "frontend/src/features/listings/index.ts": {
-    "mtime": 1791032868.9302561,
-    "seen": 1791033112.491497,
-    "ast_hash": "6ccc7a13772a2dbe29242e49e151a777",
+    "mtime": 1791713894.6098897,
+    "seen": 1791714318.2063959,
+    "ast_hash": "737b08ca0e7a7fc3ab54cb8823221fc0",
     "semantic_hash": ""
   },
   "frontend/src/features/profile/api.ts": {
@@ -858,10 +858,10 @@
     "semantic_hash": "9d1293681409bd2c2d98714bea424cee"
   },
   "frontend/src/shared/components/FileDropzone.tsx": {
-    "mtime": 1789210414.1266952,
-    "seen": 1791007791.639513,
-    "ast_hash": "59b2b36fcf54a13241c9ddd8240a1ac9",
-    "semantic_hash": "59b2b36fcf54a13241c9ddd8240a1ac9"
+    "mtime": 1791713741.6838348,
+    "seen": 1791714318.2065432,
+    "ast_hash": "0d08344c92b3714dc17a991b66798253",
+    "semantic_hash": ""
   },
   "frontend/src/shared/components/FormField.tsx": {
     "mtime": 1786206080.4658341,
@@ -1284,10 +1284,10 @@
     "semantic_hash": "1a84826b889331201da0ce567c6046a9"
   },
   "frontend/src/shared/api/constants.ts": {
-    "mtime": 1789210414.0085275,
-    "seen": 1791007791.6395001,
-    "ast_hash": "a6ca83d8ffe3b8555842648bd75ddf80",
-    "semantic_hash": "a6ca83d8ffe3b8555842648bd75ddf80"
+    "mtime": 1791713710.710524,
+    "seen": 1791714318.206526,
+    "ast_hash": "f14229e9a8d7acfb80908c4a27725497",
+    "semantic_hash": ""
   },
   "backend/.sqlx/query-44f47cf5c7fa220e5f83ac06e03c40bf17244a095bbb2fc03caf87c1c4b5c86b.json": {
     "mtime": 1791039935.7781773,
@@ -1302,10 +1302,10 @@
     "semantic_hash": "d998561e5c10882f6da8df87d593878c"
   },
   "frontend/src/features/profile/components/AvatarUpload.tsx": {
-    "mtime": 1789210413.9947188,
-    "seen": 1791007791.639471,
-    "ast_hash": "96f9c7bdc0ce9a4482a1490541ba1460",
-    "semantic_hash": "96f9c7bdc0ce9a4482a1490541ba1460"
+    "mtime": 1791713734.6436145,
+    "seen": 1791714318.206483,
+    "ast_hash": "9d14c21a1ceae5082381cca4953f926f",
+    "semantic_hash": ""
   },
   "frontend/src/features/profile/hooks/useUploadAvatar.ts": {
     "mtime": 1788931436.1337798,
@@ -1332,16 +1332,16 @@
     "semantic_hash": "7f9fab769cea459579a5ac92c7db7e97"
   },
   "frontend/src/features/profile/avatarValidation.test.ts": {
-    "mtime": 1788931436.1289768,
-    "seen": 1791007791.639467,
-    "ast_hash": "27aeecfa4f5e0ba8d114286ea3254072",
-    "semantic_hash": "27aeecfa4f5e0ba8d114286ea3254072"
+    "mtime": 1791713734.6344197,
+    "seen": 1791714318.206474,
+    "ast_hash": "31821bc4ce6485cf269c5973cc1a3ae0",
+    "semantic_hash": ""
   },
   "frontend/src/features/profile/avatarValidation.ts": {
-    "mtime": 1788931436.129413,
-    "seen": 1791007791.6394691,
-    "ast_hash": "978c2ad8e6a70e60f754d45d12202618",
-    "semantic_hash": "978c2ad8e6a70e60f754d45d12202618"
+    "mtime": 1791714305.8854666,
+    "seen": 1791714318.206479,
+    "ast_hash": "f4884349a6d0405d8d8541e9ef565ab9",
+    "semantic_hash": ""
   },
   "frontend/src/features/profile/profileValidation.test.ts": {
     "mtime": 1788931436.1350179,
@@ -1950,9 +1950,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerBar.tsx": {
-    "mtime": 1791032868.9283404,
-    "seen": 1791033112.49148,
-    "ast_hash": "1df0aae358429a2da7b8f043bde3f5bb",
+    "mtime": 1791713894.6081622,
+    "seen": 1791714318.206367,
+    "ast_hash": "b119d46239b0bf45b06571462970ea80",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/listingVisibility.test.ts": {
@@ -2181,6 +2181,60 @@
     "mtime": 1791041829.321835,
     "seen": 1791042368.299513,
     "ast_hash": "10a1794eb588097dd591092453c55288",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/DeletePhotoModal.tsx": {
+    "mtime": 1791713834.4047205,
+    "seen": 1791714318.206343,
+    "ast_hash": "c5cf6d21ecbb88eab2c292dfdd6bb92f",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/ListingPhotosPage.tsx": {
+    "mtime": 1791715848.019948,
+    "seen": 1791715923.976795,
+    "ast_hash": "d93d8569e45437d13b62bb880ebd4215",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/PhotoTile.tsx": {
+    "mtime": 1791713823.1567235,
+    "seen": 1791714318.206375,
+    "ast_hash": "82b2905a548d1143bbd8f851ad573d97",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/hooks/useListingPhotoMutations.ts": {
+    "mtime": 1791715842.3182104,
+    "seen": 1791715923.976819,
+    "ast_hash": "21c0fe33202488d20ef1d7cab300ded7",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingPhotos.test.ts": {
+    "mtime": 1791713917.8101027,
+    "seen": 1791714318.2064111,
+    "ast_hash": "6766f34fdddcabdac704fbe627bb7288",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingPhotos.ts": {
+    "mtime": 1791715842.3167844,
+    "seen": 1791715923.9768472,
+    "ast_hash": "104aa4e62857b524228305f36914501d",
+    "semantic_hash": ""
+  },
+  "frontend/src/shared/utils/imageFileCheck.test.ts": {
+    "mtime": 1791713721.3235142,
+    "seen": 1791714318.206589,
+    "ast_hash": "9c450e23adc0838f616fb960767ec9d9",
+    "semantic_hash": ""
+  },
+  "frontend/src/shared/utils/imageFileCheck.ts": {
+    "mtime": 1791714305.8846257,
+    "seen": 1791714318.206591,
+    "ast_hash": "5d53d31853d772f6c0af7de499f2fe14",
+    "semantic_hash": ""
+  },
+  "docs/plans/MH-59-plan.md": {
+    "mtime": 1791713461.7338576,
+    "seen": 1791714318.2068899,
+    "ast_hash": "89ba3381d080042f82d54e0c059b0790",
     "semantic_hash": ""
   }
 }

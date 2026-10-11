@@ -5,6 +5,7 @@ export { ListingFeed } from "./components/ListingFeed";
 export { ListingDetail } from "./components/ListingDetail";
 export { CreateListingPage } from "./components/CreateListingPage";
 export { EditListingPage } from "./components/EditListingPage";
+export { ListingPhotosPage } from "./components/ListingPhotosPage";
 export { OwnerListings } from "./components/OwnerListings";
 
 export { useListings, useListing } from "./hooks/useListings";

@@ -42,6 +42,11 @@ const EditListingPage = lazy(() =>
     default: m.EditListingPage,
   }))
 );
+const ListingPhotosPage = lazy(() =>
+  import("../features/listings/components/ListingPhotosPage").then((m) => ({
+    default: m.ListingPhotosPage,
+  }))
+);
 const OwnerListings = lazy(() =>
   import("../features/listings/components/OwnerListings").then((m) => ({
     default: m.OwnerListings,
@@ -112,6 +117,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <RequireOwner>{withSuspense(EditListingPage)}</RequireOwner>
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "owner/listings/:id/photos",
+        element: (
+          <RequireAuth>
+            <RequireOwner>{withSuspense(ListingPhotosPage)}</RequireOwner>
           </RequireAuth>
         ),
       },
