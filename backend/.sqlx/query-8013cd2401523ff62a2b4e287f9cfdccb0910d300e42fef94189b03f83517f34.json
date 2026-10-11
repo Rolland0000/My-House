@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, url, is_cover, position FROM listing_media WHERE listing_id = $1 ORDER BY position ASC",
+  "query": "\n        SELECT id, url, is_cover, position,\n            (EXTRACT(EPOCH FROM created_at) * 1000000)::bigint AS \"created_at_micros!\"\n        FROM listing_media\n        WHERE listing_id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -22,6 +22,11 @@
         "ordinal": 3,
         "name": "position",
         "type_info": "Int2"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at_micros!",
+        "type_info": "Int8"
       }
     ],
     "parameters": {
@@ -33,8 +38,9 @@
       false,
       false,
       false,
-      false
+      false,
+      null
     ]
   },
-  "hash": "9e0f1e6d9b17c448c09ca6a0d2f1912af912006eed33587c08c4729c86713bf2"
+  "hash": "8013cd2401523ff62a2b4e287f9cfdccb0910d300e42fef94189b03f83517f34"
 }

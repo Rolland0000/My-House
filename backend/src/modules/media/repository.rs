@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::shared::errors::AppError;
 
-use super::model::{MediaForDeletion, MediaRow};
+use super::model::{MediaForDeletion, MediaRow, OrderedMediaRow};
 
 fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
@@ -40,6 +40,29 @@ where
     .fetch_one(executor)
     .await
     .map_err(db_err)
+}
+
+/// Photo count and highest position for `listing_id`. Only authoritative
+/// inside the transaction holding [`lock_listing_owner`].
+pub async fn upload_slot<'e, E>(
+    executor: E,
+    listing_id: Uuid,
+) -> Result<(i64, Option<i16>), AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    let slot = sqlx::query!(
+        r#"
+        SELECT COUNT(*) AS "count!", MAX(position) AS last_position
+        FROM listing_media
+        WHERE listing_id = $1
+        "#,
+        listing_id
+    )
+    .fetch_one(executor)
+    .await
+    .map_err(db_err)?;
+    Ok((slot.count, slot.last_position))
 }
 
 /// Inserts the new photo row. Callers are expected to have already uploaded
@@ -177,4 +200,52 @@ where
     .fetch_one(executor)
     .await
     .map_err(db_err)
+}
+
+/// Every photo of `listing_id`, unsorted: callers sort with the shared display order.
+pub async fn list_listing_media<'e, E>(
+    executor: E,
+    listing_id: Uuid,
+) -> Result<Vec<OrderedMediaRow>, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_as!(
+        OrderedMediaRow,
+        r#"
+        SELECT id, url, is_cover, position,
+            (EXTRACT(EPOCH FROM created_at) * 1000000)::bigint AS "created_at_micros!"
+        FROM listing_media
+        WHERE listing_id = $1
+        "#,
+        listing_id
+    )
+    .fetch_all(executor)
+    .await
+    .map_err(db_err)
+}
+
+/// Sets each photo's position to its index in `media_ids`, in one statement.
+pub async fn set_media_positions<'e, E>(
+    executor: E,
+    listing_id: Uuid,
+    media_ids: &[Uuid],
+) -> Result<(), AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query!(
+        r#"
+        UPDATE listing_media m
+        SET position = (o.ordinality - 1)::smallint
+        FROM unnest($2::uuid[]) WITH ORDINALITY AS o(id, ordinality)
+        WHERE m.listing_id = $1 AND m.id = o.id
+        "#,
+        listing_id,
+        media_ids
+    )
+    .execute(executor)
+    .await
+    .map_err(db_err)?;
+    Ok(())
 }

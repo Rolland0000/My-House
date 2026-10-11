@@ -2,6 +2,7 @@ pub mod crypto;
 pub mod errors;
 pub mod extractors;
 pub mod file_validation;
+pub mod media_order;
 pub mod pagination;
 pub mod rbac;
 pub mod session_cookie;

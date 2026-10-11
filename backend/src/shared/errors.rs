@@ -121,6 +121,10 @@ pub enum AppError {
     #[error("Cannot remove cover photo without designating another one.")]
     CoverPhotoRequired,
 
+    /// The sent photo ids no longer match the listing's current photos.
+    #[error("The photos changed since they were loaded.")]
+    MediaOrderConflict,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
     #[error("File exceeds the maximum allowed size.")]
     PayloadTooLarge,
@@ -196,6 +200,7 @@ impl AppError {
             Self::EmailAlreadyExists => (StatusCode::CONFLICT, "EMAIL_ALREADY_EXISTS"),
             Self::MediaQuotaExceeded => (StatusCode::CONFLICT, "MEDIA_QUOTA_EXCEEDED"),
             Self::CoverPhotoRequired => (StatusCode::CONFLICT, "COVER_PHOTO_REQUIRED"),
+            Self::MediaOrderConflict => (StatusCode::CONFLICT, "MEDIA_ORDER_CONFLICT"),
             // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
@@ -337,6 +342,15 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "OWNER_REQUEST_ALREADY_REVIEWED");
+    }
+
+    #[tokio::test]
+    async fn test_media_order_conflict_is_409() {
+        let response = AppError::MediaOrderConflict.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "MEDIA_ORDER_CONFLICT");
     }
 
     #[tokio::test]

@@ -5,6 +5,7 @@ use std::ops::RangeInclusive;
 
 use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
+use crate::shared::media_order::display_order_key;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::FieldErrors;
 
@@ -92,7 +93,10 @@ pub async fn get_listing_detail(
         return Err(AppError::ListingNotFound);
     }
 
-    let media = repository::find_media_for_listing(pool, id).await?;
+    let mut media = repository::find_media_for_listing(pool, id).await?;
+    media.sort_by_key(|row| {
+        display_order_key(row.is_cover, row.position, row.created_at_micros, row.id)
+    });
 
     Ok(ListingDetailDto::from_row_and_media(row, media))
 }

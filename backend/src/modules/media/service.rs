@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use bytes::Bytes;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
@@ -5,10 +7,12 @@ use uuid::Uuid;
 use crate::infra::storage::StorageProvider;
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
+use crate::shared::media_order::display_order_key;
 use crate::shared::storage_key::listing_media_key;
 use crate::shared::types::ListingId;
+use crate::shared::validation::FieldErrors;
 
-use super::model::{MediaForDeletion, MediaRow};
+use super::model::{MediaForDeletion, MediaRow, OrderedMediaRow};
 use super::repository;
 
 const MAX_PHOTOS_PER_LISTING: i64 = 5;
@@ -18,15 +22,23 @@ struct UploadDecision {
     position: i16,
 }
 
-/// Turns the listing's current photo count into where the new one lands.
+/// Turns the listing's photo count and highest position into where the new
+/// photo lands: after the last one, even when deletions left gaps.
 /// Pure so the quota/cover/position rules can be tested without a database.
-fn upload_decision(existing_count: i64) -> Result<UploadDecision, AppError> {
+fn upload_decision(
+    existing_count: i64,
+    last_position: Option<i16>,
+) -> Result<UploadDecision, AppError> {
     if existing_count >= MAX_PHOTOS_PER_LISTING {
         return Err(AppError::MediaQuotaExceeded);
     }
+    let position = match last_position {
+        None => 0,
+        Some(last) => last.checked_add(1).ok_or(AppError::Internal)?,
+    };
     Ok(UploadDecision {
         is_cover: existing_count == 0,
-        position: existing_count as i16,
+        position,
     })
 }
 
@@ -93,8 +105,8 @@ async fn check_upload_slot(
         .ok_or(AppError::ListingNotFound)?;
     verify_ownership(owner_id, caller_id)?;
 
-    let existing_count = repository::count_media(&mut **tx, listing_id).await?;
-    upload_decision(existing_count)
+    let (existing_count, last_position) = repository::upload_slot(&mut **tx, listing_id).await?;
+    upload_decision(existing_count, last_position)
 }
 
 async fn persist_media(
@@ -213,6 +225,74 @@ pub async fn promote_cover(
     Ok(row)
 }
 
+/// A missing, empty or duplicated list is a 422 on `media_ids`.
+fn validate_media_ids(media_ids: Option<Vec<Uuid>>) -> Result<Vec<Uuid>, AppError> {
+    let mut errors = FieldErrors::default();
+    match &media_ids {
+        None => errors.push("media_ids", "media_ids is required."),
+        Some(ids) if ids.is_empty() => errors.push("media_ids", "media_ids must not be empty."),
+        Some(ids) if ids.iter().collect::<HashSet<_>>().len() != ids.len() => {
+            errors.push("media_ids", "media_ids must not contain duplicates.")
+        }
+        Some(_) => {}
+    }
+    errors.finish()?;
+    media_ids.ok_or(AppError::Internal)
+}
+
+/// Gives each current photo its index in `sent` as position, then returns
+/// them in display order. `sent` must be exactly the current set of photos.
+fn apply_order(
+    mut current: Vec<OrderedMediaRow>,
+    sent: &[Uuid],
+) -> Result<Vec<OrderedMediaRow>, AppError> {
+    let index_by_id: HashMap<&Uuid, usize> = sent
+        .iter()
+        .enumerate()
+        .map(|(index, id)| (id, index))
+        .collect();
+    if index_by_id.len() != sent.len() || sent.len() != current.len() {
+        return Err(AppError::MediaOrderConflict);
+    }
+
+    for row in &mut current {
+        let index = *index_by_id
+            .get(&row.id)
+            .ok_or(AppError::MediaOrderConflict)?;
+        row.position = i16::try_from(index).map_err(|_| AppError::Internal)?;
+    }
+    current.sort_by_key(|row| {
+        display_order_key(row.is_cover, row.position, row.created_at_micros, row.id)
+    });
+    Ok(current)
+}
+
+/// Stores `media_ids` as the photo order and returns the photos in display order.
+/// The listing lock serializes this with uploads, deletes and cover changes;
+/// any error before the commit leaves every position unchanged.
+pub async fn reorder_media(
+    pool: &PgPool,
+    listing_id: Uuid,
+    caller_id: Uuid,
+    media_ids: Option<Vec<Uuid>>,
+) -> Result<Vec<OrderedMediaRow>, AppError> {
+    let media_ids = validate_media_ids(media_ids)?;
+
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let owner_id = repository::lock_listing_owner(&mut *tx, listing_id)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+    verify_ownership(owner_id, caller_id)?;
+
+    let current = repository::list_listing_media(&mut *tx, listing_id).await?;
+    let ordered = apply_order(current, &media_ids)?;
+    repository::set_media_positions(&mut *tx, listing_id, &media_ids).await?;
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(ordered)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -223,6 +303,23 @@ mod tests {
             url: "https://media.example/listings/photo.jpg".to_string(),
             is_cover,
             position,
+        }
+    }
+
+    fn ordered(is_cover: bool, position: i16) -> OrderedMediaRow {
+        OrderedMediaRow {
+            id: Uuid::new_v4(),
+            url: "https://media.example/listings/photo.jpg".to_string(),
+            is_cover,
+            position,
+            created_at_micros: 0,
+        }
+    }
+
+    fn validation_fields(result: Result<Vec<Uuid>, AppError>) -> Vec<&'static str> {
+        match result {
+            Err(AppError::Validation(errors)) => errors.iter().map(|error| error.field).collect(),
+            other => panic!("expected a validation error, got {other:?}"),
         }
     }
 
@@ -237,29 +334,36 @@ mod tests {
 
     #[test]
     fn first_photo_becomes_the_cover_at_position_zero() {
-        let decision = upload_decision(0).unwrap();
+        let decision = upload_decision(0, None).unwrap();
         assert!(decision.is_cover);
         assert_eq!(decision.position, 0);
     }
 
     #[test]
     fn second_photo_is_not_the_cover() {
-        let decision = upload_decision(1).unwrap();
+        let decision = upload_decision(1, Some(0)).unwrap();
         assert!(!decision.is_cover);
         assert_eq!(decision.position, 1);
     }
 
     #[test]
-    fn position_tracks_the_existing_count() {
-        for count in 0..MAX_PHOTOS_PER_LISTING {
-            assert_eq!(upload_decision(count).unwrap().position, count as i16);
-        }
+    fn position_follows_the_last_position() {
+        // Two photos left at positions 0 and 3 after deletions.
+        assert_eq!(upload_decision(2, Some(3)).unwrap().position, 4);
+    }
+
+    #[test]
+    fn position_overflow_is_refused_instead_of_duplicated() {
+        assert!(matches!(
+            upload_decision(1, Some(i16::MAX)),
+            Err(AppError::Internal)
+        ));
     }
 
     #[test]
     fn a_sixth_photo_is_refused() {
         assert!(matches!(
-            upload_decision(MAX_PHOTOS_PER_LISTING),
+            upload_decision(MAX_PHOTOS_PER_LISTING, Some(4)),
             Err(AppError::MediaQuotaExceeded)
         ));
     }
@@ -346,6 +450,89 @@ mod tests {
         assert!(matches!(
             cover_promotion(None),
             Err(AppError::MediaNotFound)
+        ));
+    }
+
+    #[test]
+    fn missing_media_ids_is_a_validation_error() {
+        assert_eq!(validation_fields(validate_media_ids(None)), ["media_ids"]);
+    }
+
+    #[test]
+    fn empty_media_ids_is_a_validation_error() {
+        assert_eq!(
+            validation_fields(validate_media_ids(Some(vec![]))),
+            ["media_ids"]
+        );
+    }
+
+    #[test]
+    fn duplicated_media_id_is_a_validation_error() {
+        let id = Uuid::new_v4();
+        assert_eq!(
+            validation_fields(validate_media_ids(Some(vec![id, id]))),
+            ["media_ids"]
+        );
+    }
+
+    #[test]
+    fn distinct_media_ids_are_accepted() {
+        let ids = vec![Uuid::new_v4(), Uuid::new_v4()];
+        assert_eq!(validate_media_ids(Some(ids.clone())).unwrap(), ids);
+    }
+
+    #[test]
+    fn exact_match_stores_the_sent_order_with_the_cover_first() {
+        let cover = ordered(true, 0);
+        let second = ordered(false, 1);
+        let third = ordered(false, 2);
+        let sent = vec![third.id, second.id, cover.id];
+
+        let result = apply_order(vec![cover, second, third], &sent).unwrap();
+
+        let ids: Vec<Uuid> = result.iter().map(|row| row.id).collect();
+        assert_eq!(ids, [sent[2], sent[0], sent[1]]);
+        let positions: Vec<i16> = result.iter().map(|row| row.position).collect();
+        assert_eq!(positions, [2, 0, 1]);
+    }
+
+    #[test]
+    fn a_missing_id_is_a_conflict() {
+        let first = ordered(true, 0);
+        let sent = vec![first.id];
+        assert!(matches!(
+            apply_order(vec![first, ordered(false, 1)], &sent),
+            Err(AppError::MediaOrderConflict)
+        ));
+    }
+
+    #[test]
+    fn an_extra_id_is_a_conflict() {
+        let first = ordered(true, 0);
+        let sent = vec![first.id, Uuid::new_v4()];
+        assert!(matches!(
+            apply_order(vec![first], &sent),
+            Err(AppError::MediaOrderConflict)
+        ));
+    }
+
+    #[test]
+    fn an_unknown_id_of_the_same_length_is_a_conflict() {
+        let first = ordered(true, 0);
+        let sent = vec![first.id, Uuid::new_v4()];
+        assert!(matches!(
+            apply_order(vec![first, ordered(false, 1)], &sent),
+            Err(AppError::MediaOrderConflict)
+        ));
+    }
+
+    #[test]
+    fn a_duplicated_id_is_a_conflict() {
+        let first = ordered(true, 0);
+        let sent = vec![first.id, first.id];
+        assert!(matches!(
+            apply_order(vec![first, ordered(false, 1)], &sent),
+            Err(AppError::MediaOrderConflict)
         ));
     }
 }

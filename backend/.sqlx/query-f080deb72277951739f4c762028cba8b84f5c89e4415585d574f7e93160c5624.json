@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE listing_media m\n        SET position = (o.ordinality - 1)::smallint\n        FROM unnest($2::uuid[]) WITH ORDINALITY AS o(id, ordinality)\n        WHERE m.listing_id = $1 AND m.id = o.id\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f080deb72277951739f4c762028cba8b84f5c89e4415585d574f7e93160c5624"
+}

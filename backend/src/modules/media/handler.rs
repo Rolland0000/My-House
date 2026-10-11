@@ -5,10 +5,13 @@ use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 use crate::shared::rbac::Role;
 
-use super::dto::{MediaDto, MediaResponse, PromoteCoverRequest, UploadMediaForm};
+use super::dto::{
+    MediaDto, MediaListResponse, MediaResponse, PromoteCoverRequest, ReorderMediaRequest,
+    UploadMediaForm,
+};
 use super::model::UploadMediaSubmission;
 use super::service;
 
@@ -113,6 +116,41 @@ pub async fn promote_cover(
 
     Ok(Json(MediaResponse {
         data: MediaDto::from(row),
+    }))
+}
+
+#[utoipa::path(
+    put,
+    path = "/listings/{id}/media/order",
+    tag = "listings",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    request_body(
+        content = ReorderMediaRequest,
+        description = "Every photo id of the listing, in the new order"
+    ),
+    responses(
+        (status = 200, description = "Photos in display order", body = MediaListResponse),
+        (status = 400, description = "Malformed JSON body, including an invalid UUID"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Listing not found, or not owned by the caller"),
+        (status = 409, description = "The ids don't match the listing's current photos"),
+        (status = 422, description = "media_ids is missing, empty or has a duplicate"),
+    )
+)]
+pub async fn reorder_media(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(listing_id): Path<Uuid>,
+    AppJson(payload): AppJson<ReorderMediaRequest>,
+) -> Result<Json<MediaListResponse>, AppError> {
+    user.require_role(&[Role::Owner])?;
+
+    let rows =
+        service::reorder_media(state.db(), listing_id, user.user_id, payload.media_ids).await?;
+
+    Ok(Json(MediaListResponse {
+        data: rows.into_iter().map(MediaDto::from).collect(),
     }))
 }
 
