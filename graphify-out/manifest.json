@@ -420,10 +420,10 @@
     "semantic_hash": "75c797ffc4c83f0cc1a88f84b7e4c67d"
   },
   "frontend/src/shared/utils/format.ts": {
-    "mtime": 1789210414.1530359,
-    "seen": 1791007791.6395452,
-    "ast_hash": "bc376328118797d771628b397b85a92d",
-    "semantic_hash": "bc376328118797d771628b397b85a92d"
+    "mtime": 1791725806.2899284,
+    "seen": 1791726150.5571141,
+    "ast_hash": "62ffd1a7c99c65445076e71c3714a4ce",
+    "semantic_hash": ""
   },
   "frontend/src/shared/utils/pagination.ts": {
     "mtime": 1785298038.4261794,
@@ -822,15 +822,15 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingCard.tsx": {
-    "mtime": 1789210413.9557161,
-    "seen": 1791007791.63941,
-    "ast_hash": "0a05e1ac4816892da27861b6b02e2c52",
-    "semantic_hash": "0a05e1ac4816892da27861b6b02e2c52"
+    "mtime": 1791725844.065804,
+    "seen": 1791726150.556857,
+    "ast_hash": "cd8c8a8609b516fa062f021d9f53314d",
+    "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingDetail.tsx": {
-    "mtime": 1791032868.9261293,
-    "seen": 1791033112.491471,
-    "ast_hash": "c984a13b43263116f2afe72f03ec8bc3",
+    "mtime": 1791726042.2125437,
+    "seen": 1791726150.556861,
+    "ast_hash": "aed4bdbbef287e9d1884afe73cdc304b",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingFeed.tsx": {
@@ -1350,10 +1350,10 @@
     "semantic_hash": "b3d686c09904f65c6ea2cbc024d5d025"
   },
   "frontend/src/shared/utils/format.test.ts": {
-    "mtime": 1788931436.1421168,
-    "seen": 1791007791.639543,
-    "ast_hash": "54f3acb945a7cd0200c8ac9d1923c9e3",
-    "semantic_hash": "54f3acb945a7cd0200c8ac9d1923c9e3"
+    "mtime": 1791725820.7350082,
+    "seen": 1791726150.557111,
+    "ast_hash": "cf72b7138fc31454b1f1118786035777",
+    "semantic_hash": ""
   },
   "frontend/src/shared/utils/mediaUrl.test.ts": {
     "mtime": 1791012795.5196395,
@@ -1433,12 +1433,6 @@
     "ast_hash": "310e02089478805b9883f92a0f5aacff",
     "semantic_hash": "310e02089478805b9883f92a0f5aacff"
   },
-  "frontend/src/features/listings/components/ReportListingModal.tsx": {
-    "mtime": 1789210413.9607842,
-    "seen": 1791007791.6394172,
-    "ast_hash": "f25501573fad656767bf5a9b7bec601e",
-    "semantic_hash": "f25501573fad656767bf5a9b7bec601e"
-  },
   "frontend/src/features/profile/components/DeleteAccountSection.tsx": {
     "mtime": 1789210413.9985983,
     "seen": 1791007791.639473,
@@ -1470,10 +1464,10 @@
     "semantic_hash": "3dac3e12632190bf07130ec28d8a3c4d"
   },
   "frontend/src/shared/components/SiteFooter.tsx": {
-    "mtime": 1789210414.1456387,
-    "seen": 1791007791.6395252,
-    "ast_hash": "e0d41ef128005f8593b81fb6509afd48",
-    "semantic_hash": "e0d41ef128005f8593b81fb6509afd48"
+    "mtime": 1791725898.5363443,
+    "seen": 1791726150.5570838,
+    "ast_hash": "8fa69a63e363bb64635ea24230c6853a",
+    "semantic_hash": ""
   },
   "frontend/src/shared/components/SiteHeader.tsx": {
     "mtime": 1791019512.2963831,
@@ -2010,9 +2004,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListingRow.tsx": {
-    "mtime": 1791041906.8986037,
-    "seen": 1791042368.299486,
-    "ast_hash": "49b44a722d508885af555f3be89b9459",
+    "mtime": 1791725846.693074,
+    "seen": 1791726150.556886,
+    "ast_hash": "4ace3bfdb7a64bb34b116248ef2e5464",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerListings.tsx": {
@@ -2070,9 +2064,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingNotFound.tsx": {
-    "mtime": 1791032868.9276745,
-    "seen": 1791033112.491478,
-    "ast_hash": "28f78eed98c729492740f690f0056445",
+    "mtime": 1791725895.3853476,
+    "seen": 1791726150.556869,
+    "ast_hash": "284864a2dae4bc99ff2778a0a8f83026",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useUpdateListing.ts": {
@@ -2307,6 +2301,24 @@
     "mtime": 1791724184.4018378,
     "seen": 1791724304.6572611,
     "ast_hash": "536dfa863f5edf311dde2ee672dbc620",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/ListingPrice.tsx": {
+    "mtime": 1791725827.3716936,
+    "seen": 1791726150.556875,
+    "ast_hash": "bcf0f93db5e3e1dd927db521135ffb54",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/OwnerAvatar.tsx": {
+    "mtime": 1791726041.1841881,
+    "seen": 1791726150.5568798,
+    "ast_hash": "84385739666c372806c1a0686da209e3",
+    "semantic_hash": ""
+  },
+  "docs/plans/MH-62-plan.md": {
+    "mtime": 1791726027.4048266,
+    "seen": 1791726150.557302,
+    "ast_hash": "23508171b13275e90f274721e1c4589e",
     "semantic_hash": ""
   }
 }

@@ -312,9 +312,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/features/listings/api.ts": {
-    "mtime": 1791720543.3166387,
-    "seen": 1791721189.163915,
-    "ast_hash": "2a3f4566f50f8c5f6f40c8c5ccfa186d",
+    "mtime": 1791724178.1593068,
+    "seen": 1791724304.6571572,
+    "ast_hash": "0dfe6e9a7a62d98f735360f5653df33d",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListings.ts": {
@@ -1944,9 +1944,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/OwnerBar.tsx": {
-    "mtime": 1791718928.0901177,
-    "seen": 1791719402.913367,
-    "ast_hash": "b119d46239b0bf45b06571462970ea80",
+    "mtime": 1791724223.4492943,
+    "seen": 1791724304.657196,
+    "ast_hash": "fc967bc71824b8c2dd028efcb58205ae",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/listingVisibility.test.ts": {
@@ -2283,6 +2283,30 @@
     "mtime": 1791722916.354615,
     "seen": 1791723124.366813,
     "ast_hash": "2614739ab39998c7c77ff592771a5583",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/components/PublishListingAction.tsx": {
+    "mtime": 1791724202.3852448,
+    "seen": 1791724304.657208,
+    "ast_hash": "c976a5ba499eee1aad1cb902be4b7600",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/hooks/usePublishListing.ts": {
+    "mtime": 1791724192.2102275,
+    "seen": 1791724304.657227,
+    "ast_hash": "8a0c2a2421b2cf98295f0d0063c339ce",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingPublication.test.ts": {
+    "mtime": 1791724185.4772434,
+    "seen": 1791724304.657259,
+    "ast_hash": "7cad972d513cf294c4bce546e24ccc55",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/listingPublication.ts": {
+    "mtime": 1791724184.4018378,
+    "seen": 1791724304.6572611,
+    "ast_hash": "536dfa863f5edf311dde2ee672dbc620",
     "semantic_hash": ""
   }
 }
