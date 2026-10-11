@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCountdown, formatPrice } from "./format";
+import { formatCountdown, formatMonthlyRent, formatPrice } from "./format";
 
 describe("formatCountdown", () => {
   it("pads minutes and seconds to two digits", () => {
@@ -23,5 +23,15 @@ describe("formatPrice", () => {
 
   it("formats a value under one thousand without a separator", () => {
     expect(formatPrice(950)).toBe("950");
+  });
+});
+
+describe("formatMonthlyRent", () => {
+  it("groups thousands and labels the amount as a monthly rent in XAF", () => {
+    expect(formatMonthlyRent(150000)).toEqual({ amount: "150 000", unit: "XAF / month" });
+  });
+
+  it("renders a whole amount with no decimals", () => {
+    expect(formatMonthlyRent(950).amount).toBe("950");
   });
 });

@@ -1,24 +1,22 @@
-import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { Alert, DimensionRule, Spinner } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
-import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { useAuth } from "../../auth";
 import { useProfile } from "../../profile";
 import { useListing } from "../hooks/useListings";
 import { typeLabels } from "../labels";
 import { ListingNotFound } from "./ListingNotFound";
+import { ListingPrice } from "./ListingPrice";
+import { OwnerAvatar } from "./OwnerAvatar";
 import { OwnerBar } from "./OwnerBar";
-import { ReportListingModal } from "./ReportListingModal";
 
 const GENERIC_ERROR_MESSAGE = "Please try again in a moment.";
 
 function ListingDetail() {
   const { id } = useParams<{ id: string }>();
   const { data, isPending, error } = useListing(id);
-  const [isReportOpen, setIsReportOpen] = useState(false);
   const { status } = useAuth();
   const { data: profile } = useProfile({ enabled: status === "authenticated" });
 
@@ -101,10 +99,11 @@ function ListingDetail() {
         </div>
 
         <div className="flex items-baseline gap-3">
-          <span className="text-2xl font-bold text-ink-900">
-            {formatPrice(listing.price)}{" "}
-            <span className="text-sm font-medium text-ink-500">FCFA / month</span>
-          </span>
+          <ListingPrice
+            price={listing.price}
+            className="text-2xl font-bold text-ink-900"
+            unitClassName="text-sm font-medium text-ink-500"
+          />
         </div>
 
         {listing.status === "unavailable" && (
@@ -119,38 +118,29 @@ function ListingDetail() {
 
         <div>
           <h2 className="mb-2 text-lg font-bold text-ink-900">The owner</h2>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="flex size-11 flex-none items-center justify-center bg-ink-900 text-sm font-semibold text-white">
-                {ownerName
-                  .split(" ")
-                  .map((part) => part[0])
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase() || "?"}
-              </span>
-              <div>
-                <p className="font-semibold text-ink-900">{ownerName || "Owner"}</p>
-                <p className="text-sm text-text-muted">Owner</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <OwnerAvatar
+              avatarUrl={listing.owner.avatar_url}
+              firstName={listing.owner.first_name}
+              lastName={listing.owner.last_name}
+            />
+            <div>
+              <p className="font-semibold text-ink-900">{ownerName || "Owner"}</p>
+              <p className="text-sm text-text-muted">Owner</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsReportOpen(true)}
-              className="text-sm font-semibold text-ink-500 hover:text-ink-900"
-            >
-              Report this listing
-            </button>
           </div>
+          {/* role="note": a role="alert" would be announced every time the page loads. */}
+          <Alert
+            variant="warning"
+            role="note"
+            title="Before you contact this owner"
+            className="mt-4"
+          >
+            Never send money before visiting the property. My House does not hold deposits and is
+            not a party to your agreement.
+          </Alert>
         </div>
       </div>
-
-      <ReportListingModal
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        listingTitle={listing.title}
-      />
     </div>
   );
 }

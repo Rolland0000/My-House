@@ -1,12 +1,12 @@
 import { Link } from "react-router";
 import { ImageOff, Pencil } from "lucide-react";
 import { Badge } from "../../../shared/components";
-import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { VISIBILITY_BADGE } from "../labels";
 import { listingVisibility } from "../listingVisibility";
 import type { ListingSummary } from "../api";
 import { DeleteListingAction } from "./DeleteListingAction";
+import { ListingPrice } from "./ListingPrice";
 import { ListingStatusControl } from "./ListingStatusControl";
 
 interface OwnerListingRowProps {
@@ -47,8 +47,7 @@ function OwnerListingRow({ listing }: OwnerListingRowProps) {
         </Link>
         <p className="truncate text-sm font-medium text-ink-500">{location}</p>
         <p className="text-sm font-bold text-ink-900">
-          {formatPrice(listing.price)}{" "}
-          <span className="text-xs font-medium text-ink-500">FCFA / month</span>
+          <ListingPrice price={listing.price} unitClassName="text-xs font-medium text-ink-500" />
         </p>
         <div className="flex flex-wrap gap-2">
           <Badge tone={visibilityBadge.tone}>{visibilityBadge.label}</Badge>
