@@ -14,6 +14,7 @@ pub fn router() -> OpenApiRouter<AppState> {
             handler::delete
         ))
         .routes(routes!(handler::update_status)) // owner
+        .routes(routes!(handler::publish)) // owner
         // Mounted under /users/me, but kept here because it reads listings.
         .routes(routes!(handler::list_mine)) // owner
 }

@@ -2184,9 +2184,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingPhotosPage.tsx": {
-    "mtime": 1791721151.4989913,
-    "seen": 1791721189.163938,
-    "ast_hash": "4cd6268088ced870dcf6f28cf3919708",
+    "mtime": 1791721496.16598,
+    "seen": 1791721516.9497511,
+    "ast_hash": "af6f15f3be89c7cd1ce851d3bd84581f",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/PhotoTile.tsx": {
@@ -2271,6 +2271,12 @@
     "mtime": 1791720669.6809099,
     "seen": 1791721189.163997,
     "ast_hash": "b92237a2312e9641fe26273381ea51a3",
+    "semantic_hash": ""
+  },
+  "docs/plans/MH-61-plan.md": {
+    "mtime": 1791722708.4080124,
+    "seen": 1791722720.058818,
+    "ast_hash": "0076b28c9bacb74ec71928d978617d82",
     "semantic_hash": ""
   }
 }

@@ -223,6 +223,42 @@ pub async fn set_listing_status(
     Ok(ListingStatusDto { id, status })
 }
 
+/// What a publish request does to a listing in a given state.
+#[derive(Debug, PartialEq, Eq)]
+pub enum PublishDecision {
+    Publish,
+    AlreadyPublished,
+}
+
+/// A published listing is left as is, with or without a photo; a draft needs a photo first.
+pub fn publish_decision(is_published: bool, has_photo: bool) -> Result<PublishDecision, AppError> {
+    match (is_published, has_photo) {
+        (true, _) => Ok(PublishDecision::AlreadyPublished),
+        (false, true) => Ok(PublishDecision::Publish),
+        (false, false) => Err(AppError::PhotoRequired),
+    }
+}
+
+/// Publishes `owner_id`'s listing `id` and returns it in the same shape as `GET /listings/:id`.
+/// An unknown id and another owner's listing both give `ListingNotFound`.
+pub async fn publish_listing(
+    pool: &PgPool,
+    id: Uuid,
+    owner_id: Uuid,
+) -> Result<ListingDetailDto, AppError> {
+    let row = repository::find_listing_by_id(pool, id)
+        .await?
+        .filter(|row| row.owner_id == owner_id)
+        .ok_or(AppError::ListingNotFound)?;
+
+    // No lock: losing a race with the last photo's deletion leaves a published
+    // listing without a photo, which stays hidden from the public.
+    if publish_decision(row.published_at.is_some(), row.has_photo)? == PublishDecision::Publish {
+        repository::publish_listing(pool, id, owner_id).await?;
+    }
+    get_listing_detail(pool, id, Some(owner_id)).await
+}
+
 /// Deletes `owner_id`'s listing `id` and its photos, under the same row lock as uploads.
 /// Files are deleted after the commit, so a storage failure can only leave an orphaned file.
 pub async fn delete_listing(
@@ -318,6 +354,35 @@ mod tests {
                     "caller={caller:?} is_published={is_published} has_photo={has_photo}"
                 );
             }
+        }
+    }
+
+    #[test]
+    fn a_draft_with_a_photo_is_published() {
+        assert!(matches!(
+            publish_decision(false, true),
+            Ok(PublishDecision::Publish)
+        ));
+    }
+
+    #[test]
+    fn a_draft_without_a_photo_needs_one() {
+        assert!(matches!(
+            publish_decision(false, false),
+            Err(AppError::PhotoRequired)
+        ));
+    }
+
+    #[test]
+    fn a_published_listing_is_left_as_is_with_or_without_a_photo() {
+        for has_photo in [true, false] {
+            assert!(
+                matches!(
+                    publish_decision(true, has_photo),
+                    Ok(PublishDecision::AlreadyPublished)
+                ),
+                "has_photo={has_photo}"
+            );
         }
     }
 
