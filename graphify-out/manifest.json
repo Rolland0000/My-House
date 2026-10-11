@@ -216,9 +216,9 @@
     "semantic_hash": "2b9cd9fbb8d08dd77868c4618748de1d"
   },
   "frontend/docs-frontend/openapi.json": {
-    "mtime": 1791718928.433912,
-    "seen": 1791719402.913244,
-    "ast_hash": "c20463d529b25a328fb9d4e1007550f9",
+    "mtime": 1791719935.1389265,
+    "seen": 1791721189.16382,
+    "ast_hash": "7e0081199d7391c32cb3c1ce9cf83173",
     "semantic_hash": ""
   },
   "frontend/eslint.config.js": {
@@ -312,9 +312,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/features/listings/api.ts": {
-    "mtime": 1791718928.085042,
-    "seen": 1791719402.913339,
-    "ast_hash": "f2c4500bf993f9dcd7464994550467d3",
+    "mtime": 1791720543.3166387,
+    "seen": 1791721189.163915,
+    "ast_hash": "2a3f4566f50f8c5f6f40c8c5ccfa186d",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListings.ts": {
@@ -2184,33 +2184,33 @@
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/ListingPhotosPage.tsx": {
-    "mtime": 1791718928.0884633,
-    "seen": 1791719402.913362,
-    "ast_hash": "d93d8569e45437d13b62bb880ebd4215",
+    "mtime": 1791721496.16598,
+    "seen": 1791721516.9497511,
+    "ast_hash": "af6f15f3be89c7cd1ce851d3bd84581f",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/components/PhotoTile.tsx": {
-    "mtime": 1791718928.0933332,
-    "seen": 1791719402.913373,
-    "ast_hash": "82b2905a548d1143bbd8f851ad573d97",
+    "mtime": 1791720985.4627085,
+    "seen": 1791721189.163949,
+    "ast_hash": "bef1a0c50ed93ca7de747f8a49f92592",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/hooks/useListingPhotoMutations.ts": {
-    "mtime": 1791718928.0940132,
-    "seen": 1791719402.913381,
-    "ast_hash": "21c0fe33202488d20ef1d7cab300ded7",
+    "mtime": 1791720604.8739278,
+    "seen": 1791721189.1639569,
+    "ast_hash": "358f25ed78abf4284120013b8e99182c",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/listingPhotos.test.ts": {
-    "mtime": 1791718928.0954654,
-    "seen": 1791719402.913404,
-    "ast_hash": "6766f34fdddcabdac704fbe627bb7288",
+    "mtime": 1791720580.7182705,
+    "seen": 1791721189.16398,
+    "ast_hash": "23ab13939a07e46bdaa01905bc3645c2",
     "semantic_hash": ""
   },
   "frontend/src/features/listings/listingPhotos.ts": {
-    "mtime": 1791718928.0963128,
-    "seen": 1791719402.913406,
-    "ast_hash": "104aa4e62857b524228305f36914501d",
+    "mtime": 1791720574.8520238,
+    "seen": 1791721189.1639822,
+    "ast_hash": "5a2bc2e315e2a62d85f9f96b3a6d6c7b",
     "semantic_hash": ""
   },
   "frontend/src/shared/utils/imageFileCheck.test.ts": {
@@ -2259,6 +2259,18 @@
     "mtime": 1791718928.5098379,
     "seen": 1791719402.913683,
     "ast_hash": "ebd93a79ec883ac36262f1e4ff9894d8",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/photoOrder.test.ts": {
+    "mtime": 1791720567.9171891,
+    "seen": 1791721189.1639948,
+    "ast_hash": "fa4bfde2f375eceede1eb5951cad8c95",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/listings/photoOrder.ts": {
+    "mtime": 1791720669.6809099,
+    "seen": 1791721189.163997,
+    "ast_hash": "b92237a2312e9641fe26273381ea51a3",
     "semantic_hash": ""
   }
 }
