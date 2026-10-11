@@ -1,12 +1,20 @@
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useToast } from "../../../shared/components";
 import {
   deleteListingPhoto,
+  reorderListingPhotos,
   setListingCover,
   uploadListingPhoto,
   type ListingDetail,
   type ListingMedia,
 } from "../api";
 import { isAlreadyDeleted } from "../listingDeletion";
+import {
+  ORDER_CONFLICT_MESSAGE,
+  ORDER_SAVE_FAILED_MESSAGE,
+  isMediaOrderConflict,
+} from "../listingPhotos";
+import { withCoverFirst } from "../photoOrder";
 import { LISTING_STATUS_MUTATION_KEY } from "./useUpdateListingStatus";
 
 export const LISTING_PHOTOS_MUTATION_KEY = ["listing-photos"];
@@ -81,8 +89,47 @@ export function useSetListingCover(listingId: string) {
     retry: false,
     onSuccess: (response) =>
       updateListingMedia(queryClient, listingId, (media) =>
-        media.map((photo) => ({ ...photo, is_cover: photo.id === response.data.id }))
+        withCoverFirst(
+          media.map((photo) => ({ ...photo, is_cover: photo.id === response.data.id }))
+        )
       ),
+    onSettled: () => refetchAfterLastPhotoChange(queryClient, listingId),
+  });
+}
+
+/** Takes the full media list in its new order; the toasts live here so they still show after unmount. */
+export function useReorderListingPhotos(listingId: string) {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationKey: [...LISTING_PHOTOS_MUTATION_KEY, listingId],
+    mutationFn: (media: ListingMedia[]) =>
+      reorderListingPhotos(
+        listingId,
+        media.map(({ id }) => id)
+      ),
+    retry: false,
+    onMutate: async (media) => {
+      await queryClient.cancelQueries({ queryKey: ["listing", listingId] });
+      const previousMedia = queryClient.getQueryData<{ data: ListingDetail }>([
+        "listing",
+        listingId,
+      ])?.data.media;
+      updateListingMedia(queryClient, listingId, () => media);
+      return { previousMedia };
+    },
+    onError: (error, _media, context) => {
+      if (isMediaOrderConflict(error)) {
+        void queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
+        showToast(ORDER_CONFLICT_MESSAGE, { variant: "info" });
+        return;
+      }
+      const previousMedia = context?.previousMedia;
+      if (previousMedia) updateListingMedia(queryClient, listingId, () => previousMedia);
+      showToast(ORDER_SAVE_FAILED_MESSAGE, { variant: "error" });
+    },
+    onSuccess: (response) => updateListingMedia(queryClient, listingId, () => response.data),
     onSettled: () => refetchAfterLastPhotoChange(queryClient, listingId),
   });
 }
