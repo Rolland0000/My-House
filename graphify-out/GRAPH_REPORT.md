@@ -1,17 +1,17 @@
 # Graph Report - My-House  (2026-10-11)
 
 ## Corpus Check
-- 347 files · ~188,445 words
+- 349 files · ~192,063 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 24 file(s) not represented in the graph (top: (none) 15, .toml 5, .example 2)
 
 ## Summary
-- 2656 nodes · 6081 edges · 208 communities (138 shown, 70 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 367 edges (avg confidence: 0.92)
+- 2682 nodes · 6152 edges · 206 communities (135 shown, 71 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 383 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3931172d`
+- Built from commit: `25751327`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -48,7 +48,7 @@
 - compilerOptions
 - auth/handler.rs
 - 20260729041038_baseline_schema.sql
-- auth/service.rs
+- get_listing_detail
 - media/service.rs
 - admin/handler.rs
 - .mcp.json
@@ -57,7 +57,7 @@
 - Result
 - /graphify
 - pagination.rs
-- AuthUser
+- users/handler.rs
 - dependencies
 - MH-54 — Garder les brouillons privés jusqu'à publication : plan d'implémentation (BE + FE)
 - admin identity-document read exception
@@ -67,8 +67,8 @@
 - scripts
 - ProfileForm.tsx
 - users/dto.rs
-- AppError
-- EditListingPage.tsx
+- media/repository.rs
+- OwnerBar
 - CI Backend Workflow
 - app_server.rs
 - client.ts
@@ -83,14 +83,14 @@
 - delete_storage_objects
 - listings/handler.rs
 - Docker Rules Skill
-- Toast.tsx
+- react
 - listing_media table
 - package.json
 - listings/repository.rs
 - CI Job: Frontend OpenAPI Codegen
 - CLAUDE.md — MyHouse project instructions
 - ON DELETE CASCADE — relational-only cleanup rule
-- MH-58 — Supprimer un bien : plan d'implémentation (BE + FE)
+- Modal
 - graphify reference: extra exports and benchmark
 - users module
 - shared module
@@ -102,9 +102,9 @@
 - db.rs
 - /graphify
 - OtpCodeInput
-- RootLayout.tsx
+- @tanstack/react-query
 - owner_requests table
-- vitest
+- MH-61 — Publier un bien : plan d'implémentation (BE + FE)
 - router.tsx
 - sqlx
 - graphify reference: query, path, explain
@@ -123,9 +123,9 @@
 - R-08: search_vector trigger N+1 query
 - Refresh Token httpOnly Cookie
 - GET /users/me/owner-request
-- get_listing_detail
-- useToast
-- MH-60 — Réordonner les photos d'un bien : plan d'implémentation (BE + FE)
+- UserRow
+- 4. Points d'intégration avec l'existant
+- EditListingPage.tsx
 - useListingPhotoMutations.ts
 - graphify reference: add a URL and watch a folder
 - graphify reference: commit hook and native CLAUDE.md integration
@@ -176,53 +176,51 @@
 - .codex/skills/graphify/references/extraction-spec.md
 - backend-my-house
 - ListingSummaryRow
-- OwnerListingRow.tsx
+- ListingDetail.tsx
 - media/handler.rs
-- @tanstack/react-query
-- ListingPhotosPage
+- profile/api.ts
+- AppError
 - errors.rs
 - SiteHeader.tsx
 - What You Must Do When Invoked
 - What You Must Do When Invoked
-- auth/dto.rs
+- tokenRole.ts
 - listings/api.ts
 - Step 3 - Extract entities and relationships
 - Step 3 - Extract entities and relationships
 - RateLimitState
 - image
-- types.rs
-- async_trait
-- MediaRow
-- media_order.rs
-- rbac.rs
-- K
+- ApiError
+- ReportListingModal.tsx
+- useReviewOwnerRequest.ts
+- pagination.ts
+- cors.rs
 - main.rs
 - rate_limit
-- 2.3 MH-54-FE — Fichiers, dans l'ordre (un fichier à la fois)
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppError` - 203 edges
-2. `AppState` - 70 edges
+1. `AppError` - 207 edges
+2. `AppState` - 71 edges
 3. `cn()` - 46 edges
 4. `react` - 44 edges
-5. `ApiError` - 34 edges
-6. `Alert()` - 33 edges
+5. `ApiError` - 35 edges
+6. `Alert()` - 34 edges
 7. `AppCacheProvider` - 32 edges
-8. `AuthUser` - 31 edges
+8. `AuthUser` - 32 edges
 9. `set_valid_env()` - 29 edges
 10. `@tanstack/react-query` - 28 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `9. Critères de fin` --references--> `deleteListing()`  [INFERRED]
-  docs/plans/MH-58-plan.md → frontend/src/features/listings/api.ts
-- `9. Critères de fin` --references--> `reorderListingPhotos()`  [INFERRED]
-  docs/plans/MH-60-plan.md → frontend/src/features/listings/api.ts
+- `9. Critères de fin` --references--> `updateListingStatus()`  [INFERRED]
+  docs/plans/MH-57-plan.md → frontend/src/features/listings/api.ts
 - `3.2 Fichiers, dans l'ordre (un fichier à la fois)` --references--> `ListingNotFound()`  [INFERRED]
   docs/plans/MH-53_IMPLEMENTATION_PLAN.md → frontend/src/features/listings/components/ListingNotFound.tsx
 - `Décisions prises` --references--> `ListingNotFound()`  [INFERRED]
   docs/plans/MH-57-plan.md → frontend/src/features/listings/components/ListingNotFound.tsx
 - `5. Vérifications` --references--> `ListingNotFound()`  [INFERRED]
   docs/plans/MH-58-plan.md → frontend/src/features/listings/components/ListingNotFound.tsx
+- `2.1 MH-61-BE : fichiers, dans l'ordre (un fichier à la fois)` --references--> `ListingNotFound()`  [INFERRED]
+  docs/plans/MH-61-plan.md → frontend/src/features/listings/components/ListingNotFound.tsx
 
 ## Import Cycles
 - None detected.
@@ -249,47 +247,47 @@
 - **Owner Request Approval Notification Flow** — backend_src_modules_notifications_templates_owner_request_received, backend_src_modules_notifications_templates_owner_request_approved, backend_src_modules_notifications_templates_owner_request_rejected [INFERRED 0.85]
 - **Refresh Token Handling Invariants Across Review Skills** — claude_skills_code_review_backend_skill_refresh_token_rotation_invariant, claude_skills_code_review_frontend_skill_refresh_token_cookie_invariant, claude_skills_code_review_backend_skill_myhouse_invariants, claude_skills_code_review_frontend_skill_myhouse_invariants [INFERRED 0.85]
 
-## Communities (208 total, 70 thin omitted)
+## Communities (206 total, 71 thin omitted)
 
 ### Community 0 - "listings/service.rs"
-Cohesion: 0.13
-Nodes (20): a_valid_request_is_normalized(), an_unknown_type_is_rejected_and_every_label_is_accepted(), description_bounds(), DESCRIPTION_LENGTH, each_required_field_missing_is_reported(), optional_fields_may_be_absent(), PLACE_NAME_MAX_LENGTH, price_bounds() (+12 more)
+Cohesion: 0.10
+Nodes (25): a_valid_request_is_normalized(), an_unknown_type_is_rejected_and_every_label_is_accepted(), description_bounds(), DESCRIPTION_LENGTH, each_required_field_missing_is_reported(), optional_fields_may_be_absent(), PLACE_NAME_MAX_LENGTH, price_bounds() (+17 more)
 
 ### Community 1 - "owner_requests/dto.rs"
 Cohesion: 0.12
 Nodes (28): admin_detail_dto_falls_back_to_empty_documents_on_malformed_json(), admin_detail_dto_never_exposes_storage_key(), admin_detail_row(), admin_list_dto_omits_identity_data_and_documents(), admin_row(), AdminOwnerRequestDetailDto, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocumentDto (+20 more)
 
 ### Community 2 - "auth/index.ts"
-Cohesion: 0.07
-Nodes (35): 2.3 MH-58-FE : fichiers, dans l'ordre (un fichier à la fois), Décisions prises, RequireAuth(), RequireAuthProps, OtpRequestResponse, OtpVerifyResponse, OtpVerifyToken, RefreshResponse (+27 more)
+Cohesion: 0.14
+Nodes (22): OtpRequestResponse, OtpVerifyResponse, OtpVerifyToken, RefreshResponse, refreshSession(), registerAccount(), RegisterPayload, RegisterResponse (+14 more)
 
 ### Community 3 - "config/mod.rs"
-Cohesion: 0.06
-Nodes (69): admin_bootstrap_defaults_to_disabled_when_absent(), app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, dev_allows_smtp_credentials_over_plaintext(), dev_without_smtp_credentials_sends_plaintext_unauthenticated(), empty_smtp_credentials_count_as_absent() (+61 more)
+Cohesion: 0.07
+Nodes (64): admin_bootstrap_defaults_to_disabled_when_absent(), app_port_defaults_to_3000_when_absent(), AppConfig, AppEnv, ConfigError, dev_allows_smtp_credentials_over_plaintext(), dev_without_smtp_credentials_sends_plaintext_unauthenticated(), empty_smtp_credentials_count_as_absent() (+56 more)
 
 ### Community 4 - "owner_requests/service.rs"
 Cohesion: 0.09
-Nodes (41): a_doc_id_from_a_different_request_does_not_resolve(), a_missing_storage_object_surfaces_as_document_not_found(), a_pdf_renamed_into_an_image_slot_is_a_shape_violation(), accepts_one_pdf_with_no_side(), accepts_two_images_as_front_and_back(), as_document_not_found(), as_shape_error(), ClassifiedDocument (+33 more)
+Nodes (42): a_doc_id_from_a_different_request_does_not_resolve(), a_missing_storage_object_surfaces_as_document_not_found(), a_pdf_renamed_into_an_image_slot_is_a_shape_violation(), accepts_one_pdf_with_no_side(), accepts_two_images_as_front_and_back(), as_document_not_found(), as_shape_error(), ClassifiedDocument (+34 more)
 
 ### Community 5 - "storage_key.rs"
 Cohesion: 0.17
 Nodes (16): assert_key_shape(), avatar_key(), avatar_key_from_url(), avatar_key_from_url_round_trips_a_generated_key(), avatar_key_has_expected_shape(), extension_is_preserved_verbatim(), generated_keys_are_unique_across_calls(), listing_media_key() (+8 more)
 
 ### Community 6 - "AppCacheProvider"
-Cohesion: 0.18
-Nodes (25): AppCache, AUTH_CHALLENGE_MAX_ENTRIES, build_auth_challenge_cache(), build_cache_provider(), build_ip_rate_limit_cache(), build_otp_rate_limit_cache(), build_refresh_replay_cache(), IP_RATE_LIMIT_MAX_ENTRIES (+17 more)
+Cohesion: 0.05
+Nodes (68): async_trait, AppCache, AUTH_CHALLENGE_MAX_ENTRIES, build_auth_challenge_cache(), build_cache_provider(), build_ip_rate_limit_cache(), build_otp_rate_limit_cache(), build_refresh_replay_cache() (+60 more)
 
 ### Community 7 - "route.rs"
 Cohesion: 0.19
 Nodes (13): apidoc, appenv, ApiDoc, build_router(), merged_router(), openapi_spec(), build_cors_layer, modules (+5 more)
 
 ### Community 8 - "components/index.ts"
-Cohesion: 0.06
-Nodes (59): 2. Existant sur lequel on s'appuie, 4.2 Fichiers, dans l'ordre (un fichier à la fois), 2.3 MH-55-FE — Fichiers, dans l'ordre (un fichier à la fois), ListingFeed(), typeOptions, OwnerListings(), parsePageParam(), AlertProps (+51 more)
+Cohesion: 0.08
+Nodes (40): 2.3 MH-55-FE — Fichiers, dans l'ordre (un fichier à la fois), OwnerListings(), parsePageParam(), AlertProps, AlertVariant, variantConfig, ButtonProps, ButtonSize (+32 more)
 
 ### Community 9 - "Mailer"
 Cohesion: 0.05
-Nodes (53): Address, AddressError, AsyncSmtpTransport, authenticates_with_configured_credentials(), builds_successfully_with_valid_config(), builds_with_credentials_and_each_security_mode(), credentials(), hello_name() (+45 more)
+Nodes (55): Address, AddressError, AsyncSmtpTransport, authenticates_with_configured_credentials(), builds_successfully_with_valid_config(), builds_with_credentials_and_each_security_mode(), credentials(), hello_name() (+47 more)
 
 ### Community 10 - "auth/repository.rs"
 Cohesion: 0.21
@@ -313,31 +311,31 @@ Nodes (15): admin_exists(), delete_by_id(), find_by_id(), find_is_active(), list
 
 ### Community 15 - "owner-request/api.ts"
 Cohesion: 0.20
-Nodes (15): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, OwnerRequestStatusResponse, submitOwnerRequest(), OwnerRequestStatus(), useOwnerRequestStatus() (+7 more)
+Nodes (14): getOwnerRequestStatus(), OwnerRequest, OwnerRequestResponse, ownerRequestStatusQueryKey, OwnerRequestStatusResponse, submitOwnerRequest(), OwnerRequestStatus(), useOwnerRequestStatus() (+6 more)
 
 ### Community 16 - "extractors.rs"
-Cohesion: 0.11
-Nodes (27): AppJson<T>, AuthState, bearer_token(), MaybeAuthUser, optional_bearer_token(), resolve_identity(), resolve_identity_rejects_an_undecodable_token_without_touching_cache_or_db(), Arc (+19 more)
+Cohesion: 0.12
+Nodes (26): AppJson<T>, AuthState, AuthUser, bearer_token(), MaybeAuthUser, optional_bearer_token(), resolve_identity(), resolve_identity_rejects_an_undecodable_token_without_touching_cache_or_db() (+18 more)
 
 ### Community 17 - "validation.rs"
 Cohesion: 0.08
-Nodes (22): FieldErrors, finish_reports_one_entry_per_recorded_violation(), MAX_ADMIN_NOTE_LENGTH, MAX_NAME_LENGTH, MAX_PHONE_LENGTH, normalize_place_name(), NUL, optional_note() (+14 more)
+Nodes (24): FieldErrors, finish_reports_one_entry_per_recorded_violation(), MAX_ADMIN_NOTE_LENGTH, MAX_NAME_LENGTH, MAX_PHONE_LENGTH, normalize_place_name(), NUL, optional_name() (+16 more)
 
 ### Community 18 - "listingPhotos.ts"
-Cohesion: 0.21
-Nodes (14): 3. Tests unitaires (vitest, logique pure, sans DB ni réseau), DeletePhotoModal(), DeletePhotoModalProps, COVER_REQUIRED_MESSAGE, FORMAT_MESSAGE, freePhotoSlots(), GENERIC_UPLOAD_MESSAGE, isCoverRequiredError() (+6 more)
+Cohesion: 0.17
+Nodes (17): 3. Tests unitaires (vitest, logique pure, sans DB ni réseau), DeletePhotoModal(), DeletePhotoModalProps, COVER_REQUIRED_MESSAGE, FORMAT_MESSAGE, freePhotoSlots(), GENERIC_UPLOAD_MESSAGE, isCoverRequiredError() (+9 more)
 
 ### Community 19 - "api/constants.ts"
-Cohesion: 0.18
-Nodes (15): OwnerRequestForm(), GENERIC_ERROR_MESSAGE, IMAGE_FORMAT_MESSAGE, IMAGE_SIZE_MESSAGE, PDF_FORMAT_MESSAGE, PDF_SIZE_MESSAGE, preCheckImage(), preCheckPdf() (+7 more)
+Cohesion: 0.20
+Nodes (13): OwnerRequestForm(), GENERIC_ERROR_MESSAGE, IMAGE_FORMAT_MESSAGE, IMAGE_SIZE_MESSAGE, PDF_FORMAT_MESSAGE, PDF_SIZE_MESSAGE, preCheckImage(), preCheckPdf() (+5 more)
 
 ### Community 20 - "admin/api.ts"
-Cohesion: 0.12
-Nodes (25): AdminOwnerRequest, AdminOwnerRequestDetail, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocument, getOwnerRequest(), getOwnerRequestDocument(), listOwnerRequests(), ListOwnerRequestsParams (+17 more)
+Cohesion: 0.20
+Nodes (17): AdminOwnerRequest, AdminOwnerRequestDetail, AdminOwnerRequestDetailResponse, AdminOwnerRequestDocument, getOwnerRequest(), getOwnerRequestDocument(), listOwnerRequests(), ListOwnerRequestsParams (+9 more)
 
 ### Community 21 - "AppState"
-Cohesion: 0.11
-Nodes (27): AppState, Inner, Arc, PgPool, Self, StorageProvider, router(), OpenApiRouter (+19 more)
+Cohesion: 0.10
+Nodes (30): AppState, Inner, Arc, PgPool, Self, StorageProvider, router(), OpenApiRouter (+22 more)
 
 ### Community 22 - "compilerOptions"
 Cohesion: 0.10
@@ -364,8 +362,8 @@ Cohesion: 0.26
 Nodes (18): AdminOwnerRequestDetailRow, AdminOwnerRequestRow, IdentityData, OwnerRequestDocument, OwnerRequestRow, OwnerRequestStatus, OwnerRequestSubmission, Bytes (+10 more)
 
 ### Community 28 - "listings/dto.rs"
-Cohesion: 0.23
-Nodes (21): a_draft_summary_serializes_published_at_as_null(), a_published_summary_keeps_its_published_at(), ListingDetailDto, ListingMediaDto, ListingRequest, ListingStatusDto, ListingStatusResponse, ListingSummaryDto (+13 more)
+Cohesion: 0.24
+Nodes (20): a_draft_summary_serializes_published_at_as_null(), a_published_summary_keeps_its_published_at(), ListingDetailDto, ListingMediaDto, ListingRequest, ListingStatusDto, ListingStatusResponse, ListingSummaryDto (+12 more)
 
 ### Community 29 - "compilerOptions"
 Cohesion: 0.11
@@ -379,13 +377,13 @@ Nodes (19): logout(), otp_request(), otp_verify(), refresh(), register(), Cookie
 Cohesion: 0.13
 Nodes (25): idx_listing_media_listing, idx_listing_media_one_cover, idx_listings_city, idx_listings_city_normalized, idx_listings_owner, idx_listings_search, idx_listings_status, idx_listings_type (+17 more)
 
-### Community 32 - "auth/service.rs"
-Cohesion: 0.16
-Nodes (26): handle_revoked(), logout(), mint(), otp_request(), OtpVerifyConfig, refresh(), register(), RegisterInput (+18 more)
+### Community 32 - "get_listing_detail"
+Cohesion: 0.20
+Nodes (21): ListingStatusRequest, an_unknown_or_missing_status_is_a_status_field_error(), create_listing(), delete_listing(), get_listing_detail(), is_visible_to(), list_listings(), list_owner_listings() (+13 more)
 
 ### Community 33 - "media/service.rs"
-Cohesion: 0.07
-Nodes (41): a_duplicated_id_is_a_conflict(), a_missing_id_is_a_conflict(), an_extra_id_is_a_conflict(), an_unknown_id_of_the_same_length_is_a_conflict(), another_owners_photo_is_reported_as_not_found(), apply_order(), check_upload_slot(), db_err() (+33 more)
+Cohesion: 0.05
+Nodes (64): Self, MediaForDeletion, MediaRow, OrderedMediaRow, Bytes, String, Uuid, UploadMediaSubmission (+56 more)
 
 ### Community 34 - "admin/handler.rs"
 Cohesion: 0.26
@@ -412,20 +410,20 @@ Cohesion: 0.20
 Nodes (9): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Usage (+1 more)
 
 ### Community 40 - "pagination.rs"
-Cohesion: 0.15
-Nodes (17): DEFAULT_PER_PAGE, MAX_PER_PAGE, PaginatedResponse, PaginatedResponse<T>, PaginationMeta, Option, Self, T (+9 more)
+Cohesion: 0.05
+Nodes (42): check(), check_storage(), HealthStatus, Json, State, StatusCode, StorageStatus, OtpRequestDto (+34 more)
 
-### Community 41 - "AuthUser"
-Cohesion: 0.18
-Nodes (20): AVATAR_FIELD_NAME, delete_me(), get_me(), multipart_error(), read_file_field(), Bytes, CookieJar, Json (+12 more)
+### Community 41 - "users/handler.rs"
+Cohesion: 0.26
+Nodes (15): AVATAR_FIELD_NAME, delete_me(), get_me(), read_file_field(), Bytes, CookieJar, Json, Multipart (+7 more)
 
 ### Community 42 - "dependencies"
 Cohesion: 0.25
 Nodes (8): dependencies, clsx, lucide-react, react, react-dom, react-hook-form, react-router, @tanstack/react-query
 
 ### Community 43 - "MH-54 — Garder les brouillons privés jusqu'à publication : plan d'implémentation (BE + FE)"
-Cohesion: 0.20
-Nodes (9): 1. Contexte et objectif, 3. Ordre d'implémentation recommandé, 5. Vérifications, 6. Risques et inconnues, 7. Contrat qualité (à appliquer sur chaque branche, BE puis FE), 8. Hors périmètre, 9. Critères de fin, Décisions de conception prises pendant l'analyse (+1 more)
+Cohesion: 0.14
+Nodes (13): 1. Contexte et objectif, 2.1 MH-54-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-54-BE — Tests unitaires (logique pure, sans DB), 2.4 MH-54-FE — Tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications, 6. Risques et inconnues (+5 more)
 
 ### Community 44 - "admin identity-document read exception"
 Cohesion: 0.15
@@ -436,8 +434,8 @@ Cohesion: 0.23
 Nodes (9): RecordingStorage, Bytes, Duration, Mutex, Result, Self, StorageProvider, String (+1 more)
 
 ### Community 46 - "owner_requests/handler.rs"
-Cohesion: 0.15
-Nodes (18): DOCUMENTS_FIELD_NAME, get_owner_request_status(), multipart_error(), read_submission(), Json, Multipart, MultipartError, Result (+10 more)
+Cohesion: 0.14
+Nodes (19): DOCUMENTS_FIELD_NAME, get_owner_request_status(), multipart_error(), read_submission(), Json, Multipart, MultipartError, Result (+11 more)
 
 ### Community 47 - "rate_limit.rs"
 Cohesion: 0.13
@@ -448,20 +446,20 @@ Cohesion: 0.15
 Nodes (13): scripts, build, dev, format, generate:types, generate:types:ci, lint, predev (+5 more)
 
 ### Community 49 - "ProfileForm.tsx"
-Cohesion: 0.24
-Nodes (14): Profile, OwnerRequestStatusBlockProps, ProfileFields(), handleSubmit(), ProfileFieldsProps, ROLE_LABELS, FIELDS_BY_SERVER_NAME, maxLengthMessage() (+6 more)
+Cohesion: 0.11
+Nodes (26): OwnerRequestForm, RegistrationFormProps, FileWithPreview, FormValues, ID_TYPE_OPTIONS, ImageSlotProps, Modality, PdfSlotProps (+18 more)
 
 ### Community 50 - "users/dto.rs"
-Cohesion: 0.12
-Nodes (18): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Role, Self (+10 more)
+Cohesion: 0.14
+Nodes (14): AvatarUploadForm, response_envelope_serializes_the_profile_fields(), row(), row_maps_to_dto_field_for_field(), From, Option, Role, Self (+6 more)
 
-### Community 51 - "AppError"
-Cohesion: 0.24
-Nodes (23): count_media(), db_err(), delete_media(), demote_other_covers(), find_listing_media(), insert_media(), list_listing_media(), lock_listing_owner() (+15 more)
+### Community 51 - "media/repository.rs"
+Cohesion: 0.37
+Nodes (16): count_media(), delete_media(), demote_other_covers(), find_listing_media(), insert_media(), list_listing_media(), lock_listing_owner(), lock_media_for_deletion() (+8 more)
 
-### Community 52 - "EditListingPage.tsx"
-Cohesion: 0.15
-Nodes (24): 1. Contexte et objectif, 2.1 MH-56-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-56-BE — Tests unitaires (logique pure, sans DB), 2.3 MH-56-FE — Fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-56-FE — Tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 4. Points d'intégration avec l'existant (+16 more)
+### Community 52 - "OwnerBar"
+Cohesion: 0.22
+Nodes (15): 1. Contexte et objectif, 2.1 MH-56-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-56-BE — Tests unitaires (logique pure, sans DB), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications, 7. Contrat qualité (à appliquer sur chaque branche, BE puis FE), 8. Hors périmètre (+7 more)
 
 ### Community 53 - "CI Backend Workflow"
 Cohesion: 0.27
@@ -472,8 +470,8 @@ Cohesion: 0.18
 Nodes (11): AppServer, Error, Result, Self, SocketAddr, shutdown_signal(), Box, build_router (+3 more)
 
 ### Community 55 - "client.ts"
-Cohesion: 0.15
-Nodes (23): 2.4 MH-58-FE : tests unitaires (vitest, logique pure), 2.2 API et logique pure, 4. Points d'intégration avec l'existant, isAlreadyDeleted(), AccessTokenGetter, apiDelete(), ApiError, apiGetBlob() (+15 more)
+Cohesion: 0.21
+Nodes (16): AccessTokenGetter, apiDelete(), apiGet(), apiPatch(), apiPut(), buildQueryString(), ErrorEnvelope, isAuthPath() (+8 more)
 
 ### Community 56 - "OtpVerifyForm.tsx"
 Cohesion: 0.11
@@ -485,7 +483,7 @@ Nodes (10): DATABASE_URL compile-time requirement, fn_set_updated_at trigger, Pa
 
 ### Community 58 - "MH-59 — Écran de gestion des photos d'un bien : plan d'implémentation (FE)"
 Cohesion: 0.15
-Nodes (11): 1. Contexte et objectif, 2. Fichiers, dans l'ordre (un fichier à la fois), 5. Vérifications, 6. Risques et inconnues, 7. Contrat qualité, 8. Hors périmètre, 9. Critères de fin, Décisions prises (+3 more)
+Nodes (14): 1. Contexte et objectif, 2.1 Extraction du pré-contrôle et dropzone, 2.2 API et logique pure, 2. Fichiers, dans l'ordre (un fichier à la fois), 5. Vérifications, 6. Risques et inconnues, 8. Hors périmètre, 9. Critères de fin (+6 more)
 
 ### Community 59 - "users table"
 Cohesion: 0.24
@@ -496,16 +494,16 @@ Cohesion: 0.20
 Nodes (10): mh-14-listing-management.html wireframe, Owner's own listings ('Mes biens') page, Photo dropzone component, Publish/edit listing form page, mh-15-owner-request.html wireframe, Owner request form page ('Devenir propriétaire'), Identity document dropzone component, Request approved status page (+2 more)
 
 ### Community 61 - "MH-53 — Créer un bien : plan d'implémentation (BE + FE)"
-Cohesion: 0.14
-Nodes (13): 3.1 Contrat, 3.2 Fichiers, dans l'ordre (un fichier à la fois), 3.3 Tests unitaires (logique pure, sans DB), 3.4 Vérifications BE, 3. MH-53-BE — Création d'un bien, 4.1 Préalable, 4.4 Vérifications FE, 4. MH-53-FE — Formulaire « Publish a listing » (+5 more)
+Cohesion: 0.18
+Nodes (10): 3.1 Contrat, 3.2 Fichiers, dans l'ordre (un fichier à la fois), 3.3 Tests unitaires (logique pure, sans DB), 3.4 Vérifications BE, 3. MH-53-BE — Création d'un bien, 5. Déroulé imposé pour chaque sous-ticket, 6. Hors périmètre, 7. Critères de fin (+2 more)
 
 ### Community 62 - "backend-dev service"
 Cohesion: 0.25
 Nodes (9): backend-dev service, backend-prod service, OTP Login Code Email Template, Welcome Email Template, adminer service, db service (postgres:16-alpine), mailhog service (dev SMTP catcher), frontend-dev service (+1 more)
 
 ### Community 63 - "avatarValidation.ts"
-Cohesion: 0.16
-Nodes (16): 2.1 Extraction du pré-contrôle et dropzone, PhotoSelectionPlan, FORMAT_MESSAGE, GENERIC_ERROR_MESSAGE, preCheck(), PROBLEM_MESSAGES, serverMessage(), SIZE_MESSAGE (+8 more)
+Cohesion: 0.28
+Nodes (10): FORMAT_MESSAGE, GENERIC_ERROR_MESSAGE, preCheck(), PROBLEM_MESSAGES, serverMessage(), SIZE_MESSAGE, AvatarUpload(), clearSelection() (+2 more)
 
 ### Community 64 - "delete_storage_objects"
 Cohesion: 0.39
@@ -513,15 +511,15 @@ Nodes (7): a_missing_or_failing_key_does_not_abort_the_remaining_keys(), delete_
 
 ### Community 65 - "listings/handler.rs"
 Cohesion: 0.22
-Nodes (21): ListingDetailResponse, create(), delete(), get_by_id(), list(), list_mine(), OWNER_ROLES, Json (+13 more)
+Nodes (23): ListingDetailResponse, create(), delete(), get_by_id(), list(), list_mine(), OWNER_ROLES, publish() (+15 more)
 
 ### Community 66 - "Docker Rules Skill"
 Cohesion: 0.25
 Nodes (8): Docker Rules Skill, Dockerfile Best Practices, dockerignore Rules, Docker Forbidden Practices, Docker Logging Rules, Docker Networking Rules, Docker Security Rules, Docker Volumes Rules
 
-### Community 67 - "Toast.tsx"
-Cohesion: 0.14
-Nodes (14): App(), Providers(), ProvidersProps, queryClient, router, frontend_src_index, ToastContext, ToastContextValue (+6 more)
+### Community 67 - "react"
+Cohesion: 0.09
+Nodes (22): App(), Providers(), ProvidersProps, queryClient, router, OtpCodeInputProps, ListingFeed(), typeOptions (+14 more)
 
 ### Community 68 - "listing_media table"
 Cohesion: 0.25
@@ -532,8 +530,8 @@ Cohesion: 0.11
 Nodes (19): name, private, type, version, clsx, eslint, @eslint/js, eslint-plugin-react-hooks (+11 more)
 
 ### Community 70 - "listings/repository.rs"
-Cohesion: 0.20
-Nodes (27): count_listings(), count_owner_listings(), delete_listing(), find_listing_by_id(), find_media_for_listing(), insert_listing(), list_listings(), list_media_keys() (+19 more)
+Cohesion: 0.19
+Nodes (28): count_listings(), count_owner_listings(), delete_listing(), find_listing_by_id(), find_media_for_listing(), insert_listing(), list_listings(), list_media_keys() (+20 more)
 
 ### Community 71 - "CI Job: Frontend OpenAPI Codegen"
 Cohesion: 0.43
@@ -547,9 +545,9 @@ Nodes (7): AGENTS.md — graphify trigger instructions, CLAUDE.md — MyHouse pr
 Cohesion: 0.29
 Nodes (6): GET /admin/owner-requests/:id/documents/:doc_id, ARCHITECTURE.md, ON DELETE CASCADE — relational-only cleanup rule, listings.price missing index (known gap R-07), listings/search index checklist (idx_listings_*), Sensitive columns exclusion (identity_data, identity_documents JSONB)
 
-### Community 74 - "MH-58 — Supprimer un bien : plan d'implémentation (BE + FE)"
-Cohesion: 0.15
-Nodes (12): 1. Contexte et objectif, 2.1 MH-58-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-58-BE : tests unitaires (logique pure, sans DB), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications, 6. Risques et inconnues, 7. Contrat qualité (sur chaque branche, BE puis FE) (+4 more)
+### Community 74 - "Modal"
+Cohesion: 0.12
+Nodes (17): 1. Contexte et objectif, 2.1 MH-58-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-58-BE : tests unitaires (logique pure, sans DB), 2.3 MH-58-FE : fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-58-FE : tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications (+9 more)
 
 ### Community 75 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -580,8 +578,8 @@ Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 82 - "MH-57 — Changer le statut d'un bien : plan d'implémentation (BE + FE)"
-Cohesion: 0.13
-Nodes (15): 1. Décisions tranchées, 2.1 MH-57-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-57-BE : tests unitaires (logique pure, sans DB), 2.3 MH-57-FE : fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-57-FE : tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications (+7 more)
+Cohesion: 0.11
+Nodes (19): 1. Décisions tranchées, Décisions de conception prises pendant l'analyse (sans question), 1. Contexte et objectif, 2.1 MH-57-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-57-BE : tests unitaires (logique pure, sans DB), 2.3 MH-57-FE : fichiers, dans l'ordre (un fichier à la fois), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé (+11 more)
 
 ### Community 83 - "db.rs"
 Cohesion: 0.29
@@ -595,21 +593,21 @@ Nodes (9): For /graphify add and --watch, For /graphify query, For the commit ho
 Cohesion: 0.57
 Nodes (7): OtpCodeInput(), focusInput(), handleChange(), handleKeyDown(), handlePaste(), setDigit(), submit()
 
-### Community 86 - "RootLayout.tsx"
-Cohesion: 0.13
-Nodes (24): Décisions tranchées, 1. Contexte et objectif, 2.1 MH-55-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-55-BE — Tests unitaires (logique pure, sans DB), 2.4 MH-55-FE — Tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 4. Points d'intégration avec l'existant (+16 more)
+### Community 86 - "@tanstack/react-query"
+Cohesion: 0.12
+Nodes (27): 2.3 MH-54-FE — Fichiers, dans l'ordre (un fichier à la fois), Décisions tranchées, 1. Contexte et objectif, 2.1 MH-55-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-55-BE — Tests unitaires (logique pure, sans DB), 2.4 MH-55-FE — Tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé (+19 more)
 
 ### Community 87 - "owner_requests table"
 Cohesion: 0.40
 Nodes (5): owner request atomic submission, owner_request_status enum, owner_requests table, PATCH /admin/owner-requests/:id, POST /owner-requests
 
-### Community 88 - "vitest"
+### Community 88 - "MH-61 — Publier un bien : plan d'implémentation (BE + FE)"
 Cohesion: 0.13
-Nodes (13): OwnerRequestStatus, STATUS_BADGE, decodeBase64Url(), readTokenRole(), Role, ROLES, base64Url(), tokenWithPayload() (+5 more)
+Nodes (14): 1. Contexte et objectif, 2.1 MH-61-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-61-BE : tests unitaires (logique pure, sans DB), 2.4 MH-61-FE : tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 5. Vérifications, 6. Risques et inconnues (+6 more)
 
 ### Community 89 - "router.tsx"
-Cohesion: 0.08
-Nodes (34): Décisions de conception prises pendant l'analyse (sans question), 4. Points d'intégration avec l'existant, 2.3 Composants et intégration, AuthLayout(), RequireAdmin(), RequireAdminProps, RequireOwner(), RequireOwnerProps (+26 more)
+Cohesion: 0.10
+Nodes (26): 2. Existant sur lequel on s'appuie, 4.2 Fichiers, dans l'ordre (un fichier à la fois), AuthLayout(), RequireAdmin(), RequireAdminProps, RequireAuthProps, RequireOwnerProps, ListingFeed (+18 more)
 
 ### Community 90 - "sqlx"
 Cohesion: 0.50
@@ -648,24 +646,24 @@ Cohesion: 0.33
 Nodes (5): For /graphify explain, For /graphify path, graphify reference: query, path, explain, Step 0 — Constrained query expansion (REQUIRED before traversal), Step 1 — Traversal
 
 ### Community 101 - "ListingForm.tsx"
+Cohesion: 0.10
+Nodes (36): 4.1 Préalable, 4.3 Tests unitaires (vitest, logique pure), 4.4 Vérifications FE, 4. MH-53-FE — Formulaire « Publish a listing », 2.4 MH-56-FE — Tests unitaires (vitest, logique pure), 6. Risques et inconnues, ListingForm(), onSubmit() (+28 more)
+
+### Community 107 - "UserRow"
+Cohesion: 0.47
+Nodes (5): Option, Role, String, Uuid, UserRow
+
+### Community 108 - "4. Points d'intégration avec l'existant"
 Cohesion: 0.12
-Nodes (33): 4.3 Tests unitaires (vitest, logique pure), ListingDetail, ListingType, ListingForm(), onSubmit(), ListingFormMode, ListingFormProps, MODE_TEXT (+25 more)
+Nodes (24): 9. Critères de fin, 2.4 MH-57-FE : tests unitaires (vitest, logique pure), 4. Points d'intégration avec l'existant, 9. Critères de fin, Décisions prises, 4. Points d'intégration avec l'existant, 4. Points d'intégration avec l'existant, deleteListing() (+16 more)
 
-### Community 107 - "get_listing_detail"
-Cohesion: 0.19
-Nodes (22): ListingStatusRequest, an_unknown_or_missing_status_is_a_status_field_error(), create_listing(), delete_listing(), get_listing_detail(), is_visible_to(), list_owner_listings(), parse_status() (+14 more)
-
-### Community 108 - "useToast"
-Cohesion: 0.13
-Nodes (26): 9. Critères de fin, 9. Critères de fin, 4. Points d'intégration avec l'existant, deleteListing(), ListingStatus, ListListingsResult, updateListingStatus(), CHECKED_CLASSES (+18 more)
-
-### Community 109 - "MH-60 — Réordonner les photos d'un bien : plan d'implémentation (BE + FE)"
-Cohesion: 0.20
-Nodes (9): 1. Contexte et objectif, 3. Ordre d'implémentation recommandé, 5. Vérifications, 7. Contrat qualité (sur chaque branche, BE puis FE), 8. Hors périmètre, 9. Critères de fin, Décisions prises, MH-60 — Réordonner les photos d'un bien : plan d'implémentation (BE + FE) (+1 more)
+### Community 109 - "EditListingPage.tsx"
+Cohesion: 0.25
+Nodes (15): 4. Points d'intégration avec l'existant, 2.3 MH-56-FE — Fichiers, dans l'ordre (un fichier à la fois), 4. Points d'intégration avec l'existant, 2.3 Composants et intégration, RequireAuth(), RequireOwner(), EditListingPage, updateListing() (+7 more)
 
 ### Community 110 - "useListingPhotoMutations.ts"
-Cohesion: 0.21
-Nodes (19): 2.1 MH-60-BE : fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-60-BE : tests unitaires (logique pure, sans DB), 2.3 MH-60-FE : fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-60-FE : tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 4. Points d'intégration avec l'existant, deleteListingPhoto(), reorderListingPhotos() (+11 more)
+Cohesion: 0.11
+Nodes (29): 1. Contexte et objectif, 2.2 MH-60-BE : tests unitaires (logique pure, sans DB), 2.3 MH-60-FE : fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-60-FE : tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances, 3. Ordre d'implémentation recommandé, 4. Points d'intégration avec l'existant, 5. Vérifications (+21 more)
 
 ### Community 111 - "graphify reference: add a URL and watch a folder"
 Cohesion: 0.50
@@ -704,36 +702,36 @@ Cohesion: 0.67
 Nodes (3): typescript, overrides, openapi-typescript
 
 ### Community 175 - "ListingPhotosPage.tsx"
-Cohesion: 0.11
-Nodes (18): 6. Risques et inconnues, ListingPhotosPage, ListingMedia, MoveFocusTarget, PendingUpload, SelectionNotice, MoveButtonProps, PendingPhotoTile() (+10 more)
+Cohesion: 0.08
+Nodes (27): ListingPhotosPage, ListingMedia, isNotFound(), ListingPhotosPage(), dropPendingUpload(), handleFilesSelected(), handleMove(), startUpload() (+19 more)
 
 ### Community 184 - "ListingSummaryRow"
 Cohesion: 0.23
 Nodes (13): Self, Vec, ListingDetailRow, ListingFields, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType (+5 more)
 
-### Community 185 - "OwnerListingRow.tsx"
+### Community 185 - "ListingDetail.tsx"
 Cohesion: 0.13
-Nodes (21): Décisions de conception prises pendant l'analyse, 1. Contexte et objectif, Décisions prises, ListingSummary, ListingCard(), ListingCardProps, ListingDetail(), OwnerBarProps (+13 more)
+Nodes (21): Décisions de conception prises pendant l'analyse, ListingDetail, ListingCard(), CHECKED_CLASSES, ListingStatusControl(), STATUSES, OwnerBarProps, VISIBILITY_MESSAGE (+13 more)
 
 ### Community 186 - "media/handler.rs"
-Cohesion: 0.14
-Nodes (28): MediaDto, MediaListResponse, MediaResponse, PromoteCoverRequest, ReorderMediaRequest, From, Option, String (+20 more)
+Cohesion: 0.15
+Nodes (26): MediaDto, MediaListResponse, MediaResponse, PromoteCoverRequest, ReorderMediaRequest, From, Option, String (+18 more)
 
-### Community 187 - "@tanstack/react-query"
-Cohesion: 0.26
+### Community 187 - "profile/api.ts"
+Cohesion: 0.27
 Nodes (11): deleteAccount(), getMe(), profileQueryKey, updateMe(), UpdateProfilePayload, uploadAvatar(), UserResponse, useDeleteAccount() (+3 more)
 
-### Community 188 - "ListingPhotosPage"
-Cohesion: 0.24
-Nodes (8): isNotFound(), ListingPhotosPage(), dropPendingUpload(), handleFilesSelected(), handleMove(), startUpload(), skippedMessage(), movePhoto()
+### Community 188 - "AppError"
+Cohesion: 0.18
+Nodes (11): multipart_error(), MultipartError, db_err(), Error, multipart_error(), MultipartError, AppError, Error (+3 more)
 
 ### Community 189 - "errors.rs"
-Cohesion: 0.06
-Nodes (45): axum, check(), check_storage(), HealthStatus, Json, State, StatusCode, StorageStatus (+37 more)
+Cohesion: 0.08
+Nodes (38): axum, generates_a_valid_uuid_when_header_is_absent(), HEALTH_PATHS, propagates_incoming_x_request_id_header_verbatim(), request_id(), REQUEST_ID_HEADER, resolve_request_id(), HeaderMap (+30 more)
 
 ### Community 190 - "SiteHeader.tsx"
-Cohesion: 0.12
-Nodes (11): MobileMenu(), NavItem(), NavLinkSpec, OwnerHeader(), ownerLinks(), PUBLIC_LINKS, SeekerHeader(), SiteHeaderProps (+3 more)
+Cohesion: 0.10
+Nodes (15): BadgeProps, BadgeSize, sizeClasses, toneClasses, MobileMenu(), NavItem(), NavLinkSpec, OwnerHeader() (+7 more)
 
 ### Community 191 - "What You Must Do When Invoked"
 Cohesion: 0.20
@@ -743,13 +741,13 @@ Nodes (10): Step 0 - GitHub repos and multi-path merge (only if a URL or several
 Cohesion: 0.20
 Nodes (10): Step 0 - GitHub repos and multi-path merge (only if a URL or several paths), Step 1 - Ensure graphify is installed, Step 2.5 - Video and audio (only if video files detected), Step 4.5 - Graph health check (read-only integrity gate), Step 4 - Build graph, cluster, analyze, generate outputs, Step 5 - Label communities, Step 6 - Generate Obsidian vault (opt-in) + HTML, Step 9 - Save manifest, update cost tracker, clean up, and report (+2 more)
 
-### Community 193 - "auth/dto.rs"
-Cohesion: 0.24
-Nodes (14): OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse, OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto (+6 more)
+### Community 193 - "tokenRole.ts"
+Cohesion: 0.27
+Nodes (8): decodeBase64Url(), readTokenRole(), Role, ROLES, base64Url(), tokenWithPayload(), frontend_src_shared_api_types, frontend_src_shared_api_types_components
 
 ### Community 194 - "listings/api.ts"
-Cohesion: 0.29
-Nodes (13): 4. Points d'intégration avec l'existant, createListing(), getListing(), listListings(), ListListingsParams, listOwnerListings(), ListOwnerListingsParams, CreateListingPage() (+5 more)
+Cohesion: 0.18
+Nodes (21): 4. Points d'intégration avec l'existant, CreateListingPage, createListing(), getListing(), ListingDetail, ListingStatus, ListingSummary, ListingType (+13 more)
 
 ### Community 195 - "Step 3 - Extract entities and relationships"
 Cohesion: 0.50
@@ -767,29 +765,21 @@ Nodes (10): middleware_passes_then_rejects_with_429_and_retry_after(), peer(), R
 Cohesion: 0.67
 Nodes (3): Step 2 - Detect files, Step 2 - Detect files, image()
 
-### Community 199 - "types.rs"
-Cohesion: 0.21
-Nodes (7): verify_otp(), AuthChallenge, otp_key(), PendingOtp, registration_key(), String, fmt
+### Community 199 - "ApiError"
+Cohesion: 0.39
+Nodes (5): OwnerRequestDetail(), handleApprove(), handleRejectConfirm(), reviewErrorMessage(), ApiError
 
-### Community 200 - "async_trait"
-Cohesion: 0.17
-Nodes (10): async_trait, MokaStore, MokaStore<K, V>, Duration, K, Self, V, Cache (+2 more)
+### Community 200 - "ReportListingModal.tsx"
+Cohesion: 0.40
+Nodes (5): REASONS, ReportListingModal(), handleClose(), handleSubmit(), ReportListingModalProps
 
-### Community 201 - "MediaRow"
-Cohesion: 0.27
-Nodes (11): Self, MediaForDeletion, MediaRow, OrderedMediaRow, Bytes, String, Uuid, UploadMediaSubmission (+3 more)
+### Community 201 - "useReviewOwnerRequest.ts"
+Cohesion: 0.60
+Nodes (4): ReviewDecision, reviewOwnerRequest(), ReviewOwnerRequestInput, useReviewOwnerRequest()
 
-### Community 202 - "media_order.rs"
-Cohesion: 0.29
-Nodes (11): non_cover_photo_of_a_three_photo_listing_is_promoted(), photo(), cover_comes_first_even_with_the_highest_position(), display_order_key(), equal_position_and_upload_time_fall_back_to_id(), equal_positions_put_the_oldest_upload_first(), other_photos_follow_ascending_position(), Photo (+3 more)
-
-### Community 203 - "rbac.rs"
-Cohesion: 0.22
-Nodes (5): failed_check_maps_to_forbidden(), require_role(), Role, Result, toschema
-
-### Community 204 - "K"
-Cohesion: 0.38
-Nodes (4): MokaStore<K, V>, K, Option, V
+### Community 203 - "cors.rs"
+Cohesion: 0.67
+Nodes (3): build_cors_layer(), CorsLayer, http
 
 ### Community 205 - "main.rs"
 Cohesion: 0.33
@@ -798,10 +788,6 @@ Nodes (5): arc, backend_my_house, duration, socketaddr, tracing_subscriber
 ### Community 206 - "rate_limit"
 Cohesion: 0.33
 Nodes (6): rate_limit(), Next, Request, Response, State, ConnectInfo
-
-### Community 207 - "2.3 MH-54-FE — Fichiers, dans l'ordre (un fichier à la fois)"
-Cohesion: 0.40
-Nodes (5): 2.1 MH-54-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 MH-54-BE — Tests unitaires (logique pure, sans DB), 2.3 MH-54-FE — Fichiers, dans l'ordre (un fichier à la fois), 2.4 MH-54-FE — Tests unitaires (vitest, logique pure), 2. Découpage BE / FE et dépendances
 
 ## Ambiguous Edges - Review These
 - `MyHouse Project Instructions (Agents)` → `React/TypeScript Rules (Agents)`  [AMBIGUOUS]
@@ -814,9 +800,9 @@ Nodes (5): 2.1 MH-54-BE — Fichiers, dans l'ordre (un fichier à la fois), 2.2 
   .claude/skills/readme/SKILL.md · relation: shares_data_with
 
 ## Knowledge Gaps
-- **471 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+466 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 869 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **70 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **478 isolated node(s):** `@modelcontextprotocol/server-github`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `@modelcontextprotocol/server-filesystem`, `postgres-mcp`, `DATABASE_URI` (+473 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 880 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **71 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -829,9 +815,9 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `react-typecrypt.md Rules File` and `README Writing Rules Skill`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **Why does `AppError` connect `AppError` to `listings/service.rs`, `owner_requests/service.rs`, `Mailer`, `auth/repository.rs`, `jwt.rs`, `super`, `users/repository.rs`, `extractors.rs`, `validation.rs`, `owner_requests/repository.rs`, `listings/dto.rs`, `auth/handler.rs`, `auth/service.rs`, `media/service.rs`, `admin/handler.rs`, `users/service.rs`, `Result`, `file_validation.rs`, `AuthUser`, `RecordingStorage`, `owner_requests/handler.rs`, `media/handler.rs`, `errors.rs`, `listings/handler.rs`, `listings/repository.rs`, `types.rs`, `MediaRow`, `rbac.rs`, `get_listing_detail`?**
-  _High betweenness centrality (0.320) - this node is a cross-community bridge._
-- **Why does `upload()` connect `media/service.rs` to `storage_key.rs`, `file_validation.rs`, `MediaRow`, `useToast`, `AppError`?**
-  _High betweenness centrality (0.201) - this node is a cross-community bridge._
-- **Why does `4. Points d'intégration avec l'existant` connect `useToast` to `media/service.rs`, `auth/index.ts`, `MH-58 — Supprimer un bien : plan d'implémentation (BE + FE)`, `RootLayout.tsx`, `client.ts`, `router.tsx`?**
-  _High betweenness centrality (0.200) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `listings/service.rs`, `owner_requests/service.rs`, `AppCacheProvider`, `Mailer`, `auth/repository.rs`, `jwt.rs`, `super`, `users/repository.rs`, `extractors.rs`, `validation.rs`, `owner_requests/repository.rs`, `auth/handler.rs`, `get_listing_detail`, `media/service.rs`, `admin/handler.rs`, `users/service.rs`, `Result`, `file_validation.rs`, `pagination.rs`, `users/handler.rs`, `RecordingStorage`, `owner_requests/handler.rs`, `media/repository.rs`, `media/handler.rs`, `errors.rs`, `listings/handler.rs`, `listings/repository.rs`?**
+  _High betweenness centrality (0.307) - this node is a cross-community bridge._
+- **Why does `upload()` connect `media/service.rs` to `4. Points d'intégration avec l'existant`, `AppError`, `storage_key.rs`, `file_validation.rs`?**
+  _High betweenness centrality (0.156) - this node is a cross-community bridge._
+- **Why does `4. Points d'intégration avec l'existant` connect `4. Points d'intégration avec l'existant` to `media/service.rs`, `Modal`, `EditListingPage.tsx`, `ProfileForm.tsx`, `@tanstack/react-query`, `client.ts`, `router.tsx`?**
+  _High betweenness centrality (0.156) - this node is a cross-community bridge._
