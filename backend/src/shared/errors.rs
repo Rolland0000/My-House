@@ -125,6 +125,9 @@ pub enum AppError {
     #[error("The photos changed since they were loaded.")]
     MediaOrderConflict,
 
+    #[error("A listing needs at least one photo to be published.")]
+    PhotoRequired,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
     #[error("File exceeds the maximum allowed size.")]
     PayloadTooLarge,
@@ -201,6 +204,7 @@ impl AppError {
             Self::MediaQuotaExceeded => (StatusCode::CONFLICT, "MEDIA_QUOTA_EXCEEDED"),
             Self::CoverPhotoRequired => (StatusCode::CONFLICT, "COVER_PHOTO_REQUIRED"),
             Self::MediaOrderConflict => (StatusCode::CONFLICT, "MEDIA_ORDER_CONFLICT"),
+            Self::PhotoRequired => (StatusCode::CONFLICT, "PHOTO_REQUIRED"),
             // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
@@ -351,6 +355,15 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "MEDIA_ORDER_CONFLICT");
+    }
+
+    #[tokio::test]
+    async fn test_photo_required_is_409() {
+        let response = AppError::PhotoRequired.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "PHOTO_REQUIRED");
     }
 
     #[tokio::test]

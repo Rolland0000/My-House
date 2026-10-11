@@ -304,6 +304,24 @@ pub async fn update_listing_status(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Sets `published_at` on `owner_id`'s draft `id`. A listing that is already published
+/// keeps its original date, so matching no row is not an error.
+pub async fn publish_listing(pool: &PgPool, id: Uuid, owner_id: Uuid) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+        UPDATE listings
+        SET published_at = now()
+        WHERE id = $1 AND owner_id = $2 AND published_at IS NULL
+        "#,
+        id,
+        owner_id,
+    )
+    .execute(pool)
+    .await
+    .map(|_| ())
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
 /// Locks listing `id` until the transaction ends if `owner_id` owns it, and returns whether
 /// it did. Uploads, cover changes and photo deletes take the same row lock.
 pub async fn lock_owned_listing<'e, E>(

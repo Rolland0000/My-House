@@ -713,6 +713,51 @@
         }
       }
     },
+    "/api/v1/listings/{id}/publish": {
+      "post": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Publishes one of the caller's drafts. It needs at least one photo, and can't be undone.",
+        "operationId": "publish",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing published; an already published listing also returns 200 and keeps its original `published_at`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an owner"
+          },
+          "404": {
+            "description": "Listing not found, or owned by someone else"
+          },
+          "409": {
+            "description": "`PHOTO_REQUIRED`: the draft has no photo"
+          }
+        }
+      }
+    },
     "/api/v1/listings/{id}/status": {
       "patch": {
         "tags": [

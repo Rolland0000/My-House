@@ -788,6 +788,7 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | `DELETE` | `/listings/:id`        | JWT  | `owner` | Supprimer son bien                           |
 | `GET`    | `/users/me/listings`   | JWT  | `owner` | Ses propres biens                            |
 | `PATCH`  | `/listings/:id/status` | JWT  | `owner` | Changer le statut                            |
+| `POST`   | `/listings/:id/publish` | JWT | `owner` | Publier un brouillon                         |
 | `PATCH`  | `/listings/:id/cover`  | JWT  | `owner` | Définir la photo de couverture              |
 | `PUT`    | `/listings/:id/media/order` | JWT | `owner` | Réordonner les photos                  |
 
@@ -912,6 +913,18 @@ Response 200 : même forme que `GET /listings/:id`, brouillon compris (lecture c
 | `403` | Appelant seeker ou admin                                                              |
 | `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner (même réponse, jamais `403`) |
 | `422` | `VALIDATION_FAILED`, une entrée par champ invalide dans `error.fields`               |
+
+**`POST /listings/:id/publish`**
+
+Pas de corps. Sur un brouillon qui a au moins une photo, pose `published_at` et répond `200` avec la même forme que `GET /listings/:id`. Un bien déjà publié répond aussi `200` et garde son `published_at` d'origine. Aucun autre champ n'est modifié. La publication est irréversible au MVP.
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Bien publié, ou déjà publié                                                           |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner (même réponse, jamais `403`) |
+| `409` | `PHOTO_REQUIRED` : brouillon sans photo, qui reste un brouillon                       |
 
 **`PATCH /listings/:id/cover`**
 

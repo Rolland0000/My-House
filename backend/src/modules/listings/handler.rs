@@ -147,6 +147,31 @@ pub async fn update_status(
     Ok(Json(ListingStatusResponse { data }))
 }
 
+/// Publishes one of the caller's drafts. It needs at least one photo, and can't be undone.
+#[utoipa::path(
+    post,
+    path = "/listings/{id}/publish",
+    tag = "listings",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    responses(
+        (status = 200, description = "Listing published; an already published listing also returns 200 and keeps its original `published_at`", body = ListingDetailResponse),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an owner"),
+        (status = 404, description = "Listing not found, or owned by someone else"),
+        (status = 409, description = "`PHOTO_REQUIRED`: the draft has no photo"),
+    )
+)]
+pub async fn publish(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ListingDetailResponse>, AppError> {
+    user.require_role(OWNER_ROLES)?;
+
+    let data = service::publish_listing(state.db(), id, user.user_id).await?;
+    Ok(Json(ListingDetailResponse { data }))
+}
+
 /// Permanently deletes one of the caller's listings and its photos.
 #[utoipa::path(
     delete,
