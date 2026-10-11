@@ -1,3 +1,5 @@
+import { PRICE_CURRENCY } from "../utils/format";
+
 type SiteFooterVariant = "public" | "none";
 
 interface SiteFooterProps {
@@ -45,7 +47,7 @@ function SiteFooter({ variant = "public" }: SiteFooterProps) {
         </div>
 
         <div className="h-px bg-white/10" />
-        <p className="text-xs text-[#8E9AAC]">© 2026 My House. All prices in FCFA.</p>
+        <p className="text-xs text-[#8E9AAC]">© 2026 My House. All prices in {PRICE_CURRENCY}.</p>
       </div>
     </footer>
   );

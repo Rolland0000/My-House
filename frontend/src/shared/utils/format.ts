@@ -1,15 +1,15 @@
 const priceFormatter = new Intl.NumberFormat("fr-FR");
 
-/**
- * Formats a listing price for display.
- *
- * No currency symbol: `GET /listings` / `GET /listings/:id` don't return one
- * (see `listings.price` in `TECHNICAL_SPEC_MVP.md §4.3`) — display currency
- * for the France vs. Africa markets is an open call tied to the monetization
- * blocker noted in `CLAUDE.md`, not something to invent here.
- */
+export const PRICE_CURRENCY = "XAF";
+
+/** Amount only, grouped per the fr-FR locale (e.g. "150 000"). */
 export function formatPrice(price: number): string {
   return priceFormatter.format(price);
+}
+
+/** Every listing price is a monthly rent in XAF; split so views can style each part. */
+export function formatMonthlyRent(price: number): { amount: string; unit: string } {
+  return { amount: formatPrice(price), unit: `${PRICE_CURRENCY} / month` };
 }
 
 export function formatCountdown(totalSeconds: number): string {

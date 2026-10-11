@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import { ImageOff } from "lucide-react";
 import { Card } from "../../../shared/components";
-import { formatPrice } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { typeLabels } from "../labels";
 import type { ListingSummary } from "../api";
+import { ListingPrice } from "./ListingPrice";
 
 interface ListingCardProps {
   listing: ListingSummary;
@@ -49,10 +49,11 @@ function ListingCard({ listing }: ListingCardProps) {
               Unavailable
             </span>
           )}
-          <span className="absolute bottom-0 left-3 border border-b-0 border-brass-600 bg-surface px-3 py-2 text-[17px] leading-none font-bold text-ink-900">
-            {formatPrice(listing.price)}{" "}
-            <span className="text-[11.5px] font-medium text-ink-500">FCFA / month</span>
-          </span>
+          <ListingPrice
+            price={listing.price}
+            className="absolute bottom-0 left-3 border border-b-0 border-brass-600 bg-surface px-3 py-2 text-[17px] leading-none font-bold text-ink-900"
+            unitClassName="text-[11.5px] font-medium text-ink-500"
+          />
         </div>
         <div className="flex flex-col gap-1.5 p-4">
           <h3 className="truncate text-base font-bold text-ink-900">{listing.title}</h3>

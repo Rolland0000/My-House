@@ -7,8 +7,8 @@ function ListingNotFound() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
       <EmptyState
-        title="This property is no longer available"
-        description="It may have been removed by the owner, or its status changed to “unavailable”."
+        title="Listing not found"
+        description="This listing doesn't exist, was removed by its owner, or isn't public."
         secondaryAction={{ label: "Back to listings", onClick: () => navigate("/") }}
       />
     </div>
