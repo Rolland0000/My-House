@@ -65,13 +65,28 @@ pub fn optional_note<'a>(raw: Option<&'a str>, field: &str) -> Result<Option<&'a
     }
 }
 
-/// Postgres rejects NUL in text columns, so it is caught here as a field error, not a 500.
+/// Postgres rejects NUL in text values, so callers reject it before any query runs.
 const NUL: char = '\0';
 
 /// Trims and collapses every run of Unicode whitespace to a single space.
-/// Stored place names go through it; feed filters must too (MH-59) so both compare equal.
+/// Stored place names and feed filters both go through it, so they compare equal.
 pub fn normalize_place_name(raw: &str) -> String {
     raw.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Normalizes a place filter from a query string; empty after normalization is `None`.
+/// A NUL is a 400: Postgres would reject the bound value, and no stored name has one.
+pub fn place_filter(field: &str, raw: Option<String>) -> Result<Option<String>, AppError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+    if raw.contains(NUL) {
+        return Err(AppError::InvalidQueryParam(format!(
+            "{field} must not contain a NUL character."
+        )));
+    }
+    let normalized = normalize_place_name(&raw);
+    Ok((!normalized.is_empty()).then_some(normalized))
 }
 
 /// Accumulates rule violations across fields so a request is answered with
@@ -305,6 +320,32 @@ mod tests {
             "Plateau Nord Est"
         );
         assert_eq!(normalize_place_name(" \t\u{00A0} "), "");
+    }
+
+    #[test]
+    fn place_filter_ignores_absent_empty_and_whitespace_only_values() {
+        assert_eq!(place_filter("city", None).unwrap(), None);
+        assert_eq!(place_filter("city", Some(String::new())).unwrap(), None);
+        assert_eq!(
+            place_filter("city", Some(" \t\u{00A0} ".into())).unwrap(),
+            None
+        );
+    }
+
+    #[test]
+    fn place_filter_normalizes_mixed_whitespace() {
+        assert_eq!(
+            place_filter("neighborhood", Some(" Bonapriso \t\n Nord ".into())).unwrap(),
+            Some("Bonapriso Nord".to_owned())
+        );
+    }
+
+    #[test]
+    fn place_filter_rejects_the_nul_character() {
+        assert!(matches!(
+            place_filter("city", Some("Akwa\0".into())),
+            Err(AppError::InvalidQueryParam(_))
+        ));
     }
 
     fn violated_fields(errors: FieldErrors) -> Vec<&'static str> {

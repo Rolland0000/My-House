@@ -7,7 +7,7 @@ use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
 use crate::shared::media_order::display_order_key;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
-use crate::shared::validation::FieldErrors;
+use crate::shared::validation::{place_filter, FieldErrors};
 
 use super::dto::{
     ListListingsQuery, ListingDetailDto, ListingRequest, ListingStatusDto, ListingStatusRequest,
@@ -31,8 +31,10 @@ pub async fn list_listings(
 ) -> Result<PaginatedResponse<ListingSummaryDto>, AppError> {
     let filters = ListingFilters {
         owner_id: query.owner_id,
-        city: query.city,
+        city: place_filter("city", query.city)?,
+        neighborhood: place_filter("neighborhood", query.neighborhood)?,
         listing_type: query.listing_type,
+        status: query.status,
     };
 
     let total = repository::count_listings(pool, &filters).await?;

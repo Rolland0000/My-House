@@ -800,9 +800,13 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | ------------ | ----------- | ------------------------------------------- |
 | `owner_id` | `uuid`    | Filtrer par propriétaire                   |
 | `city`     | `string`  | Filtre par ville                            |
+| `neighborhood` | `string` | Filtre par quartier                    |
 | `type`     | `enum`    | `apartment\|studio\|house\|room\|villa\|other` |
+| `status`   | `enum`    | `available\|unavailable` ; absent : les deux |
 | `page`     | `integer` | Défaut : 1                                 |
 | `per_page` | `integer` | Défaut : 20, max : 50                      |
+
+`city` et `neighborhood` sont normalisés comme à l'enregistrement (trim, espaces internes réduits à un seul), puis comparés à la valeur entière, sans tenir compte de la casse ni des accents : « yaounde » trouve « Yaoundé », « Bonap » ne trouve pas « Bonapriso ». Une valeur vide après normalisation est ignorée. Un caractère NUL, une valeur `type` ou `status` inconnue, ou un paramètre mal formé renvoient `400 INVALID_QUERY_PARAM`.
 
 **`GET /listings` — Response 200**
 
