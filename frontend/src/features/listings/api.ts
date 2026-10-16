@@ -13,7 +13,9 @@ export type ListingRequest = components["schemas"]["ListingRequest"];
 
 export interface ListListingsParams {
   city?: string;
+  neighborhood?: string;
   type?: ListingType;
+  status?: ListingStatus;
   ownerId?: string;
   page?: number;
   perPage?: number;
@@ -27,7 +29,9 @@ export interface ListListingsResult {
 export function listListings(params: ListListingsParams = {}): Promise<ListListingsResult> {
   return apiGet<ListListingsResult>("/api/v1/listings", {
     city: params.city,
+    neighborhood: params.neighborhood,
     type: params.type,
+    status: params.status,
     owner_id: params.ownerId,
     page: params.page,
     per_page: params.perPage,
