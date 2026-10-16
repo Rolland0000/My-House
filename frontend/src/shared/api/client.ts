@@ -122,13 +122,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
-type QueryValue = string | number | boolean | undefined;
+type QueryScalar = string | number | boolean;
+type QueryValue = QueryScalar | readonly QueryScalar[] | undefined;
 
-function buildQueryString(params?: Record<string, QueryValue>): string {
+/** An array value repeats its key (`type=a&type=b`); an empty array leaves the key out. */
+export function buildQueryString(params?: Record<string, QueryValue>): string {
   if (!params) return "";
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) search.set(key, String(value));
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) search.append(key, String(item));
+    } else {
+      search.set(key, String(value));
+    }
   }
   const query = search.toString();
   return query ? `?${query}` : "";

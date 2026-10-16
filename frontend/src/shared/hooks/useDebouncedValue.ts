@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+/** Delay before a typed city or neighborhood filter is applied. */
+export const TEXT_FILTER_DEBOUNCE_MS = 400;
+
 /**
  * Returns `value` once it has stopped changing for `delayMs`. A delay of 0
  * applies the value in the same render, with no intermediate one.

@@ -10,6 +10,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
 export { Card } from "./Card";
 export type { CardProps, CardRadius } from "./Card";
 
+export { Checkbox } from "./Checkbox";
+export type { CheckboxProps } from "./Checkbox";
+
 export { DimensionRule } from "./DimensionRule";
 export type { DimensionRuleProps } from "./DimensionRule";
 
