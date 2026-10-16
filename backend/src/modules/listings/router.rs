@@ -7,6 +7,7 @@ use crate::modules::listings::handler;
 pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(handler::list, handler::create)) // list is public, create is owner-only
+        .routes(routes!(handler::search)) // public
         // get is public, update and delete are owner-only
         .routes(routes!(
             handler::get_by_id,

@@ -89,6 +89,27 @@ pub fn place_filter(field: &str, raw: Option<String>) -> Result<Option<String>, 
     Ok((!normalized.is_empty()).then_some(normalized))
 }
 
+const MAX_KEYWORD_LENGTH: usize = 100;
+
+/// Trims the search text `q`; empty after trimming is `None`. Over-long text or a NUL is a 400.
+pub fn keyword_filter(raw: Option<String>) -> Result<Option<String>, AppError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+    if raw.contains(NUL) {
+        return Err(AppError::InvalidQueryParam(
+            "q must not contain a NUL character.".to_owned(),
+        ));
+    }
+    let trimmed = raw.trim();
+    if trimmed.chars().count() > MAX_KEYWORD_LENGTH {
+        return Err(AppError::InvalidQueryParam(format!(
+            "q must be at most {MAX_KEYWORD_LENGTH} characters."
+        )));
+    }
+    Ok((!trimmed.is_empty()).then(|| trimmed.to_owned()))
+}
+
 /// Accumulates rule violations across fields so a request is answered with
 /// every offending field at once. Each check returns the accepted value, or
 /// `None` after recording the error.
@@ -344,6 +365,42 @@ mod tests {
     fn place_filter_rejects_the_nul_character() {
         assert!(matches!(
             place_filter("city", Some("Akwa\0".into())),
+            Err(AppError::InvalidQueryParam(_))
+        ));
+    }
+
+    #[test]
+    fn keyword_filter_ignores_absent_empty_and_whitespace_only_values() {
+        assert_eq!(keyword_filter(None).unwrap(), None);
+        assert_eq!(keyword_filter(Some(String::new())).unwrap(), None);
+        assert_eq!(keyword_filter(Some(" \t\u{00A0} ".into())).unwrap(), None);
+    }
+
+    #[test]
+    fn keyword_filter_trims_the_text() {
+        assert_eq!(
+            keyword_filter(Some("  villa douala  ".into())).unwrap(),
+            Some("villa douala".to_owned())
+        );
+    }
+
+    #[test]
+    fn keyword_filter_counts_characters_not_bytes() {
+        let at_limit = "é".repeat(MAX_KEYWORD_LENGTH);
+        assert_eq!(
+            keyword_filter(Some(at_limit.clone())).unwrap(),
+            Some(at_limit)
+        );
+        assert!(matches!(
+            keyword_filter(Some("é".repeat(MAX_KEYWORD_LENGTH + 1))),
+            Err(AppError::InvalidQueryParam(_))
+        ));
+    }
+
+    #[test]
+    fn keyword_filter_rejects_the_nul_character() {
+        assert!(matches!(
+            keyword_filter(Some("villa\0".into())),
             Err(AppError::InvalidQueryParam(_))
         ));
     }

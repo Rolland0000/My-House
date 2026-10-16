@@ -7,11 +7,11 @@ use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
 use crate::shared::media_order::display_order_key;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
-use crate::shared::validation::{place_filter, FieldErrors};
+use crate::shared::validation::{keyword_filter, place_filter, FieldErrors};
 
 use super::dto::{
     ListListingsQuery, ListingDetailDto, ListingRequest, ListingStatusDto, ListingStatusRequest,
-    ListingSummaryDto, OwnerListingsQuery,
+    ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
 };
 use super::model::{ListingFields, ListingStatus, ListingType};
 use super::repository::{self, ListingFilters};
@@ -33,14 +33,60 @@ pub async fn list_listings(
         owner_id: query.owner_id,
         city: place_filter("city", query.city)?,
         neighborhood: place_filter("neighborhood", query.neighborhood)?,
-        listing_type: query.listing_type,
+        listing_types: query.listing_types,
         status: query.status,
+        ..ListingFilters::default()
     };
+    public_listings_page(pool, &filters, query.page, query.per_page).await
+}
 
-    let total = repository::count_listings(pool, &filters).await?;
-    let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
+/// Fetches one page of public listings matching `query`'s keywords and filters.
+pub async fn search_listings(
+    pool: &PgPool,
+    query: SearchListingsQuery,
+) -> Result<PaginatedResponse<ListingSummaryDto>, AppError> {
+    check_price_bounds(query.price_min, query.price_max)?;
+    let filters = ListingFilters {
+        owner_id: query.owner_id,
+        city: place_filter("city", query.city)?,
+        neighborhood: place_filter("neighborhood", query.neighborhood)?,
+        listing_types: query.listing_types,
+        status: query.status,
+        keywords: keyword_filter(query.q)?,
+        price_min: query.price_min,
+        price_max: query.price_max,
+    };
+    public_listings_page(pool, &filters, query.page, query.per_page).await
+}
 
-    let rows = repository::list_listings(pool, &filters, meta.per_page, meta.offset()).await?;
+/// Rejects a negative bound, or a `price_min` above `price_max`.
+fn check_price_bounds(price_min: Option<i64>, price_max: Option<i64>) -> Result<(), AppError> {
+    for (field, bound) in [("price_min", price_min), ("price_max", price_max)] {
+        if bound.is_some_and(|value| value < 0) {
+            return Err(AppError::InvalidQueryParam(format!(
+                "{field} must be 0 or more."
+            )));
+        }
+    }
+    if matches!((price_min, price_max), (Some(min), Some(max)) if min > max) {
+        return Err(AppError::InvalidQueryParam(
+            "price_min must not be greater than price_max.".to_owned(),
+        ));
+    }
+    Ok(())
+}
+
+/// Counts the public listings matching `filters`, then fetches the requested page.
+async fn public_listings_page(
+    pool: &PgPool,
+    filters: &ListingFilters,
+    page: Option<u32>,
+    per_page: Option<u32>,
+) -> Result<PaginatedResponse<ListingSummaryDto>, AppError> {
+    let total = repository::count_listings(pool, filters).await?;
+    let meta = PaginationMeta::new(page, per_page, total as u64);
+
+    let rows = repository::list_listings(pool, filters, meta.per_page, meta.offset()).await?;
     let data = rows.into_iter().map(ListingSummaryDto::from).collect();
 
     Ok(PaginatedResponse::new(data, meta))
@@ -286,6 +332,39 @@ pub async fn delete_listing(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn check_price_bounds_accepts_none_either_one_alone_and_equal_bounds() {
+        for (min, max) in [
+            (None, None),
+            (Some(0), None),
+            (None, Some(50_000)),
+            (Some(50_000), Some(50_000)),
+        ] {
+            assert!(check_price_bounds(min, max).is_ok(), "{min:?}..{max:?}");
+        }
+    }
+
+    #[test]
+    fn check_price_bounds_rejects_a_negative_bound() {
+        for (min, max) in [(Some(-1), None), (None, Some(-1)), (Some(-5), Some(10))] {
+            assert!(
+                matches!(
+                    check_price_bounds(min, max),
+                    Err(AppError::InvalidQueryParam(_))
+                ),
+                "{min:?}..{max:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn check_price_bounds_rejects_min_above_max() {
+        assert!(matches!(
+            check_price_bounds(Some(50), Some(10)),
+            Err(AppError::InvalidQueryParam(_))
+        ));
+    }
 
     fn status_request(status: Option<&str>) -> ListingStatusRequest {
         ListingStatusRequest {

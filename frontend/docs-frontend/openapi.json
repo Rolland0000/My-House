@@ -401,10 +401,16 @@
           {
             "name": "type",
             "in": "query",
+            "description": "Repeatable (`type=apartment&type=studio`): keeps listings of any given type.",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/ListingType"
-            }
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ListingType"
+              }
+            },
+            "style": "form",
+            "explode": true
           },
           {
             "name": "status",
@@ -448,7 +454,7 @@
             }
           },
           "400": {
-            "description": "Unknown `type` or `status` value, or a place filter containing a NUL character"
+            "description": "Unknown `type` (any of the repeated values) or `status` value, malformed `owner_id`, or a place filter containing a NUL character"
           }
         }
       },
@@ -972,6 +978,132 @@
           },
           "422": {
             "description": "Wrong number or combination of documents, or an unsupported format"
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "listings"
+        ],
+        "summary": "Searches the public listings by keywords and filters.",
+        "description": "With `q`, a title match comes first, then a match in the city, neighborhood,\nowner name or type label, then a match in the description only. Without\n`q`, the feed order applies (newest first).",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Words to find, ignoring case and accents, with French stemming. Accepts\n`\"exact phrase\"`, `OR` and `-excluded`. Blank is ignored; at most 100 characters.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Matches the whole city name, ignoring case and accents. Blank is ignored.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "neighborhood",
+            "in": "query",
+            "description": "Matches the whole neighborhood name, ignoring case and accents. Blank is ignored.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Repeatable (`type=apartment&type=studio`): keeps listings of any given type.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ListingType"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Keeps only listings with this status; without it, both are returned.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListingStatus"
+            }
+          },
+          {
+            "name": "price_min",
+            "in": "query",
+            "description": "Lowest price in whole XAF, inclusive. 0 or more.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "price_max",
+            "in": "query",
+            "description": "Highest price in whole XAF, inclusive. 0 or more, and not below `price_min`.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of matching listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ListingSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`q` over 100 characters; unknown `type` or `status`; malformed `owner_id`; non-integer, negative or reversed price bounds; or a NUL character in `q` or a place filter"
           }
         }
       }
