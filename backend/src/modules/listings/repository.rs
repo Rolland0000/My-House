@@ -10,14 +10,15 @@ use super::model::{
 /// The feed and the spec price everything in XAF; the column has no default.
 const LISTING_CURRENCY: &str = "XAF";
 
-/// Optional, combinable filters for `GET /listings` (owner_id, city, type —
-/// API contract §4.3). Built with `QueryBuilder` rather than static SQL
-/// per `.claude/rules/database.md` ("optional/combinable filters").
+/// Optional, combinable filters for `GET /listings`, built with `QueryBuilder`.
+/// `city` and `neighborhood` are expected already normalized.
 #[derive(Debug, Default)]
 pub struct ListingFilters {
     pub owner_id: Option<Uuid>,
     pub city: Option<String>,
+    pub neighborhood: Option<String>,
     pub listing_type: Option<ListingType>,
+    pub status: Option<ListingStatus>,
 }
 
 /// Public-visibility predicate: a listing is public once published and it has
@@ -33,19 +34,35 @@ pub fn push_public_visibility(qb: &mut QueryBuilder<'_, Postgres>) {
     );
 }
 
+/// Whole-value place match, ignoring case and accents. The column side must stay
+/// `lower(immutable_unaccent(..))` to use `idx_listings_city_normalized`.
+/// `column` is a code constant, never client input; `pub` so search can reuse it.
+pub fn push_place_match(qb: &mut QueryBuilder<'_, Postgres>, column: &'static str, value: &str) {
+    qb.push(format_args!(
+        " AND lower(immutable_unaccent({column})) = lower(immutable_unaccent("
+    ));
+    qb.push_bind(value.to_owned());
+    qb.push("))");
+}
+
 fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
     if let Some(owner_id) = filters.owner_id {
         qb.push(" AND l.owner_id = ");
         qb.push_bind(owner_id);
     }
     if let Some(city) = &filters.city {
-        qb.push(" AND lower(l.city) = lower(");
-        qb.push_bind(city.clone());
-        qb.push(")");
+        push_place_match(qb, "l.city", city);
+    }
+    if let Some(neighborhood) = &filters.neighborhood {
+        push_place_match(qb, "l.neighborhood", neighborhood);
     }
     if let Some(listing_type) = filters.listing_type {
         qb.push(" AND l.type = ");
         qb.push_bind(listing_type);
+    }
+    if let Some(status) = filters.status {
+        qb.push(" AND l.status = ");
+        qb.push_bind(status);
     }
 }
 

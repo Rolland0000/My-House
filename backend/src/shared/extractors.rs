@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
+use axum::extract::{FromRef, FromRequest, FromRequestParts, Query, Request};
 use axum::http::request::Parts;
 use axum::Json;
 use serde::de::DeserializeOwned;
@@ -131,6 +131,26 @@ where
             .await
             .map(|Json(payload)| Self(payload))
             .map_err(|rejection| AppError::BadRequest(rejection.body_text()))
+    }
+}
+
+/// `axum::Query` with its rejection remapped to `AppError::InvalidQueryParam`,
+/// so a bad query string gets the standard error envelope.
+pub struct AppQuery<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequestParts<S> for AppQuery<T>
+where
+    T: DeserializeOwned,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Query::<T>::from_request_parts(parts, state)
+            .await
+            .map(|Query(params)| Self(params))
+            .map_err(|rejection| AppError::InvalidQueryParam(rejection.body_text()))
     }
 }
 

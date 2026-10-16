@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser, MaybeAuthUser};
+use crate::shared::extractors::{AppJson, AppQuery, AuthUser, MaybeAuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
@@ -25,11 +25,12 @@ const OWNER_ROLES: &[Role] = &[Role::Owner];
     params(ListListingsQuery),
     responses(
         (status = 200, description = "Paginated list of listings", body = PaginatedResponse<ListingSummaryDto>),
+        (status = 400, description = "Unknown `type` or `status` value, or a place filter containing a NUL character"),
     )
 )]
 pub async fn list(
     State(state): State<AppState>,
-    Query(query): Query<ListListingsQuery>,
+    AppQuery(query): AppQuery<ListListingsQuery>,
 ) -> Result<Json<PaginatedResponse<ListingSummaryDto>>, AppError> {
     let response = service::list_listings(state.db(), query).await?;
     Ok(Json(response))

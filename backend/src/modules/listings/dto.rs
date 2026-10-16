@@ -15,9 +15,14 @@ use super::model::{
 #[into_params(parameter_in = Query)]
 pub struct ListListingsQuery {
     pub owner_id: Option<Uuid>,
+    /// Matches the whole city name, ignoring case and accents. Blank is ignored.
     pub city: Option<String>,
+    /// Matches the whole neighborhood name, ignoring case and accents. Blank is ignored.
+    pub neighborhood: Option<String>,
     #[serde(rename = "type")]
     pub listing_type: Option<ListingType>,
+    /// Keeps only listings with this status; without it, both are returned.
+    pub status: Option<ListingStatus>,
     pub page: Option<u32>,
     pub per_page: Option<u32>,
 }

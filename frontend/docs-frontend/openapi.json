@@ -383,6 +383,16 @@
           {
             "name": "city",
             "in": "query",
+            "description": "Matches the whole city name, ignoring case and accents. Blank is ignored.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "neighborhood",
+            "in": "query",
+            "description": "Matches the whole neighborhood name, ignoring case and accents. Blank is ignored.",
             "required": false,
             "schema": {
               "type": "string"
@@ -394,6 +404,15 @@
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/ListingType"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Keeps only listings with this status; without it, both are returned.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListingStatus"
             }
           },
           {
@@ -427,6 +446,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Unknown `type` or `status` value, or a place filter containing a NUL character"
           }
         }
       },
