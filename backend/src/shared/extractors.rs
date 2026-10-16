@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use axum::extract::{FromRef, FromRequest, FromRequestParts, Query, Request};
+use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
 use axum::http::request::Parts;
 use axum::Json;
+use axum_extra::extract::Query;
 use serde::de::DeserializeOwned;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -134,8 +135,9 @@ where
     }
 }
 
-/// `axum::Query` with its rejection remapped to `AppError::InvalidQueryParam`,
-/// so a bad query string gets the standard error envelope.
+/// `axum_extra::Query` with its rejection remapped to `AppError::InvalidQueryParam`,
+/// so a bad query string gets the standard error envelope. A repeated key
+/// (`type=a&type=b`) fills a `Vec` field marked `#[serde(default)]`.
 pub struct AppQuery<T>(pub T);
 
 #[async_trait]
@@ -150,7 +152,11 @@ where
         Query::<T>::from_request_parts(parts, state)
             .await
             .map(|Query(params)| Self(params))
-            .map_err(|rejection| AppError::InvalidQueryParam(rejection.body_text()))
+            .map_err(|rejection| {
+                AppError::InvalidQueryParam(format!(
+                    "Failed to deserialize query string: {rejection}"
+                ))
+            })
     }
 }
 

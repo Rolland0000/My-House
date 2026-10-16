@@ -10,15 +10,20 @@ use super::model::{
 /// The feed and the spec price everything in XAF; the column has no default.
 const LISTING_CURRENCY: &str = "XAF";
 
-/// Optional, combinable filters for `GET /listings`, built with `QueryBuilder`.
-/// `city` and `neighborhood` are expected already normalized.
+/// Optional, combinable filters for `GET /listings` and `GET /search`, built with
+/// `QueryBuilder`. `city` and `neighborhood` are expected already normalized, and
+/// `keywords` trimmed and non-blank: blank keywords would match no listing.
 #[derive(Debug, Default)]
 pub struct ListingFilters {
     pub owner_id: Option<Uuid>,
     pub city: Option<String>,
     pub neighborhood: Option<String>,
-    pub listing_type: Option<ListingType>,
+    /// Empty means any type.
+    pub listing_types: Vec<ListingType>,
     pub status: Option<ListingStatus>,
+    pub keywords: Option<String>,
+    pub price_min: Option<i64>,
+    pub price_max: Option<i64>,
 }
 
 /// Public-visibility predicate: a listing is public once published and it has
@@ -45,6 +50,14 @@ pub fn push_place_match(qb: &mut QueryBuilder<'_, Postgres>, column: &'static st
     qb.push("))");
 }
 
+/// Builds the tsquery for `keywords` with `unaccent` then the `french` configuration, as the
+/// trigger that fills `search_vector` does. If the two differ, accents and stems stop matching.
+fn push_keyword_query(qb: &mut QueryBuilder<'_, Postgres>, keywords: &str) {
+    qb.push("websearch_to_tsquery('french', unaccent(");
+    qb.push_bind(keywords.to_owned());
+    qb.push("))");
+}
+
 fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
     if let Some(owner_id) = filters.owner_id {
         qb.push(" AND l.owner_id = ");
@@ -56,13 +69,26 @@ fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
     if let Some(neighborhood) = &filters.neighborhood {
         push_place_match(qb, "l.neighborhood", neighborhood);
     }
-    if let Some(listing_type) = filters.listing_type {
-        qb.push(" AND l.type = ");
-        qb.push_bind(listing_type);
+    if !filters.listing_types.is_empty() {
+        qb.push(" AND l.type = ANY(");
+        qb.push_bind(filters.listing_types.clone());
+        qb.push(")");
     }
     if let Some(status) = filters.status {
         qb.push(" AND l.status = ");
         qb.push_bind(status);
+    }
+    if let Some(price_min) = filters.price_min {
+        qb.push(" AND l.price >= ");
+        qb.push_bind(price_min);
+    }
+    if let Some(price_max) = filters.price_max {
+        qb.push(" AND l.price <= ");
+        qb.push_bind(price_max);
+    }
+    if let Some(keywords) = &filters.keywords {
+        qb.push(" AND l.search_vector @@ ");
+        push_keyword_query(qb, keywords);
     }
 }
 
@@ -80,7 +106,8 @@ pub async fn count_listings(pool: &PgPool, filters: &ListingFilters) -> Result<i
         .map_err(|error| AppError::Database(error.to_string()))
 }
 
-/// One page of the public listings feed, newest first.
+/// One page of public listings, newest first. With keywords, relevance comes first: title
+/// matches, then city, neighborhood, owner or type-label matches, then the rest.
 pub async fn list_listings(
     pool: &PgPool,
     filters: &ListingFilters,
@@ -108,8 +135,17 @@ pub async fn list_listings(
     );
     push_public_visibility(&mut qb);
     push_filters(&mut qb, filters);
+    qb.push(" ORDER BY");
+    if let Some(keywords) = &filters.keywords {
+        // `search_vector` weights: A is the title; B the city, neighborhood, owner and type label.
+        qb.push(" CASE WHEN ts_filter(l.search_vector, '{a}') @@ ");
+        push_keyword_query(&mut qb, keywords);
+        qb.push(" THEN 3 WHEN ts_filter(l.search_vector, '{a,b}') @@ ");
+        push_keyword_query(&mut qb, keywords);
+        qb.push(" THEN 2 ELSE 1 END DESC,");
+    }
     // Rows inserted in one transaction share `created_at`; `id` keeps the pages stable.
-    qb.push(" ORDER BY l.created_at DESC, l.id DESC LIMIT ");
+    qb.push(" l.created_at DESC, l.id DESC LIMIT ");
     qb.push_bind(limit as i64);
     qb.push(" OFFSET ");
     qb.push_bind(offset as i64);

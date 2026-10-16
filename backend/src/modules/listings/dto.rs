@@ -19,10 +19,42 @@ pub struct ListListingsQuery {
     pub city: Option<String>,
     /// Matches the whole neighborhood name, ignoring case and accents. Blank is ignored.
     pub neighborhood: Option<String>,
-    #[serde(rename = "type")]
-    pub listing_type: Option<ListingType>,
+    /// Repeatable (`type=apartment&type=studio`): keeps listings of any given type.
+    #[serde(rename = "type", default)]
+    #[param(style = Form, explode)]
+    pub listing_types: Vec<ListingType>,
     /// Keeps only listings with this status; without it, both are returned.
     pub status: Option<ListingStatus>,
+    pub page: Option<u32>,
+    pub per_page: Option<u32>,
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /search — query params
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Query parameters accepted by `GET /search`: the feed filters plus keywords and a price range.
+#[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct SearchListingsQuery {
+    /// Words to find, ignoring case and accents, with French stemming. Accepts
+    /// `"exact phrase"`, `OR` and `-excluded`. Blank is ignored; at most 100 characters.
+    pub q: Option<String>,
+    pub owner_id: Option<Uuid>,
+    /// Matches the whole city name, ignoring case and accents. Blank is ignored.
+    pub city: Option<String>,
+    /// Matches the whole neighborhood name, ignoring case and accents. Blank is ignored.
+    pub neighborhood: Option<String>,
+    /// Repeatable (`type=apartment&type=studio`): keeps listings of any given type.
+    #[serde(rename = "type", default)]
+    #[param(style = Form, explode)]
+    pub listing_types: Vec<ListingType>,
+    /// Keeps only listings with this status; without it, both are returned.
+    pub status: Option<ListingStatus>,
+    /// Lowest price in whole XAF, inclusive. 0 or more.
+    pub price_min: Option<i64>,
+    /// Highest price in whole XAF, inclusive. 0 or more, and not below `price_min`.
+    pub price_max: Option<i64>,
     pub page: Option<u32>,
     pub per_page: Option<u32>,
 }

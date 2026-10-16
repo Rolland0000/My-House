@@ -11,7 +11,7 @@ use crate::shared::rbac::Role;
 
 use super::dto::{
     ListListingsQuery, ListingDetailResponse, ListingRequest, ListingStatusRequest,
-    ListingStatusResponse, ListingSummaryDto, OwnerListingsQuery,
+    ListingStatusResponse, ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
 };
 use super::service;
 
@@ -25,7 +25,7 @@ const OWNER_ROLES: &[Role] = &[Role::Owner];
     params(ListListingsQuery),
     responses(
         (status = 200, description = "Paginated list of listings", body = PaginatedResponse<ListingSummaryDto>),
-        (status = 400, description = "Unknown `type` or `status` value, or a place filter containing a NUL character"),
+        (status = 400, description = "Unknown `type` (any of the repeated values) or `status` value, malformed `owner_id`, or a place filter containing a NUL character"),
     )
 )]
 pub async fn list(
@@ -33,6 +33,29 @@ pub async fn list(
     AppQuery(query): AppQuery<ListListingsQuery>,
 ) -> Result<Json<PaginatedResponse<ListingSummaryDto>>, AppError> {
     let response = service::list_listings(state.db(), query).await?;
+    Ok(Json(response))
+}
+
+/// Searches the public listings by keywords and filters.
+///
+/// With `q`, a title match comes first, then a match in the city, neighborhood,
+/// owner name or type label, then a match in the description only. Without
+/// `q`, the feed order applies (newest first).
+#[utoipa::path(
+    get,
+    path = "/search",
+    tag = "listings",
+    params(SearchListingsQuery),
+    responses(
+        (status = 200, description = "Paginated list of matching listings", body = PaginatedResponse<ListingSummaryDto>),
+        (status = 400, description = "`q` over 100 characters; unknown `type` or `status`; malformed `owner_id`; non-integer, negative or reversed price bounds; or a NUL character in `q` or a place filter"),
+    )
+)]
+pub async fn search(
+    State(state): State<AppState>,
+    AppQuery(query): AppQuery<SearchListingsQuery>,
+) -> Result<Json<PaginatedResponse<ListingSummaryDto>>, AppError> {
+    let response = service::search_listings(state.db(), query).await?;
     Ok(Json(response))
 }
 
