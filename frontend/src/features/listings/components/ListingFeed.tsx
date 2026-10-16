@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   DimensionRule,
@@ -10,13 +10,15 @@ import {
 } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { cn } from "../../../shared/utils/cn";
+import { useDebouncedValue } from "../../../shared/hooks/useDebouncedValue";
 import { usePagination } from "../../../shared/hooks/usePagination";
 import { useListings } from "../hooks/useListings";
-import { typeLabels } from "../labels";
+import { hasActiveFilters, toFeedFilters } from "../feedFilters";
+import { AVAILABILITY_BADGE, typeLabels } from "../labels";
 import { ListingCard } from "./ListingCard";
-import type { ListingType } from "../api";
+import type { ListingStatus, ListingType } from "../api";
 
-const CITY_FILTER_DEBOUNCE_MS = 400;
+const TEXT_FILTER_DEBOUNCE_MS = 400;
 const GENERIC_ERROR_MESSAGE = "Please try again in a moment.";
 
 const typeOptions = [
@@ -24,25 +26,33 @@ const typeOptions = [
   ...Object.entries(typeLabels).map(([value, label]) => ({ value, label })),
 ];
 
+const statusOptions = [
+  { value: "", label: "All statuses" },
+  ...Object.entries(AVAILABILITY_BADGE).map(([value, { label }]) => ({ value, label })),
+];
+
 function ListingFeed() {
   const [cityInput, setCityInput] = useState("");
-  const [city, setCity] = useState("");
+  const [neighborhoodInput, setNeighborhoodInput] = useState("");
   const [type, setType] = useState<ListingType | "">("");
+  const [status, setStatus] = useState<ListingStatus | "">("");
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => setCity(cityInput), CITY_FILTER_DEBOUNCE_MS);
-    return () => window.clearTimeout(timeout);
-  }, [cityInput]);
+  // An emptied field applies at once, so "Clear filters" sends a single request.
+  const city = useDebouncedValue(cityInput, cityInput ? TEXT_FILTER_DEBOUNCE_MS : 0);
+  const neighborhood = useDebouncedValue(
+    neighborhoodInput,
+    neighborhoodInput ? TEXT_FILTER_DEBOUNCE_MS : 0
+  );
 
   const filters = useMemo(
-    () => ({ city: city.trim() || undefined, type: type || undefined }),
-    [city, type]
+    () => toFeedFilters({ city, neighborhood, type, status }),
+    [city, neighborhood, type, status]
   );
   const { page, setPage } = usePagination(JSON.stringify(filters));
 
   const { data, isPending, isPlaceholderData, error } = useListings({ ...filters, page });
 
-  const hasActiveFilters = Boolean(filters.city || filters.type);
+  const filtersActive = hasActiveFilters(filters);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-7 py-8">
@@ -59,11 +69,25 @@ function ListingFeed() {
           aria-label="Filter by city"
           className="max-w-xs"
         />
+        <Input
+          value={neighborhoodInput}
+          onChange={(event) => setNeighborhoodInput(event.target.value)}
+          placeholder="Neighborhood"
+          aria-label="Filter by neighborhood"
+          className="max-w-xs"
+        />
         <Select
           value={type}
           onChange={(event) => setType(event.target.value as ListingType | "")}
           options={typeOptions}
           aria-label="Filter by property type"
+          className="max-w-xs"
+        />
+        <Select
+          value={status}
+          onChange={(event) => setStatus(event.target.value as ListingStatus | "")}
+          options={statusOptions}
+          aria-label="Filter by status"
           className="max-w-xs"
         />
         <span className="flex-1" />
@@ -101,20 +125,22 @@ function ListingFeed() {
       ) : data ? (
         <EmptyState
           title={
-            hasActiveFilters
+            filtersActive
               ? "No properties match these filters"
               : "No properties available right now"
           }
           description={
-            hasActiveFilters ? "Widen the city or drop the type filter." : "Check back again soon."
+            filtersActive ? "Try fewer filters or check the spelling." : "Check back again soon."
           }
           secondaryAction={
-            hasActiveFilters
+            filtersActive
               ? {
                   label: "Clear filters",
                   onClick: () => {
                     setCityInput("");
+                    setNeighborhoodInput("");
                     setType("");
+                    setStatus("");
                   },
                 }
               : undefined
