@@ -10,7 +10,10 @@ import {
 } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
 import { cn } from "../../../shared/utils/cn";
-import { useDebouncedValue } from "../../../shared/hooks/useDebouncedValue";
+import {
+  TEXT_FILTER_DEBOUNCE_MS,
+  useDebouncedValue,
+} from "../../../shared/hooks/useDebouncedValue";
 import { usePagination } from "../../../shared/hooks/usePagination";
 import { useListings } from "../hooks/useListings";
 import { hasActiveFilters, toFeedFilters } from "../feedFilters";
@@ -18,7 +21,6 @@ import { AVAILABILITY_BADGE, typeLabels } from "../labels";
 import { ListingCard } from "./ListingCard";
 import type { ListingStatus, ListingType } from "../api";
 
-const TEXT_FILTER_DEBOUNCE_MS = 400;
 const GENERIC_ERROR_MESSAGE = "Please try again in a moment.";
 
 const typeOptions = [

@@ -195,23 +195,28 @@ function HamburgerButton({ isOpen, onClick }: { isOpen: boolean; onClick: () => 
   );
 }
 
-const PUBLIC_LINKS: NavLinkSpec[] = [
-  { label: "Home", to: "/" },
-  { label: "Listings", to: "/", current: true },
-  { label: "Search" },
-  { label: "About" },
-  { label: "Contact" },
-];
+const SEARCH_PATH = "/search";
+
+function publicLinks(pathname: string): NavLinkSpec[] {
+  return [
+    { label: "Home", to: "/" },
+    { label: "Listings", to: "/", current: pathname === "/" },
+    { label: "Search", to: SEARCH_PATH, current: pathname === SEARCH_PATH },
+    { label: "About" },
+    { label: "Contact" },
+  ];
+}
 
 function PublicHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const links = publicLinks(useLocation().pathname);
 
   return (
     <>
       <div className="mx-auto flex h-[66px] max-w-[1112px] items-center gap-7 px-4 sm:px-7">
         {wordmark}
         <nav className="hidden flex-1 items-center gap-5 sm:flex">
-          {PUBLIC_LINKS.map((link) =>
+          {links.map((link) =>
             link.to ? (
               <NavItem key={link.label} to={link.to} current={link.current}>
                 {link.label}
@@ -236,7 +241,7 @@ function PublicHeader() {
         <HamburgerButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen((open) => !open)} />
       </div>
       {isMenuOpen && (
-        <MobileMenu links={PUBLIC_LINKS} onClose={() => setIsMenuOpen(false)}>
+        <MobileMenu links={links} onClose={() => setIsMenuOpen(false)}>
           <Link
             to="/login"
             onClick={() => setIsMenuOpen(false)}
@@ -272,13 +277,14 @@ function SeekerHeader({
   onSignOut?: () => void;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const links = publicLinks(useLocation().pathname);
 
   return (
     <>
       <div className="mx-auto flex h-[66px] max-w-[1112px] items-center gap-7 px-4 sm:px-7">
         {wordmark}
         <nav className="hidden flex-1 items-center gap-5 sm:flex">
-          {PUBLIC_LINKS.map((link) =>
+          {links.map((link) =>
             link.to ? (
               <NavItem key={link.label} to={link.to} current={link.current}>
                 {link.label}
@@ -310,7 +316,7 @@ function SeekerHeader({
         <HamburgerButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen((open) => !open)} />
       </div>
       {isMenuOpen && (
-        <MobileMenu links={PUBLIC_LINKS} onClose={() => setIsMenuOpen(false)}>
+        <MobileMenu links={links} onClose={() => setIsMenuOpen(false)}>
           {ownerRequestStatus === "pending" && <Badge tone="warning">Owner request pending</Badge>}
           {ownerRequestCta && (
             <Link
@@ -354,6 +360,7 @@ const ADD_PROPERTY_PATH = "/owner/listings/new";
 function ownerLinks(pathname: string): NavLinkSpec[] {
   return [
     { label: "Listings", to: "/", current: pathname === "/" },
+    { label: "Search", to: SEARCH_PATH, current: pathname === SEARCH_PATH },
     { label: "My properties", to: OWNER_LISTINGS_PATH, current: pathname === OWNER_LISTINGS_PATH },
     { label: "About" },
     { label: "Contact" },

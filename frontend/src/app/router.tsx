@@ -11,6 +11,9 @@ import { Spinner } from "../shared/components";
 const ListingFeed = lazy(() =>
   import("../features/listings/components/ListingFeed").then((m) => ({ default: m.ListingFeed }))
 );
+const SearchPage = lazy(() =>
+  import("../features/search/components/SearchPage").then((m) => ({ default: m.SearchPage }))
+);
 const ListingDetail = lazy(() =>
   import("../features/listings/components/ListingDetail").then((m) => ({
     default: m.ListingDetail,
@@ -83,6 +86,7 @@ export const router = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, element: withSuspense(ListingFeed) },
+      { path: "search", element: withSuspense(SearchPage) },
       { path: "listings/:id", element: withSuspense(ListingDetail) },
       {
         path: "profile",
