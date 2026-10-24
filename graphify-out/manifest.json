@@ -318,9 +318,9 @@
     "semantic_hash": "271d48498583f1628c02137700aecd7f"
   },
   "frontend/src/features/listings/index.ts": {
-    "mtime": 1792147395.8090274,
-    "seen": 1792148720.683607,
-    "ast_hash": "860da7f6653150427e20e1edf5c26350",
+    "mtime": 1792793846.352384,
+    "seen": 1792794567.814743,
+    "ast_hash": "44a9bc6dfe687e3338943f228366ff93",
     "semantic_hash": ""
   },
   "frontend/src/features/profile/api.ts": {
@@ -336,9 +336,9 @@
     "semantic_hash": "d60026b48efaa0115c361bda431ad903"
   },
   "frontend/src/features/search/api.ts": {
-    "mtime": 1792147312.6996167,
-    "seen": 1792148720.683739,
-    "ast_hash": "751ed664efd9532f2204b9d291b16737",
+    "mtime": 1792793953.7258527,
+    "seen": 1792794567.8148549,
+    "ast_hash": "db345cedbcc02da14f57b3e4d3f9026f",
     "semantic_hash": ""
   },
   "frontend/src/features/search/hooks/useSearch.ts": {
@@ -2346,9 +2346,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/search/components/FilterPanel.tsx": {
-    "mtime": 1792149298.1427207,
-    "seen": 1792149332.65167,
-    "ast_hash": "69714f7bdf4aacb6845385a234220fd0",
+    "mtime": 1792794542.4583957,
+    "seen": 1792794567.814857,
+    "ast_hash": "cf13de9877b301f5630e2374039302ea",
     "semantic_hash": ""
   },
   "frontend/src/features/search/components/SearchBar.tsx": {
@@ -2370,15 +2370,15 @@
     "semantic_hash": ""
   },
   "frontend/src/features/search/searchCriteria.test.ts": {
-    "mtime": 1792147537.0303042,
-    "seen": 1792148720.683757,
-    "ast_hash": "44866d6f4cf3b339816a2fc58ce490cd",
+    "mtime": 1792793994.936174,
+    "seen": 1792794567.814881,
+    "ast_hash": "b7864a6b586d35b2d954edd168c3d4bb",
     "semantic_hash": ""
   },
   "frontend/src/features/search/searchCriteria.ts": {
-    "mtime": 1792147410.213957,
-    "seen": 1792148720.6837602,
-    "ast_hash": "298c2d2168b8f0b6d9b84f6813d65328",
+    "mtime": 1792793979.7606153,
+    "seen": 1792794567.8148842,
+    "ast_hash": "6269997e08825f633abe3752ef6765a4",
     "semantic_hash": ""
   },
   "frontend/src/shared/api/client.test.ts": {
@@ -2391,6 +2391,30 @@
     "mtime": 1792147302.9715004,
     "seen": 1792148720.683785,
     "ast_hash": "7e43a63a791a9713be5fd728b4bca9fb",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/search/components/PriceRangeFilter.tsx": {
+    "mtime": 1792794463.5555596,
+    "seen": 1792794567.81486,
+    "ast_hash": "8efef235fa09ea11dc3ea1412ac5d7f3",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/search/priceRange.test.ts": {
+    "mtime": 1792793947.2233317,
+    "seen": 1792794567.8148758,
+    "ast_hash": "d31b915ce0a630699a82d5d2b9afb965",
+    "semantic_hash": ""
+  },
+  "frontend/src/features/search/priceRange.ts": {
+    "mtime": 1792794542.4578292,
+    "seen": 1792794567.814878,
+    "ast_hash": "6c05790d630e61c2d91566e6498a4166",
+    "semantic_hash": ""
+  },
+  "docs/plans/MH-65-plan.md": {
+    "mtime": 1792793692.7202642,
+    "seen": 1792794567.815153,
+    "ast_hash": "1479008d4dcbc3716e890e675c9c0812",
     "semantic_hash": ""
   }
 }
