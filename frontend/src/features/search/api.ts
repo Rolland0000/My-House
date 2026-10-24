@@ -8,6 +8,8 @@ export interface SearchParams {
   neighborhood?: string;
   types?: ListingType[];
   status?: ListingStatus;
+  priceMin?: number;
+  priceMax?: number;
   page?: number;
   perPage?: number;
 }
@@ -20,6 +22,8 @@ export function searchListings(params: SearchParams = {}): Promise<ListListingsR
     neighborhood: params.neighborhood,
     type: params.types,
     status: params.status,
+    price_min: params.priceMin,
+    price_max: params.priceMax,
     page: params.page,
     per_page: params.perPage,
   });
