@@ -15,6 +15,7 @@ export { useOwnerListings } from "./hooks/useOwnerListings";
 
 export { listingVisibility, type ListingVisibility } from "./listingVisibility";
 export { typeLabels, AVAILABILITY_BADGE } from "./labels";
+export { PRICE_MAX } from "./listingFormValidation";
 export { removeOwnerScopedQueries } from "./removeOwnerScopedQueries";
 
 export {

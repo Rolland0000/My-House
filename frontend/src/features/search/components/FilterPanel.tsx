@@ -13,13 +13,14 @@ import {
   type ListingType,
 } from "../../listings";
 import { useUrlDraft } from "../hooks/useUrlDraft";
+import { PriceRangeFilter } from "./PriceRangeFilter";
 import type { SearchCriteria } from "../searchCriteria";
 
 type FilterPatch = Partial<Omit<SearchCriteria, "q" | "page">>;
 
 interface FilterPanelProps {
   criteria: SearchCriteria;
-  /** A new value remounts the text fields, dropping their unsent drafts. */
+  /** A new value remounts the text and price fields, dropping their unsent drafts. */
   draftResetKey: number;
   onChange: (patch: FilterPatch) => void;
   onClearAll: () => void;
@@ -106,6 +107,14 @@ function FilterPanel({ criteria, draftResetKey, onChange, onClearAll }: FilterPa
           ))}
         </div>
       </section>
+
+      <PriceRangeFilter
+        // Sibling of the text fields' Fragment, so it needs a key of its own.
+        key={`price-${draftResetKey}`}
+        priceMin={criteria.priceMin}
+        priceMax={criteria.priceMax}
+        onCommit={onChange}
+      />
 
       <fieldset className="flex flex-col gap-2.5">
         <legend className="mb-3 text-sm font-semibold text-text">Status</legend>

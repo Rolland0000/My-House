@@ -14,6 +14,8 @@ const FULL_CRITERIA: SearchCriteria = {
   q: "villa piscine",
   types: ["apartment", "villa"],
   statuses: ["available"],
+  priceMin: 50_000,
+  priceMax: 1_500_000,
   city: "Douala",
   neighborhood: "Bonapriso",
   ownerId: OWNER_ID,
@@ -74,6 +76,31 @@ describe("parseSearchCriteria", () => {
     expect(criteria.types).toEqual(["apartment", "villa"]);
     expect(criteria.statuses).toEqual(["available", "unavailable"]);
   });
+
+  it("reads whole price bounds, alone or together", () => {
+    expect(parse("price_min=7499")).toEqual({ ...EMPTY_CRITERIA, priceMin: 7_499 });
+    expect(parse("price_max=1500000")).toEqual({ ...EMPTY_CRITERIA, priceMax: 1_500_000 });
+    expect(parse("price_min=200000&price_max=200000")).toEqual({
+      ...EMPTY_CRITERIA,
+      priceMin: 200_000,
+      priceMax: 200_000,
+    });
+  });
+
+  it("ignores a price that is not a whole amount up to the highest listing price", () => {
+    for (const price of ["abc", "-5", "1.5", "", "1e5", "10000000000"]) {
+      expect(parse(`price_min=${price}&price_max=${price}`)).toEqual(EMPTY_CRITERIA);
+    }
+    expect(parse("price_max=9999999999").priceMax).toBe(9_999_999_999);
+  });
+
+  it("ignores both bounds when they are reversed", () => {
+    expect(parse("price_min=500000&price_max=100000")).toEqual(EMPTY_CRITERIA);
+  });
+
+  it("reads the slider ends as no bound", () => {
+    expect(parse("price_min=0&price_max=1000000")).toEqual(EMPTY_CRITERIA);
+  });
 });
 
 describe("toUrlSearchParams", () => {
@@ -84,7 +111,7 @@ describe("toUrlSearchParams", () => {
 
   it("writes keys in a fixed order whatever the input order", () => {
     expect(toUrlSearchParams({ ...FULL_CRITERIA, types: ["villa", "apartment"] }).toString()).toBe(
-      `q=villa+piscine&type=apartment&type=villa&status=available&city=Douala&neighborhood=Bonapriso&owner_id=${OWNER_ID}&page=3`
+      `q=villa+piscine&type=apartment&type=villa&status=available&price_min=50000&price_max=1500000&city=Douala&neighborhood=Bonapriso&owner_id=${OWNER_ID}&page=3`
     );
   });
 });
@@ -110,12 +137,14 @@ describe("toSearchRequest", () => {
     ).toEqual({ page: 1, q: "villa", city: "Douala" });
   });
 
-  it("passes types, owner_id and page through", () => {
+  it("passes types, prices, owner_id and page through", () => {
     expect(toSearchRequest(FULL_CRITERIA)).toEqual({
       page: 3,
       q: "villa piscine",
       types: ["apartment", "villa"],
       status: "available",
+      priceMin: 50_000,
+      priceMax: 1_500_000,
       city: "Douala",
       neighborhood: "Bonapriso",
       ownerId: OWNER_ID,
@@ -135,5 +164,6 @@ describe("hasSearchCriteria", () => {
       true
     );
     expect(hasSearchCriteria({ ...EMPTY_CRITERIA, ownerId: OWNER_ID })).toBe(true);
+    expect(hasSearchCriteria({ ...EMPTY_CRITERIA, priceMax: 0 })).toBe(true);
   });
 });
