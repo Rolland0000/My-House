@@ -1,2 +1,13 @@
 [advisories]
-ignore = ["RUSTSEC-2023-0071"]
+# Keep in sync with the `[advisories] ignore` list in deny.toml.
+ignore = [
+    # Transitive via sqlx-mysql, not reachable: only the "postgres" sqlx feature is enabled.
+    "RUSTSEC-2023-0071",
+    # `crypto-bigint` 0.5 (via jsonwebtoken `rust_crypto` -> p256/p384): only the
+    # ECDSA path is affected, tokens are HS256-only. Revisit when jsonwebtoken
+    # moves to elliptic-curve 0.14.
+    "RUSTSEC-2026-0387",
+    # `basic-toml` (via askama_derive `config`, needed to read askama.toml) is
+    # unmaintained with no replacement; compile-time only, parses our own file.
+    "RUSTSEC-2026-0374",
+]
