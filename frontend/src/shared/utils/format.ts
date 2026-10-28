@@ -18,6 +18,14 @@ export function formatCountdown(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+/** First and last name joined by a space, skipping blank parts; "" when both are blank. */
+export function formatFullName(firstName?: string | null, lastName?: string | null): string {
+  return [firstName, lastName]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(" ");
+}
+
 /** Initials for the ink-900 avatar square used throughout the header/profile/detail. */
 export function formatInitials(firstName?: string | null, lastName?: string | null): string {
   return [firstName, lastName]

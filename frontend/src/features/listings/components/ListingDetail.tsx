@@ -1,7 +1,8 @@
 import { Link, useParams } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Alert, DimensionRule, Spinner } from "../../../shared/components";
 import { ApiError } from "../../../shared/api/client";
+import { formatFullName } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { useAuth } from "../../auth";
 import { useProfile } from "../../profile";
@@ -45,9 +46,12 @@ function ListingDetail() {
   const listing = data.data;
   const displayableMedia = listing.media.filter((media) => isRemoteMediaUrl(media.url));
   const isOwner = status === "authenticated" && profile?.id === listing.owner.id;
+  // Hidden until we know the viewer is not the owner, so it never flashes on their own listing.
+  const showOwnerListingsLink =
+    status === "anonymous" || (status === "authenticated" && !!profile && !isOwner);
 
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
-  const ownerName = [listing.owner.first_name, listing.owner.last_name].filter(Boolean).join(" ");
+  const ownerName = formatFullName(listing.owner.first_name, listing.owner.last_name);
   const eyebrow = [
     typeLabels[listing.type],
     listing.surface_m2 ? `${listing.surface_m2} m²` : null,
@@ -129,6 +133,18 @@ function ListingDetail() {
               <p className="text-sm text-text-muted">Owner</p>
             </div>
           </div>
+          {showOwnerListingsLink && (
+            <Link
+              to={{
+                pathname: "/search",
+                search: `?${new URLSearchParams({ owner_id: listing.owner.id })}`,
+              }}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-ink-900 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
+              See other listings by {ownerName || "this owner"}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          )}
           {/* role="note": a role="alert" would be announced every time the page loads. */}
           <Alert
             variant="warning"
