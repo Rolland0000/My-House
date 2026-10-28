@@ -4,9 +4,13 @@ ignore = [
     # No fixed upgrade available yet (transitive via sqlx-mysql, not reachable
     # at runtime since only the "postgres" sqlx feature is enabled).
     "RUSTSEC-2023-0071",
-    # `paste` (via utoipa-axum) is archived/unmaintained with no safe
-    # replacement drop-in yet; revisit when utoipa-axum drops the dependency.
-    "RUSTSEC-2024-0436",
+    # `crypto-bigint` 0.5 (via jsonwebtoken `rust_crypto` -> p256/p384): only the
+    # ECDSA path is affected, tokens are HS256-only. Revisit when jsonwebtoken
+    # moves to elliptic-curve 0.14.
+    "RUSTSEC-2026-0387",
+    # `basic-toml` (via askama_derive `config`, needed to read askama.toml) is
+    # unmaintained with no replacement; compile-time only, parses our own file.
+    "RUSTSEC-2026-0374",
 ]
 
 [licenses]
