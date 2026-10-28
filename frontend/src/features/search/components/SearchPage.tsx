@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { ChevronDown } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
 import { cn } from "../../../shared/utils/cn";
 import { ListingCard } from "../../listings";
 import { useSearch } from "../hooks/useSearch";
+import { ownerFilterLabel } from "../ownerFilter";
 import {
   EMPTY_CRITERIA,
   hasSearchCriteria,
@@ -22,6 +23,7 @@ import {
   type SearchCriteria,
 } from "../searchCriteria";
 import { FilterPanel, type FilterPatch } from "./FilterPanel";
+import { OwnerFilterChip } from "./OwnerFilterChip";
 import { SearchBar } from "./SearchBar";
 
 const SKELETON_CARD_COUNT = 6;
@@ -37,6 +39,7 @@ function SearchPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   // Bumped by "Clear all" to remount the text fields and drop their unsent drafts.
   const [draftResetKey, setDraftResetKey] = useState(0);
+  const resultCountRef = useRef<HTMLParagraphElement>(null);
 
   function navigate(next: SearchCriteria, replace = false) {
     const nextParams = toUrlSearchParams(next);
@@ -52,6 +55,12 @@ function SearchPage() {
 
   function submitKeyword(keyword: string) {
     navigate({ ...criteria, q: keyword, page: 1 });
+  }
+
+  // Removing the chip also removes its button, so focus moves to the result count.
+  function removeOwnerFilter() {
+    changeFilters({ ownerId: "" });
+    resultCountRef.current?.focus();
   }
 
   function clearAll() {
@@ -99,8 +108,15 @@ function SearchPage() {
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <SearchBar key={draftResetKey} value={criteria.q} onSubmit={submitKeyword} />
 
+          {criteria.ownerId && (
+            <OwnerFilterChip
+              label={ownerFilterLabel(criteria.ownerId, data?.data ?? [])}
+              onRemove={removeOwnerFilter}
+            />
+          )}
+
           <div className="flex min-h-5 items-center gap-2 text-sm font-medium text-ink-500">
-            <p aria-live="polite">
+            <p ref={resultCountRef} tabIndex={-1} aria-live="polite">
               {data &&
                 `${data.pagination.total} propert${data.pagination.total === 1 ? "y" : "ies"}`}
             </p>
