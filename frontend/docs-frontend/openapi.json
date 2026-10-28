@@ -2079,10 +2079,10 @@
           "data": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/OwnerRequestDto"
               },
               {
-                "$ref": "#/components/schemas/OwnerRequestDto"
+                "type": "null"
               }
             ]
           }

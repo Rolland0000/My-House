@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
 use axum::http::request::Parts;
 use axum::Json;
@@ -40,13 +39,11 @@ impl AuthUser {
 /// header that fails to parse or resolve still rejects with `AppError`
 /// (401), it is never downgraded to anonymous.
 ///
-/// Deliberately not axum's blanket `Option<AuthUser>`: that impl's rejection
-/// is `Infallible`, so an expired or malformed token would silently become
-/// `None` instead of the 401 the frontend's refresh-and-retry relies on.
+/// An expired or malformed token must stay a 401, never silently become
+/// `None`: the frontend's refresh-and-retry relies on it.
 #[derive(Debug, Clone, Copy)]
 pub struct MaybeAuthUser(pub Option<AuthUser>);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for MaybeAuthUser
 where
     S: Send + Sync,
@@ -91,7 +88,6 @@ impl FromRef<AppState> for AuthState {
     }
 }
 
-#[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
 where
     S: Send + Sync,
@@ -119,7 +115,6 @@ where
 /// says a malformed body is a `400` in the standard error envelope.
 pub struct AppJson<T>(pub T);
 
-#[async_trait]
 impl<T, S> FromRequest<S> for AppJson<T>
 where
     T: DeserializeOwned,
@@ -140,7 +135,6 @@ where
 /// (`type=a&type=b`) fills a `Vec` field marked `#[serde(default)]`.
 pub struct AppQuery<T>(pub T);
 
-#[async_trait]
 impl<T, S> FromRequestParts<S> for AppQuery<T>
 where
     T: DeserializeOwned,
