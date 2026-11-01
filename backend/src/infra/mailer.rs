@@ -153,6 +153,8 @@ mod tests {
             rate_limit_max_requests: 100,
             rate_limit_window_seconds: 60,
             trusted_proxies: vec![],
+            contact_reveal_max_per_window: 20,
+            contact_reveal_window_seconds: 3600,
         }
     }
 

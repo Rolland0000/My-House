@@ -629,6 +629,52 @@
         }
       }
     },
+    "/api/v1/listings/{id}/contact": {
+      "get": {
+        "tags": [
+          "contact"
+        ],
+        "summary": "Phone numbers of a listing's owner, for a signed-in seeker or owner.",
+        "description": "The listing must be publicly visible, available or not, and its owner\nactive. Otherwise the 404 is identical to the one for an unknown id. Every\ncall counts toward a per-user cap, 404s included.",
+        "operationId": "get_owner_contact",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Owner phone numbers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, invalid or expired access token, or suspended account"
+          },
+          "403": {
+            "description": "Caller is an admin"
+          },
+          "404": {
+            "description": "Listing not found, not publicly visible, or its owner is inactive"
+          },
+          "429": {
+            "description": "Too many reveals by the caller within the window"
+          }
+        }
+      }
+    },
     "/api/v1/listings/{id}/cover": {
       "patch": {
         "tags": [
@@ -1543,6 +1589,39 @@
           "file": {
             "type": "string",
             "format": "binary"
+          }
+        }
+      },
+      "ContactDto": {
+        "type": "object",
+        "description": "Phone numbers of a listing's owner, exactly as stored.",
+        "required": [
+          "phone",
+          "secondary_phone"
+        ],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "The owner's profile phone."
+          },
+          "secondary_phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Secondary number from the owner's most recent approved owner request."
+          }
+        }
+      },
+      "ContactResponse": {
+        "type": "object",
+        "description": "Envelope for `GET /listings/:id/contact`.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ContactDto"
           }
         }
       },
@@ -2612,6 +2691,10 @@
     {
       "name": "admin",
       "description": "Platform administration"
+    },
+    {
+      "name": "contact",
+      "description": "Owner contact reveal"
     }
   ]
 }
