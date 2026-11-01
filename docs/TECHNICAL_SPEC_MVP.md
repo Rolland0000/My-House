@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.2
+> **Version :** 1.3
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v2.2 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.3 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -30,32 +30,55 @@
 backend/
 ├── Cargo.toml
 ├── Dockerfile
+├── compose-backend.yml
+├── askama.toml                        # Répertoire des templates email (modules/notifications/templates)
 ├── .env.example
-├── migrations/                        # sqlx migrate — fichiers horodatés .sql
-│   └── 0001_init.sql
+├── migrations/                        # sqlx migrate — fichiers horodatés .sql, forward-only
+│   ├── 20260709000000_baseline.sql
+│   ├── 20260729041038_baseline_schema.sql
+│   ├── 20260729044830_triggers_functions.sql
+│   ├── 20260830120000_users_profile_completeness.sql
+│   ├── 20260912081021_owner_requests_secondary_phone.sql
+│   ├── 20260927094513_listings_published_at.sql
+│   └── 20261024053122_search_vector_english_type_labels.sql
+├── seed/
+│   └── seed_listings.sql
 └── src/
-    ├── main.rs                        # Bootstrap, AppState, router global, DI, /health, graceful shutdown
+    ├── main.rs                        # Composition root : config, pool, cache, storage, bootstrap admin
+    ├── lib.rs
+    ├── app_server.rs                  # Bind, serve, graceful shutdown (SIGINT / SIGTERM)
+    ├── app_state.rs                   # AppState injecté via State<AppState>
+    ├── route.rs                       # Routers des modules sous /api/v1, /health, Swagger UI hors production
+    ├── api_doc.rs                     # Métadonnées OpenAPI (utoipa)
+    ├── bin/
+    │   └── gen_openapi.rs             # Écrit frontend/docs-frontend/openapi.json sans DB ni serveur
     │
     ├── config/
     │   └── mod.rs                     # AppConfig — chargement et validation des env vars
     │
     ├── middleware/
     │   ├── mod.rs
-    │   ├── cors.rs          	       # CorsLayer (tower-http)
-    │   ├── logging.rs		       # tracing + request_id
-    │   └── rate_limit.rs    	       # Limite générique (complète le rate-limit OTP spécifique)
+    │   ├── cors.rs                    # CorsLayer (tower-http), origines lues dans ALLOWED_ORIGINS
+    │   ├── logging.rs                 # tracing + request_id
+    │   └── rate_limit.rs              # Limite générique par IP (complète le rate-limit OTP spécifique)
     │
     ├── infra/
     │   ├── mod.rs
     │   ├── db.rs                      # Pool sqlx::PgPool
-    │   ├── cache.rs                   # moka::Cache — OTP + pending registrations
+    │   ├── health.rs                  # GET /health (PostgreSQL) et GET /health/storage
     │   ├── mailer.rs                  # Client SMTP (lettre)
+    │   ├── cache/
+    │   │   ├── mod.rs
+    │   │   ├── provider.rs            # trait AppCacheProvider
+    │   │   └── moka.rs                # impl moka — OTP et tickets d'inscription, is_active, rejeu refresh, rate-limits
     │   └── storage/
     │       ├── mod.rs                 # Factory : sélection impl via STORAGE_PROVIDER (local au MVP)
-    │       ├── provider.rs            # trait StorageProvider (incl. presigned_url, read — non utilisés au MVP)
-    │       └── local_fs.rs            # impl LocalFsStorage (MVP) — AwsS3Storage ajouté en V2
+    │       ├── provider.rs            # trait StorageProvider (incl. presigned_url, non utilisé au MVP)
+    │       ├── local_fs.rs            # impl LocalFsStorage (MVP) — AwsS3Storage ajouté en V2
+    │       ├── cleanup.rs             # Suppression best-effort d'une liste de clés
+    │       └── test_support.rs        # Storage factice pour les tests unitaires
     │
-    ├── modules/
+    ├── modules/                       # Tests unitaires dans un bloc #[cfg(test)] de chaque fichier
     │   ├── auth/
     │   │   ├── mod.rs
     │   │   ├── router.rs
@@ -63,170 +86,257 @@ backend/
     │   │   ├── service.rs
     │   │   ├── repository.rs          # refresh_tokens CRUD
     │   │   ├── model.rs
-    │   │   ├── dto.rs                 # ToSchema derives (utoipa)
-    │   │   └── tests.rs
+    │   │   └── dto.rs                 # ToSchema derives (utoipa)
     │   │
     │   ├── users/
     │   │   ├── mod.rs
-    │   │   ├── router.rs
+    │   │   ├── router.rs              # /users/me, /users/me/avatar
     │   │   ├── handler.rs
-    │   │   ├── service.rs              # Délègue upload avatar + documents identité à media::service
-    │   │   ├── repository.rs          # users + owner_requests CRUD (incl. identity_data, identity_documents)
+    │   │   ├── service.rs             # Profil, suppression de compte, upload avatar (cf. §3.1)
+    │   │   ├── repository.rs          # users CRUD ; lit listing_media et owner_requests.identity_documents (suppression de compte)
     │   │   ├── model.rs
-    │   │   ├── dto.rs
-    │   │   └── tests.rs
+    │   │   └── dto.rs
+    │   │
+    │   ├── owner_requests/
+    │   │   ├── mod.rs
+    │   │   ├── router.rs              # POST /owner-requests, GET /users/me/owner-request
+    │   │   ├── handler.rs
+    │   │   ├── service.rs             # Soumission atomique, upload des pièces (cf. §3.1), revue admin
+    │   │   ├── repository.rs          # owner_requests CRUD (incl. identity_data, identity_documents)
+    │   │   ├── model.rs
+    │   │   └── dto.rs
     │   │
     │   ├── listings/
     │   │   ├── mod.rs
-    │   │   ├── router.rs
+    │   │   ├── router.rs              # /listings, /search, /users/me/listings
     │   │   ├── handler.rs
-    │   │   ├── service.rs
-    │   │   ├── repository.rs
+    │   │   ├── service.rs             # Validation, visibilité publique, publication, recherche
+    │   │   ├── repository.rs          # Feed et recherche : une seule paire count/list (QueryBuilder)
     │   │   ├── model.rs
-    │   │   ├── dto.rs
-    │   │   └── tests.rs
-    │   │
-    │   ├── search/
-    │   │   ├── mod.rs
-    │   │   ├── router.rs
-    │   │   ├── handler.rs
-    │   │   ├── service.rs
-    │   │   ├── repository.rs          # Requêtes full-text PostgreSQL
-    │   │   ├── dto.rs
-    │   │   └── tests.rs
+    │   │   └── dto.rs
     │   │
     │   ├── media/
     │   │   ├── mod.rs
-    │   │   ├── router.rs
+    │   │   ├── router.rs              # /media/*, /listings/:id/cover, /listings/:id/media/order
     │   │   ├── handler.rs
-    │   │   ├── service.rs             # Validation (magic bytes) + délégation à StorageProvider
-    │   │   │                         # upload_listing_photo · upload_avatar · upload_identity_documents
-    │   │   ├── repository.rs          # listing_media CRUD
+    │   │   ├── service.rs             # Photos de listing : quota, cover, ordre, upload vers StorageProvider
+    │   │   ├── repository.rs          # listing_media CRUD (seul module qui écrit dans cette table)
     │   │   ├── model.rs
-    │   │   ├── dto.rs
-    │   │   └── tests.rs
-    │   │
-    │   ├── contact/
-    │   │   ├── mod.rs
-    │   │   ├── router.rs
-    │   │   ├── handler.rs
-    │   │   ├── service.rs
-    │   │   ├── dto.rs
-    │   │   └── tests.rs
+    │   │   └── dto.rs
     │   │
     │   ├── notifications/
     │   │   ├── mod.rs
     │   │   ├── service.rs
-    │   │   ├── templates/
-    │   │   │   ├── otp.html
-    │   │   │   ├── welcome.html
-    │   │   │   ├── owner_request_received.html
-    │   │   │   ├── owner_request_approved.html
-    │   │   │   └── owner_request_rejected.html
-    │   │   └── tests.rs
+    │   │   └── templates/
+    │   │       ├── otp.html
+    │   │       ├── welcome.html
+    │   │       ├── owner_request_received.html
+    │   │       ├── owner_request_approved.html
+    │   │       └── owner_request_rejected.html
     │   │
-    │   └── admin/
-    │       ├── mod.rs
-    │       ├── router.rs
-    │       ├── handler.rs
-    │       ├── service.rs
-    │       ├── dto.rs
-    │       └── tests.rs
+    │   ├── admin/
+    │   │   ├── mod.rs
+    │   │   ├── router.rs              # /admin/owner-requests/*
+    │   │   └── handler.rs             # Délègue à owner_requests::service, pas de service propre
+    │   │
+    │   └── contact/
+    │       └── mod.rs                 # Vide, non déclaré dans modules/mod.rs : GET /listings/:id/contact pas encore livré
     │
     └── shared/
         ├── mod.rs
         ├── errors.rs                  # AppError → réponse HTTP structurée
         ├── pagination.rs              # PaginatedResponse<T>
-        ├── extractors.rs              # AuthUser — JWT claims + revérifie is_active à chaque requête
-        ├── rbac.rs                    # Guards de rôle (seeker/owner/admin) utilisés par les extracteurs
-        └── types.rs                   # NewType wrappers : UserId, ListingId...
+        ├── extractors.rs              # AuthUser, MaybeAuthUser, AppJson, AppQuery (revérifie is_active)
+        ├── rbac.rs                    # Contrôle de rôle (seeker/owner/admin), appelé dans les handlers
+        ├── types.rs                   # NewType wrappers : UserId, ListingId...
+        ├── validation.rs              # Règles de champs (400 ou 422 FieldErrors), place_filter, keyword_filter
+        ├── file_validation.rs         # Magic bytes (infer) et tailles max, pour tous les uploads
+        ├── storage_key.rs             # Seul constructeur des clés de storage (préfixes publics/privés)
+        ├── media_order.rs             # Ordre d'affichage des photos (cover d'abord)
+        ├── session_cookie.rs          # Attributs du cookie refresh_token
+        ├── token_decoder.rs           # Trait de décodage du JWT utilisé par AuthUser
+        └── crypto/
+            ├── mod.rs
+            ├── jwt.rs                 # Émission et vérification de l'access token
+            ├── hashing.rs             # SHA-256 (refresh tokens, codes OTP)
+            └── otp.rs                 # Code à 6 chiffres (CSPRNG)
 ```
+
+La recherche n'a pas de module à elle : `GET /search` est servi par `listings`, qui partage avec le feed les filtres, la règle de visibilité et les deux requêtes SQL (cf. §4.4 et ARCHITECTURE.md ADR-12).
 
 ### 1.2 Frontend
 
 ```
 frontend/
 ├── package.json
-├── tsconfig.json
+├── package-lock.json
+├── tsconfig.json                      # + tsconfig.app.json, tsconfig.node.json
+├── vite.config.ts
+├── eslint.config.js
+├── index.html
+├── .env.example
 ├── Dockerfile
+├── compose-frontend.yml
 ├── nginx.conf
-├── openapi.json                       # Généré depuis utoipa — ne pas committer (gitignore)
+├── docs-frontend/
+│   └── openapi.json                   # Écrit par backend/src/bin/gen_openapi.rs, versionné (détection de dérive en CI)
 └── src/
     ├── main.tsx
     ├── App.tsx
+    ├── index.css
     │
     ├── app/
-    │   ├── router.tsx                 # Routes globales + guards rôle
+    │   ├── router.tsx                 # Routes globales, une route lazy par page
     │   ├── providers.tsx              # QueryClientProvider, AuthProvider
+    │   ├── RequireAuth.tsx            # Exige une session (refresh silencieux d'abord)
+    │   ├── RequireOwner.tsx           # Rôle owner, imbriqué dans RequireAuth
+    │   ├── RequireAdmin.tsx           # Rôle admin, imbriqué dans RequireAuth
     │   └── layout/
     │       ├── RootLayout.tsx
     │       ├── AuthLayout.tsx
     │       └── AdminLayout.tsx
     │
-    ├── features/
+    ├── features/                      # Logique pure dans des .ts testés par un *.test.ts voisin (vitest)
     │   ├── auth/
     │   │   ├── components/
+    │   │   │   ├── AuthFlow.tsx
     │   │   │   ├── OtpRequestForm.tsx
     │   │   │   ├── OtpVerifyForm.tsx
-    │   │   │   └── RegistrationForm.tsx   # Affiché si is_new_user = true
-    │   │   ├── hooks/useAuth.ts
+    │   │   │   ├── OtpCodeInput.tsx
+    │   │   │   ├── RegistrationForm.tsx       # Affiché si is_new_user = true
+    │   │   │   └── OwnerActivationModal.tsx
+    │   │   ├── hooks/                 # useAuth, useOtpRequest, useOtpVerify, useRegister
+    │   │   ├── AuthContext.tsx
+    │   │   ├── tokenRole.ts
+    │   │   ├── constants.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
     │   ├── listings/
     │   │   ├── components/
-    │   │   │   ├── ListingFeed.tsx       # Grille de cover photos scrollable
-    │   │   │   ├── ListingCard.tsx       # Cover + résumé (titre, ville, prix)
-    │   │   │   ├── ListingDetail.tsx     # Page complète + owner info
-    │   │   │   └── ListingForm.tsx       # Création / édition (Owner)
-    │   │   ├── hooks/useListings.ts
+    │   │   │   ├── ListingFeed.tsx            # Feed public : grille de covers + filtres (ville, quartier, type, statut)
+    │   │   │   ├── ListingCard.tsx
+    │   │   │   ├── ListingPrice.tsx
+    │   │   │   ├── ListingDetail.tsx          # Détail public, ou vue owner avec OwnerBar
+    │   │   │   ├── ListingNotFound.tsx
+    │   │   │   ├── OwnerAvatar.tsx
+    │   │   │   ├── OwnerBar.tsx               # Vue owner du détail : éditer, photos, publier un brouillon
+    │   │   │   ├── ListingForm.tsx            # Création / édition
+    │   │   │   ├── CreateListingPage.tsx
+    │   │   │   ├── EditListingPage.tsx
+    │   │   │   ├── ListingPhotosPage.tsx      # Upload, cover, ordre, suppression des photos
+    │   │   │   ├── PhotoTile.tsx
+    │   │   │   ├── DeletePhotoModal.tsx
+    │   │   │   ├── PublishListingAction.tsx
+    │   │   │   ├── DeleteListingAction.tsx
+    │   │   │   ├── ListingStatusControl.tsx
+    │   │   │   ├── OwnerListings.tsx          # « Mes biens » (GET /users/me/listings)
+    │   │   │   └── OwnerListingRow.tsx        # Statut et suppression d'un bien
+    │   │   ├── hooks/                 # useListings, useOwnerListings, useCreateListing, useUpdateListing,
+    │   │   │                          # useUpdateListingStatus, usePublishListing, useDeleteListing,
+    │   │   │                          # useListingPhotoMutations
+    │   │   ├── feedFilters.ts
+    │   │   ├── labels.ts
+    │   │   ├── listingFormValidation.ts
+    │   │   ├── listingVisibility.ts
+    │   │   ├── listingPublication.ts
+    │   │   ├── listingDeletion.ts
+    │   │   ├── listingPhotos.ts
+    │   │   ├── photoOrder.ts
+    │   │   ├── ownerListingsPage.ts
+    │   │   ├── ownerListingsCache.ts
+    │   │   ├── removeOwnerScopedQueries.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
-    │   ├── search/
+    │   ├── search/                    # Page /search (MH-64-FE, MH-65, MH-67)
     │   │   ├── components/
+    │   │   │   ├── SearchPage.tsx             # Mot-clé, filtres et résultats, tout l'état dans l'URL
     │   │   │   ├── SearchBar.tsx
-    │   │   │   └── FilterPanel.tsx
-    │   │   ├── hooks/useSearch.ts
+    │   │   │   ├── FilterPanel.tsx            # Cases à cocher type et statut, ville, quartier, prix
+    │   │   │   ├── PriceRangeFilter.tsx       # Curseur double et champs min/max, en XAF
+    │   │   │   └── OwnerFilterChip.tsx        # Puce du filtre owner_id, retirable
+    │   │   ├── hooks/
+    │   │   │   ├── useSearch.ts               # Clé ["listings", "search", params]
+    │   │   │   └── useUrlDraft.ts             # Brouillon éditable d'une valeur portée par l'URL
+    │   │   ├── searchCriteria.ts              # URL ↔ critères ↔ paramètres d'API
+    │   │   ├── priceRange.ts
+    │   │   ├── ownerFilter.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
     │   ├── profile/
     │   │   ├── components/
     │   │   │   ├── ProfileForm.tsx
-    │   │   │   ├── OwnerRequestForm.tsx  # Submit unique : phone + identité + documents
-    │   │   │   └── AvatarUpload.tsx      # Upload / remplacement de l'avatar
+    │   │   │   ├── AvatarUpload.tsx           # Upload / remplacement de l'avatar
+    │   │   │   ├── OwnerRequestStatusBlock.tsx
+    │   │   │   └── DeleteAccountSection.tsx
+    │   │   ├── hooks/                 # useProfile, useUpdateProfile, useUploadAvatar, useDeleteAccount
+    │   │   ├── profileValidation.ts
+    │   │   ├── avatarValidation.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
-    │   ├── contact/
+    │   ├── owner-request/
     │   │   ├── components/
-    │   │   │   └── ContactReveal.tsx
+    │   │   │   ├── OwnerRequestForm.tsx       # Submit unique : phone + identité + documents
+    │   │   │   └── OwnerRequestStatus.tsx
+    │   │   ├── hooks/                 # useSubmitOwnerRequest, useOwnerRequestStatus
+    │   │   ├── ownerRequestValidation.ts
+    │   │   ├── ownerRequestStatusView.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
-    │   └── admin/
-    │       ├── components/
-    │       │   ├── UserTable.tsx
-    │       │   ├── ListingTable.tsx
-    │       │   └── OwnerRequestTable.tsx
-    │       ├── api.ts
-    │       └── index.ts
+    │   ├── admin/
+    │   │   ├── components/
+    │   │   │   ├── OwnerRequestQueueList.tsx
+    │   │   │   ├── OwnerRequestDetail.tsx
+    │   │   │   └── DocumentViewer.tsx
+    │   │   ├── hooks/                 # useOwnerRequestQueue, useOwnerRequestDetail,
+    │   │   │                          # useOwnerRequestDocument, useReviewOwnerRequest
+    │   │   ├── ownerRequestStatusBadge.ts
+    │   │   ├── reviewErrorMessage.ts
+    │   │   ├── api.ts
+    │   │   └── index.ts
+    │   │
+    │   └── contact/                   # api.ts et index.ts vides : révélation du contact pas encore livrée
     │
     └── shared/
         ├── components/
+        │   ├── index.ts
+        │   ├── Alert.tsx
+        │   ├── Badge.tsx
         │   ├── Button.tsx
         │   ├── Card.tsx
+        │   ├── Checkbox.tsx           # Case native dans son <label> (MH-64-FE), réutilisée par les filtres
+        │   ├── DimensionRule.tsx
+        │   ├── EmptyState.tsx
+        │   ├── FileDropzone.tsx
+        │   ├── FormField.tsx
+        │   ├── Input.tsx
         │   ├── Modal.tsx
         │   ├── Pagination.tsx
-        │   └── Spinner.tsx
+        │   ├── Select.tsx
+        │   ├── SiteFooter.tsx
+        │   ├── SiteHeader.tsx
+        │   ├── Skeleton.tsx
+        │   ├── Spinner.tsx
+        │   ├── TextArea.tsx
+        │   └── Toast.tsx
         ├── hooks/
+        │   ├── useCountdown.ts
+        │   ├── useDebouncedValue.ts   # + TEXT_FILTER_DEBOUNCE_MS, partagé par le feed et la recherche
         │   └── usePagination.ts
         ├── api/
-        │   ├── client.ts              # Instance fetch (base URL, headers, interceptors)
-        │   └── types.ts               # Auto-généré par openapi-typescript — ne pas éditer
+        │   ├── client.ts              # Instance fetch (base URL, headers, refresh, paramètres répétés)
+        │   ├── constants.ts           # Bornes de champs alignées sur backend/src/shared/validation.rs
+        │   └── types.ts               # Auto-généré par openapi-typescript — ne pas éditer (gitignore)
         └── utils/
-            └── format.ts
+            ├── cn.ts
+            ├── format.ts
+            ├── imageFileCheck.ts
+            ├── mediaUrl.ts
+            └── pagination.ts
 ```
 
 ---
@@ -335,11 +445,12 @@ CREATE TABLE listings (
     status        listing_status NOT NULL DEFAULT 'available',
     city          VARCHAR(100)   NOT NULL,
     neighborhood  VARCHAR(100),
-    price         NUMERIC(12,2)  NOT NULL,
+    price         NUMERIC(12,2)  NOT NULL,   -- Loyer mensuel ; entier en entrée d'API
+    currency      CHAR(3)        NOT NULL,   -- ISO 4217 ; toujours 'XAF' au MVP, écrit par le repository
     surface_m2    INTEGER,
     rooms         INTEGER,
     search_vector TSVECTOR,
-    published_at  TIMESTAMPTZ,   -- NULL = brouillon ; visible publiquement seulement si non NULL et au moins une photo
+    published_at  TIMESTAMPTZ,   -- Migration 20260927094513. NULL = brouillon ; visible publiquement seulement si non NULL et au moins une photo
     created_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
@@ -349,6 +460,22 @@ CREATE INDEX idx_listings_owner  ON listings(owner_id);
 CREATE INDEX idx_listings_city   ON listings(city);
 CREATE INDEX idx_listings_status ON listings(status);
 CREATE INDEX idx_listings_type   ON listings(type);
+
+-- unaccent() est STABLE : il ne peut pas servir dans une expression d'index.
+-- Ce wrapper fige le dictionnaire "unaccent" et se déclare IMMUTABLE.
+CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+    RETURNS text
+    LANGUAGE sql
+    IMMUTABLE
+    PARALLEL SAFE
+    STRICT
+AS $$
+    SELECT unaccent('unaccent', $1)
+$$;
+
+-- Filtre city : égalité sans casse ni accents (cf. §4.3). Le filtre neighborhood
+-- utilise la même expression, sans index dédié.
+CREATE INDEX idx_listings_city_normalized ON listings(lower(immutable_unaccent(city)));
 
 -- ============================================================
 -- listing_media
@@ -374,21 +501,35 @@ CREATE UNIQUE INDEX idx_listing_media_one_cover
 -- ============================================================
 
 -- search_vector : mis à jour à chaque INSERT/UPDATE sur listings
--- Inclut le nom de l'owner (pondéré B) pour permettre la recherche par propriétaire
+-- Inclut le nom de l'owner (pondéré B) pour permettre la recherche par propriétaire,
+-- et le libellé du type en français puis en anglais (pondéré B, migration
+-- 20261024053122, MH-66) : le mot affiché dans l'interface retrouve le bien.
+-- studio et villa s'écrivent pareil dans les deux langues.
 CREATE OR REPLACE FUNCTION fn_update_listing_search_vector()
 RETURNS TRIGGER AS $$
 DECLARE
     v_owner_name TEXT;
+    v_type_label TEXT;
 BEGIN
     SELECT COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')
         INTO v_owner_name
         FROM users WHERE id = NEW.owner_id;
+
+    v_type_label := CASE NEW.type
+        WHEN 'apartment' THEN 'appartement apartment'
+        WHEN 'studio'    THEN 'studio'
+        WHEN 'house'     THEN 'maison house'
+        WHEN 'room'      THEN 'chambre room'
+        WHEN 'villa'     THEN 'villa'
+        WHEN 'other'     THEN 'autre other'
+    END;
 
     NEW.search_vector :=
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.title, ''))),        'A') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.city, ''))),          'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.neighborhood, ''))),  'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(v_owner_name, ''))),      'B') ||
+        setweight(to_tsvector('french', unaccent(COALESCE(v_type_label, ''))),      'B') ||
         setweight(to_tsvector('french', unaccent(COALESCE(NEW.description, ''))),   'C');
     RETURN NEW;
 END;
@@ -446,6 +587,9 @@ CREATE TRIGGER tg_owner_requests_updated_at
 | `is_cover` index partiel unique         | PostgreSQL garantit l'unicité de la cover sans contrainte applicative               |
 | `owner_requests` index partiel          | Bloque un second `pending` sans empêcher plusieurs demandes historiques           |
 | `identity_documents` JSONB              | Tableau de références storage — accès restreint admin, jamais exposé en statique (cf. ARCHITECTURE.md §7.3) |
+| `listings.published_at` nullable        | `NULL` = brouillon. La publication pose la date une fois, sans retour arrière au MVP. Les biens antérieurs à la colonne ont été rétro-remplis avec `created_at` |
+| `listings.currency` sans défaut         | Le repository écrit toujours `XAF` ; l'API ne l'expose pas, tous les prix sont en XAF au MVP |
+| Libellés de type dans `search_vector`  | Français et anglais, pour que « apartment » comme « appartement » trouvent le bien. Changer la liste demande une migration qui réindexe |
 | `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token `revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
 
 ---
@@ -487,6 +631,18 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 **Injection :**
 `Arc<dyn StorageProvider>` est stocké dans `AppState` et injecté dans les handlers via l'extracteur Axum `State<AppState>`.
+
+**Appelants :** trois services écrivent dans le storage, chacun pour son propre domaine. Aucun ne passe par un autre module ; ils partagent deux helpers de `shared/`.
+
+| Upload | Service | Validation | Clé |
+| ------ | ------- | ---------- | --- |
+| Photo de listing (`POST /media/upload`) | `media::service::upload` | `validate_image`, 5 MB | `listing_media_key` |
+| Avatar (`POST /users/me/avatar`) | `users::service::replace_avatar` | `validate_image`, 5 MB | `avatar_key` |
+| Pièces d'identité (`POST /owner-requests`) | `owner_requests::service::submit` | Un PDF (`validate_pdf`, 3 MB) ou deux images recto/verso (`validate_image`, 5 MB chacune) | `owner_request_document_key` |
+
+`shared::file_validation` contrôle les magic bytes (crate `infer`) et la taille. `shared::storage_key` est le seul endroit qui construit une clé : il impose le préfixe public ou privé et génère le nom de fichier (UUID). `media::service` ne gère que les photos de listing, et reste le seul module qui écrit dans `listing_media`.
+
+L'ordre des écritures protège la base contre une URL morte. L'avatar est écrit, puis `users.avatar_url` pointe dessus, puis l'ancien fichier est supprimé en best-effort. Pour une demande owner, toutes les pièces sont validées en mémoire, puis envoyées au storage, puis la ligne `owner_requests` est insérée ; un échec à l'une des deux dernières étapes supprime les pièces déjà envoyées.
 
 ---
 
@@ -783,16 +939,22 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | ---------- | ------------------------ | ---- | --------- | -------------------------------------------- |
 | `GET`    | `/listings`            | Non  | —        | Feed public paginé (cover photo + résumé) |
 | `GET`    | `/listings/:id`        | Optionnelle | —        | Détail complet + owner info (sans phone)    |
-| `POST`   | `/listings`            | JWT  | `owner` | Créer un bien                               |
+| `POST`   | `/listings`            | JWT  | `owner` | Créer un bien (brouillon)                   |
 | `PUT`    | `/listings/:id`        | JWT  | `owner` | Modifier son bien                            |
-| `DELETE` | `/listings/:id`        | JWT  | `owner` | Supprimer son bien                           |
-| `GET`    | `/users/me/listings`   | JWT  | `owner` | Ses propres biens                            |
+| `DELETE` | `/listings/:id`        | JWT  | `owner` | Supprimer son bien et ses photos             |
+| `GET`    | `/users/me/listings`   | JWT  | `owner` | Ses propres biens, brouillons compris        |
 | `PATCH`  | `/listings/:id/status` | JWT  | `owner` | Changer le statut                            |
 | `POST`   | `/listings/:id/publish` | JWT | `owner` | Publier un brouillon                         |
 | `PATCH`  | `/listings/:id/cover`  | JWT  | `owner` | Définir la photo de couverture              |
 | `PUT`    | `/listings/:id/media/order` | JWT | `owner` | Réordonner les photos                  |
 
-**Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL` et il a au moins une photo (une ligne de couverture). Elle s'applique au feed, à son total, au filtre `owner_id` et au détail. Sur `GET /listings/:id`, l'authentification est optionnelle : le propriétaire voit toujours son bien, quel que soit son état ; tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
+`PATCH /listings/:id/cover` et `PUT /listings/:id/media/order` sont servis par le module `media`, seul à écrire dans `listing_media`. `GET /users/me/listings` est servi par `listings`.
+
+**Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL` et il a au moins une photo (une ligne de couverture). Elle s'applique au feed, à son total, au filtre `owner_id`, à la recherche (§4.4) et au détail. Sur `GET /listings/:id`, l'authentification est optionnelle : le propriétaire voit toujours son bien, quel que soit son état ; tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
+
+**Prix** : `price` est le loyer mensuel, en XAF, sans centimes. En entrée (`POST`, `PUT`, `price_min`, `price_max`), c'est un entier. En sortie, c'est un nombre JSON à virgule (`150000.0`), lu depuis `price::float8`. La devise n'apparaît pas dans l'API : la colonne `currency` vaut toujours `XAF` au MVP (§2.2).
+
+**Statut et publication** : `status` (`available` / `unavailable`) et `published_at` sont indépendants. Le feed montre les biens publics des deux statuts ; le filtre `status` restreint à l'un des deux. Changer le statut ne publie ni ne dépublie rien.
 
 **`GET /listings` — Query params**
 
@@ -801,12 +963,14 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 | `owner_id` | `uuid`    | Filtrer par propriétaire                   |
 | `city`     | `string`  | Filtre par ville                            |
 | `neighborhood` | `string` | Filtre par quartier                    |
-| `type`     | `enum`    | `apartment\|studio\|house\|room\|villa\|other` |
+| `type`     | `enum`, répétable | `apartment\|studio\|house\|room\|villa\|other`. `type=apartment&type=studio` garde les biens de l'un ou l'autre type ; absent : tous |
 | `status`   | `enum`    | `available\|unavailable` ; absent : les deux |
 | `page`     | `integer` | Défaut : 1                                 |
 | `per_page` | `integer` | Défaut : 20, max : 50                      |
 
-`city` et `neighborhood` sont normalisés comme à l'enregistrement (trim, espaces internes réduits à un seul), puis comparés à la valeur entière, sans tenir compte de la casse ni des accents : « yaounde » trouve « Yaoundé », « Bonap » ne trouve pas « Bonapriso ». Une valeur vide après normalisation est ignorée. Un caractère NUL, une valeur `type` ou `status` inconnue, ou un paramètre mal formé renvoient `400 INVALID_QUERY_PARAM`.
+`city` et `neighborhood` sont normalisés comme à l'enregistrement (trim, espaces internes réduits à un seul), puis comparés à la valeur entière, sans tenir compte de la casse ni des accents : « yaounde » trouve « Yaoundé », « Bonap » ne trouve pas « Bonapriso ». Une valeur vide après normalisation est ignorée. Un caractère NUL, une valeur `type` (y compris l'une des valeurs répétées) ou `status` inconnue, ou un paramètre mal formé renvoient `400 INVALID_QUERY_PARAM`.
+
+Le feed est trié du plus récent au plus ancien (`created_at` décroissant, puis `id` décroissant).
 
 **`GET /listings` — Response 200**
 
@@ -815,12 +979,12 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
   "data": [
     {
       "id": "uuid",
-      "title": "Studio meublé Plateau",
+      "title": "Studio meublé Bonapriso",
       "type": "studio",
       "status": "available",
-      "city": "Dakar",
-      "neighborhood": "Plateau",
-      "price": 150000,
+      "city": "Douala",
+      "neighborhood": "Bonapriso",
+      "price": 150000.0,
       "cover_photo_url": "https://...",
       "published_at": "2025-06-02T09:00:00Z",
       "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo" }
@@ -843,12 +1007,12 @@ Tous les biens de l'appelant, sans règle de visibilité publique : brouillons e
   "data": [
     {
       "id": "uuid",
-      "title": "Studio meublé Plateau",
+      "title": "Studio meublé Bonapriso",
       "type": "studio",
       "status": "available",
-      "city": "Dakar",
-      "neighborhood": "Plateau",
-      "price": 150000,
+      "city": "Douala",
+      "neighborhood": "Bonapriso",
+      "price": 150000.0,
       "cover_photo_url": null,
       "published_at": null,
       "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo" }
@@ -864,13 +1028,13 @@ Tous les biens de l'appelant, sans règle de visibilité publique : brouillons e
 {
   "data": {
     "id": "uuid",
-    "title": "Studio meublé Plateau",
+    "title": "Studio meublé Bonapriso",
     "description": "...",
     "type": "studio",
     "status": "available",
-    "city": "Dakar",
-    "neighborhood": "Plateau",
-    "price": 150000,
+    "city": "Douala",
+    "neighborhood": "Bonapriso",
+    "price": 150000.0,
     "surface_m2": 35,
     "rooms": 1,
     "media": [
@@ -889,6 +1053,62 @@ Tous les biens de l'appelant, sans règle de visibilité publique : brouillons e
 }
 ```
 
+**`POST /listings`**
+
+Crée un brouillon de l'appelant : `status` vaut `available`, `published_at` vaut `null`. Le bien reste invisible du public jusqu'à `POST /listings/:id/publish`. Response `201` : même forme que `GET /listings/:id`.
+
+```json
+// Request
+{
+  "title": "Studio meublé Bonapriso",
+  "description": "...",
+  "type": "studio",
+  "price": 150000,
+  "city": "Douala",
+  "neighborhood": "Bonapriso",
+  "surface_m2": 35,
+  "rooms": 1
+}
+```
+
+**Règles de validation** (communes à `POST` et `PUT`) :
+
+| Champ | Requis | Règle |
+| ----- | ------ | ----- |
+| `title` | oui | 5 à 120 caractères après trim |
+| `description` | oui | 20 à 2 000 caractères après trim |
+| `type` | oui | `apartment`, `studio`, `house`, `room`, `villa` ou `other` |
+| `price` | oui | Entier, 1 à 9 999 999 999 (loyer mensuel en XAF) |
+| `city` | oui | 100 caractères max ; trim, espaces internes réduits à un seul ; vide refusé |
+| `neighborhood` | oui | Mêmes règles que `city` |
+| `surface_m2` | non | Entier, 1 à 100 000 |
+| `rooms` | non | Entier, 0 à 100 |
+
+Un caractère NUL dans un champ texte est refusé. Toutes les violations sont collectées avant de répondre : un seul `422 VALIDATION_FAILED` liste chaque champ fautif dans `error.fields`. Un champ requis absent est un `422`, pas un `400`. Un JSON mal formé, ou une valeur du mauvais type JSON (un `price` décimal ou en chaîne, par exemple), donne `400`. `owner_id`, `status`, `published_at` et `created_at` présents dans le corps sont ignorés.
+
+```json
+// Response 422
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "...",
+    "status": 422,
+    "fields": [
+      { "field": "title", "message": "title must be between 5 and 120 characters." },
+      { "field": "price", "message": "price must be between 1 and 9999999999." }
+    ]
+  }
+}
+```
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `201` | Brouillon créé                                                                        |
+| `400` | Corps JSON mal formé                                                                 |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `422` | `VALIDATION_FAILED`, une entrée par champ invalide dans `error.fields`               |
+
 **`PUT /listings/:id`**
 
 Remplacement complet des champs éditables : même corps, même validation et même normalisation que `POST /listings`. Un `surface_m2` ou `rooms` absent est remis à `null`. `status`, `published_at`, `owner_id` et `created_at` ne sont jamais modifiés ; présents dans le corps, ils sont ignorés. Le contrôle de propriété et l'écriture se font dans un seul `UPDATE … WHERE id = $1 AND owner_id = $2`.
@@ -896,12 +1116,12 @@ Remplacement complet des champs éditables : même corps, même validation et m�
 ```json
 // Request
 {
-  "title": "Studio meublé Plateau",
+  "title": "Studio meublé Bonapriso",
   "description": "...",
   "type": "studio",
   "price": 150000,
-  "city": "Dakar",
-  "neighborhood": "Plateau",
+  "city": "Douala",
+  "neighborhood": "Bonapriso",
   "surface_m2": 35,
   "rooms": 1
 }
@@ -930,15 +1150,86 @@ Pas de corps. Sur un brouillon qui a au moins une photo, pose `published_at` et 
 | `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner (même réponse, jamais `403`) |
 | `409` | `PHOTO_REQUIRED` : brouillon sans photo, qui reste un brouillon                       |
 
+**`PATCH /listings/:id/status`**
+
+Fonctionne aussi sur un brouillon. `published_at` n'est jamais modifié. Redemander le statut courant répond aussi `200`.
+
+```json
+// Request
+{ "status": "unavailable" }
+
+// Response 200
+{ "data": { "id": "uuid", "status": "unavailable" } }
+```
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Statut posé                                                                           |
+| `400` | Corps JSON mal formé                                                                 |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner (même réponse, jamais `403`) |
+| `422` | `VALIDATION_FAILED` sur `status` : absent, ou autre que `available` / `unavailable`  |
+
+**`DELETE /listings/:id`**
+
+Supprime définitivement le bien et ses photos. Response `204`, sans corps. La ligne est verrouillée comme pour un upload, puis supprimée (cascade sur `listing_media`) et commitée ; les fichiers sont supprimés ensuite en best-effort. Une panne du storage ne peut laisser qu'un fichier orphelin (cf. ARCHITECTURE.md §8.1).
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `204` | Bien et photos supprimés                                                              |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` : id inconnu, déjà supprimé, ou bien d'un autre owner             |
+
 **`PATCH /listings/:id/cover`**
 
 ```json
 // Request
 { "media_id": "uuid" }
 
-// Response 200
-{ "data": { "message": "Cover mise à jour" } }
+// Response 200 — la nouvelle cover
+{ "data": { "id": "uuid", "url": "https://...", "is_cover": true, "position": 1 } }
 ```
+
+L'ancienne cover est rétrogradée et la nouvelle promue dans une seule transaction, sous le verrou du listing. Désigner la cover actuelle répond aussi `200`, sans écriture.
+
+Écart connu : le corps de cette route est lu par l'extracteur `Json` d'axum, pas par `AppJson`. Un corps invalide est donc rejeté avant le handler, sans l'enveloppe `error` : `400` (JSON mal formé), `415` (`Content-Type` absent) ou `422` (`media_id` absent ou UUID invalide), en texte brut. Les autres routes à corps JSON des biens et des photos passent par `AppJson`.
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Cover changée                                                                         |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` (bien inconnu ou d'un autre owner) ou `MEDIA_NOT_FOUND` (photo absente de ce bien) |
+
+**`PUT /listings/:id/media/order`**
+
+`media_ids` donne l'ordre voulu et doit contenir exactement les photos actuelles du bien. Les positions sont réécrites de 0 à n−1 dans l'ordre envoyé, dans une seule transaction : une erreur ne change aucune position. La réponse liste les photos dans l'ordre d'affichage (§4.5), la cover d'abord.
+
+```json
+// Request
+{ "media_ids": ["uuid-2", "uuid-1", "uuid-3"] }
+
+// Response 200
+{
+  "data": [
+    { "id": "uuid-1", "url": "https://...", "is_cover": true,  "position": 1 },
+    { "id": "uuid-2", "url": "https://...", "is_cover": false, "position": 0 },
+    { "id": "uuid-3", "url": "https://...", "is_cover": false, "position": 2 }
+  ]
+}
+```
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Ordre enregistré                                                                      |
+| `400` | Corps JSON mal formé, y compris un UUID invalide                                      |
+| `401` | Jeton absent ou invalide                                                              |
+| `403` | Appelant seeker ou admin                                                              |
+| `404` | `LISTING_NOT_FOUND` : id inconnu ou bien d'un autre owner                              |
+| `409` | `MEDIA_ORDER_CONFLICT` : les ids ne correspondent pas aux photos actuelles du bien     |
+| `422` | `VALIDATION_FAILED` sur `media_ids` : absent, vide, ou avec un doublon               |
 
 ---
 
@@ -946,22 +1237,42 @@ Pas de corps. Sur un brouillon qui a au moins une photo, pose `published_at` et 
 
 | Méthode | Endpoint    | Auth | Description                   |
 | -------- | ----------- | ---- | ----------------------------- |
-| `GET`  | `/search` | Non  | Full-text + filtres combinés |
+| `GET`  | `/search` | Non  | Mots-clés + filtres combinés |
+
+Servi par le module `listings` (tag OpenAPI `listings`), pas par un module dédié (cf. ARCHITECTURE.md ADR-12). Le feed et la recherche passent par les deux mêmes requêtes SQL (comptage et page) : ils partagent la règle de visibilité publique (§4.3), les filtres et la pagination, et `total` reste aligné sur les pages. Réponse : même enveloppe et mêmes éléments que `GET /listings`.
 
 **Query params**
 
 | Paramètre    | Type        | Description                                       |
 | ------------- | ----------- | ------------------------------------------------- |
-| `q`         | `string`  | Terme libre (titre, ville, nom owner, label bien) |
+| `q`         | `string`  | Mots-clés, 100 caractères max après trim. Vide ou absent : pas de recherche par mots-clés |
 | `owner_id`  | `uuid`    | Filtrer par propriétaire                         |
-| `city`      | `string`  | Filtre par ville                                  |
-| `type`      | `enum`    | Type de bien                                      |
-| `price_min` | `number`  | Prix minimum                                      |
-| `price_max` | `number`  | Prix maximum                                      |
+| `city`      | `string`  | Filtre par ville, mêmes règles que le feed (§4.3) |
+| `neighborhood` | `string` | Filtre par quartier, mêmes règles que le feed |
+| `type`      | `enum`, répétable | Comme le feed : un bien de l'un des types donnés |
+| `status`    | `enum`    | `available\|unavailable` ; absent : les deux     |
+| `price_min` | `integer` | Loyer mensuel minimum en XAF, inclus, 0 ou plus  |
+| `price_max` | `integer` | Loyer mensuel maximum en XAF, inclus, 0 ou plus, pas sous `price_min` |
 | `page`      | `integer` | Défaut : 1                                       |
 | `per_page`  | `integer` | Défaut : 20, max : 50                            |
 
-Retourne le même format que `GET /listings`.
+Chaque borne de prix peut venir seule. Tous les filtres se combinent (ET).
+
+**Correspondance des mots-clés** : `q` passe par `websearch_to_tsquery('french', unaccent(q))` et se compare à `search_vector` (§2.2) : titre, ville, quartier, nom de l'owner, libellé du type en français et en anglais, description. La casse et les accents sont ignorés, et la racinisation française s'applique (« appartements » trouve « appartement »). Seuls les mots entiers correspondent : pas de préfixe ni de recherche floue. La syntaxe web est acceptée : `"phrase exacte"`, `OR`, `-exclu`. Une syntaxe mal formée (guillemet non fermé, `OR` isolé) ne lève jamais d'erreur. Une requête faite uniquement de mots vides (« le de ») ne trouve rien : `200` avec une liste vide et `total: 0`.
+
+**Tri** : avec `q`, par palier de pertinence, puis du plus récent au plus ancien (`created_at` décroissant, puis `id` décroissant).
+
+| Palier | Le mot-clé correspond dans |
+| ------ | -------------------------- |
+| 1 | Le titre (poids A) |
+| 2 | La ville, le quartier, le nom de l'owner ou le libellé du type (poids B) |
+| 3 | La description seulement (poids C) |
+
+Sans `q`, l'ordre est celui du feed.
+
+**Erreurs** : `400 INVALID_QUERY_PARAM` pour un `q` de plus de 100 caractères, un `type` ou un `status` inconnu, un `owner_id` mal formé, une borne de prix non entière, négative ou inversée (`price_min > price_max`), ou un caractère NUL dans `q` ou un filtre de lieu.
+
+**Performance** : `search_vector` porte l'index GIN `idx_listings_search`. Le filtre de prix n'a pas d'index (ARCHITECTURE.md R-07).
 
 ---
 
@@ -1004,7 +1315,7 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ```json
 // Response 200
-{ "data": { "phone": "+221 77 123 45 67" } }
+{ "data": { "phone": "+237 6 77 12 34 56" } }
 
 // Response 404 — listing inexistant ou inactif
 { "error": { "code": "LISTING_NOT_FOUND", "status": 404 } }
@@ -1058,7 +1369,7 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 ### 6.1 Règle Générale
 
-Chaque module backend contient un fichier `tests.rs` déclaré dans `mod.rs` sous `#[cfg(test)]`. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` et opèrent dans une transaction rollbackée.
+Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` et opèrent dans une transaction rollbackée.
 
 ### 6.2 Ce qu'on Teste par Couche
 
@@ -1074,10 +1385,10 @@ Chaque module backend contient un fichier `tests.rs` déclaré dans `mod.rs` sou
 | Module       | Cas critiques à tester                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------ |
 | `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée, `/auth/otp/verify` sur email inconnu → aucune ligne `users`, ticket d'inscription à usage unique, transaction `create_account` (rollback si l'insert refresh_tokens échoue), 409 `EMAIL_ALREADY_EXISTS` |
-| `users`    | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
-| `listings` | Owner ne peut modifier que ses propres biens, cover obligatoire avant suppression                |
+| `users`    | Cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar, pièces d'identité) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
+| `owner_requests` | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), forme des pièces (1 PDF ou 2 images) |
+| `listings` | Owner ne peut modifier que ses propres biens, publication refusée sans photo. Recherche (`GET /search`) : `q` vide retourne le feed complet, filtres combinés cohérents, pagination correcte, bornes de prix rejetées si négatives ou inversées |
 | `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée, 1ère photo d'un listing marquée `is_cover=true` automatiquement, uploads suivants `is_cover=false` |
-| `search`   | Recherche vide retourne feed complet, filtres combinés cohérents, pagination correcte          |
 | `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                   |
 | `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin |
 
@@ -1232,7 +1543,7 @@ Fichier de référence : `backend/.env.example`
 ```bash
 # ── Application ──────────────────────────────────────────────
 APP_PORT=3000
-APP_ENV=development           # development | production
+APP_ENV=development           # development | staging | production
 RUST_LOG=info
 
 # ── Base de données ──────────────────────────────────────────
@@ -1264,6 +1575,11 @@ STORAGE_BUCKET=myhouse
 # ── Cookies ──────────────────────────────────────────────────
 COOKIE_DOMAIN=localhost        # domaine du cookie refresh_token (httpOnly, Secure, SameSite=Strict)
 
+# ── CORS ─────────────────────────────────────────────────────
+ALLOWED_ORIGINS=http://localhost,http://localhost:5173   # obligatoire ; liste séparée par des virgules
+                                # chaque origine commence par http:// ou https://, sans slash final ;
+                                # une entrée vide (virgule en trop) bloque le démarrage
+
 # ── Email ────────────────────────────────────────────────────
 SMTP_HOST=localhost
 SMTP_PORT=1025                 # toujours utilisé tel quel, quel que soit SMTP_SECURITY
@@ -1274,9 +1590,17 @@ SMTP_FROM=noreply@myhouse.app
 ADMIN_NOTIFICATION_EMAIL=admin@myhouse.app     # destinataire fixe — admin unique au MVP (cf. §3bis.2)
 
 # ── Admin Bootstrap ──────────────────────────────────────────
-ADMIN_BOOTSTRAP_EMAIL=          # email du compte admin unique, créé au démarrage si absent en DB
+ADMIN_BOOTSTRAP_EMAIL=admin@myhouse.app # email du compte admin unique, créé au démarrage si absent en DB ; requis si ON_STARTUP=true
 ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, vérifie/crée le compte admin au boot (idempotent)
+
+# ── Rate limiting générique ──────────────────────────────────
+RATE_LIMIT_MAX_REQUESTS=100     # obligatoire, > 0 ; requêtes par IP et par fenêtre (distinct de OTP_RATE_LIMIT_SECONDS)
+RATE_LIMIT_WINDOW_SECONDS=60    # obligatoire, > 0
+TRUSTED_PROXIES=                # obligatoire, même vide ; IP/CIDR dont X-Forwarded-For est cru ; vide = IP du pair (cargo run en local)
+                                # en staging/prod : la plage la plus étroite couvrant nginx seul
 ```
+
+La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-têtes `Authorization` et `Content-Type`, et les credentials (cookie `refresh_token`). Seules les origines d'`ALLOWED_ORIGINS` sont acceptées.
 
 ---
 
@@ -1286,7 +1610,7 @@ ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, vérifie/crée le compte admin au boo
 | ----------------------------- | ------------------------ | ---------------------- |
 | Messagerie in-app             | `contact`              | V2                     |
 | Notifications push (FCM/APNs) | `notifications`        | V2                     |
-| Carte et géolocalisation     | `listings`, `search` | V2                     |
+| Carte et géolocalisation     | `listings`             | V2                     |
 | Favoris                       | Nouveau module           | V2                     |
 | OAuth (Google, Facebook)      | `auth`                 | V2                     |
 | Application mobile native     | —                       | V2                     |
@@ -1307,3 +1631,4 @@ ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, vérifie/crée le compte admin au boo
 | 1.0     | Juin 2025 | Document initial — issu de la refactorisation ARCHITECTURE_MVP.md v2.0 |
 | 1.1     | Juin 2026 | Renommage `seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
 | 1.2     | Août 2026 | Correction pagination feed (20/page uniforme), sélection automatique de la cover photo au premier upload, nouvelle section Stack de Notification (§3bis) bout-en-bout, admin unique + bootstrap documentés, rappel mensuel disponibilité (LIST-03) formellement différé en V2 |
+| 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §1.1/§1.2 : arbres tels que construits (pas de module `search`, `GET /search` servi par `listings` ; module `owner_requests` ; `features/search/` et `Checkbox` partagée). §2.2 : `published_at`, `currency`, `immutable_unaccent` et `idx_listings_city_normalized`, libellés de type français et anglais dans `search_vector` (MH-66). §3.1 : appelants du `StorageProvider` (avatar et pièces d'identité hors `media`). §4.3 : filtres `neighborhood` et `status`, `type` répétable, visibilité publique, prix en XAF, endpoints `POST`, `PUT`, `PATCH status`, `DELETE`, `publish`, `cover`, `media/order` et `/users/me/listings`, règles de validation. §4.4 : contrat de MH-64-BE. §8 : `ALLOWED_ORIGINS`, rate-limit générique, `TRUSTED_PROXIES`. Fichier renommé sans numéro de version |
