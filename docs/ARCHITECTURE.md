@@ -1,9 +1,9 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 1.2
+> **Version :** 1.3
 > **Statut :** Validé
-> **Dernière mise à jour :** Août 2026
+> **Dernière mise à jour :** Novembre 2026
 
 ---
 
@@ -231,51 +231,57 @@ graph TB
 ```mermaid
 graph TB
     subgraph MODULES["Modules de Domaine"]
-        AUTH["auth\n─────\nOTP passwordless\nJWT access + refresh\nRate limiting"]
-        USERS["users\n─────\nProfils user/owner/admin\nDemande upgrade owner\nGestion du compte"]
-        LISTINGS["listings\n─────\nCRUD des biens\nStatuts available/unavailable\nCover photo"]
-        SEARCH["search\n─────\nFull-text PostgreSQL\nFiltres combinés\nPagination"]
-        MEDIA["media\n─────\nUpload photos listings + avatars\nAbstraction StorageProvider\nValidation format/taille (magic bytes)"]
-        CONTACT["contact\n─────\nRévélation téléphone owner\n(V2 : messagerie in-app)"]
+        AUTH["auth\n─────\nOTP passwordless\nJWT access + refresh\nRate limiting OTP"]
+        USERS["users\n─────\nProfil seeker/owner/admin\nAvatar\nSuppression du compte"]
+        OWNER_REQ["owner_requests\n─────\nDemande upgrade owner\nPièces d'identité (privées)\nRevue admin"]
+        LISTINGS["listings\n─────\nCRUD des biens, brouillon → publication\nStatuts available/unavailable\nFeed public + recherche full-text\n(GET /listings, GET /search)"]
+        MEDIA["media\n─────\nPhotos des listings\nQuota, cover, ordre d'affichage\nSeul writer de listing_media"]
+        CONTACT["contact\n─────\nRévélation téléphone owner\n(pas encore livré)\n(V2 : messagerie in-app)"]
         NOTIF["notifications\n─────\nEmail OTP\nEmail notifications\n(V2 : push)"]
-        ADMIN["admin\n─────\nModération biens/users\nValidation owner requests"]
+        ADMIN["admin\n─────\nRoutes /admin/*\nFile des demandes owner\n(modération biens/users\npas encore livrée)"]
     end
 ```
+
+La recherche n'est pas un module : `listings` sert le feed et `GET /search` avec les mêmes filtres, la même règle de visibilité et les mêmes requêtes (ADR-12).
 
 ### 5.3 Dépendances Inter-Modules
 
 ```mermaid
 graph TD
     AUTH -->|"émet JWT → validé par"| SHARED
-    AUTH -->|"envoie OTP via"| NOTIF
+    AUTH -->|"envoie OTP + bienvenue via"| NOTIF
     AUTH -->|"stocke OTP dans"| CACHE["moka"]
 
-    USERS -->|"alimente search_vector via trigger"| LISTINGS
-    USERS -->|"délègue upload avatar + documents identité à"| MEDIA
+    USERS -->|"nom de l'owner → search_vector\n(trigger SQL)"| LISTINGS
+    USERS -->|"écrit l'avatar via"| STORAGE["StorageProvider"]
 
-    LISTINGS -->|"délègue upload à"| MEDIA
-    LISTINGS -->|"indexé dans"| SEARCH
+    OWNER_REQ["owner_requests"] -->|"lit le profil du demandeur via"| USERS
+    OWNER_REQ -->|"écrit les pièces d'identité via"| STORAGE
+    OWNER_REQ -->|"emails demande / décision via"| NOTIF
 
-    CONTACT -->|"lit numéro depuis"| USERS
-    CONTACT -->|"vérifie statut via"| LISTINGS
+    MEDIA -->|"verrouille le bien, écrit listing_media\n(tables partagées)"| LISTINGS
+    MEDIA -->|"écrit les photos via"| STORAGE
 
-    ADMIN -->|"modère"| LISTINGS
-    ADMIN -->|"modère"| USERS
-    ADMIN -->|"valide demandes via"| USERS
+    LISTINGS -->|"supprime les photos d'un bien via"| STORAGE
 
-    NOTIF -->|"notifie résultat owner request"| USERS
+    CONTACT -.->|"lit numéro depuis (prévu)"| USERS
+    CONTACT -.->|"vérifie la visibilité via (prévu)"| LISTINGS
+
+    ADMIN -->|"délègue la revue des demandes à"| OWNER_REQ
 
     SHARED -.->|"utilisé par tous"| AUTH
     SHARED -.->|"utilisé par tous"| USERS
+    SHARED -.->|"utilisé par tous"| OWNER_REQ
     SHARED -.->|"utilisé par tous"| LISTINGS
-    SHARED -.->|"utilisé par tous"| SEARCH
     SHARED -.->|"utilisé par tous"| MEDIA
     SHARED -.->|"utilisé par tous"| CONTACT
     SHARED -.->|"utilisé par tous"| NOTIF
     SHARED -.->|"utilisé par tous"| ADMIN
 ```
 
-**Règle de dépendance :** les modules interagissent uniquement via des traits de service définis dans `shared/` ou via injection au bootstrap. Aucun module n'importe jamais l'implémentation concrète d'un autre.
+**Règle de dépendance :** les modules interagissent uniquement via des traits de service définis dans `shared/` ou via injection au bootstrap. Aucun module n'importe jamais l'implémentation concrète d'un autre. Trois écarts existent aujourd'hui (`owner_requests` → `users`, `admin` → `owner_requests`, et `auth` / `owner_requests` → `notifications`) ; ils sont suivis en R-11 (§11).
+
+`users`, `listings` et `media` n'importent aucun autre module mais partagent des tables : `listings` lit `listing_media` (cover, visibilité), `media` verrouille la ligne `listings` avant d'écrire une photo, et `users` lit les clés de `listing_media` et de `owner_requests.identity_documents` pour nettoyer le storage à la suppression d'un compte. Changer la forme JSONB de `identity_documents` impose donc de revoir aussi cette lecture. L'upload passe par les helpers partagés `shared::file_validation` et `shared::storage_key` ; chaque module appelle ensuite `StorageProvider` lui-même (TECHNICAL_SPEC_MVP.md §3.1).
 
 ---
 
@@ -334,40 +340,41 @@ sequenceDiagram
     actor Seeker
     actor Admin
     participant Frontend
-    participant UsersModule
-    participant Media
+    participant OwnerRequests
     participant StorageProvider
     participant AdminModule
     participant Notifications
     participant DB
 
     Seeker->>Frontend: Remplit le formulaire complet\n(téléphone + identité + documents)
-    Frontend->>UsersModule: POST /owner-requests\n(multipart : phone, identity_data, documents[])
-    UsersModule->>Media: upload_identity_documents(documents)
-    Media->>StorageProvider: upload(key, bytes) — préfixe owner-requests/{id}/\n(privé, non exposé en statique)
-    StorageProvider-->>Media: storage_key
-    Media-->>UsersModule: storage_keys[]
-    UsersModule->>DB: INSERT owner_requests\n(status: pending, identity_data, identity_documents)
-    UsersModule->>Notifications: send_owner_request_email(admin)
-    UsersModule-->>Frontend: 201 Created
+    Frontend->>OwnerRequests: POST /owner-requests\n(multipart : phone, identity_data, documents[])
+    OwnerRequests->>OwnerRequests: Valide tout en mémoire\n(magic bytes, taille : 1 PDF ou 2 images)
+    OwnerRequests->>StorageProvider: upload(key, bytes) — préfixe owner-requests/{id}/\n(privé, non exposé en statique)
+    StorageProvider-->>OwnerRequests: storage_key
+    OwnerRequests->>DB: INSERT owner_requests\n(status: pending, identity_data, identity_documents)
+    OwnerRequests->>Notifications: send_owner_request_email(admin)
+    OwnerRequests-->>Frontend: 201 Created
 
-    Note over Seeker,DB: Échec upload = échec atomique de toute la requête — pas d'état intermédiaire
+    Note over Seeker,DB: Échec upload ou INSERT = échec de toute la requête, les pièces déjà envoyées sont supprimées
 
     Admin->>Frontend: Consulte la liste des demandes
     Frontend->>AdminModule: GET /admin/owner-requests?status=pending
-    AdminModule->>DB: SELECT owner_requests WHERE status=pending
+    AdminModule->>OwnerRequests: list (service)
+    OwnerRequests->>DB: SELECT owner_requests WHERE status=pending
     AdminModule-->>Frontend: Liste des demandes
 
     Admin->>Frontend: Consulte un document (lecture contrôlée)
     Frontend->>AdminModule: GET /admin/owner-requests/:id/documents/:doc_id
-    AdminModule->>StorageProvider: read(storage_key) — exception au principe no-proxy (§7.3)
+    AdminModule->>OwnerRequests: lecture du document (service)
+    OwnerRequests->>StorageProvider: read(storage_key) — exception au principe no-proxy (§7.3)
     AdminModule-->>Frontend: Bytes du document
 
     Admin->>Frontend: Approuve ou rejette
     Frontend->>AdminModule: PATCH /admin/owner-requests/:id { status: approved }
-    AdminModule->>DB: UPDATE owner_requests SET status=approved
-    AdminModule->>DB: UPDATE users SET role=owner WHERE id=user_id
-    AdminModule->>Notifications: send_owner_approved_email(user)
+    AdminModule->>OwnerRequests: review (service)
+    OwnerRequests->>DB: UPDATE owner_requests SET status=approved
+    OwnerRequests->>DB: UPDATE users SET role=owner WHERE id=user_id
+    OwnerRequests->>Notifications: send_owner_approved_email(user)
     AdminModule-->>Frontend: 200 OK
 ```
 
@@ -385,44 +392,63 @@ sequenceDiagram
     participant Listings
     participant Media
     participant StorageProvider
-    participant Search
     participant Contact
     participant DB
 
-    Owner->>Frontend: Crée un bien + upload photos
+    Owner->>Frontend: Remplit le formulaire du bien
     Frontend->>Listings: POST /listings { title, city, type, price... }
-    Listings->>DB: INSERT listings
+    Listings->>DB: INSERT listings (published_at = NULL : brouillon)
     DB->>DB: trigger → search_vector mis à jour
+    Listings-->>Frontend: 201 — brouillon, visible du seul owner
 
+    Owner->>Frontend: Ajoute des photos (écran Photos)
     Frontend->>Media: POST /media/upload (photo, listing_id)
-    Media->>Media: Valide format (magic bytes) + taille + quota
-    Media->>StorageProvider: upload(key, bytes)
-    StorageProvider-->>Media: storage_key
-    Media->>DB: INSERT listing_media (storage_key, url calculée,\nis_cover=true si 1ère photo du listing, sinon false)
+    Media->>Media: Valide format (magic bytes) + taille
+    Media->>DB: Vérifie propriété + quota (5), hors écriture
+    Media->>StorageProvider: upload(key, bytes), sans verrou tenu
+    StorageProvider-->>Media: url
+    Media->>DB: SELECT … FROM listings FOR UPDATE, revérifie le quota,\nINSERT listing_media (is_cover=true si 1ère photo,\nposition = dernière + 1)
+    Note over Media,StorageProvider: Si l'INSERT échoue, le fichier envoyé est supprimé
 
-    Note over Owner,DB: Changement manuel ultérieur (optionnel)
-    Owner->>Frontend: Choisit une autre photo comme cover
-    Frontend->>Listings: PATCH /listings/:id/cover { media_id }
-    Listings->>DB: UPDATE listing_media SET is_cover=true
+    opt Réglages des photos
+        Frontend->>Media: PATCH /listings/:id/cover { media_id }
+        Media->>DB: Rétrograde l'ancienne cover, promeut la nouvelle (1 transaction)
+        Frontend->>Media: PUT /listings/:id/media/order { media_ids }
+        Media->>DB: Réécrit position 0..n−1 dans l'ordre envoyé
+    end
+
+    Owner->>Frontend: Publie le brouillon
+    Frontend->>Listings: POST /listings/:id/publish
+    alt au moins une photo
+        Listings->>DB: UPDATE listings SET published_at = NOW()
+        Listings-->>Frontend: 200 — bien public (irréversible au MVP)
+    else aucune photo
+        Listings-->>Frontend: 409 PHOTO_REQUIRED — reste un brouillon
+    end
 
     Note over Seeker,DB: Plus tard — un Seeker cherche un logement
 
-    Seeker->>Frontend: Ouvre la plateforme
-    Frontend->>Listings: GET /listings (feed public)
-    Listings->>DB: SELECT listings + cover photo
-    Listings-->>Frontend: Feed de cover photos paginé
+    Seeker->>Frontend: Ouvre le feed ou la page /search
+    Frontend->>Listings: GET /listings ou GET /search?q=…&type=…&price_max=…
+    Listings->>DB: Même requête : visibilité publique (publié + cover),\nfiltres, mots-clés (search_vector), tri
+    Listings-->>Frontend: Page de résultats (cover + résumé)
     Note over Frontend,StorageProvider: Le frontend charge les images\ndirectement depuis le volume statique — pas de proxy backend
 
     Seeker->>Frontend: Clique sur une annonce
     Frontend->>Listings: GET /listings/:id
     Listings->>DB: SELECT listing + medias + owner info (sans phone)
+    Listings->>Listings: Trie les photos : cover, position, date d'upload, id
     Listings-->>Frontend: Page de détail complète
 
     Seeker->>Frontend: Clique "Contacter le propriétaire"
-    Frontend->>Contact: GET /listings/:id/contact
+    Frontend->>Contact: GET /listings/:id/contact (pas encore livré)
     Contact->>DB: SELECT phone FROM users WHERE id=owner_id
-    Contact-->>Frontend: { phone: "+221 XX XXX XX XX" }
+    Contact-->>Frontend: { phone: "+237 6XX XX XX XX" }
 ```
+
+**Brouillon, photos, publication.** Un bien naît brouillon (`published_at` nul). Il reste invisible du public tant qu'il n'est pas publié et qu'il n'a pas au moins une photo ; seul son owner le voit, sur le détail comme dans `GET /users/me/listings`. Dans l'interface, la création mène au détail du brouillon, d'où l'owner ouvre l'écran Photos puis publie. La publication exige une photo et ne se défait pas au MVP : ensuite, l'owner ne joue plus que sur le statut `available` / `unavailable`, et le feed montre les deux.
+
+**Ordre d'affichage des photos.** Toutes les lectures qui renvoient les photos d'un bien les trient de la même façon (`shared::media_order`) : la cover d'abord, puis `position` croissante, puis la date d'upload, puis `id`. Un upload prend la position qui suit la plus haute existante, même si des suppressions ont laissé des trous. Le réordonnancement réécrit les positions de 0 à n−1. L'écriture en base d'un upload, la suppression d'une photo ou du bien, le changement de cover et le réordonnancement prennent le même verrou sur la ligne `listings`, donc ils ne se croisent pas sur un même bien.
 
 ---
 
@@ -472,7 +498,7 @@ graph TB
 
 ### 7.3 Abstraction Storage — Portabilité Dev/Prod
 
-Le module `media` interagit uniquement avec le trait `StorageProvider`. L'implémentation concrète est sélectionnée au démarrage via variable d'environnement :
+Les modules qui écrivent ou lisent des fichiers (`media`, `users`, `owner_requests`, et `listings` pour la suppression d'un bien) interagissent uniquement avec le trait `StorageProvider`. L'implémentation concrète est sélectionnée au démarrage via variable d'environnement :
 
 ```
 STORAGE_PROVIDER=local  →  LocalFsStorage  (MVP — dev et prod)
@@ -592,6 +618,7 @@ Le schéma OpenAPI est la source de vérité unique du contrat API. Les types Ty
 | ADR-11 | **Inscription atomique via `POST /auth/register` + ticket opaque** | Création du compte dès `/auth/otp/verify`, complété ensuite par `PUT /users/me` | L'ancien flux laissait un compte fantôme (email seul, authentifiable) si l'utilisateur abandonnait entre les deux appels. `users` + `refresh_tokens` sont désormais insérés dans une seule transaction, tous champs obligatoires présents ; le ticket (usage unique, TTL 10 min) porte la preuve de possession de l'email entre les deux appels |
 | ADR-09 | **Rotation du refresh token à chaque usage**                  | Refresh token statique valable 30 jours sans rotation | Détection de vol (réutilisation d'un token déjà consommé) et révocation immédiate de la famille de tokens ; le TTL 30 jours reste un plafond indépendant             |
 | ADR-10 | **Refresh token en cookie `httpOnly` + `SameSite=Strict`** | Refresh token retourné en JSON body                  | Protection contre le vol via XSS (non accessible en JS) ;`SameSite=Strict` neutralise le CSRF sans token dédié, suffisant pour un MVP mono-domaine                       |
+| ADR-12 | **Recherche hébergée dans le module `listings`** (`GET /search`, MH-64) | Module `search` séparé, avec son handler, son service et son repository | La recherche lit les mêmes lignes que le feed, avec la même règle de visibilité (publié + au moins une photo) et les mêmes filtres. Feed et recherche partagent donc `ListingFilters` et une seule paire de requêtes (comptage + page) : `total` reste aligné sur les pages, et une règle ne peut pas diverger entre les deux. Un module séparé aurait dû dupliquer ces requêtes ou importer le repository de `listings`, ce que la règle de dépendance (§5.3) interdit. Conséquence : une extraction vers un moteur dédié (R-02) passera par un découpage de `listings::repository`, pas par le remplacement d'un module |
 
 ---
 
@@ -638,7 +665,7 @@ Qualité Système
 | ID   | Risque                                                                                                                                                                                                           | Probabilité                   | Impact                                           | Mitigation                                                                                                                          |
 | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
 | R-01 | **moka non partageable** entre instances backend                                                                                                                                                           | Faible (MVP mono-instance)     | Élevé si scaling horizontal                    | Remplacer par Redis via le trait — changement localisé à`infra/cache.rs`                                                       |
-| R-02 | **Full-text PostgreSQL insuffisant** pour recherche avancée (floue, multilingue)                                                                                                                          | Moyenne                        | Moyen                                            | Extraction du module`search` vers Meilisearch via trait repository                                                                |
+| R-02 | **Full-text PostgreSQL insuffisant** pour recherche avancée (floue, multilingue)                                                                                                                          | Moyenne                        | Moyen                                            | Extraire la requête de recherche de `listings::repository` derrière un trait, puis brancher Meilisearch (cf. ADR-12)          |
 | R-03 | **Délivrabilité email OTP** (spam, délai)                                                                                                                                                               | Moyenne                        | Élevé                                          | Dès la production, passer par un relais SMTP réputé, authentifié et chiffré (STARTTLS/TLS), pris en charge au MVP via `SMTP_USERNAME`/`SMTP_PASSWORD`/`SMTP_SECURITY` (MH-113). Le relais se change par variables d'environnement, sans code propre à un fournisseur. SDK et API transactionnelles HTTP (SES, Postmark) restent hors scope MVP (cf. TECHNICAL_SPEC §3bis.3) |
 | R-04 | **Validation owner manuelle** non scalable                                                                                                                                                                 | Faible (MVP)                   | Moyen                                            | Back-office admin V2 avec workflow de validation automatisé                                                                        |
 | R-05 | **Charge pics sur le feed** (images lourdes)                                                                                                                                                               | Faible                         | Moyen                                            | CDN devant S3 en V2, lazy loading côté frontend dès le MVP                                                                       |
@@ -647,6 +674,7 @@ Qualité Système
 | R-08 | **Trigger `fn_update_listing_search_vector` exécute un `SELECT` sur `users` par ligne** modifiée — un changement de nom d'owner avec N listings déclenche N requêtes dans le trigger de cascade | Faible au volume MVP           | Faible                                           | Acceptable au MVP ; à revisiter (dénormalisation ou recalcul batch) si le volume de listings par owner augmente significativement |
 | R-09 | **Un seul compte admin** — aucune redondance opérationnelle ; indisponibilité de l'admin bloque toute validation owner et toute modération                                                             | Faible (MVP, équipe réduite) | Moyen                                            | Rôle superviseur (charge de validation distribuée) prévu en V2                                                                   |
 | R-10 | **Rappel mensuel de disponibilité (LIST-03 du CDC) non implémenté au MVP** — exigence `Must` du cahier des charges différée faute de mécanisme de tâche planifiée                               | Certaine (déjà connu)        | Faible produit / Moyen conformité contractuelle | Implémenter en V2 via tâche planifiée in-process ou cron externe ; amendement explicite du CDC en attendant (cf. CDC v2.1 §6.3) |
+| R-11 | **Règle de dépendance inter-modules non respectée partout** (§5.3) : `owner_requests` appelle `users::service`, `admin` appelle `owner_requests::service`, `auth` et `owner_requests` appellent `notifications` directement, sans trait dans `shared/` | Certaine (déjà dans le code) | Faible au MVP / Moyen si un module est extrait | Introduire les traits de service dans `shared/` et l'injection au bootstrap avant toute extraction de module ; d'ici là, ne pas ajouter de nouvel import direct |
 
 ---
 
@@ -667,3 +695,12 @@ Qualité Système
 | **search_vector**    | Colonne PostgreSQL de type`tsvector` utilisée pour la recherche full-text sur les listings.                                                                                                                                               |
 | **ADR**              | Architecture Decision Record — document court capturant une décision architecturale et sa justification.                                                                                                                                   |
 | **Modular Monolith** | Pattern architectural : un seul binaire déployé, structuré en modules aux frontières strictes.                                                                                                                                           |
+
+---
+
+## Historique des Révisions
+
+| Version | Date          | Description |
+| ------- | ------------- | ----------- |
+| 1.2     | Août 2026     | Dernière version publiée sans historique de révisions |
+| 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §5.2/§5.3 : recherche hébergée dans `listings`, module `owner_requests`, dépendances réelles et tables partagées. §6.2 : la demande owner passe par `owner_requests`, sans `media`. §6.3 : parcours owner brouillon → photos → publication, ordre d'affichage des photos (cover d'abord), feed et recherche sur la même requête. §9 : ADR-12 (recherche dans `listings`). §11 : R-02 reformulé, R-11 ajouté. Numéro de version aligné sur l'en-tête (1.x), fichier renommé sans numéro de version |

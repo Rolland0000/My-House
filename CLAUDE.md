@@ -1,7 +1,7 @@
 # Project
 
 MyHouse — real estate rental matching platform (owners ↔ seekers).
-Target markets: France + francophone Africa. Two-person team, web-first (mobile is V2).
+Target markets: Cameroon and francophone Africa. Two-person team, web-first (mobile is V2).
 
 ## Stack (locked)
 
@@ -16,9 +16,10 @@ Target markets: France + francophone Africa. Two-person team, web-first (mobile 
 
 Authoritative specs — defer to these over general best practices when they conflict:
 
-- `docs/ARCHITECTURE.md` (arc42, v2.1) — modules, ADRs, ADRs, runtime flows, deployment. Read before any cross-module or architectural change.
-- `docs/TECHNICAL_SPEC_MVP.md` (v1.1) — DDL, API contract, folder structure. Read before touching schema, endpoints, or module layout.
-- `docs/MyHouse_CahierDesCharges_v2_0.docx` — functional requirements (ISO 29148). Source of truth for feature scope.
+- `docs/ARCHITECTURE.md` (arc42, v1.3) — modules, ADRs, runtime flows, deployment. Read before any cross-module or architectural change.
+- `docs/TECHNICAL_SPEC_MVP.md` (v1.3) — DDL, API contract, folder structure. Read before touching schema, endpoints, or module layout.
+- `docs/MyHouse_CahierDesCharges.docx` (v2.2) — functional requirements (ISO 29148). Source of truth for feature scope.
+
 
 ## Key Decisions Already Locked — Do Not Re-litigate
 
