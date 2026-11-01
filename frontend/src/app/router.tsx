@@ -7,6 +7,7 @@ import { RequireOwner } from "./RequireOwner";
 import { RootLayout } from "./layout/RootLayout";
 import { AdminLayout } from "./layout/AdminLayout";
 import { Spinner } from "../shared/components";
+import { LOGIN_PATH } from "../shared/utils/returnTo";
 
 const ListingFeed = lazy(() =>
   import("../features/listings/components/ListingFeed").then((m) => ({ default: m.ListingFeed }))
@@ -135,7 +136,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/login",
+    path: LOGIN_PATH,
     Component: AuthLayout,
     children: [{ index: true, element: withSuspense(AuthFlow) }],
   },
