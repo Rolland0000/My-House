@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Badge } from "./Badge";
 import { cn } from "../utils/cn";
+import { useLoginPath } from "../hooks/useLoginPath";
 
 type SiteHeaderRole = "public" | "seeker" | "owner" | "admin";
 
@@ -210,6 +211,8 @@ function publicLinks(pathname: string): NavLinkSpec[] {
 function PublicHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const links = publicLinks(useLocation().pathname);
+  // Sign-in and sign-up both bring the user back to this page.
+  const signInPath = useLoginPath();
 
   return (
     <>
@@ -227,11 +230,11 @@ function PublicHeader() {
           )}
         </nav>
         <div className="hidden flex-1 items-center justify-end gap-3 sm:flex">
-          <Link to="/login" className="px-1 py-2.5 text-sm font-medium text-ink-600">
+          <Link to={signInPath} className="px-1 py-2.5 text-sm font-medium text-ink-600">
             Log in
           </Link>
           <Link
-            to="/login"
+            to={signInPath}
             className="rounded-sm border border-brass-600 bg-primary px-4.5 py-3 text-sm font-semibold text-ink-900"
           >
             Post a property
@@ -243,14 +246,14 @@ function PublicHeader() {
       {isMenuOpen && (
         <MobileMenu links={links} onClose={() => setIsMenuOpen(false)}>
           <Link
-            to="/login"
+            to={signInPath}
             onClick={() => setIsMenuOpen(false)}
             className="py-2 text-sm font-medium text-ink-600"
           >
             Log in
           </Link>
           <Link
-            to="/login"
+            to={signInPath}
             onClick={() => setIsMenuOpen(false)}
             className="rounded-sm border border-brass-600 bg-primary px-4 py-3 text-center text-sm font-semibold text-ink-900"
           >

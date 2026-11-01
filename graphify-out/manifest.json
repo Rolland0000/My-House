@@ -246,9 +246,9 @@
     "semantic_hash": "0283005233539e53a7cf12b879eb1658"
   },
   "frontend/src/app/layout/RootLayout.tsx": {
-    "mtime": 1793538257.145815,
-    "seen": 1793539131.168849,
-    "ast_hash": "e410cf74eef7e4f78be16a6df509c821",
+    "mtime": 1793541188.1236587,
+    "seen": 1793541388.272767,
+    "ast_hash": "80b4bc91c41ba61ba94e63775fa0133a",
     "semantic_hash": ""
   },
   "frontend/src/app/providers.tsx": {
@@ -258,9 +258,9 @@
     "semantic_hash": "4ebc4ea5deff4cd133bcbed57233d9db"
   },
   "frontend/src/app/router.tsx": {
-    "mtime": 1792147514.5425656,
-    "seen": 1792148720.6834161,
-    "ast_hash": "4b77eb7c4532c69562d4f3ed4c3cd31f",
+    "mtime": 1793541188.126857,
+    "seen": 1793541388.272772,
+    "ast_hash": "8c4e1d3a2c00140dae85c62ab898ea0b",
     "semantic_hash": ""
   },
   "frontend/src/features/admin/api.ts": {
@@ -1164,10 +1164,10 @@
     "semantic_hash": ""
   },
   "frontend/src/features/auth/components/AuthFlow.tsx": {
-    "mtime": 1789210413.944009,
-    "seen": 1791007791.6393821,
-    "ast_hash": "cf0de445d41ba094543fde1344943165",
-    "semantic_hash": "cf0de445d41ba094543fde1344943165"
+    "mtime": 1793541345.6360219,
+    "seen": 1793541388.27282,
+    "ast_hash": "b9d59b6fc265a142a0ae274a18951c38",
+    "semantic_hash": ""
   },
   "frontend/src/features/auth/components/OtpCodeInput.tsx": {
     "mtime": 1791012795.5108252,
@@ -1236,10 +1236,10 @@
     "semantic_hash": "5e79ec2cff1c804c807e6cb5f9c501c4"
   },
   "frontend/src/app/RequireAuth.tsx": {
-    "mtime": 1788931436.1162655,
-    "seen": 1791007791.639339,
-    "ast_hash": "6d3ff0f6ba501cccde4c8dbf62a8eceb",
-    "semantic_hash": "6d3ff0f6ba501cccde4c8dbf62a8eceb"
+    "mtime": 1793541188.1231785,
+    "seen": 1793541388.272754,
+    "ast_hash": "041c4100cc066a0174a25d4f7f97658b",
+    "semantic_hash": ""
   },
   "frontend/src/features/profile/components/ProfileForm.tsx": {
     "mtime": 1790505497.0490327,
@@ -1452,9 +1452,9 @@
     "semantic_hash": ""
   },
   "frontend/src/shared/components/SiteHeader.tsx": {
-    "mtime": 1792147526.7745197,
-    "seen": 1792148720.683816,
-    "ast_hash": "799d16150b38a48e02d53f64d247edda",
+    "mtime": 1793541188.125447,
+    "seen": 1793541388.2731972,
+    "ast_hash": "7ef96aed1a7db995264d315610066609",
     "semantic_hash": ""
   },
   "frontend/src/shared/components/Skeleton.tsx": {
@@ -2490,9 +2490,9 @@
     "semantic_hash": ""
   },
   "frontend/src/features/contact/components/ContactReveal.tsx": {
-    "mtime": 1793538903.9698255,
-    "seen": 1793539131.1689448,
-    "ast_hash": "da0d466bb45f71149513058df457248c",
+    "mtime": 1793541188.1240222,
+    "seen": 1793541388.272866,
+    "ast_hash": "1773f9cb0a3098bf1b1abdd8294d3695",
     "semantic_hash": ""
   },
   "frontend/src/features/contact/components/PhoneNumber.tsx": {
@@ -2535,6 +2535,24 @@
     "mtime": 1793538880.3847775,
     "seen": 1793539131.169281,
     "ast_hash": "421c44df7fc28a90ac891041f843c80f",
+    "semantic_hash": ""
+  },
+  "frontend/src/shared/hooks/useLoginPath.ts": {
+    "mtime": 1793541187.0061033,
+    "seen": 1793541388.2732239,
+    "ast_hash": "5649fff1b961b658432cf68fb51c53aa",
+    "semantic_hash": ""
+  },
+  "frontend/src/shared/utils/returnTo.test.ts": {
+    "mtime": 1793541188.1225786,
+    "seen": 1793541388.2732549,
+    "ast_hash": "5e4d09b543012d354a294f02c15b61af",
+    "semantic_hash": ""
+  },
+  "frontend/src/shared/utils/returnTo.ts": {
+    "mtime": 1793541186.2116454,
+    "seen": 1793541388.273258,
+    "ast_hash": "a55069bb792d8869fa01063badbd5dac",
     "semantic_hash": ""
   }
 }

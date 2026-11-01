@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { Alert, Button, buttonClasses } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
+import { useLoginPath } from "../../../shared/hooks/useLoginPath";
 import { contactErrorKind } from "../contactError";
 import { useListingContact } from "../hooks/useListingContact";
 import { PhoneNumber } from "./PhoneNumber";
@@ -19,10 +20,12 @@ interface ContactRevealProps {
 }
 
 function ContactReveal({ listingId, access }: ContactRevealProps) {
+  const signInPath = useLoginPath();
+
   return (
     <div className="mt-4 flex flex-col gap-4">
       {access === "sign-in" && (
-        <Link to="/login" className={cn(buttonClasses(), "w-fit")}>
+        <Link to={signInPath} className={cn(buttonClasses(), "w-fit")}>
           Sign in to contact
         </Link>
       )}

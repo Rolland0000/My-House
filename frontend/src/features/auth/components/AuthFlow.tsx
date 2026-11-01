@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { Check } from "lucide-react";
 import { Alert, Spinner } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
+import { RETURN_TO_PARAM, safeReturnTo } from "../../../shared/utils/returnTo";
 import { useAuth } from "../hooks/useAuth";
 import { OtpRequestForm } from "./OtpRequestForm";
 import { OtpVerifyForm } from "./OtpVerifyForm";
@@ -63,6 +64,9 @@ function markInterrupted(pending: boolean): void {
 function AuthFlow() {
   const { status } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Every navigation to `returnTo` uses `replace`, so Back never shows the sign-in form again.
+  const returnTo = safeReturnTo(searchParams.get(RETURN_TO_PARAM));
   const [screen, setScreen] = useState<Screen>("email");
   const [email, setEmail] = useState("");
   const [registrationTicket, setRegistrationTicket] = useState("");
@@ -83,7 +87,7 @@ function AuthFlow() {
   }
 
   if (status === "authenticated" && screen === "email") {
-    return <Navigate to="/" replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   switch (screen) {
@@ -122,7 +126,7 @@ function AuthFlow() {
                 setRegistrationTicket(ticket);
                 setScreen("register");
               } else {
-                navigate("/", { replace: true });
+                navigate(returnTo, { replace: true });
               }
             }}
           />
@@ -137,7 +141,7 @@ function AuthFlow() {
             registrationTicket={registrationTicket}
             onRegistered={() => {
               markInterrupted(false);
-              navigate("/", { replace: true });
+              navigate(returnTo, { replace: true });
             }}
             onAccountExists={() => {
               leaveRegistration();

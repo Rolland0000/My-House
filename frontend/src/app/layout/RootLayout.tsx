@@ -9,10 +9,12 @@ import { removeOwnerScopedQueries } from "../../features/listings";
 import { ownerRequestStatusView, useOwnerRequestStatus } from "../../features/owner-request";
 import { useProfile } from "../../features/profile";
 import { formatInitials } from "../../shared/utils/format";
+import { useLoginPath } from "../../shared/hooks/useLoginPath";
 
 export function RootLayout() {
   const { status, sessionRole, clearSession } = useAuth();
   const navigate = useNavigate();
+  const signInPath = useLoginPath();
   const queryClient = useQueryClient();
   const { data: profile, isFetchedAfterMount: isProfileFresh } = useProfile({
     enabled: status === "authenticated",
@@ -74,7 +76,7 @@ export function RootLayout() {
       <SiteFooter variant="public" />
       <OwnerActivationModal
         isOpen={needsOwnerActivation && !isActivationDismissed}
-        onSignInAgain={() => signOutTo("/login")}
+        onSignInAgain={() => signOutTo(signInPath)}
         onClose={() => setIsActivationDismissed(true)}
       />
     </div>
