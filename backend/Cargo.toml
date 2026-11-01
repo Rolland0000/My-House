@@ -22,7 +22,7 @@ dotenvy = "0.15"
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "macros", "uuid", "json"] }
 utoipa = { version = "6", features = ["uuid"] }
 utoipa-axum = "0.3"
-utoipa-swagger-ui = { version = "10", features = ["axum"] }
+utoipa-swagger-ui = { version = "10", features = ["axum", "vendored"] }
 async-trait = "0.1"
 bytes = "1"
 lettre = { version = "0.11", default-features = false, features = ["tokio1", "tokio1-rustls-tls", "smtp-transport", "builder"] }
