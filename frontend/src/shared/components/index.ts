@@ -6,6 +6,7 @@ export type { BadgeProps, BadgeTone, BadgeSize } from "./Badge";
 
 export { Button } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
+export { buttonClasses } from "./buttonClasses";
 
 export { Card } from "./Card";
 export type { CardProps, CardRadius } from "./Card";

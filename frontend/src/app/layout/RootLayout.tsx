@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from "react-router";
 import { SiteFooter, SiteHeader } from "../../shared/components";
 import type { SiteHeaderRole } from "../../shared/components";
 import { logout, OwnerActivationModal, useAuth } from "../../features/auth";
+import { removeContactQueries } from "../../features/contact";
 import { removeOwnerScopedQueries } from "../../features/listings";
 import { ownerRequestStatusView, useOwnerRequestStatus } from "../../features/owner-request";
 import { useProfile } from "../../features/profile";
@@ -53,6 +54,7 @@ export function RootLayout() {
     } finally {
       clearSession();
       removeOwnerScopedQueries(queryClient);
+      removeContactQueries(queryClient);
       navigate(destination);
     }
   }

@@ -5,6 +5,7 @@ import { ApiError } from "../../../shared/api/client";
 import { formatFullName } from "../../../shared/utils/format";
 import { isRemoteMediaUrl } from "../../../shared/utils/mediaUrl";
 import { useAuth } from "../../auth";
+import { ContactReveal, type ContactAccess } from "../../contact";
 import { useProfile } from "../../profile";
 import { useListing } from "../hooks/useListings";
 import { typeLabels } from "../labels";
@@ -49,6 +50,12 @@ function ListingDetail() {
   // Hidden until we know the viewer is not the owner, so it never flashes on their own listing.
   const showOwnerListingsLink =
     status === "anonymous" || (status === "authenticated" && !!profile && !isOwner);
+  const contactAccess: ContactAccess =
+    status === "anonymous"
+      ? "sign-in"
+      : status === "authenticated" && profile && !isOwner && profile.role !== "admin"
+        ? "reveal"
+        : "hidden";
 
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");
   const ownerName = formatFullName(listing.owner.first_name, listing.owner.last_name);
@@ -145,16 +152,7 @@ function ListingDetail() {
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           )}
-          {/* role="note": a role="alert" would be announced every time the page loads. */}
-          <Alert
-            variant="warning"
-            role="note"
-            title="Before you contact this owner"
-            className="mt-4"
-          >
-            Never send money before visiting the property. My House does not hold deposits and is
-            not a party to your agreement.
-          </Alert>
+          <ContactReveal listingId={listing.id} access={contactAccess} />
         </div>
       </div>
     </div>
