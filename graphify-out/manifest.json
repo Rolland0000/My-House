@@ -468,10 +468,10 @@
     "semantic_hash": "f860f871fc51113318dd6adac4b02313"
   },
   ".agents/rules/insrtruction-for-my-house.md": {
-    "mtime": 1784418984.579596,
-    "seen": 1791007791.6395679,
-    "ast_hash": "377b521e3bb58bf06f23a3048992b60f",
-    "semantic_hash": "377b521e3bb58bf06f23a3048992b60f"
+    "mtime": 1793529868.340771,
+    "seen": 1793530340.7118368,
+    "ast_hash": "4470bb59c46f5eea84e4ae80ce7d9003",
+    "semantic_hash": ""
   },
   ".agents/rules/react-typecrypt.md": {
     "mtime": 1784418984.579866,
@@ -696,10 +696,10 @@
     "semantic_hash": "6a47d64fcc136324ca395065a707ef76"
   },
   "CLAUDE.md": {
-    "mtime": 1785881850.8113375,
-    "seen": 1791007791.6396348,
-    "ast_hash": "3fd9a38064ce2247b9ba2322d38eada5",
-    "semantic_hash": "3fd9a38064ce2247b9ba2322d38eada5"
+    "mtime": 1793529847.6901002,
+    "seen": 1793530340.711936,
+    "ast_hash": "1ac85766a900cbfe7a4a66822c556347",
+    "semantic_hash": ""
   },
   "README.md": {
     "mtime": 1782646914.0992856,
@@ -712,18 +712,6 @@
     "seen": 1791007791.63965,
     "ast_hash": "86832fe899b336a24df5f01750953549",
     "semantic_hash": "86832fe899b336a24df5f01750953549"
-  },
-  "docs/ARCHITECTURE_v1.2.md": {
-    "mtime": 1791040114.2349102,
-    "seen": 1791040144.77613,
-    "ast_hash": "b72a180abf52b5a3d419e140182bad3d",
-    "semantic_hash": ""
-  },
-  "docs/TECHNICAL_SPEC_MVP_v1.2.md": {
-    "mtime": 1792129015.3995903,
-    "seen": 1792129032.369039,
-    "ast_hash": "7676813bae82f2bda2781f5fc039fb92",
-    "semantic_hash": ""
   },
   "docs/wireframes/DESIGN_TOKENS.md": {
     "mtime": 1789210413.74847,
@@ -1956,9 +1944,9 @@
     "semantic_hash": ""
   },
   "backend/Cargo.toml": {
-    "mtime": 1793155130.964892,
-    "seen": 1793159424.276899,
-    "ast_hash": "7193f875052f56cebfbfb263c4b21ccf",
+    "mtime": 1793220224.8259792,
+    "seen": 1793530340.711124,
+    "ast_hash": "25c7b7d454b660de7d96daa169dfe85d",
     "semantic_hash": ""
   },
   "backend/.sqlx/query-5258f3a513d2e93cd5f195e31bc5c65b6fe72063f6f66ffccf10ea881c983b4d.json": {
@@ -2451,6 +2439,18 @@
     "mtime": 1793158412.4930475,
     "seen": 1793159424.277594,
     "ast_hash": "b6d1550a918d73a4aecd8b7870557005",
+    "semantic_hash": ""
+  },
+  "docs/ARCHITECTURE.md": {
+    "mtime": 1793530285.3546734,
+    "seen": 1793530340.71196,
+    "ast_hash": "c1daea71c0cf747898553e6e70060e2c",
+    "semantic_hash": ""
+  },
+  "docs/TECHNICAL_SPEC_MVP.md": {
+    "mtime": 1793530279.306015,
+    "seen": 1793530340.7119622,
+    "ast_hash": "f59cf627444e23bd346e4b74787db61a",
     "semantic_hash": ""
   }
 }
