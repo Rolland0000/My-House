@@ -28,6 +28,8 @@ interface FormValues {
   id_number: string;
 }
 
+const PHONE_VISIBILITY_HINT = "Signed-in users can see these numbers on your listings.";
+
 const ID_TYPE_OPTIONS = [
   { value: "national_id", label: "National ID card" },
   { value: "passport", label: "Passport" },
@@ -251,7 +253,12 @@ function OwnerRequestForm() {
             </p>
           </div>
 
-          <FormField label="Phone" required error={errors.phone?.message}>
+          <FormField
+            label="Phone"
+            required
+            hint={PHONE_VISIBILITY_HINT}
+            error={errors.phone?.message}
+          >
             <Input
               type="tel"
               placeholder="+225 07 00 00 00 00"
@@ -264,7 +271,7 @@ function OwnerRequestForm() {
 
           <FormField
             label="Secondary phone"
-            hint="Optional — only sent if filled in."
+            hint={`Optional — only sent if filled in. ${PHONE_VISIBILITY_HINT}`}
             error={errors.secondary_phone?.message}
           >
             <Input
