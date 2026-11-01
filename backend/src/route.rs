@@ -13,7 +13,7 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
-use crate::modules::{admin, auth, listings, media, owner_requests, users};
+use crate::modules::{admin, auth, contact, listings, media, owner_requests, users};
 
 /// Merges the module routers under `/api/v1` and returns the router with the
 /// collected OpenAPI schema.
@@ -32,7 +32,8 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
         .merge(users::router::router())
         .merge(owner_requests::router::router())
         .merge(media::router::router())
-        .merge(admin::router::router());
+        .merge(admin::router::router())
+        .merge(contact::router::router());
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::check))

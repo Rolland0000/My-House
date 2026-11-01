@@ -22,6 +22,7 @@ use utoipa::OpenApi;
         (name = "owner_requests", description = "Owner upgrade request submission and status"),
         (name = "media", description = "Listing photo upload"),
         (name = "admin", description = "Platform administration"),
+        (name = "contact", description = "Owner contact reveal"),
     )
 )]
 pub struct ApiDoc;

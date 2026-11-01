@@ -42,6 +42,10 @@ const OTP_RATE_LIMIT_MAX_ENTRIES: u64 = 50_000;
 /// Distinct client IPs seen within one rate-limit window (MH-39).
 const IP_RATE_LIMIT_MAX_ENTRIES: u64 = 100_000;
 
+/// Distinct signed-in users revealing a contact within one window (MH-69).
+/// Keyed by authenticated user id, so bounded by the account count.
+const CONTACT_REVEAL_RATE_LIMIT_MAX_ENTRIES: u64 = 100_000;
+
 /// Engine choice, made once at startup by the caller (`main.rs`).
 pub fn build_cache_provider() -> Arc<dyn AppCacheProvider<Uuid, bool>> {
     Arc::new(MokaStore::new(
@@ -88,6 +92,17 @@ pub fn build_ip_rate_limit_cache(
     Arc::new(MokaStore::new(window, IP_RATE_LIMIT_MAX_ENTRIES))
 }
 
+/// Per-user owner contact reveal counters (MH-69), same shape as
+/// [`build_ip_rate_limit_cache`] but keyed by the caller's user id.
+pub fn build_contact_reveal_rate_limit_cache(
+    window: Duration,
+) -> Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>> {
+    Arc::new(MokaStore::new(
+        window,
+        CONTACT_REVEAL_RATE_LIMIT_MAX_ENTRIES,
+    ))
+}
+
 /// Single point of entry for every in-memory cache the app keeps.
 pub struct AppCache {
     is_active_status: Arc<dyn AppCacheProvider<Uuid, bool>>,
@@ -95,6 +110,7 @@ pub struct AppCache {
     auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
     otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
     ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
+    contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>>,
 }
 
 impl AppCache {
@@ -104,6 +120,7 @@ impl AppCache {
         auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
         otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
         ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
+        contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>>,
     ) -> Self {
         Self {
             is_active_status,
@@ -111,6 +128,7 @@ impl AppCache {
             auth_challenge,
             otp_rate_limit,
             ip_rate_limit,
+            contact_reveal_rate_limit,
         }
     }
 
@@ -135,5 +153,10 @@ impl AppCache {
     /// Per-IP request counters backing the generic rate-limit middleware.
     pub fn ip_rate_limit(&self) -> Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>> {
         Arc::clone(&self.ip_rate_limit)
+    }
+
+    /// Per-user counters capping owner contact reveals.
+    pub fn contact_reveal_rate_limit(&self) -> Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>> {
+        Arc::clone(&self.contact_reveal_rate_limit)
     }
 }

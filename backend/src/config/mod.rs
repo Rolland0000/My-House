@@ -229,6 +229,10 @@ pub struct AppConfig {
     /// Reverse proxies whose `X-Forwarded-For` is trusted, as IPs or CIDRs.
     /// Empty means no proxy is trusted and the header is never read.
     pub trusted_proxies: Vec<IpNet>,
+    /// Owner contact reveals allowed per user within `contact_reveal_window_seconds` (MH-69).
+    pub contact_reveal_max_per_window: u32,
+    /// Fixed window length in seconds for `contact_reveal_max_per_window`.
+    pub contact_reveal_window_seconds: u64,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -494,6 +498,20 @@ impl AppConfig {
             });
         }
         let trusted_proxies = require_trusted_proxies("TRUSTED_PROXIES")?;
+        let contact_reveal_max_per_window = require_u32("CONTACT_REVEAL_MAX_PER_WINDOW")?;
+        if contact_reveal_max_per_window == 0 {
+            return Err(ConfigError::Invalid {
+                key: "CONTACT_REVEAL_MAX_PER_WINDOW".to_string(),
+                reason: "must be greater than 0".to_string(),
+            });
+        }
+        let contact_reveal_window_seconds = require_u64("CONTACT_REVEAL_WINDOW_SECONDS")?;
+        if contact_reveal_window_seconds == 0 {
+            return Err(ConfigError::Invalid {
+                key: "CONTACT_REVEAL_WINDOW_SECONDS".to_string(),
+                reason: "must be greater than 0".to_string(),
+            });
+        }
 
         Ok(AppConfig {
             app_port,
@@ -521,6 +539,8 @@ impl AppConfig {
             rate_limit_max_requests,
             rate_limit_window_seconds,
             trusted_proxies,
+            contact_reveal_max_per_window,
+            contact_reveal_window_seconds,
         })
     }
 }
@@ -573,6 +593,8 @@ mod tests {
         env::set_var("RATE_LIMIT_MAX_REQUESTS", "100");
         env::set_var("RATE_LIMIT_WINDOW_SECONDS", "60");
         env::set_var("TRUSTED_PROXIES", "");
+        env::set_var("CONTACT_REVEAL_MAX_PER_WINDOW", "20");
+        env::set_var("CONTACT_REVEAL_WINDOW_SECONDS", "3600");
     }
 
     #[test]
@@ -781,6 +803,30 @@ mod tests {
             .expect_err("should fail on a zero request cap");
         assert!(
             matches!(err, ConfigError::Invalid { key, .. } if key == "RATE_LIMIT_MAX_REQUESTS")
+        );
+    }
+
+    #[test]
+    fn rejects_zero_contact_reveal_max_per_window() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("CONTACT_REVEAL_MAX_PER_WINDOW", "0");
+        let err =
+            AppConfig::from_env(AppEnv::Development).expect_err("should fail on a zero reveal cap");
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "CONTACT_REVEAL_MAX_PER_WINDOW")
+        );
+    }
+
+    #[test]
+    fn rejects_zero_contact_reveal_window_seconds() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("CONTACT_REVEAL_WINDOW_SECONDS", "0");
+        let err =
+            AppConfig::from_env(AppEnv::Development).expect_err("should fail on a zero window");
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "CONTACT_REVEAL_WINDOW_SECONDS")
         );
     }
 
