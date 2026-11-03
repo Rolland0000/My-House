@@ -635,7 +635,7 @@
           "contact"
         ],
         "summary": "Phone numbers of a listing's owner, for a signed-in seeker or owner.",
-        "description": "The listing must be publicly visible, available or not, and its owner\nactive. Otherwise the 404 is identical to the one for an unknown id. Every\ncall counts toward a per-user cap, 404s included.",
+        "description": "The listing must be publicly visible, available or not, and its owner\nactive. Otherwise the 404 is identical to the one for an unknown id. Each\n200 counts toward a per-user cap; other responses do not.",
         "operationId": "get_owner_contact",
         "parameters": [
           {
@@ -670,7 +670,17 @@
             "description": "Listing not found, not publicly visible, or its owner is inactive"
           },
           "429": {
-            "description": "Too many reveals by the caller within the window"
+            "description": "CONTACT_RATE_LIMITED: the caller used up their reveals for the current window",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 0
+                },
+                "description": "Seconds until the caller can reveal again"
+              }
+            }
           }
         }
       }
