@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use moka::MokaStore;
 
-use crate::shared::types::{AuthChallenge, RefreshTokenId};
+use crate::shared::types::{AuthChallenge, RefreshTokenId, RevealWindow};
 
 /// Staleness bound on an admin suspension taking effect (MH-32).
 const IS_ACTIVE_STATUS_TTL: Duration = Duration::from_secs(8);
@@ -92,11 +92,11 @@ pub fn build_ip_rate_limit_cache(
     Arc::new(MokaStore::new(window, IP_RATE_LIMIT_MAX_ENTRIES))
 }
 
-/// Per-user owner contact reveal counters (MH-69), same shape as
-/// [`build_ip_rate_limit_cache`] but keyed by the caller's user id.
+/// Per-user owner contact reveal windows (MH-71), keyed by the caller's user
+/// id. The TTL is the window length, so an entry expires when its window ends.
 pub fn build_contact_reveal_rate_limit_cache(
     window: Duration,
-) -> Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>> {
+) -> Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>> {
     Arc::new(MokaStore::new(
         window,
         CONTACT_REVEAL_RATE_LIMIT_MAX_ENTRIES,
@@ -110,7 +110,7 @@ pub struct AppCache {
     auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
     otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
     ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
-    contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>>,
+    contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>>,
 }
 
 impl AppCache {
@@ -120,7 +120,7 @@ impl AppCache {
         auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
         otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
         ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
-        contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>>,
+        contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>>,
     ) -> Self {
         Self {
             is_active_status,
@@ -155,8 +155,8 @@ impl AppCache {
         Arc::clone(&self.ip_rate_limit)
     }
 
-    /// Per-user counters capping owner contact reveals.
-    pub fn contact_reveal_rate_limit(&self) -> Arc<dyn AppCacheProvider<Uuid, Arc<AtomicU32>>> {
+    /// Per-user windows capping owner contact reveals.
+    pub fn contact_reveal_rate_limit(&self) -> Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>> {
         Arc::clone(&self.contact_reveal_rate_limit)
     }
 }

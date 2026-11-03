@@ -229,7 +229,7 @@ pub struct AppConfig {
     /// Reverse proxies whose `X-Forwarded-For` is trusted, as IPs or CIDRs.
     /// Empty means no proxy is trusted and the header is never read.
     pub trusted_proxies: Vec<IpNet>,
-    /// Owner contact reveals allowed per user within `contact_reveal_window_seconds` (MH-69).
+    /// Successful owner contact reveals allowed per user within `contact_reveal_window_seconds` (MH-71).
     pub contact_reveal_max_per_window: u32,
     /// Fixed window length in seconds for `contact_reveal_max_per_window`.
     pub contact_reveal_window_seconds: u64,
