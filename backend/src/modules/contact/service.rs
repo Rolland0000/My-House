@@ -86,7 +86,7 @@ async fn reserve_reveal(
 
     let reserved = window
         .count
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |count| {
             (count < cap.max_per_window).then_some(count + 1)
         })
         .is_ok();
