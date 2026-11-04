@@ -1,7 +1,7 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 1.3
+> **Version :** 1.4
 > **Statut :** Validé
 > **Dernière mise à jour :** Novembre 2026
 
@@ -440,15 +440,26 @@ sequenceDiagram
     Listings->>Listings: Trie les photos : cover, position, date d'upload, id
     Listings-->>Frontend: Page de détail complète
 
-    Seeker->>Frontend: Clique "Contacter le propriétaire"
-    Frontend->>Contact: GET /listings/:id/contact (pas encore livré)
-    Contact->>DB: SELECT phone FROM users WHERE id=owner_id
-    Contact-->>Frontend: { phone: "+237 6XX XX XX XX" }
+    Seeker->>Frontend: Clique "Contact the owner" (connecté, seeker ou owner)
+    Frontend->>Contact: GET /listings/:id/contact
+    Contact->>Contact: Réserve une révélation dans le plafond du user (moka)
+    alt plafond atteint
+        Contact-->>Frontend: 429 CONTACT_RATE_LIMITED + Retry-After
+    else révélation réservée
+        Contact->>DB: Bien public, owner actif avec téléphone,\nsecondary_phone de sa dernière demande owner approuvée
+        alt une condition manque
+            Contact-->>Frontend: 404 LISTING_NOT_FOUND (révélation rendue)
+        else
+            Contact-->>Frontend: 200 { phone, secondary_phone } (révélation comptée)
+        end
+    end
 ```
 
 **Brouillon, photos, publication.** Un bien naît brouillon (`published_at` nul). Il reste invisible du public tant qu'il n'est pas publié et qu'il n'a pas au moins une photo ; seul son owner le voit, sur le détail comme dans `GET /users/me/listings`. Dans l'interface, la création mène au détail du brouillon, d'où l'owner ouvre l'écran Photos puis publie. La publication exige une photo et ne se défait pas au MVP : ensuite, l'owner ne joue plus que sur le statut `available` / `unavailable`, et le feed montre les deux.
 
 **Ordre d'affichage des photos.** Toutes les lectures qui renvoient les photos d'un bien les trient de la même façon (`shared::media_order`) : la cover d'abord, puis `position` croissante, puis la date d'upload, puis `id`. Un upload prend la position qui suit la plus haute existante, même si des suppressions ont laissé des trous. Le réordonnancement réécrit les positions de 0 à n−1. L'écriture en base d'un upload, la suppression d'une photo ou du bien, le changement de cover et le réordonnancement prennent le même verrou sur la ligne `listings`, donc ils ne se croisent pas sur un même bien.
+
+**Contact.** L'étape est livrée (MH-69) : le détail ne montre jamais de numéro, il faut le demander. Un visiteur anonyme voit « Sign in to contact », qui le ramène à l'annonce après connexion (MH-70). Un seeker ou un owner connecté obtient deux numéros : `phone`, le téléphone de son profil, et `secondary_phone`, le numéro secondaire de sa dernière demande owner approuvée, `null` s'il n'en a pas donné. La révélation exige que le bien soit visible publiquement, `available` ou `unavailable`, et que son owner soit actif et ait un téléphone de profil ; sinon la réponse est le même 404 qu'un id inconnu. Un admin reçoit un 403. Chaque révélation réussie compte dans un plafond par utilisateur (§8.8).
 
 ---
 
@@ -601,6 +612,12 @@ Le schéma OpenAPI est la source de vérité unique du contrat API. Les types Ty
 | `GET /health`   | Endpoint non-authentifié, hors`/api/v1`. Vérifie la connectivité PostgreSQL (`SELECT 1`). Retourne `200` si prêt, `503` sinon. Utilisé comme healthcheck Docker et comme readiness probe pour un futur orchestrateur. |
 | Graceful shutdown | Le serveur Axum intercepte`SIGTERM` (`with_graceful_shutdown`) : arrête d'accepter de nouvelles connexions, laisse les requêtes en vol se terminer, puis quitte. Évite les requêtes coupées lors d'un redéploiement.     |
 
+### 8.8 Protection des Coordonnées des Owners
+
+Le téléphone d'un owner n'apparaît dans aucune réponse publique (feed, recherche, détail) : seul `GET /listings/:id/contact` le renvoie, à un seeker ou un owner connecté. Sans limite, un seul compte pourrait collecter le numéro de tous les owners de la plateforme, et la limite générique par IP ne fait que ralentir cette collecte.
+
+Chaque utilisateur a donc droit à `CONTACT_REVEAL_MAX_PER_WINDOW` révélations réussies par fenêtre fixe de `CONTACT_REVEAL_WINDOW_SECONDS` (30 par 8 heures par défaut) : assez pour un seeker réel, trop peu pour une collecte en masse. Le compteur est par `user_id`, pas par IP, donc deux utilisateurs derrière la même IP (NAT d'opérateur mobile, cybercafé) ne se gênent pas. Seules les réponses `200` comptent : une révélation est réservée avant la lecture en base, puis rendue si la réponse n'est pas un succès, ce qui garde le plafond exact sous requêtes concurrentes. Revoir le même bien compte de nouveau. Au-delà, la réponse est `429 CONTACT_RATE_LIMITED` avec un en-tête `Retry-After` qui donne les secondes avant la fin de la fenêtre, et chaque refus est journalisé avec le `user_id`. Le compteur vit dans moka, borné en nombre d'entrées (cf. R-12).
+
 ---
 
 ## 9. Décisions d'Architecture
@@ -675,6 +692,8 @@ Qualité Système
 | R-09 | **Un seul compte admin** — aucune redondance opérationnelle ; indisponibilité de l'admin bloque toute validation owner et toute modération                                                             | Faible (MVP, équipe réduite) | Moyen                                            | Rôle superviseur (charge de validation distribuée) prévu en V2                                                                   |
 | R-10 | **Rappel mensuel de disponibilité (LIST-03 du CDC) non implémenté au MVP** — exigence `Must` du cahier des charges différée faute de mécanisme de tâche planifiée                               | Certaine (déjà connu)        | Faible produit / Moyen conformité contractuelle | Implémenter en V2 via tâche planifiée in-process ou cron externe ; amendement explicite du CDC en attendant (cf. CDC v2.1 §6.3) |
 | R-11 | **Règle de dépendance inter-modules non respectée partout** (§5.3) : `owner_requests` appelle `users::service`, `admin` appelle `owner_requests::service`, `auth` et `owner_requests` appellent `notifications` directement, sans trait dans `shared/` | Certaine (déjà dans le code) | Faible au MVP / Moyen si un module est extrait | Introduire les traits de service dans `shared/` et l'injection au bootstrap avant toute extraction de module ; d'ici là, ne pas ajouter de nouvel import direct |
+| R-12 | **Compteur de révélations du contact en mémoire** (§8.8) : il repart de zéro à chaque redémarrage du backend et n'est pas partagé entre instances, donc un utilisateur peut dépasser le plafond en profitant d'un redéploiement ou de plusieurs instances | Faible (MVP mono-instance, redémarrages rares) | Faible au MVP / Moyen si scaling horizontal | Même mitigation que R-01 : passer le cache sur Redis via le trait `AppCacheProvider`, sans toucher au module `contact` |
+| R-13 | **Numéro secondaire non modifiable** : `secondary_phone` est saisi dans la demande owner et aucune route ne le change après approbation ; un owner qui change de numéro secondaire continue d'exposer l'ancien | Moyenne | Faible produit / Moyen confiance des seekers | Ajouter la modification du numéro secondaire au profil owner (V2) ; d'ici là, le téléphone de profil reste modifiable via `PUT /users/me` |
 
 ---
 
@@ -704,3 +723,4 @@ Qualité Système
 | ------- | ------------- | ----------- |
 | 1.2     | Août 2026     | Dernière version publiée sans historique de révisions |
 | 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §5.2/§5.3 : recherche hébergée dans `listings`, module `owner_requests`, dépendances réelles et tables partagées. §6.2 : la demande owner passe par `owner_requests`, sans `media`. §6.3 : parcours owner brouillon → photos → publication, ordre d'affichage des photos (cover d'abord), feed et recherche sur la même requête. §9 : ADR-12 (recherche dans `listings`). §11 : R-02 reformulé, R-11 ajouté. Numéro de version aligné sur l'en-tête (1.x), fichier renommé sans numéro de version |
+| 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §6.3 : étape contact livrée, deux numéros (`phone`, `secondary_phone`), conditions de révélation, retour à l'annonce après connexion. §8.8 : plafond de révélations par utilisateur comme protection des coordonnées des owners. §11 : R-12 (compteur en mémoire) et R-13 (numéro secondaire non modifiable) ajoutés |

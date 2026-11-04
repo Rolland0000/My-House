@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use axum::extract::{Path, State};
 use axum::Json;
 use uuid::Uuid;
@@ -8,15 +10,15 @@ use crate::shared::extractors::AuthUser;
 use crate::shared::rbac::Role;
 
 use super::dto::ContactResponse;
-use super::service;
+use super::service::{self, RevealCap};
 
 const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
 
 /// Phone numbers of a listing's owner, for a signed-in seeker or owner.
 ///
 /// The listing must be publicly visible, available or not, and its owner
-/// active. Otherwise the 404 is identical to the one for an unknown id. Every
-/// call counts toward a per-user cap, 404s included.
+/// active. Otherwise the 404 is identical to the one for an unknown id. Each
+/// 200 counts toward a per-user cap; other responses do not.
 #[utoipa::path(
     get,
     path = "/listings/{id}/contact",
@@ -27,7 +29,8 @@ const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
         (status = 401, description = "Missing, malformed, invalid or expired access token, or suspended account"),
         (status = 403, description = "Caller is an admin"),
         (status = 404, description = "Listing not found, not publicly visible, or its owner is inactive"),
-        (status = 429, description = "Too many reveals by the caller within the window"),
+        (status = 429, description = "CONTACT_RATE_LIMITED: the caller used up their reveals for the current window",
+            headers(("Retry-After" = u64, description = "Seconds until the caller can reveal again"))),
     )
 )]
 pub async fn get_owner_contact(
@@ -40,7 +43,10 @@ pub async fn get_owner_contact(
     let data = service::reveal_owner_contact(
         state.db(),
         state.cache().contact_reveal_rate_limit().as_ref(),
-        state.config().contact_reveal_max_per_window,
+        RevealCap {
+            max_per_window: state.config().contact_reveal_max_per_window,
+            window: Duration::from_secs(state.config().contact_reveal_window_seconds),
+        },
         user.user_id,
         id,
     )

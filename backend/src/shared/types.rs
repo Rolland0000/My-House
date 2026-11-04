@@ -1,4 +1,6 @@
 use std::fmt;
+use std::sync::atomic::AtomicU32;
+use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -124,6 +126,23 @@ pub fn otp_key(email: &str) -> String {
 /// Cache key for the single-use registration ticket `ticket`.
 pub fn registration_key(ticket: &str) -> String {
     format!("reg:{ticket}")
+}
+
+/// One user's owner contact reveals in the current fixed window. `started_at`
+/// dates the window, so a refusal can tell when the next reveal is allowed.
+#[derive(Debug)]
+pub struct RevealWindow {
+    pub started_at: Instant,
+    pub count: AtomicU32,
+}
+
+impl RevealWindow {
+    pub fn start() -> Self {
+        Self {
+            started_at: Instant::now(),
+            count: AtomicU32::new(0),
+        }
+    }
 }
 
 #[cfg(test)]

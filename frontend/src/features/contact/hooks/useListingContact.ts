@@ -10,7 +10,7 @@ export function useListingContact(listingId: string) {
     enabled: false,
     staleTime: Infinity,
     gcTime: Infinity,
-    // Every call counts toward the per-user reveal cap, so a failure is not retried.
+    // A 404 or 429 would come back unchanged, so a failure is not retried.
     retry: false,
   });
 }

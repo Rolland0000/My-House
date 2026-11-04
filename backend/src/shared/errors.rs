@@ -151,6 +151,11 @@ pub enum AppError {
     #[error("Too many requests. Please wait before trying again.")]
     RateLimited,
 
+    /// Per-user owner contact reveal cap; carries the seconds until the
+    /// window ends, emitted as a `Retry-After` header.
+    #[error("Too many contact reveals. Please wait before trying again.")]
+    ContactRateLimited { retry_after_seconds: u64 },
+
     // ── 500 Internal Server Error ─────────────────────────────────────────────
     #[error("Internal server error.")]
     Internal,
@@ -214,6 +219,9 @@ impl AppError {
             // 429
             Self::OtpRateLimited { .. } => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
+            Self::ContactRateLimited { .. } => {
+                (StatusCode::TOO_MANY_REQUESTS, "CONTACT_RATE_LIMITED")
+            }
             // 500
             Self::Internal => (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR"),
             Self::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR"),
@@ -228,6 +236,9 @@ impl IntoResponse for AppError {
         let (status, code) = self.status_and_code();
         let retry_after_seconds = match &self {
             Self::OtpRateLimited {
+                retry_after_seconds,
+            }
+            | Self::ContactRateLimited {
                 retry_after_seconds,
             } => Some(*retry_after_seconds),
             _ => None,
@@ -324,6 +335,20 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "RATE_LIMITED");
+    }
+
+    #[tokio::test]
+    async fn test_contact_rate_limited_produces_429_with_retry_after() {
+        let response = AppError::ContactRateLimited {
+            retry_after_seconds: 120,
+        }
+        .into_response();
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert_eq!(response.headers()[RETRY_AFTER], "120");
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "CONTACT_RATE_LIMITED");
+        assert_eq!(json["error"]["status"], 429);
     }
 
     #[tokio::test]

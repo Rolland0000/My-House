@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.3
+> **Version :** 1.4
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.3 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.4 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -140,7 +140,12 @@ backend/
     │   │   └── handler.rs             # Délègue à owner_requests::service, pas de service propre
     │   │
     │   └── contact/
-    │       └── mod.rs                 # Vide, non déclaré dans modules/mod.rs : GET /listings/:id/contact pas encore livré
+    │       ├── mod.rs
+    │       ├── router.rs              # GET /listings/:id/contact
+    │       ├── handler.rs             # Rôle seeker ou owner, puis service
+    │       ├── service.rs             # Plafond de révélations par utilisateur (cf. §4.6), puis lecture
+    │       ├── repository.rs          # Une requête : listing public, owner actif, dernière demande owner approuvée
+    │       └── dto.rs
     │
     └── shared/
         ├── mod.rs
@@ -148,7 +153,7 @@ backend/
         ├── pagination.rs              # PaginatedResponse<T>
         ├── extractors.rs              # AuthUser, MaybeAuthUser, AppJson, AppQuery (revérifie is_active)
         ├── rbac.rs                    # Contrôle de rôle (seeker/owner/admin), appelé dans les handlers
-        ├── types.rs                   # NewType wrappers : UserId, ListingId...
+        ├── types.rs                   # NewType wrappers (UserId, ListingId...), valeurs de cache (AuthChallenge, RevealWindow)
         ├── validation.rs              # Règles de champs (400 ou 422 FieldErrors), place_filter, keyword_filter
         ├── file_validation.rs         # Magic bytes (infer) et tailles max, pour tous les uploads
         ├── storage_key.rs             # Seul constructeur des clés de storage (préfixes publics/privés)
@@ -299,7 +304,16 @@ frontend/
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
-    │   └── contact/                   # api.ts et index.ts vides : révélation du contact pas encore livrée
+    │   └── contact/                   # Révélation des numéros de l'owner sur le détail d'un bien (MH-69-FE)
+    │       ├── components/
+    │       │   ├── ContactReveal.tsx          # « Sign in to contact » ou « Contact the owner », erreurs 404/429
+    │       │   └── PhoneNumber.tsx            # Un numéro : liens tel: et WhatsApp, copie
+    │       ├── hooks/
+    │       │   └── useListingContact.ts       # Clé ["listing-contact", id], appel au clic seulement
+    │       ├── contactError.ts
+    │       ├── phoneLinks.ts
+    │       ├── api.ts                         # + removeContactQueries, appelé à la déconnexion
+    │       └── index.ts
     │
     └── shared/
         ├── components/
@@ -326,6 +340,7 @@ frontend/
         ├── hooks/
         │   ├── useCountdown.ts
         │   ├── useDebouncedValue.ts   # + TEXT_FILTER_DEBOUNCE_MS, partagé par le feed et la recherche
+        │   ├── useLoginPath.ts        # Lien de connexion qui ramène à la page courante (MH-70)
         │   └── usePagination.ts
         ├── api/
         │   ├── client.ts              # Instance fetch (base URL, headers, refresh, paramètres répétés)
@@ -336,7 +351,8 @@ frontend/
             ├── format.ts
             ├── imageFileCheck.ts
             ├── mediaUrl.ts
-            └── pagination.ts
+            ├── pagination.ts
+            └── returnTo.ts            # Paramètre ?redirect= de /login, limité aux chemins internes (MH-70)
 ```
 
 ---
@@ -1311,15 +1327,31 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 
 | Méthode | Endpoint                  | Auth | Rôle                 | Description                        |
 | -------- | ------------------------- | ---- | --------------------- | ---------------------------------- |
-| `GET`  | `/listings/:id/contact` | JWT  | `seeker` ou `owner` | Révèle le téléphone de l'owner |
+| `GET`  | `/listings/:id/contact` | JWT  | `seeker` ou `owner` | Révèle les numéros de l'owner |
+
+Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphone du profil de l'owner. `secondary_phone` est le numéro secondaire saisi dans sa demande owner : celle approuvée le plus récemment, `null` s'il n'en a pas donné. Les deux numéros sont renvoyés tels que stockés.
 
 ```json
 // Response 200
-{ "data": { "phone": "+237 6 77 12 34 56" } }
+{ "data": { "phone": "+237 6 77 12 34 56", "secondary_phone": "+237 6 99 00 11 22" } }
 
-// Response 404 — listing inexistant ou inactif
-{ "error": { "code": "LISTING_NOT_FOUND", "status": 404 } }
+// Response 429 — plafond de révélations atteint (en-tête Retry-After: 5400)
+{ "error": { "code": "CONTACT_RATE_LIMITED", "message": "Too many contact reveals. Please wait before trying again.", "status": 429 } }
 ```
+
+**Conditions de révélation** : le bien est visible publiquement (règle du §4.3), qu'il soit `available` ou `unavailable`, et son owner est actif et a un téléphone de profil. Si une condition manque, la réponse est un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un owner qui appelle la route sur son propre bien reçoit ses numéros aux mêmes conditions.
+
+**Plafond par utilisateur** : au plus `CONTACT_REVEAL_MAX_PER_WINDOW` révélations réussies par `CONTACT_REVEAL_WINDOW_SECONDS` (30 par 8 h par défaut, cf. §8), en fenêtre fixe ouverte par le premier appel d'un seeker ou d'un owner, même s'il finit en `404`. Seules les réponses `200` comptent ; révéler à nouveau le même bien compte une fois de plus. Le compteur est par `user_id`, pas par IP : deux utilisateurs derrière la même IP ont chacun le leur. Chaque refus écrit une ligne de log `warn` avec le `user_id`. Le compteur vit en mémoire (moka) : un redémarrage le remet à zéro (cf. ARCHITECTURE.md R-12). La limite générique par IP (`RATE_LIMIT_*`, `429 RATE_LIMITED`) s'applique aussi à cette route.
+
+| Code    | Cas                                                                                  |
+| ------- | ------------------------------------------------------------------------------------ |
+| `200` | Numéros révélés ; compte dans le plafond                                              |
+| `401` | Jeton absent, mal formé, invalide ou expiré, ou compte suspendu                       |
+| `403` | Appelant admin                                                                        |
+| `404` | `LISTING_NOT_FOUND` : bien inconnu, non visible publiquement, owner inactif ou sans téléphone |
+| `429` | `CONTACT_RATE_LIMITED` : plafond atteint. L'en-tête `Retry-After` donne les secondes avant la fin de la fenêtre, donc avant la prochaine révélation possible |
+
+`401`, `403`, `404` et `429` ne comptent pas dans le plafond.
 
 ---
 
@@ -1598,6 +1630,10 @@ RATE_LIMIT_MAX_REQUESTS=100     # obligatoire, > 0 ; requêtes par IP et par fen
 RATE_LIMIT_WINDOW_SECONDS=60    # obligatoire, > 0
 TRUSTED_PROXIES=                # obligatoire, même vide ; IP/CIDR dont X-Forwarded-For est cru ; vide = IP du pair (cargo run en local)
                                 # en staging/prod : la plage la plus étroite couvrant nginx seul
+
+# ── Révélation du contact ────────────────────────────────────
+CONTACT_REVEAL_MAX_PER_WINDOW=30      # obligatoire, > 0 ; révélations réussies par utilisateur et par fenêtre (cf. §4.6)
+CONTACT_REVEAL_WINDOW_SECONDS=28800   # obligatoire, > 0 ; 8 heures
 ```
 
 La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-têtes `Authorization` et `Content-Type`, et les credentials (cookie `refresh_token`). Seules les origines d'`ALLOWED_ORIGINS` sont acceptées.
@@ -1632,3 +1668,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.1     | Juin 2026 | Renommage `seeker`, `LocalFsStorage` MVP, owner-request enrichi (identité + documents), rotation refresh token + cookie httpOnly, `is_active` à chaque requête, avatar en scope, `/health`, graceful shutdown |
 | 1.2     | Août 2026 | Correction pagination feed (20/page uniforme), sélection automatique de la cover photo au premier upload, nouvelle section Stack de Notification (§3bis) bout-en-bout, admin unique + bootstrap documentés, rappel mensuel disponibilité (LIST-03) formellement différé en V2 |
 | 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §1.1/§1.2 : arbres tels que construits (pas de module `search`, `GET /search` servi par `listings` ; module `owner_requests` ; `features/search/` et `Checkbox` partagée). §2.2 : `published_at`, `currency`, `immutable_unaccent` et `idx_listings_city_normalized`, libellés de type français et anglais dans `search_vector` (MH-66). §3.1 : appelants du `StorageProvider` (avatar et pièces d'identité hors `media`). §4.3 : filtres `neighborhood` et `status`, `type` répétable, visibilité publique, prix en XAF, endpoints `POST`, `PUT`, `PATCH status`, `DELETE`, `publish`, `cover`, `media/order` et `/users/me/listings`, règles de validation. §4.4 : contrat de MH-64-BE. §8 : `ALLOWED_ORIGINS`, rate-limit générique, `TRUSTED_PROXIES`. Fichier renommé sans numéro de version |
+| 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §1.1/§1.2 : module `contact` et `features/contact/` tels que construits, `useLoginPath` et `returnTo` (MH-70). §4.6 : réponse avec `phone` et `secondary_phone` et origine de ce dernier, conditions de révélation, cas 401, 403, 404 et 429 `CONTACT_RATE_LIMITED` avec `Retry-After`, plafond par utilisateur. §8 : `CONTACT_REVEAL_MAX_PER_WINDOW` et `CONTACT_REVEAL_WINDOW_SECONDS` |
