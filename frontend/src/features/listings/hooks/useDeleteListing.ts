@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../../../shared/components";
 import { deleteListing, type ListListingsResult } from "../api";
 import { isAlreadyDeleted } from "../listingDeletion";
-import { withoutListing } from "../ownerListingsCache";
+import { withoutRow } from "../../../shared/utils/paginatedRows";
 import { LISTING_STATUS_MUTATION_KEY } from "./useUpdateListingStatus";
 
 const OWNER_LISTINGS_KEY = ["owner-listings"];
@@ -23,7 +23,7 @@ export function useDeleteListing(id: string) {
     retry: false,
     onSuccess: () => {
       queryClient.setQueriesData<ListListingsResult>({ queryKey: OWNER_LISTINGS_KEY }, (result) =>
-        withoutListing(result, id)
+        withoutRow(result, id)
       );
       queryClient.removeQueries({ queryKey: ["listing", id] });
       void queryClient.invalidateQueries({ queryKey: ["listings"] });

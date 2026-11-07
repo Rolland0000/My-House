@@ -80,6 +80,9 @@ pub enum AppError {
     #[error("Insufficient permissions to access this resource.")]
     Forbidden,
 
+    #[error("Admin accounts cannot be the target of this action.")]
+    AdminAccountProtected,
+
     // ── 404 Not Found ────────────────────────────────────────────────────────
     #[error("User not found.")]
     UserNotFound,
@@ -189,6 +192,7 @@ impl AppError {
             // 403
             Self::AccountInactive => (StatusCode::FORBIDDEN, "ACCOUNT_INACTIVE"),
             Self::Forbidden => (StatusCode::FORBIDDEN, "FORBIDDEN"),
+            Self::AdminAccountProtected => (StatusCode::FORBIDDEN, "ADMIN_ACCOUNT_PROTECTED"),
             // 404
             Self::UserNotFound => (StatusCode::NOT_FOUND, "USER_NOT_FOUND"),
             Self::ListingNotFound => (StatusCode::NOT_FOUND, "LISTING_NOT_FOUND"),
@@ -371,6 +375,15 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "OWNER_REQUEST_ALREADY_REVIEWED");
+    }
+
+    #[tokio::test]
+    async fn test_admin_account_protected_is_403_distinct_from_forbidden() {
+        let response = AppError::AdminAccountProtected.into_response();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "ADMIN_ACCOUNT_PROTECTED");
     }
 
     #[tokio::test]

@@ -71,6 +71,11 @@ const AdminListingsPage = lazy(() =>
     default: m.AdminListingsPage,
   }))
 );
+const AdminUsersPage = lazy(() =>
+  import("../features/admin/components/AdminUsersPage").then((m) => ({
+    default: m.AdminUsersPage,
+  }))
+);
 
 function withSuspense(Component: ComponentType) {
   return (
@@ -159,6 +164,7 @@ export const router = createBrowserRouter([
       { path: "owner-requests", element: withSuspense(OwnerRequestQueueList) },
       { path: "owner-requests/:id", element: withSuspense(OwnerRequestDetail) },
       { path: "listings", element: withSuspense(AdminListingsPage) },
+      { path: "users", element: withSuspense(AdminUsersPage) },
     ],
   },
 ]);

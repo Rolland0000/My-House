@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../../../shared/api/client";
 import { useToast } from "../../../shared/components";
 import { updateListingStatus, type ListListingsResult, type ListingStatus } from "../api";
-import { withListingStatus, withoutListing } from "../ownerListingsCache";
+import { withoutRow } from "../../../shared/utils/paginatedRows";
+import { withListingStatus } from "../ownerListingsCache";
 
 const OWNER_LISTINGS_KEY = ["owner-listings"];
 export const LISTING_STATUS_MUTATION_KEY = ["listing-status"];
@@ -31,7 +32,7 @@ export function useUpdateListingStatus(id: string) {
     },
     onError: (error, { previousStatus }) => {
       if (error instanceof ApiError && error.status === 404) {
-        patchOwnerListings((result) => withoutListing(result, id));
+        patchOwnerListings((result) => withoutRow(result, id));
         showToast("This listing no longer exists.", { variant: "info" });
         return;
       }

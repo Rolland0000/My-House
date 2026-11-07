@@ -3,14 +3,17 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::config::AppConfig;
+use crate::infra::cache::AppCacheProvider;
 use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
+use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
+use crate::shared::rbac::Role;
 use crate::shared::storage_key::{avatar_key, avatar_key_from_url};
 use crate::shared::types::UserId;
-use crate::shared::validation::{optional_name, required_name, required_phone};
+use crate::shared::validation::{keyword_filter, optional_name, required_name, required_phone};
 
-use super::dto::UpdateMeDto;
+use super::dto::{AccountState, AdminUserDto, AdminUserListQuery, UpdateMeDto};
 use super::model::UserRow;
 use super::repository;
 
@@ -89,23 +92,71 @@ pub async fn replace_avatar(
     Ok(updated)
 }
 
-/// Deletes the caller's account. Runs storage cleanup before the row delete —
-/// the reverse order would lose the file references and make orphans
-/// undetectable. A failure between the two steps leaves the account with
-/// some files already gone; retrying re-enumerates whatever remains, so no
-/// partial state needs its own repair path.
+/// Deletes the caller's account.
 pub async fn delete_account(
     pool: &PgPool,
     storage: &dyn StorageProvider,
     user_id: Uuid,
 ) -> Result<(), AppError> {
-    let avatar_url = repository::find_by_id(pool, user_id)
+    let user = repository::find_by_id(pool, user_id)
         .await?
-        .ok_or(AppError::UserNotFound)?
-        .avatar_url;
+        .ok_or(AppError::UserNotFound)?;
 
+    delete_user_and_files(pool, storage, &user).await
+}
+
+/// Backs `GET /admin/users`.
+pub async fn list_for_admin(
+    pool: &PgPool,
+    query: AdminUserListQuery,
+) -> Result<PaginatedResponse<AdminUserDto>, AppError> {
+    let is_active = query.state.map(|state| state == AccountState::Active);
+    let search = keyword_filter(query.q)?;
+
+    let total = repository::count_for_admin(pool, query.role, is_active, search.as_deref()).await?;
+    let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
+
+    let rows = repository::list_for_admin(
+        pool,
+        query.role,
+        is_active,
+        search.as_deref(),
+        meta.per_page as i64,
+        meta.offset() as i64,
+    )
+    .await?;
+    let data = rows.into_iter().map(AdminUserDto::from).collect();
+    Ok(PaginatedResponse::new(data, meta))
+}
+
+/// Backs `DELETE /admin/users/:id`: `delete_account`'s cleanup, refused for an
+/// admin account. Dropping the cached `is_active` ends the user's open session.
+pub async fn delete_for_admin(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    is_active_cache: &dyn AppCacheProvider<Uuid, bool>,
+    user_id: Uuid,
+) -> Result<(), AppError> {
+    let user = repository::find_by_id(pool, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)?;
+    ensure_deletable(user.role)?;
+
+    delete_user_and_files(pool, storage, &user).await?;
+    is_active_cache.invalidate(&user_id).await;
+    Ok(())
+}
+
+/// Deletes the files before the rows that reference them. After a partial
+/// failure, a retry re-enumerates whatever remains.
+async fn delete_user_and_files(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    user: &UserRow,
+) -> Result<(), AppError> {
+    let user_id = user.id;
     let mut keys = Vec::new();
-    if let Some(url) = avatar_url.as_deref() {
+    if let Some(url) = user.avatar_url.as_deref() {
         match avatar_key_from_url(url, UserId::new(user_id)) {
             Some(key) => keys.push(key),
             None => tracing::warn!(%user_id, "avatar URL yields no storage key; skipping delete"),
@@ -121,6 +172,14 @@ pub async fn delete_account(
     }
 
     Ok(())
+}
+
+/// The admin routes never delete an admin account, the caller's own included.
+fn ensure_deletable(role: Role) -> Result<(), AppError> {
+    match role {
+        Role::Admin => Err(AppError::AdminAccountProtected),
+        Role::Seeker | Role::Owner => Ok(()),
+    }
 }
 
 /// Best-effort cleanup: the replacement is already stored and referenced, so a
@@ -195,5 +254,15 @@ mod tests {
         delete_previous_avatar(&storage, Some(&url), Uuid::new_v4()).await;
 
         assert!(storage.deleted_keys().is_empty());
+    }
+
+    #[test]
+    fn only_admin_accounts_are_protected_from_deletion() {
+        assert!(ensure_deletable(Role::Seeker).is_ok());
+        assert!(ensure_deletable(Role::Owner).is_ok());
+        assert!(matches!(
+            ensure_deletable(Role::Admin),
+            Err(AppError::AdminAccountProtected)
+        ));
     }
 }

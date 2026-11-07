@@ -1,15 +1,20 @@
-use axum::extract::{Multipart, State};
+use axum::extract::{Multipart, Path, State};
 use axum::http::StatusCode;
 use axum::Json;
 use axum_extra::extract::cookie::CookieJar;
 use bytes::Bytes;
+use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::extractors::{AppJson, AppQuery, AuthUser};
+use crate::shared::pagination::PaginatedResponse;
+use crate::shared::rbac::Role;
 use crate::shared::session_cookie::clear_refresh_cookie;
 
-use super::dto::{AvatarUploadForm, UpdateMeDto, UserDto, UserResponse};
+use super::dto::{
+    AdminUserDto, AdminUserListQuery, AvatarUploadForm, UpdateMeDto, UserDto, UserResponse,
+};
 use super::service;
 
 /// Multipart field carrying the image (`TECHNICAL_SPEC_MVP.md §4.2`).
@@ -116,6 +121,60 @@ pub async fn delete_me(
 
     let cookie_domain = state.config().cookie_domain.clone();
     Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
+}
+
+#[utoipa::path(
+    get,
+    path = "/admin/users",
+    tag = "admin",
+    params(AdminUserListQuery),
+    responses(
+        (status = 200, description = "Paginated account list, newest first", body = PaginatedResponse<AdminUserDto>),
+        (status = 400, description = "Invalid `role`, `state`, `q` or pagination value"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+    )
+)]
+pub async fn list_users(
+    State(state): State<AppState>,
+    user: AuthUser,
+    AppQuery(query): AppQuery<AdminUserListQuery>,
+) -> Result<Json<PaginatedResponse<AdminUserDto>>, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    let response = service::list_for_admin(state.db(), query).await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(
+    delete,
+    path = "/admin/users/{id}",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "User id")),
+    responses(
+        (status = 204, description = "Account, data and files deleted"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"),
+        (status = 404, description = "No user with this id"),
+    )
+)]
+pub async fn delete_user(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    service::delete_for_admin(
+        state.db(),
+        state.storage().as_ref(),
+        state.cache().is_active_status().as_ref(),
+        id,
+    )
+    .await?;
+
+    tracing::info!(admin_id = %user.user_id, deleted_user_id = %id, "user account deleted by admin");
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// Reads the `file` part, skipping any other field. The part's declared

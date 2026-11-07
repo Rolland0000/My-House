@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { Button, Input } from "../../../shared/components";
-import { useUrlDraft } from "../hooks/useUrlDraft";
+import { useUrlDraft } from "../../../shared/hooks/useUrlDraft";
 import { MAX_KEYWORD_CHARS } from "../searchCriteria";
 
 interface SearchBarProps {

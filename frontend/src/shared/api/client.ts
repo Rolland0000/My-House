@@ -44,6 +44,10 @@ export class ApiError extends Error {
   }
 }
 
+export function isNotFound(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404;
+}
+
 function readRetryAfter(response: Response): number | undefined {
   const raw = response.headers.get("Retry-After");
   if (!raw) return undefined;

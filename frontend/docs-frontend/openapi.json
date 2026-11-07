@@ -384,6 +384,121 @@
         }
       }
     },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "list_users",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Role"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "`suspended` means `is_active = false`.",
+              "enum": [
+                "active",
+                "suspended"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Matches part of the email, first name or last name, ignoring case and accents.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated account list, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_AdminUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid `role`, `state`, `q` or pagination value"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "delete_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Account, data and files deleted"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"
+          },
+          "404": {
+            "description": "No user with this id"
+          }
+        }
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "tags": [
@@ -1866,6 +1981,59 @@
           }
         }
       },
+      "AdminUserDto": {
+        "type": "object",
+        "description": "One account in the admin user list. Never carries owner-request identity data.",
+        "required": [
+          "id",
+          "email",
+          "role",
+          "is_active",
+          "created_at",
+          "listing_count"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "listing_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Listings the user owns, drafts included."
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
       "AvatarUploadForm": {
         "type": "object",
         "description": "Documents the avatar upload body for the OpenAPI schema. Nothing\ndeserializes into it — the handler walks the multipart fields itself.",
@@ -2643,6 +2811,75 @@
                 },
                 "status": {
                   "$ref": "#/components/schemas/OwnerRequestStatus"
+                }
+              }
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "PaginatedResponse_AdminUserDto": {
+        "type": "object",
+        "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "One account in the admin user list. Never carries owner-request identity data.",
+              "required": [
+                "id",
+                "email",
+                "role",
+                "is_active",
+                "created_at",
+                "listing_count"
+              ],
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "first_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "is_active": {
+                  "type": "boolean"
+                },
+                "last_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "listing_count": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Listings the user owns, drafts included."
+                },
+                "phone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "role": {
+                  "$ref": "#/components/schemas/Role"
                 }
               }
             }

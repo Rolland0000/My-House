@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::shared::errors::AppError;
 use crate::shared::rbac::Role;
 
-use super::model::UserRow;
+use super::model::{AdminUserRow, UserRow};
 
 /// `is_active` for `user_id`, or `None` if the user no longer exists.
 /// Backs the `AuthUser` extractor's cache-miss fallback (MH-32).
@@ -83,6 +83,78 @@ pub async fn update_avatar_url(
         avatar_url
     )
     .fetch_optional(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Total for the admin user list. `search` goes through `strpos` because
+/// `unaccent` turns fullwidth `％` and `＿` into `LIKE` wildcards.
+pub async fn count_for_admin(
+    pool: &PgPool,
+    role: Option<Role>,
+    is_active: Option<bool>,
+    search: Option<&str>,
+) -> Result<i64, AppError> {
+    sqlx::query_scalar!(
+        r#"
+        SELECT COUNT(*) AS "count!"
+        FROM users u
+        WHERE ($1::user_role IS NULL OR u.role = $1)
+          AND ($2::bool IS NULL OR u.is_active = $2)
+          AND ($3::text IS NULL
+               OR strpos(lower(immutable_unaccent(u.email)), lower(immutable_unaccent($3))) > 0
+               OR strpos(lower(immutable_unaccent(u.first_name)), lower(immutable_unaccent($3))) > 0
+               OR strpos(lower(immutable_unaccent(u.last_name)), lower(immutable_unaccent($3))) > 0)
+        "#,
+        role as Option<Role>,
+        is_active,
+        search,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// One page of the admin user list, newest first, with the same filters as
+/// `count_for_admin`.
+pub async fn list_for_admin(
+    pool: &PgPool,
+    role: Option<Role>,
+    is_active: Option<bool>,
+    search: Option<&str>,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<AdminUserRow>, AppError> {
+    sqlx::query_as!(
+        AdminUserRow,
+        r#"
+        SELECT
+            u.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            u.phone,
+            u.role AS "role: Role",
+            u.is_active,
+            to_char(u.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+            (SELECT COUNT(*) FROM listings l WHERE l.owner_id = u.id) AS "listing_count!"
+        FROM users u
+        WHERE ($1::user_role IS NULL OR u.role = $1)
+          AND ($2::bool IS NULL OR u.is_active = $2)
+          AND ($3::text IS NULL
+               OR strpos(lower(immutable_unaccent(u.email)), lower(immutable_unaccent($3))) > 0
+               OR strpos(lower(immutable_unaccent(u.first_name)), lower(immutable_unaccent($3))) > 0
+               OR strpos(lower(immutable_unaccent(u.last_name)), lower(immutable_unaccent($3))) > 0)
+        ORDER BY u.created_at DESC, u.id DESC
+        LIMIT $4 OFFSET $5
+        "#,
+        role as Option<Role>,
+        is_active,
+        search,
+        limit,
+        offset,
+    )
+    .fetch_all(pool)
     .await
     .map_err(|error| AppError::Database(error.to_string()))
 }
