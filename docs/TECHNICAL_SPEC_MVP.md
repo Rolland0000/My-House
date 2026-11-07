@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.4
+> **Version :** 1.5
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.4 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.5 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -143,7 +143,7 @@ backend/
     │       ├── mod.rs
     │       ├── router.rs              # GET /listings/:id/contact
     │       ├── handler.rs             # Rôle seeker ou owner, puis service
-    │       ├── service.rs             # Plafond de révélations par utilisateur (cf. §4.6), puis lecture
+    │       ├── service.rs             # Lecture, puis plafond de biens distincts par utilisateur (cf. §4.6)
     │       ├── repository.rs          # Une requête : listing public, owner actif, dernière demande owner approuvée
     │       └── dto.rs
     │
@@ -1341,15 +1341,15 @@ Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphon
 
 **Conditions de révélation** : le bien est visible publiquement (règle du §4.3), qu'il soit `available` ou `unavailable`, et son owner est actif et a un téléphone de profil. Si une condition manque, la réponse est un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un owner qui appelle la route sur son propre bien reçoit ses numéros aux mêmes conditions.
 
-**Plafond par utilisateur** : au plus `CONTACT_REVEAL_MAX_PER_WINDOW` révélations réussies par `CONTACT_REVEAL_WINDOW_SECONDS` (30 par 8 h par défaut, cf. §8), en fenêtre fixe ouverte par le premier appel d'un seeker ou d'un owner, même s'il finit en `404`. Seules les réponses `200` comptent ; révéler à nouveau le même bien compte une fois de plus. Le compteur est par `user_id`, pas par IP : deux utilisateurs derrière la même IP ont chacun le leur. Chaque refus écrit une ligne de log `warn` avec le `user_id`. Le compteur vit en mémoire (moka) : un redémarrage le remet à zéro (cf. ARCHITECTURE.md R-12). La limite générique par IP (`RATE_LIMIT_*`, `429 RATE_LIMITED`) s'applique aussi à cette route.
+**Plafond par utilisateur** : au plus `CONTACT_REVEAL_MAX_PER_WINDOW` biens distincts par `CONTACT_REVEAL_WINDOW_SECONDS` (30 par 8 h par défaut, cf. §8), en fenêtre fixe ouverte par la première révélation comptée. Révéler à nouveau un bien déjà révélé dans la fenêtre réussit, ne compte pas, et reste possible une fois le plafond atteint. Le plafond s'applique après la lecture en base : un `404` ne compte pas, n'ouvre pas de fenêtre, et reste un `404` même plafond atteint. À la fin de la fenêtre, l'utilisateur peut révéler de nouveau le maximum de biens distincts. Le compte est par `user_id`, pas par IP : deux utilisateurs derrière la même IP ont chacun le leur. Chaque refus écrit une ligne de log `warn` avec le `user_id`. Le compte vit en mémoire (moka) : un redémarrage le remet à zéro (cf. ARCHITECTURE.md R-12). La limite générique par IP (`RATE_LIMIT_*`, `429 RATE_LIMITED`) s'applique aussi à cette route.
 
 | Code    | Cas                                                                                  |
 | ------- | ------------------------------------------------------------------------------------ |
-| `200` | Numéros révélés ; compte dans le plafond                                              |
+| `200` | Numéros révélés ; compte dans le plafond si le bien est nouveau dans la fenêtre       |
 | `401` | Jeton absent, mal formé, invalide ou expiré, ou compte suspendu                       |
 | `403` | Appelant admin                                                                        |
 | `404` | `LISTING_NOT_FOUND` : bien inconnu, non visible publiquement, owner inactif ou sans téléphone |
-| `429` | `CONTACT_RATE_LIMITED` : plafond atteint. L'en-tête `Retry-After` donne les secondes avant la fin de la fenêtre, donc avant la prochaine révélation possible |
+| `429` | `CONTACT_RATE_LIMITED` : plafond atteint et bien pas encore révélé dans la fenêtre. L'en-tête `Retry-After` donne les secondes restantes dans la fenêtre |
 
 `401`, `403`, `404` et `429` ne comptent pas dans le plafond.
 
@@ -1632,7 +1632,7 @@ TRUSTED_PROXIES=                # obligatoire, même vide ; IP/CIDR dont X-Forwa
                                 # en staging/prod : la plage la plus étroite couvrant nginx seul
 
 # ── Révélation du contact ────────────────────────────────────
-CONTACT_REVEAL_MAX_PER_WINDOW=30      # obligatoire, > 0 ; révélations réussies par utilisateur et par fenêtre (cf. §4.6)
+CONTACT_REVEAL_MAX_PER_WINDOW=30      # obligatoire, > 0 ; biens distincts révélés par utilisateur et par fenêtre (cf. §4.6)
 CONTACT_REVEAL_WINDOW_SECONDS=28800   # obligatoire, > 0 ; 8 heures
 ```
 
@@ -1669,3 +1669,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.2     | Août 2026 | Correction pagination feed (20/page uniforme), sélection automatique de la cover photo au premier upload, nouvelle section Stack de Notification (§3bis) bout-en-bout, admin unique + bootstrap documentés, rappel mensuel disponibilité (LIST-03) formellement différé en V2 |
 | 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §1.1/§1.2 : arbres tels que construits (pas de module `search`, `GET /search` servi par `listings` ; module `owner_requests` ; `features/search/` et `Checkbox` partagée). §2.2 : `published_at`, `currency`, `immutable_unaccent` et `idx_listings_city_normalized`, libellés de type français et anglais dans `search_vector` (MH-66). §3.1 : appelants du `StorageProvider` (avatar et pièces d'identité hors `media`). §4.3 : filtres `neighborhood` et `status`, `type` répétable, visibilité publique, prix en XAF, endpoints `POST`, `PUT`, `PATCH status`, `DELETE`, `publish`, `cover`, `media/order` et `/users/me/listings`, règles de validation. §4.4 : contrat de MH-64-BE. §8 : `ALLOWED_ORIGINS`, rate-limit générique, `TRUSTED_PROXIES`. Fichier renommé sans numéro de version |
 | 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §1.1/§1.2 : module `contact` et `features/contact/` tels que construits, `useLoginPath` et `returnTo` (MH-70). §4.6 : réponse avec `phone` et `secondary_phone` et origine de ce dernier, conditions de révélation, cas 401, 403, 404 et 429 `CONTACT_RATE_LIMITED` avec `Retry-After`, plafond par utilisateur. §8 : `CONTACT_REVEAL_MAX_PER_WINDOW` et `CONTACT_REVEAL_WINDOW_SECONDS` |
+| 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §1.1 : `contact::service` lit d'abord, compte ensuite. §4.6 : 30 biens distincts par 8 h, fenêtre ouverte par la première révélation comptée, un bien déjà révélé ne compte pas et reste accessible au plafond, un `404` n'ouvre pas de fenêtre. §8 : description de `CONTACT_REVEAL_MAX_PER_WINDOW` |

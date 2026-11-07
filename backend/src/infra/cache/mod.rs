@@ -43,7 +43,8 @@ const OTP_RATE_LIMIT_MAX_ENTRIES: u64 = 50_000;
 const IP_RATE_LIMIT_MAX_ENTRIES: u64 = 100_000;
 
 /// Distinct signed-in users revealing a contact within one window (MH-69).
-/// Keyed by authenticated user id, so bounded by the account count.
+/// Keyed by authenticated user id, so bounded by the account count. Each entry
+/// holds up to `CONTACT_REVEAL_MAX_PER_WINDOW` listing ids.
 const CONTACT_REVEAL_RATE_LIMIT_MAX_ENTRIES: u64 = 100_000;
 
 /// Engine choice, made once at startup by the caller (`main.rs`).
