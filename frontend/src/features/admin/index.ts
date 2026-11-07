@@ -6,6 +6,7 @@ export { useOwnerRequestQueue } from "./hooks/useOwnerRequestQueue";
 export { useOwnerRequestDetail } from "./hooks/useOwnerRequestDetail";
 export {
   listOwnerRequests,
+  removeAdminQueries,
   getOwnerRequest,
   getOwnerRequestDocument,
   type AdminOwnerRequest,

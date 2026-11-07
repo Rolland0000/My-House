@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useId, useRef, type KeyboardEvent } from "re
 import { Input } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
 import { PRICE_MAX } from "../../listings";
-import { useUrlDraft } from "../hooks/useUrlDraft";
+import { useUrlDraft } from "../../../shared/hooks/useUrlDraft";
 import {
   clampHandle,
   formatPriceLabel,

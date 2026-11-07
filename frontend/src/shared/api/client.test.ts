@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildQueryString } from "./client";
+import { ApiError, buildQueryString, isNotFound } from "./client";
+
+describe("isNotFound", () => {
+  it("is true only for a 404 from the API", () => {
+    expect(isNotFound(new ApiError(404, "USER_NOT_FOUND", "gone"))).toBe(true);
+    expect(isNotFound(new ApiError(403, "FORBIDDEN", "no"))).toBe(false);
+    expect(isNotFound(new Error("network"))).toBe(false);
+  });
+});
 
 describe("buildQueryString", () => {
   it("returns an empty string without params or when every value is undefined", () => {

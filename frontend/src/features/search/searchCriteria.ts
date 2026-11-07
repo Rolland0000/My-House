@@ -5,15 +5,13 @@ import {
   type ListingStatus,
   type ListingType,
 } from "../listings";
+import { parsePageParam } from "../../shared/utils/pageParam";
 import type { SearchParams } from "./api";
 import { PRICE_SLIDER, toPriceBounds, type PriceBounds } from "./priceRange";
 
 /** Same limit as the API, counted in characters. */
 export const MAX_KEYWORD_CHARS = 100;
-/** The API reads `page` as an unsigned 32-bit integer. */
-const MAX_PAGE = 2 ** 32 - 1;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const PAGE_PATTERN = /^[1-9]\d*$/;
 const PRICE_PATTERN = /^\d+$/;
 
 const LISTING_TYPES = Object.keys(typeLabels) as ListingType[];
@@ -50,12 +48,6 @@ function pickKnown<T extends string>(known: readonly T[], raw: string[]): T[] {
   return known.filter((value) => raw.includes(value));
 }
 
-function parsePage(raw: string | null): number {
-  if (!raw || !PAGE_PATTERN.test(raw)) return 1;
-  const page = Number(raw);
-  return page <= MAX_PAGE ? page : 1;
-}
-
 function parsePrice(raw: string | null): number | null {
   if (!raw || !PRICE_PATTERN.test(raw)) return null;
   const price = Number(raw);
@@ -82,7 +74,7 @@ export function parseSearchCriteria(params: URLSearchParams): SearchCriteria {
     city: params.get("city")?.trim() ?? "",
     neighborhood: params.get("neighborhood")?.trim() ?? "",
     ownerId: UUID_PATTERN.test(ownerId) ? ownerId : "",
-    page: parsePage(params.get("page")),
+    page: parsePageParam(params.get("page")),
   };
 }
 

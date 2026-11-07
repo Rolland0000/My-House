@@ -1,10 +1,7 @@
-import { Fragment, useEffect, useEffectEvent, useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button, Checkbox, Input } from "../../../shared/components";
-import {
-  TEXT_FILTER_DEBOUNCE_MS,
-  useDebouncedValue,
-} from "../../../shared/hooks/useDebouncedValue";
+import { useDebouncedUrlDraft } from "../../../shared/hooks/useDebouncedUrlDraft";
 import { cn } from "../../../shared/utils/cn";
 import {
   AVAILABILITY_BADGE,
@@ -12,7 +9,6 @@ import {
   type ListingStatus,
   type ListingType,
 } from "../../listings";
-import { useUrlDraft } from "../hooks/useUrlDraft";
 import { PriceRangeFilter } from "./PriceRangeFilter";
 import type { SearchCriteria } from "../searchCriteria";
 
@@ -42,17 +38,7 @@ interface TextFilterProps {
 
 function TextFilter({ label, value, onCommit }: TextFilterProps) {
   const inputId = useId();
-  const [draft, setDraft] = useUrlDraft(value);
-
-  // An emptied field applies at once.
-  const debouncedDraft = useDebouncedValue(draft, draft ? TEXT_FILTER_DEBOUNCE_MS : 0);
-
-  // Skips a value already in the URL, which would otherwise reset the page on mount or after a resync.
-  const commit = useEffectEvent((next: string) => {
-    if (next.trim() !== value) onCommit(next);
-  });
-  // Deferred past React's commit phase, where the navigation's flushSync is not allowed.
-  useEffect(() => queueMicrotask(() => commit(debouncedDraft)), [debouncedDraft]);
+  const [draft, setDraft] = useDebouncedUrlDraft(value, onCommit);
 
   return (
     <div className="flex flex-col gap-1.5">

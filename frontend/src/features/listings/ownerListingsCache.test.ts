@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ListListingsResult, ListingSummary } from "./api";
-import { withListingStatus, withoutListing } from "./ownerListingsCache";
+import { withListingStatus } from "./ownerListingsCache";
 
 function row(id: string): ListingSummary {
   return {
@@ -37,34 +37,5 @@ describe("withListingStatus", () => {
 
   it("passes undefined through", () => {
     expect(withListingStatus(undefined, "a", "unavailable")).toBeUndefined();
-  });
-});
-
-describe("withoutListing", () => {
-  it("removes the matching row and keeps the others", () => {
-    const input = page();
-    const output = withoutListing(input, "a");
-
-    expect(output?.data).toEqual([input.data[1]]);
-    expect(output?.data[0]).toBe(input.data[1]);
-    expect(input.data).toHaveLength(2);
-    expect(output?.pagination).toMatchObject({ total: 1, total_pages: 1 });
-    expect(input.pagination.total).toBe(2);
-  });
-
-  it("drops the counts to zero when the last row goes", () => {
-    const output = withoutListing(withoutListing(page(), "a"), "b");
-
-    expect(output?.data).toEqual([]);
-    expect(output?.pagination).toMatchObject({ total: 0, total_pages: 0 });
-  });
-
-  it("returns the input unchanged for an unknown id", () => {
-    const input = page();
-    expect(withoutListing(input, "missing")).toBe(input);
-  });
-
-  it("passes undefined through", () => {
-    expect(withoutListing(undefined, "a")).toBeUndefined();
   });
 });

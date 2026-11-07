@@ -1,10 +1,18 @@
-import { apiGet, apiGetBlob, apiPatch } from "../../shared/api/client";
-import type { components } from "../../shared/api/types";
+import type { QueryClient } from "@tanstack/react-query";
+import { apiDelete, apiGet, apiGetBlob, apiPatch } from "../../shared/api/client";
+import type { components, paths } from "../../shared/api/types";
 
 export type AdminOwnerRequest = components["schemas"]["AdminOwnerRequestDto"];
 export type AdminOwnerRequestDetail = components["schemas"]["AdminOwnerRequestDetailDto"];
 export type AdminOwnerRequestDocument = components["schemas"]["AdminOwnerRequestDocumentDto"];
 export type ReviewDecision = components["schemas"]["ReviewDecision"];
+export type AdminUser = components["schemas"]["AdminUserDto"];
+export type AdminUsersResult = components["schemas"]["PaginatedResponse_AdminUserDto"];
+export type UserRole = components["schemas"]["Role"];
+export type ListAdminUsersParams = NonNullable<
+  paths["/api/v1/admin/users"]["get"]["parameters"]["query"]
+>;
+export type AccountState = NonNullable<ListAdminUsersParams["state"]>;
 
 type OwnerRequestQueueResponse = components["schemas"]["PaginatedResponse_AdminOwnerRequestDto"];
 type AdminOwnerRequestDetailResponse = components["schemas"]["AdminOwnerRequestDetailResponse"];
@@ -22,6 +30,20 @@ export const ownerRequestDetailQueryKey = (id: string) => ["admin", "owner-reque
 
 export const ownerRequestDocumentQueryKey = (id: string, docId: string) =>
   ["admin", "owner-requests", id, "documents", docId] as const;
+
+export const ADMIN_QUERY_ROOT = "admin";
+export const ADMIN_USERS_KEY = [ADMIN_QUERY_ROOT, "users"] as const;
+
+export const adminUsersQueryKey = (params: ListAdminUsersParams) =>
+  [...ADMIN_USERS_KEY, params] as const;
+
+/** Lets a row lock its actions while a mutation on that account runs. */
+export const adminUserMutationKey = (id: string) => ["admin-user", id] as const;
+
+/** Called on sign-out: the cached lists hold every account's email and phone. */
+export function removeAdminQueries(queryClient: QueryClient) {
+  queryClient.removeQueries({ queryKey: [ADMIN_QUERY_ROOT] });
+}
 
 export function listOwnerRequests(
   params: ListOwnerRequestsParams
@@ -47,4 +69,12 @@ export function reviewOwnerRequest(
   adminNote?: string
 ): Promise<AdminOwnerRequestDetailResponse> {
   return apiPatch(`/api/v1/admin/owner-requests/${id}`, { status, admin_note: adminNote });
+}
+
+export function listAdminUsers(params: ListAdminUsersParams): Promise<AdminUsersResult> {
+  return apiGet<AdminUsersResult>("/api/v1/admin/users", params);
+}
+
+export function deleteAdminUser(id: string): Promise<void> {
+  return apiDelete<void>(`/api/v1/admin/users/${encodeURIComponent(id)}`);
 }

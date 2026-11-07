@@ -32,8 +32,8 @@ L'admin n'a aujourd'hui aucun moyen de retrouver ou de supprimer un compte sans 
 | D11 | Layout FE | Choix validé : `<table>` natif sémantique (`<th scope="col">`), dans un conteneur `overflow-x-auto`. Colonnes : nom, email, téléphone, rôle, état, biens, inscription, action. Une valeur nulle s'affiche « — ». |
 | D12 | État URL | `adminUsersCriteria.ts` (pur), sur le modèle de `search/searchCriteria.ts` : `parse(URLSearchParams)` remplace une valeur invalide par la valeur par défaut, `toUrlSearchParams` omet les valeurs vides et la page 1. Un changement de filtre utilise `replace` et remet la page à 1. La recherche passe par `useDebouncedValue(draft, draft ? TEXT_FILTER_DEBOUNCE_MS : 0)`, avec une soumission immédiate sur Enter (`<form role="search">`). `placeholderData: keepPreviousData` garde les résultats précédents, avec `aria-busy` et `opacity-60`. Une page hors bornes affiche « Go to page 1 ». |
 | D13 | Lien biens | Choix validé : pour un owner, le compteur est un `Link` vers `/admin/listings?owner_id=<id>`. Il reste mort jusqu'au merge de MH-72-FE. Pour les autres rôles, le compteur est du texte. |
-| D14 | Suppression FE | `DeleteUserAction` sur le modèle de `DeleteListingAction` : `Modal`, bouton `danger` avec `isLoading`, fermeture bloquée pendant l'envoi. Verrou par ligne avec `useIsMutating({ mutationKey: ["admin","users","delete",id] })`. Le succès est géré dans le hook (la ligne se démonte) : `setQueriesData` avec `withoutUser`, invalidation de `["admin","users"]` et toast de succès. Un 404 n'est pas un succès : toast « This account no longer exists » puis invalidation. Toute autre erreur s'affiche en `Alert` dans la modale. Une ligne admin n'a aucune action. |
-| D15 | Nav admin | `AdminHeader` passe à un état actif calculé depuis `useLocation`. « Owner requests » est actif sur `/admin/owner-requests*` et « Users » sur `/admin/users`. « Properties » reste un placeholder (MH-72-FE). |
+| D14 | Suppression FE | `DeleteUserAction` sur le modèle de `DeleteListingAction` : `Modal`, bouton `danger` avec `isLoading`, fermeture bloquée pendant l'envoi. Verrou par ligne avec `useIsMutating({ mutationKey: adminUserMutationKey(id) })`. Le succès est géré dans le hook (la ligne se démonte) : `setQueriesData` avec `withoutRow` (partagé), invalidation du préfixe `["admin"]` (les demandes owner du compte partent aussi) et toast de succès. Un 404 n'est pas un succès : la ligne sort du cache, toast « This account no longer exists » puis invalidation. Toute autre erreur s'affiche en `Alert` dans la modale. Une ligne admin n'a aucune action. |
+| D15 | Nav admin | `AdminHeader` utilise `NavLink`, qui gère l'état actif et `aria-current`. « Owner requests » est actif sur `/admin/owner-requests*` et « Users » sur `/admin/users`. « Properties » reste un placeholder (MH-72-FE). |
 
 ## 2. Découpage BE / FE et dépendances
 - **MH-73-BE** n'a pas de dépendance. Il livre le contrat OpenAPI (`frontend/docs-frontend/openapi.json`).
@@ -62,11 +62,11 @@ L'admin n'a aujourd'hui aucun moyen de retrouver ou de supprimer un compte sans 
 2. `features/admin/api.ts` : `listAdminUsers(params)`, `deleteAdminUser(id)` (avec `encodeURIComponent`) et la clé `adminUsersQueryKey`.
 3. Fichiers purs avec leurs `.test.ts` :
    - `adminUsersCriteria.ts` ;
-   - `adminUserBadges.ts` (rôle et état, sur le modèle de `ownerRequestStatusBadge`) ;
-   - `adminUserDeletion.ts` (`isUserGone`, `withoutUser`).
+   - `adminUserBadges.ts` (rôle et état, source unique des valeurs et des libellés) ;
+   - dans `shared/` : `paginatedRows.ts` (`withoutRow`), `isNotFound` dans `client.ts`, `pageParam.ts` (déplacé, avec la limite u32), `useDebouncedUrlDraft` et `useUrlDraft`.
 4. Hooks : `useAdminUsers.ts` (avec `keepPreviousData`) et `useDeleteAdminUser.ts` (D14).
-5. Composants : `AdminUsersPage.tsx` (filtres, recherche, tableau, pagination, état vide, erreur avec Retry), `AdminUserRow.tsx` et `DeleteUserAction.tsx`.
-6. `app/router.tsx` : route lazy `users` sous `/admin`. `SiteHeader.tsx` : D15.
+5. Composants : `AdminUsersPage.tsx` (filtres, tableau, pagination, état vide, erreur avec Retry), `AdminUsersSearch.tsx`, `AdminUserRow.tsx` et `DeleteUserAction.tsx`.
+6. `app/router.tsx` : route lazy `users` sous `/admin`. `SiteHeader.tsx` : D15. `removeAdminQueries` à la déconnexion dans `AdminLayout` et `RootLayout`.
 
 ## 4. Points d'intégration avec l'existant
 | Zone | Existant | Changement |

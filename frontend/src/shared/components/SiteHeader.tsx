@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, NavLink, useLocation } from "react-router";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Badge } from "./Badge";
 import { cn } from "../utils/cn";
@@ -456,6 +456,13 @@ function OwnerHeader({
   );
 }
 
+function adminNavClasses(current: boolean) {
+  return cn(
+    "flex items-center gap-1 px-3.5 py-2 text-sm",
+    current ? "bg-paper-50 font-semibold text-ink-900" : "text-[#DDE2E9] hover:text-white"
+  );
+}
+
 function AdminHeader({
   pendingRequestCount,
   onSignOut,
@@ -470,18 +477,17 @@ function AdminHeader({
         <span className="text-[11px] font-semibold tracking-[.06em] text-primary">ADMIN</span>
       </span>
       <nav className="hidden flex-1 items-center gap-0.5 sm:flex">
-        <Link
-          to="/admin/owner-requests"
-          className="flex items-center gap-1 bg-paper-50 px-3.5 py-2 text-sm font-semibold text-ink-900"
-        >
+        <NavLink to="/admin/owner-requests" className={({ isActive }) => adminNavClasses(isActive)}>
           Owner requests
           {Boolean(pendingRequestCount) && (
             <span className="bg-warning-soft px-1.5 py-0.5 text-xs font-bold text-warning-text">
               {pendingRequestCount}
             </span>
           )}
-        </Link>
-        <span className="cursor-default px-3.5 py-2 text-sm text-[#B8C0CE]">Users</span>
+        </NavLink>
+        <NavLink to="/admin/users" className={({ isActive }) => adminNavClasses(isActive)}>
+          Users
+        </NavLink>
         <span className="cursor-default px-3.5 py-2 text-sm text-[#B8C0CE]">Properties</span>
       </nav>
       <span className="flex-1 sm:hidden" />
