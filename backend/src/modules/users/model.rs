@@ -15,3 +15,16 @@ pub struct UserRow {
     /// no `chrono`/`time` feature enabled on `sqlx` in this crate.
     pub created_at: String,
 }
+
+/// One row of the admin user list. `listing_count` includes drafts.
+pub struct AdminUserRow {
+    pub id: Uuid,
+    pub email: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub phone: Option<String>,
+    pub role: Role,
+    pub is_active: bool,
+    pub created_at: String,
+    pub listing_count: i64,
+}

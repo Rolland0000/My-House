@@ -1,0 +1,96 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            u.id,\n            u.email,\n            u.first_name,\n            u.last_name,\n            u.phone,\n            u.role AS \"role: Role\",\n            u.is_active,\n            to_char(u.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"created_at!\",\n            (SELECT COUNT(*) FROM listings l WHERE l.owner_id = u.id) AS \"listing_count!\"\n        FROM users u\n        WHERE ($1::user_role IS NULL OR u.role = $1)\n          AND ($2::bool IS NULL OR u.is_active = $2)\n          AND ($3::text IS NULL\n               OR strpos(lower(immutable_unaccent(u.email)), lower(immutable_unaccent($3))) > 0\n               OR strpos(lower(immutable_unaccent(u.first_name)), lower(immutable_unaccent($3))) > 0\n               OR strpos(lower(immutable_unaccent(u.last_name)), lower(immutable_unaccent($3))) > 0)\n        ORDER BY u.created_at DESC, u.id DESC\n        LIMIT $4 OFFSET $5\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "role: Role",
+        "type_info": {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "seeker",
+                "owner",
+                "admin"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "listing_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "seeker",
+                "owner",
+                "admin"
+              ]
+            }
+          }
+        },
+        "Bool",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "d4dd9d3a89af089078e8ae7037465522f24650278033947c0eac2f8717c0022d"
+}

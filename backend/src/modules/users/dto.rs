@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::shared::rbac::Role;
 
-use super::model::UserRow;
+use super::model::{AdminUserRow, UserRow};
 
 /// Same obligations as `RegisterDto`: `phone` being required is what keeps an
 /// omitted field from silently erasing the stored number.
@@ -55,6 +55,56 @@ pub struct UserResponse {
 pub struct AvatarUploadForm {
     #[schema(value_type = String, format = Binary)]
     pub file: String,
+}
+
+/// `suspended` means `is_active = false`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum AccountState {
+    Active,
+    Suspended,
+}
+
+#[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct AdminUserListQuery {
+    pub role: Option<Role>,
+    pub state: Option<AccountState>,
+    /// Matches part of the email, first name or last name, ignoring case and accents.
+    pub q: Option<String>,
+    pub page: Option<u32>,
+    pub per_page: Option<u32>,
+}
+
+/// One account in the admin user list. Never carries owner-request identity data.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminUserDto {
+    pub id: Uuid,
+    pub email: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub phone: Option<String>,
+    pub role: Role,
+    pub is_active: bool,
+    pub created_at: String,
+    /// Listings the user owns, drafts included.
+    pub listing_count: i64,
+}
+
+impl From<AdminUserRow> for AdminUserDto {
+    fn from(row: AdminUserRow) -> Self {
+        Self {
+            id: row.id,
+            email: row.email,
+            first_name: row.first_name,
+            last_name: row.last_name,
+            phone: row.phone,
+            role: row.role,
+            is_active: row.is_active,
+            created_at: row.created_at,
+            listing_count: row.listing_count,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -133,5 +183,50 @@ mod tests {
         assert_eq!(data["role"], "seeker");
         assert_eq!(data["is_active"], true);
         assert_eq!(data["created_at"], "2026-08-30T10:00:00Z");
+    }
+
+    #[test]
+    fn account_state_accepts_only_its_two_lowercase_values() {
+        let parse = |raw| serde_json::from_value::<AccountState>(serde_json::json!(raw));
+        assert_eq!(parse("active").unwrap(), AccountState::Active);
+        assert_eq!(parse("suspended").unwrap(), AccountState::Suspended);
+        assert!(parse("inactive").is_err());
+        assert!(parse("Active").is_err());
+    }
+
+    #[test]
+    fn admin_user_dto_serializes_exactly_the_list_fields() {
+        let dto = AdminUserDto::from(AdminUserRow {
+            id: Uuid::nil(),
+            email: "owner@example.com".to_string(),
+            first_name: None,
+            last_name: Some("Mbarga".to_string()),
+            phone: Some("+237600000000".to_string()),
+            role: Role::Owner,
+            is_active: false,
+            created_at: "2026-11-01T08:00:00Z".to_string(),
+            listing_count: 3,
+        });
+        let json = serde_json::to_value(dto).unwrap();
+
+        let mut keys: Vec<_> = json.as_object().unwrap().keys().cloned().collect();
+        keys.sort();
+        assert_eq!(
+            keys,
+            [
+                "created_at",
+                "email",
+                "first_name",
+                "id",
+                "is_active",
+                "last_name",
+                "listing_count",
+                "phone",
+                "role"
+            ]
+        );
+        assert_eq!(json["role"], "owner");
+        assert_eq!(json["listing_count"], 3);
+        assert!(json["first_name"].is_null());
     }
 }
