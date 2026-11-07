@@ -488,7 +488,9 @@ function AdminHeader({
         <NavLink to="/admin/users" className={({ isActive }) => adminNavClasses(isActive)}>
           Users
         </NavLink>
-        <span className="cursor-default px-3.5 py-2 text-sm text-[#B8C0CE]">Properties</span>
+        <NavLink to="/admin/listings" className={({ isActive }) => adminNavClasses(isActive)}>
+          Properties
+        </NavLink>
       </nav>
       <span className="flex-1 sm:hidden" />
       <span className="hidden flex-none text-sm text-[#8E9AAC] sm:inline">admin@myhouse.app</span>

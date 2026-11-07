@@ -26,3 +26,5 @@ export const AVAILABILITY_BADGE: Record<ListingStatus, BadgeSpec> = {
   available: { tone: "success", label: "Available" },
   unavailable: { tone: "error", label: "Unavailable" },
 };
+
+export const LISTING_STATUSES = Object.keys(AVAILABILITY_BADGE) as ListingStatus[];

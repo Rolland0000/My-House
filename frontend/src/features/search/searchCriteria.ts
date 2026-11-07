@@ -1,21 +1,20 @@
 import {
-  AVAILABILITY_BADGE,
+  LISTING_STATUSES,
   PRICE_MAX,
   typeLabels,
   type ListingStatus,
   type ListingType,
 } from "../listings";
 import { parsePageParam } from "../../shared/utils/pageParam";
+import { isUuid } from "../../shared/utils/uuid";
 import type { SearchParams } from "./api";
 import { PRICE_SLIDER, toPriceBounds, type PriceBounds } from "./priceRange";
 
 /** Same limit as the API, counted in characters. */
 export const MAX_KEYWORD_CHARS = 100;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PRICE_PATTERN = /^\d+$/;
 
 const LISTING_TYPES = Object.keys(typeLabels) as ListingType[];
-const LISTING_STATUSES = Object.keys(AVAILABILITY_BADGE) as ListingStatus[];
 
 export interface SearchCriteria {
   q: string;
@@ -73,7 +72,7 @@ export function parseSearchCriteria(params: URLSearchParams): SearchCriteria {
     ...parsePriceBounds(params),
     city: params.get("city")?.trim() ?? "",
     neighborhood: params.get("neighborhood")?.trim() ?? "",
-    ownerId: UUID_PATTERN.test(ownerId) ? ownerId : "",
+    ownerId: isUuid(ownerId) ? ownerId : "",
     page: parsePageParam(params.get("page")),
   };
 }

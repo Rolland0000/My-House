@@ -6,14 +6,15 @@ import {
   Button,
   DimensionRule,
   EmptyState,
+  OwnerFilterChip,
   Pagination,
   Skeleton,
   Spinner,
 } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
+import { ownerFilterLabel } from "../../../shared/utils/ownerFilter";
 import { ListingCard } from "../../listings";
 import { useSearch } from "../hooks/useSearch";
-import { ownerFilterLabel } from "../ownerFilter";
 import {
   EMPTY_CRITERIA,
   hasSearchCriteria,
@@ -23,7 +24,6 @@ import {
   type SearchCriteria,
 } from "../searchCriteria";
 import { FilterPanel, type FilterPatch } from "./FilterPanel";
-import { OwnerFilterChip } from "./OwnerFilterChip";
 import { SearchBar } from "./SearchBar";
 
 const SKELETON_CARD_COUNT = 6;
