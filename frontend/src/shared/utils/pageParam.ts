@@ -1,8 +1,10 @@
 const FIRST_PAGE = 1;
+/** The API reads `page` as an unsigned 32-bit integer. */
+const MAX_PAGE = 2 ** 32 - 1;
 
 /** Reads `?page=` as a positive integer; anything else falls back to the first page. */
 export function parsePageParam(value: string | null): number {
   if (value === null || !/^\d+$/.test(value)) return FIRST_PAGE;
   const page = Number(value);
-  return Number.isSafeInteger(page) && page >= FIRST_PAGE ? page : FIRST_PAGE;
+  return page >= FIRST_PAGE && page <= MAX_PAGE ? page : FIRST_PAGE;
 }

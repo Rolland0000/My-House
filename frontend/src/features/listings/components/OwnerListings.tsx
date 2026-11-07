@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { Alert, DimensionRule, EmptyState, Pagination, Skeleton } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
 import { useOwnerListings } from "../hooks/useOwnerListings";
-import { parsePageParam } from "../ownerListingsPage";
+import { parsePageParam } from "../../../shared/utils/pageParam";
 import { OwnerListingRow } from "./OwnerListingRow";
 
 const CREATE_LISTING_PATH = "/owner/listings/new";
