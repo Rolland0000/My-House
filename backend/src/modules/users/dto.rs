@@ -69,6 +69,8 @@ pub enum AccountState {
 #[into_params(parameter_in = Query)]
 pub struct AdminUserListQuery {
     pub role: Option<Role>,
+    /// Inlined: `utoipa` does not collect schemas from query parameters.
+    #[param(inline)]
     pub state: Option<AccountState>,
     /// Matches part of the email, first name or last name, ignoring case and accents.
     pub q: Option<String>,
