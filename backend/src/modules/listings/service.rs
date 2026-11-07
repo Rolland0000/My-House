@@ -1,4 +1,4 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 use std::ops::RangeInclusive;
@@ -10,10 +10,13 @@ use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::validation::{keyword_filter, place_filter, FieldErrors};
 
 use super::dto::{
-    ListListingsQuery, ListingDetailDto, ListingRequest, ListingStatusDto, ListingStatusRequest,
-    ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
+    AdminListingDto, AdminListingsQuery, ListListingsQuery, ListingDetailDto, ListingRequest,
+    ListingStatusDto, ListingStatusRequest, ListingSummaryDto, OwnerListingsQuery,
+    SearchListingsQuery,
 };
-use super::model::{ListingFields, ListingStatus, ListingType};
+use super::model::{
+    AdminListingRow, AdminListingVisibility, ListingFields, ListingStatus, ListingType,
+};
 use super::repository::{self, ListingFilters};
 
 const TITLE_LENGTH: RangeInclusive<usize> = 5..=120;
@@ -315,12 +318,25 @@ pub async fn delete_listing(
     id: Uuid,
     owner_id: Uuid,
 ) -> Result<(), AppError> {
-    let db_err = |error: sqlx::Error| AppError::Database(error.to_string());
     let mut tx = pool.begin().await.map_err(db_err)?;
 
     if !repository::lock_owned_listing(&mut *tx, id, owner_id).await? {
         return Err(AppError::ListingNotFound);
     }
+    delete_locked_listing(tx, storage, id).await
+}
+
+fn db_err(error: sqlx::Error) -> AppError {
+    AppError::Database(error.to_string())
+}
+
+/// Deletes listing `id`, already locked by `tx`, then its files. The commit comes first, so
+/// a storage failure can only leave an orphaned file.
+async fn delete_locked_listing(
+    mut tx: Transaction<'_, Postgres>,
+    storage: &dyn StorageProvider,
+    id: Uuid,
+) -> Result<(), AppError> {
     let keys = repository::list_media_keys(&mut *tx, id).await?;
     repository::delete_listing(&mut *tx, id).await?;
     tx.commit().await.map_err(db_err)?;
@@ -329,9 +345,107 @@ pub async fn delete_listing(
     Ok(())
 }
 
+/// Derives the back-office label. `is_public` comes from the same SQL as the feed, so
+/// a published listing with a photo is `Hidden` when that rule excludes it.
+fn admin_listing_visibility(
+    is_published: bool,
+    has_photo: bool,
+    is_public: bool,
+) -> AdminListingVisibility {
+    match (is_published, has_photo, is_public) {
+        (false, _, _) => AdminListingVisibility::Draft,
+        (true, false, _) => AdminListingVisibility::NoPhoto,
+        (true, true, true) => AdminListingVisibility::Public,
+        (true, true, false) => AdminListingVisibility::Hidden,
+    }
+}
+
+fn admin_listing_dto(row: AdminListingRow) -> AdminListingDto {
+    let visibility =
+        admin_listing_visibility(row.published_at.is_some(), row.has_photo, row.is_public);
+    AdminListingDto::from_row_and_visibility(row, visibility)
+}
+
+/// Fetches one page of every listing matching `query`'s filters, whatever its state.
+pub async fn list_admin_listings(
+    pool: &PgPool,
+    query: AdminListingsQuery,
+) -> Result<PaginatedResponse<AdminListingDto>, AppError> {
+    let filters = ListingFilters {
+        owner_id: query.owner_id,
+        status: query.status,
+        ..ListingFilters::default()
+    };
+    let total = repository::count_admin_listings(pool, &filters, query.visibility).await?;
+    let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
+
+    let rows = repository::list_admin_listings(
+        pool,
+        &filters,
+        query.visibility,
+        meta.per_page,
+        meta.offset(),
+    )
+    .await?;
+    let data = rows.into_iter().map(admin_listing_dto).collect();
+
+    Ok(PaginatedResponse::new(data, meta))
+}
+
+/// Sets the status of any listing, draft included, and returns its back-office item.
+/// `published_at` and the content are left alone.
+pub async fn admin_set_listing_status(
+    pool: &PgPool,
+    id: Uuid,
+    request: ListingStatusRequest,
+) -> Result<AdminListingDto, AppError> {
+    let status = parse_status(request)?;
+    if !repository::set_listing_status_by_id(pool, id, status).await? {
+        return Err(AppError::ListingNotFound);
+    }
+    // A delete can land between the update and this read.
+    let row = repository::find_admin_listing(pool, id)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+    Ok(admin_listing_dto(row))
+}
+
+/// Deletes any listing and its photos, under the same row lock as uploads.
+pub async fn admin_delete_listing(
+    pool: &PgPool,
+    storage: &dyn StorageProvider,
+    id: Uuid,
+) -> Result<(), AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    if !repository::lock_listing(&mut *tx, id).await? {
+        return Err(AppError::ListingNotFound);
+    }
+    delete_locked_listing(tx, storage, id).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn admin_listing_visibility_covers_every_state() {
+        use AdminListingVisibility::{Draft, Hidden, NoPhoto, Public};
+
+        for (is_published, has_photo, is_public, expected) in [
+            (false, false, false, Draft),
+            (false, true, false, Draft),
+            (true, false, false, NoPhoto),
+            (true, true, true, Public),
+            (true, true, false, Hidden),
+        ] {
+            assert_eq!(
+                admin_listing_visibility(is_published, has_photo, is_public),
+                expected,
+                "is_published={is_published} has_photo={has_photo} is_public={is_public}"
+            );
+        }
+    }
 
     #[test]
     fn check_price_bounds_accepts_none_either_one_alone_and_equal_bounds() {

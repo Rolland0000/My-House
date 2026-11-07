@@ -9,6 +9,175 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/admin/listings": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Every listing on the platform, drafts and listings without a photo included, newest first.",
+        "operationId": "admin_list",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ListingStatus"
+            }
+          },
+          {
+            "name": "visibility",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/AdminListingVisibility"
+            }
+          },
+          {
+            "name": "owner_id",
+            "in": "query",
+            "description": "An unknown owner gives an empty page.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_AdminListingDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown `status` or `visibility` value, malformed `owner_id`, or non-integer `page` or `per_page`"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/listings/{id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Permanently deletes any listing and its photos.",
+        "operationId": "admin_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Listing and its photos deleted"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin"
+          },
+          "404": {
+            "description": "Listing not found or already deleted"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Marks any listing as available or unavailable. Works on drafts too, and never\nchanges the content or the publication state.",
+        "operationId": "admin_update_status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Listing id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Status set; setting the current status also returns 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminListingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin"
+          },
+          "404": {
+            "description": "Listing not found"
+          },
+          "422": {
+            "description": "`status` is missing or not one of the two labels"
+          }
+        }
+      }
+    },
     "/api/v1/admin/owner-requests": {
       "get": {
         "tags": [
@@ -1438,6 +1607,114 @@
   },
   "components": {
     "schemas": {
+      "AdminListingDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "type",
+          "city",
+          "price",
+          "status",
+          "visibility",
+          "created_at",
+          "owner"
+        ],
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "neighborhood": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AdminListingOwnerDto"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 8601 UTC, or `null` for a draft."
+          },
+          "status": {
+            "$ref": "#/components/schemas/ListingStatus"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ListingType"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AdminListingVisibility"
+          }
+        }
+      },
+      "AdminListingOwnerDto": {
+        "type": "object",
+        "description": "Owner info as the back office sees it: adds the email, still no phone.",
+        "required": [
+          "id",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AdminListingResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminListingDto"
+          }
+        }
+      },
+      "AdminListingVisibility": {
+        "type": "string",
+        "description": "How the back office labels a listing under the public rule. Derived on each\nread and never stored, so it has no Postgres enum.",
+        "enum": [
+          "draft",
+          "no_photo",
+          "public",
+          "hidden"
+        ]
+      },
       "AdminOwnerRequestDetailDto": {
         "type": "object",
         "description": "One request's full detail, including `identity_data` and every document\ndescriptor — only ever fetched one id at a time, never listed.",
@@ -2231,6 +2508,80 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "PaginatedResponse_AdminListingDto": {
+        "type": "object",
+        "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "type",
+                "city",
+                "price",
+                "status",
+                "visibility",
+                "created_at",
+                "owner"
+              ],
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "neighborhood": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "owner": {
+                  "$ref": "#/components/schemas/AdminListingOwnerDto"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "published_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "ISO 8601 UTC, or `null` for a draft."
+                },
+                "status": {
+                  "$ref": "#/components/schemas/ListingStatus"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ListingType"
+                },
+                "visibility": {
+                  "$ref": "#/components/schemas/AdminListingVisibility"
+                }
+              }
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
           }
         }
       },

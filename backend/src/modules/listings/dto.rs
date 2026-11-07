@@ -3,7 +3,8 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use super::model::{
-    ListingDetailRow, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType,
+    AdminListingRow, AdminListingVisibility, ListingDetailRow, ListingMediaRow, ListingStatus,
+    ListingSummaryRow, ListingType,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -266,9 +267,124 @@ pub struct ListingStatusResponse {
     pub data: ListingStatusDto,
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET, PATCH, DELETE /admin/listings
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Filters accepted by `GET /admin/listings`; they combine.
+#[derive(Debug, Deserialize, IntoParams)]
+#[into_params(parameter_in = Query)]
+pub struct AdminListingsQuery {
+    pub status: Option<ListingStatus>,
+    pub visibility: Option<AdminListingVisibility>,
+    /// An unknown owner gives an empty page.
+    pub owner_id: Option<Uuid>,
+    pub page: Option<u32>,
+    pub per_page: Option<u32>,
+}
+
+/// Owner info as the back office sees it: adds the email, still no phone.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminListingOwnerDto {
+    pub id: Uuid,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminListingDto {
+    pub id: Uuid,
+    pub title: String,
+    #[serde(rename = "type")]
+    pub listing_type: ListingType,
+    pub city: String,
+    pub neighborhood: Option<String>,
+    pub price: f64,
+    pub status: ListingStatus,
+    pub visibility: AdminListingVisibility,
+    /// ISO 8601 UTC, or `null` for a draft.
+    pub published_at: Option<String>,
+    pub created_at: String,
+    pub owner: AdminListingOwnerDto,
+}
+
+impl AdminListingDto {
+    pub fn from_row_and_visibility(
+        row: AdminListingRow,
+        visibility: AdminListingVisibility,
+    ) -> Self {
+        Self {
+            id: row.id,
+            title: row.title,
+            listing_type: row.listing_type,
+            city: row.city,
+            neighborhood: row.neighborhood,
+            price: row.price,
+            status: row.status,
+            visibility,
+            published_at: row.published_at,
+            created_at: row.created_at,
+            owner: AdminListingOwnerDto {
+                id: row.owner_id,
+                first_name: row.owner_first_name,
+                last_name: row.owner_last_name,
+                email: row.owner_email,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminListingResponse {
+    pub data: AdminListingDto,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_admin_item_nests_the_owner_and_carries_no_description_or_photo() {
+        let row = AdminListingRow {
+            id: Uuid::from_u128(1),
+            title: "Studio meublé Plateau".into(),
+            listing_type: ListingType::Studio,
+            status: ListingStatus::Unavailable,
+            city: "Dakar".into(),
+            neighborhood: None,
+            price: 150_000.0,
+            published_at: None,
+            created_at: "2026-10-01T08:30:00Z".into(),
+            has_photo: false,
+            is_public: false,
+            owner_id: Uuid::from_u128(2),
+            owner_first_name: Some("Awa".into()),
+            owner_last_name: Some("Diop".into()),
+            owner_email: "awa@example.com".into(),
+        };
+
+        let json = serde_json::to_value(AdminListingDto::from_row_and_visibility(
+            row,
+            AdminListingVisibility::Draft,
+        ))
+        .expect("admin item serializes");
+
+        assert_eq!(
+            json["owner"],
+            serde_json::json!({
+                "id": Uuid::from_u128(2),
+                "first_name": "Awa",
+                "last_name": "Diop",
+                "email": "awa@example.com",
+            })
+        );
+        assert_eq!(json["visibility"], "draft");
+        assert_eq!(json["type"], "studio");
+        for key in ["description", "cover_photo_url", "media", "has_photo"] {
+            assert!(json.get(key).is_none(), "{key}");
+        }
+    }
 
     fn summary_row(published_at: Option<String>) -> ListingSummaryRow {
         ListingSummaryRow {

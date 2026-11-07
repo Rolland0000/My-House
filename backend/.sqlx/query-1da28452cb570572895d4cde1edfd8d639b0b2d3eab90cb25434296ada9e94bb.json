@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE listings SET status = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "listing_status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1da28452cb570572895d4cde1edfd8d639b0b2d3eab90cb25434296ada9e94bb"
+}
