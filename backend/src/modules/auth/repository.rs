@@ -10,7 +10,7 @@ fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
 }
 
-/// Hash lookup joined with the owning user's current role. Booleans are
+/// Hash lookup joined with the owning user's current role and state. Booleans are
 /// computed in SQL — this crate's sqlx build has no chrono/time feature.
 pub async fn find_by_hash(
     pool: &PgPool,
@@ -23,6 +23,7 @@ pub async fn find_by_hash(
             rt.id,
             rt.user_id,
             u.role AS "role: Role",
+            u.is_active,
             (rt.revoked_at IS NOT NULL) AS "is_revoked!",
             (rt.expires_at < NOW())     AS "is_expired!"
         FROM refresh_tokens rt
@@ -122,21 +123,21 @@ pub async fn email_exists(pool: &PgPool, email: &str) -> Result<bool, AppError> 
     .map_err(db_err)
 }
 
-/// Existing account's id + current role, for `/auth/otp/verify`'s
-/// known-email branch — no `users` mutation, straight to session issuance.
+/// Existing account's id, current role and `is_active`, for `/auth/otp/verify`'s
+/// known-email branch. Writes nothing to `users`.
 pub async fn find_user_by_email(
     pool: &PgPool,
     email: &str,
-) -> Result<Option<(Uuid, Role)>, AppError> {
+) -> Result<Option<(Uuid, Role, bool)>, AppError> {
     let row = sqlx::query!(
-        r#"SELECT id, role AS "role: Role" FROM users WHERE email = $1"#,
+        r#"SELECT id, role AS "role: Role", is_active FROM users WHERE email = $1"#,
         email
     )
     .fetch_optional(pool)
     .await
     .map_err(db_err)?;
 
-    Ok(row.map(|r| (r.id, r.role)))
+    Ok(row.map(|r| (r.id, r.role, r.is_active)))
 }
 
 /// Creates the account and its first refresh token in one transaction.

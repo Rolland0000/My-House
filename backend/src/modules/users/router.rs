@@ -16,7 +16,7 @@ pub fn router() -> OpenApiRouter<AppState> {
             handler::delete_me
         )) // authenticated
         .routes(routes!(handler::list_users)) // admin
-        .routes(routes!(handler::delete_user)) // admin
+        .routes(routes!(handler::update_user_state, handler::delete_user)) // admin
         .merge(avatar_router())
 }
 

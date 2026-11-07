@@ -18,12 +18,28 @@ macro_rules! has_cover_sql {
     };
 }
 
+/// Same reason as [`has_cover_sql`].
+macro_rules! owner_is_eligible_sql {
+    () => {
+        "EXISTS (SELECT 1 FROM users owner WHERE owner.id = l.owner_id AND owner.is_active)"
+    };
+}
+
 /// True once listing `l` has a photo: the first upload is always marked cover.
 const HAS_COVER: &str = has_cover_sql!();
 
-/// The public-visibility rule for listing `l`: published with at least one photo. It must
-/// stay self-contained on that alias, because the count queries don't join `users`.
-const IS_PUBLIC: &str = concat!("(l.published_at IS NOT NULL AND ", has_cover_sql!(), ")");
+/// True while the owner of listing `l` may keep listings online, and see their own.
+const OWNER_IS_ELIGIBLE: &str = owner_is_eligible_sql!();
+
+/// The public-visibility rule for listing `l`: published with a photo, by an eligible owner.
+/// It stays self-contained on that alias because the count queries don't join `users`.
+const IS_PUBLIC: &str = concat!(
+    "(l.published_at IS NOT NULL AND ",
+    has_cover_sql!(),
+    " AND ",
+    owner_is_eligible_sql!(),
+    ")"
+);
 
 /// Optional, combinable filters for `GET /listings`, `GET /search` and `GET /admin/listings`,
 /// built with `QueryBuilder`. `city` and `neighborhood` are expected already normalized, and
@@ -331,36 +347,40 @@ pub async fn find_listing_by_id(
     pool: &PgPool,
     id: Uuid,
 ) -> Result<Option<ListingDetailRow>, AppError> {
-    sqlx::query_as!(
-        ListingDetailRow,
-        r#"
-        SELECT
-            l.id,
-            l.title,
-            l.description,
-            l.type AS "listing_type: ListingType",
-            l.status AS "status: crate::modules::listings::model::ListingStatus",
-            l.city,
-            l.neighborhood,
-            l.price::float8 AS "price!",
-            l.surface_m2,
-            l.rooms,
-            to_char(l.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
-            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS published_at,
-            EXISTS (SELECT 1 FROM listing_media c WHERE c.listing_id = l.id AND c.is_cover) AS "has_photo!",
-            u.id AS "owner_id!",
-            u.first_name AS owner_first_name,
-            u.last_name AS owner_last_name,
-            u.avatar_url AS owner_avatar_url
-        FROM listings l
-        JOIN users u ON u.id = l.owner_id
-        WHERE l.id = $1
-        "#,
-        id
-    )
-    .fetch_optional(pool)
-    .await
-    .map_err(|error| AppError::Database(error.to_string()))
+    // `query_as!` can't embed the visibility constants.
+    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+        "SELECT \
+            l.id, \
+            l.title, \
+            l.description, \
+            l.type AS listing_type, \
+            l.status, \
+            l.city, \
+            l.neighborhood, \
+            l.price::float8 AS price, \
+            l.surface_m2, \
+            l.rooms, \
+            to_char(l.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at, \
+            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS published_at, ",
+    );
+    qb.push(format_args!(
+        "{HAS_COVER} AS has_photo, \
+            {IS_PUBLIC} AS is_public, \
+            {OWNER_IS_ELIGIBLE} AS owner_is_eligible, \
+            u.id AS owner_id, \
+            u.first_name AS owner_first_name, \
+            u.last_name AS owner_last_name, \
+            u.avatar_url AS owner_avatar_url \
+         FROM listings l \
+         JOIN users u ON u.id = l.owner_id \
+         WHERE l.id = "
+    ));
+    qb.push_bind(id);
+
+    qb.build_query_as::<ListingDetailRow>()
+        .fetch_optional(pool)
+        .await
+        .map_err(|error| AppError::Database(error.to_string()))
 }
 
 /// All media attachments for a listing, unsorted; the service applies the

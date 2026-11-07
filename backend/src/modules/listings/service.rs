@@ -111,15 +111,15 @@ pub async fn list_owner_listings(
     Ok(PaginatedResponse::new(data, meta))
 }
 
-/// True when `caller` may see a listing in this state: the owner always can;
-/// anyone else only once it's published and has at least one photo.
+/// True when `caller` may see a listing: anyone once it's public, and an
+/// eligible owner in any state.
 pub fn is_visible_to(
     caller: Option<Uuid>,
     owner_id: Uuid,
-    is_published: bool,
-    has_photo: bool,
+    owner_is_eligible: bool,
+    is_public: bool,
 ) -> bool {
-    caller == Some(owner_id) || (is_published && has_photo)
+    is_public || (owner_is_eligible && caller == Some(owner_id))
 }
 
 /// Fetches the full detail (owner + media) for one listing, as seen by
@@ -135,12 +135,7 @@ pub async fn get_listing_detail(
         .await?
         .ok_or(AppError::ListingNotFound)?;
 
-    if !is_visible_to(
-        caller,
-        row.owner_id,
-        row.published_at.is_some(),
-        row.has_photo,
-    ) {
+    if !is_visible_to(caller, row.owner_id, row.owner_is_eligible, row.is_public) {
         return Err(AppError::ListingNotFound);
     }
 
@@ -517,38 +512,25 @@ mod tests {
     }
 
     #[test]
-    fn is_visible_to_the_owner_regardless_of_state_or_photos() {
+    fn is_visible_to_an_eligible_owner_even_when_not_public() {
         let owner_id = Uuid::from_u128(1);
-        for is_published in [false, true] {
-            for has_photo in [false, true] {
-                assert!(is_visible_to(
-                    Some(owner_id),
-                    owner_id,
-                    is_published,
-                    has_photo
-                ));
-            }
-        }
+        assert!(is_visible_to(Some(owner_id), owner_id, true, false));
     }
 
     #[test]
-    fn is_visible_to_a_non_owner_only_when_published_with_a_photo() {
+    fn is_hidden_from_an_ineligible_owner() {
+        let owner_id = Uuid::from_u128(1);
+        assert!(!is_visible_to(Some(owner_id), owner_id, false, false));
+    }
+
+    #[test]
+    fn is_visible_to_a_non_owner_only_when_public() {
         let owner_id = Uuid::from_u128(1);
         let other_id = Uuid::from_u128(2);
 
         for caller in [None, Some(other_id)] {
-            for (is_published, has_photo, expected) in [
-                (false, false, false),
-                (false, true, false),
-                (true, false, false),
-                (true, true, true),
-            ] {
-                assert_eq!(
-                    is_visible_to(caller, owner_id, is_published, has_photo),
-                    expected,
-                    "caller={caller:?} is_published={is_published} has_photo={has_photo}"
-                );
-            }
+            assert!(is_visible_to(caller, owner_id, true, true));
+            assert!(!is_visible_to(caller, owner_id, true, false));
         }
     }
 

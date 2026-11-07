@@ -11,10 +11,14 @@ use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::rbac::Role;
 use crate::shared::storage_key::{avatar_key, avatar_key_from_url};
 use crate::shared::types::UserId;
-use crate::shared::validation::{keyword_filter, optional_name, required_name, required_phone};
+use crate::shared::validation::{
+    keyword_filter, optional_name, required_name, required_phone, FieldErrors,
+};
 
-use super::dto::{AccountState, AdminUserDto, AdminUserListQuery, UpdateMeDto};
-use super::model::UserRow;
+use super::dto::{
+    AccountState, AdminUserDto, AdminUserListQuery, UpdateAccountStateDto, UpdateMeDto,
+};
+use super::model::{AdminUserRow, UserRow};
 use super::repository;
 
 /// Startup-only entry point — called once from `main` before the HTTP server
@@ -140,11 +144,47 @@ pub async fn delete_for_admin(
     let user = repository::find_by_id(pool, user_id)
         .await?
         .ok_or(AppError::UserNotFound)?;
-    ensure_deletable(user.role)?;
+    ensure_not_admin(user.role)?;
 
     delete_user_and_files(pool, storage, &user).await?;
     is_active_cache.invalidate(&user_id).await;
     Ok(())
+}
+
+/// Backs `PATCH /admin/users/:id`. Sending the current value changes nothing.
+/// Dropping the cached `is_active` applies the new state to open sessions at once.
+pub async fn set_active_for_admin(
+    pool: &PgPool,
+    is_active_cache: &dyn AppCacheProvider<Uuid, bool>,
+    admin_id: Uuid,
+    user_id: Uuid,
+    request: UpdateAccountStateDto,
+) -> Result<AdminUserDto, AppError> {
+    let is_active = parse_is_active(request)?;
+    let user = repository::find_for_admin(pool, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)?;
+    ensure_not_admin(user.role)?;
+
+    if repository::set_is_active(pool, user_id, is_active).await? {
+        is_active_cache.invalidate(&user_id).await;
+        tracing::info!(%admin_id, %user_id, is_active, "account state changed by admin");
+    }
+
+    Ok(AdminUserRow { is_active, ..user }.into())
+}
+
+/// A missing or non-boolean value is a 422 on `is_active`.
+fn parse_is_active(request: UpdateAccountStateDto) -> Result<bool, AppError> {
+    let is_active = request.is_active.and_then(|value| value.as_bool());
+
+    let mut errors = FieldErrors::default();
+    if is_active.is_none() {
+        errors.push("is_active", "is_active must be true or false.");
+    }
+    errors.finish()?;
+
+    is_active.ok_or(AppError::Internal)
 }
 
 /// Deletes the files before the rows that reference them. After a partial
@@ -174,8 +214,8 @@ async fn delete_user_and_files(
     Ok(())
 }
 
-/// The admin routes never delete an admin account, the caller's own included.
-fn ensure_deletable(role: Role) -> Result<(), AppError> {
+/// The admin routes never act on an admin account, the caller's own included.
+fn ensure_not_admin(role: Role) -> Result<(), AppError> {
     match role {
         Role::Admin => Err(AppError::AdminAccountProtected),
         Role::Seeker | Role::Owner => Ok(()),
@@ -257,12 +297,27 @@ mod tests {
     }
 
     #[test]
-    fn only_admin_accounts_are_protected_from_deletion() {
-        assert!(ensure_deletable(Role::Seeker).is_ok());
-        assert!(ensure_deletable(Role::Owner).is_ok());
+    fn only_admin_accounts_are_protected() {
+        assert!(ensure_not_admin(Role::Seeker).is_ok());
+        assert!(ensure_not_admin(Role::Owner).is_ok());
         assert!(matches!(
-            ensure_deletable(Role::Admin),
+            ensure_not_admin(Role::Admin),
             Err(AppError::AdminAccountProtected)
         ));
+    }
+
+    #[test]
+    fn parse_is_active_accepts_only_a_boolean() {
+        let parse = |value| parse_is_active(UpdateAccountStateDto { is_active: value });
+
+        assert!(matches!(parse(Some(serde_json::json!(true))), Ok(true)));
+        assert!(matches!(parse(Some(serde_json::json!(false))), Ok(false)));
+        for invalid in [
+            None,
+            Some(serde_json::json!("true")),
+            Some(serde_json::json!(1)),
+        ] {
+            assert!(matches!(parse(invalid), Err(AppError::Validation(_))));
+        }
     }
 }

@@ -5,6 +5,7 @@ use crate::shared::session_cookie::{
     build_refresh_cookie, clear_refresh_cookie, REFRESH_TOKEN_COOKIE,
 };
 use axum::extract::State;
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use axum_extra::extract::cookie::CookieJar;
 
@@ -61,7 +62,7 @@ pub async fn otp_request(
     request_body = OtpVerifyDto,
     responses(
         (status = 200, description = "OTP verified; session issued, or registration ticket returned for an unknown email", body = OtpVerifyResponse),
-        (status = 401, description = "Invalid, expired, or attempt-exhausted OTP code"),
+        (status = 401, description = "Invalid, expired, or attempt-exhausted OTP code (`OTP_INVALID`), or suspended account (`ACCOUNT_SUSPENDED`)"),
     )
 )]
 pub async fn otp_verify(
@@ -177,13 +178,10 @@ pub async fn register(
     tag = "auth",
     responses(
         (status = 200, description = "New access token issued; refresh cookie rotated", body = RefreshResponse),
-        (status = 401, description = "Missing, unknown, expired, or reused refresh token"),
+        (status = 401, description = "Missing, unknown, expired, or reused refresh token (`UNAUTHORIZED`), or suspended account (`ACCOUNT_SUSPENDED`, cookie cleared)"),
     )
 )]
-pub async fn refresh(
-    State(state): State<AppState>,
-    jar: CookieJar,
-) -> Result<(CookieJar, Json<RefreshResponse>), AppError> {
+pub async fn refresh(State(state): State<AppState>, jar: CookieJar) -> Result<Response, AppError> {
     let raw_token = jar
         .get(REFRESH_TOKEN_COOKIE)
         .map(|c| c.value().to_string())
@@ -196,13 +194,22 @@ pub async fn refresh(
         app_config.jwt_access_ttl_seconds,
         app_config.jwt_refresh_ttl_days,
     );
-    let outcome = service::refresh(
+    let outcome = match service::refresh(
         state.db(),
         state.cache().refresh_replay().as_ref(),
         &config,
         &raw_token,
     )
-    .await?;
+    .await
+    {
+        Ok(outcome) => outcome,
+        // Otherwise every later page load would retry the refresh and be refused again.
+        Err(AppError::AccountSuspended) => {
+            let jar = jar.remove(clear_refresh_cookie(cookie_domain));
+            return Ok((jar, AppError::AccountSuspended).into_response());
+        }
+        Err(error) => return Err(error),
+    };
 
     Ok((
         jar.add(build_refresh_cookie(
@@ -215,7 +222,8 @@ pub async fn refresh(
                 access_token: outcome.access_token,
             },
         }),
-    ))
+    )
+        .into_response())
 }
 
 /// The access token itself keeps authenticating requests until its own

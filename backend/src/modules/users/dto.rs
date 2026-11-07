@@ -78,6 +78,14 @@ pub struct AdminUserListQuery {
     pub per_page: Option<u32>,
 }
 
+/// Body of `PATCH /admin/users/:id`. `is_active` is read as raw JSON so a missing
+/// or non-boolean value is reported as a `422` field error, not a `400`.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UpdateAccountStateDto {
+    #[schema(required = true, value_type = bool)]
+    pub is_active: Option<serde_json::Value>,
+}
+
 /// One account in the admin user list. Never carries owner-request identity data.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AdminUserDto {

@@ -10,8 +10,8 @@ pub struct OwnerContactRow {
     pub secondary_phone: Option<String>,
 }
 
-/// Owner numbers of a publicly visible listing whose owner is active and has a
-/// phone. `None` covers every other case, an unknown id included.
+/// Owner numbers of a publicly visible listing whose owner has a phone. `None`
+/// covers every other case, an unknown id included.
 pub async fn find_owner_contact(
     pool: &PgPool,
     listing_id: Uuid,
@@ -29,7 +29,7 @@ pub async fn find_owner_contact(
         WHERE l.id = ",
     );
     qb.push_bind(listing_id);
-    qb.push(" AND u.is_active AND u.phone IS NOT NULL");
+    qb.push(" AND u.phone IS NOT NULL");
     push_public_visibility(&mut qb);
 
     qb.build_query_as::<OwnerContactRow>()

@@ -49,9 +49,7 @@ pub(in crate::modules::auth) async fn refresh(
     raw_token: &str,
 ) -> Result<SessionOutcome, AppError> {
     let token_hash = crypto::hash_refresh_token(raw_token);
-    let row = repository::find_by_hash(pool, &token_hash)
-        .await?
-        .ok_or(AppError::RefreshTokenInvalid)?;
+    let row = find_active_row(pool, &token_hash).await?;
 
     if row.is_revoked {
         return handle_revoked(
@@ -97,9 +95,7 @@ pub(in crate::modules::auth) async fn refresh(
         // the winner's committed state and falls into the same reuse path
         // a sequential re-request would hit.
         None => {
-            let row = repository::find_by_hash(pool, &token_hash)
-                .await?
-                .ok_or(AppError::RefreshTokenInvalid)?;
+            let row = find_active_row(pool, &token_hash).await?;
             handle_revoked(
                 pool,
                 &row,
@@ -110,6 +106,19 @@ pub(in crate::modules::auth) async fn refresh(
             .await
         }
     }
+}
+
+/// Refuses a suspended account before the revoked and expired checks: all its
+/// tokens get the same answer, and the grace window reissues nothing.
+async fn find_active_row(pool: &PgPool, token_hash: &str) -> Result<RefreshTokenLookup, AppError> {
+    let row = repository::find_by_hash(pool, token_hash)
+        .await?
+        .ok_or(AppError::RefreshTokenInvalid)?;
+
+    if !row.is_active {
+        return Err(AppError::AccountSuspended);
+    }
+    Ok(row)
 }
 
 async fn handle_revoked(
@@ -273,9 +282,15 @@ pub(in crate::modules::auth) async fn verify_otp(
         });
     }
 
-    let (user_id, role) = repository::find_user_by_email(pool, email)
+    let (user_id, role, is_active) = repository::find_user_by_email(pool, email)
         .await?
         .ok_or(AppError::OtpInvalid)?;
+
+    // Only here, once the code is proven: refusing earlier would reveal the
+    // suspension to anyone who knows the email.
+    if !is_active {
+        return Err(AppError::AccountSuspended);
+    }
 
     let access_token = mint(
         user_id,
