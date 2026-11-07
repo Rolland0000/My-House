@@ -58,6 +58,17 @@ impl ListingStatus {
     }
 }
 
+/// How the back office labels a listing under the public rule. Derived on each
+/// read and never stored, so it has no Postgres enum.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum AdminListingVisibility {
+    Draft,
+    NoPhoto,
+    Public,
+    Hidden,
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Validated input
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,4 +156,57 @@ pub struct ListingMediaRow {
     pub position: i16,
     /// Upload time in microseconds since the Unix epoch; breaks position ties.
     pub created_at_micros: i64,
+}
+
+/// One row of the back-office listing table. It has no description or photo
+/// column, so neither can reach the response.
+#[derive(Debug, FromRow)]
+pub struct AdminListingRow {
+    pub id: Uuid,
+    pub title: String,
+    pub listing_type: ListingType,
+    pub status: ListingStatus,
+    pub city: String,
+    pub neighborhood: Option<String>,
+    pub price: f64,
+    pub published_at: Option<String>,
+    pub created_at: String,
+    pub has_photo: bool,
+    pub is_public: bool,
+    pub owner_id: Uuid,
+    pub owner_first_name: Option<String>,
+    pub owner_last_name: Option<String>,
+    pub owner_email: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn admin_visibility_uses_snake_case_labels() {
+        for (visibility, label) in [
+            (AdminListingVisibility::Draft, "draft"),
+            (AdminListingVisibility::NoPhoto, "no_photo"),
+            (AdminListingVisibility::Public, "public"),
+            (AdminListingVisibility::Hidden, "hidden"),
+        ] {
+            assert_eq!(
+                serde_json::to_value(visibility).expect("visibility serializes"),
+                label
+            );
+            assert_eq!(
+                serde_json::from_value::<AdminListingVisibility>(label.into())
+                    .expect("known label"),
+                visibility
+            );
+        }
+    }
+
+    #[test]
+    fn an_unknown_admin_visibility_is_rejected() {
+        for label in ["noPhoto", "Public", "archived"] {
+            assert!(serde_json::from_value::<AdminListingVisibility>(label.into()).is_err());
+        }
+    }
 }

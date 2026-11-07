@@ -10,12 +10,14 @@ use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
 use super::dto::{
-    ListListingsQuery, ListingDetailResponse, ListingRequest, ListingStatusRequest,
-    ListingStatusResponse, ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
+    AdminListingDto, AdminListingResponse, AdminListingsQuery, ListListingsQuery,
+    ListingDetailResponse, ListingRequest, ListingStatusRequest, ListingStatusResponse,
+    ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
 };
 use super::service;
 
 const OWNER_ROLES: &[Role] = &[Role::Owner];
+const ADMIN_ROLES: &[Role] = &[Role::Admin];
 
 /// Public paginated feed of listings (cover photo + summary).
 #[utoipa::path(
@@ -243,10 +245,112 @@ pub async fn list_mine(
     Ok(Json(response))
 }
 
+/// Every listing on the platform, drafts and listings without a photo included, newest first.
+#[utoipa::path(
+    get,
+    path = "/admin/listings",
+    tag = "admin",
+    params(AdminListingsQuery),
+    responses(
+        (status = 200, description = "Paginated list of listings", body = PaginatedResponse<AdminListingDto>),
+        (status = 400, description = "Unknown `status` or `visibility` value, malformed `owner_id`, or non-integer `page` or `per_page`"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+    )
+)]
+pub async fn admin_list(
+    State(state): State<AppState>,
+    user: AuthUser,
+    AppQuery(query): AppQuery<AdminListingsQuery>,
+) -> Result<Json<PaginatedResponse<AdminListingDto>>, AppError> {
+    user.require_role(ADMIN_ROLES)?;
+
+    let response = service::list_admin_listings(state.db(), query).await?;
+    Ok(Json(response))
+}
+
+/// Marks any listing as available or unavailable. Works on drafts too, and never
+/// changes the content or the publication state.
+#[utoipa::path(
+    patch,
+    path = "/admin/listings/{id}",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    request_body = ListingStatusRequest,
+    responses(
+        (status = 200, description = "Status set; setting the current status also returns 200", body = AdminListingResponse),
+        (status = 400, description = "Malformed JSON body"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+        (status = 404, description = "Listing not found"),
+        (status = 422, description = "`status` is missing or not one of the two labels"),
+    )
+)]
+pub async fn admin_update_status(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+    // Consumes the request body, so it must stay the last argument.
+    AppJson(payload): AppJson<ListingStatusRequest>,
+) -> Result<Json<AdminListingResponse>, AppError> {
+    user.require_role(ADMIN_ROLES)?;
+
+    let data = service::admin_set_listing_status(state.db(), id, payload).await?;
+    tracing::info!(
+        admin_id = %user.user_id,
+        listing_id = %id,
+        action = "set_status",
+        status = ?data.status,
+        "listing moderated"
+    );
+    Ok(Json(AdminListingResponse { data }))
+}
+
+/// Permanently deletes any listing and its photos.
+#[utoipa::path(
+    delete,
+    path = "/admin/listings/{id}",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "Listing id")),
+    responses(
+        (status = 204, description = "Listing and its photos deleted"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin"),
+        (status = 404, description = "Listing not found or already deleted"),
+    )
+)]
+pub async fn admin_delete(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, AppError> {
+    user.require_role(ADMIN_ROLES)?;
+
+    service::admin_delete_listing(state.db(), state.storage().as_ref(), id).await?;
+    tracing::info!(
+        admin_id = %user.user_id,
+        listing_id = %id,
+        action = "delete",
+        "listing moderated"
+    );
+    Ok(StatusCode::NO_CONTENT)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::shared::rbac::require_role;
+
+    #[test]
+    fn only_admins_may_moderate_listings() {
+        assert!(require_role(Role::Admin, ADMIN_ROLES).is_ok());
+        for role in [Role::Seeker, Role::Owner] {
+            assert!(matches!(
+                require_role(role, ADMIN_ROLES),
+                Err(AppError::Forbidden)
+            ));
+        }
+    }
 
     #[test]
     fn only_owners_may_manage_their_listings() {

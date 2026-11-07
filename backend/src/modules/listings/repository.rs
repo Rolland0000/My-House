@@ -4,14 +4,29 @@ use uuid::Uuid;
 use crate::shared::errors::AppError;
 
 use super::model::{
-    ListingDetailRow, ListingFields, ListingMediaRow, ListingStatus, ListingSummaryRow, ListingType,
+    AdminListingRow, AdminListingVisibility, ListingDetailRow, ListingFields, ListingMediaRow,
+    ListingStatus, ListingSummaryRow, ListingType,
 };
 
 /// The feed and the spec price everything in XAF; the column has no default.
 const LISTING_CURRENCY: &str = "XAF";
 
-/// Optional, combinable filters for `GET /listings` and `GET /search`, built with
-/// `QueryBuilder`. `city` and `neighborhood` are expected already normalized, and
+/// A macro because `concat!` only accepts literals, and `IS_PUBLIC` is built from it.
+macro_rules! has_cover_sql {
+    () => {
+        "EXISTS (SELECT 1 FROM listing_media c WHERE c.listing_id = l.id AND c.is_cover)"
+    };
+}
+
+/// True once listing `l` has a photo: the first upload is always marked cover.
+const HAS_COVER: &str = has_cover_sql!();
+
+/// The public-visibility rule for listing `l`: published with at least one photo. It must
+/// stay self-contained on that alias, because the count queries don't join `users`.
+const IS_PUBLIC: &str = concat!("(l.published_at IS NOT NULL AND ", has_cover_sql!(), ")");
+
+/// Optional, combinable filters for `GET /listings`, `GET /search` and `GET /admin/listings`,
+/// built with `QueryBuilder`. `city` and `neighborhood` are expected already normalized, and
 /// `keywords` trimmed and non-blank: blank keywords would match no listing.
 #[derive(Debug, Default)]
 pub struct ListingFilters {
@@ -26,17 +41,11 @@ pub struct ListingFilters {
     pub price_max: Option<i64>,
 }
 
-/// Public-visibility predicate: a listing is public once published and it has
-/// at least one photo (a cover row — the first upload is always marked cover).
-/// Shared by `count_listings` and `list_listings` so `total` stays aligned
-/// with the returned pages; `pub` so search (EP-10) and contact reveal (EP-11)
-/// can reuse it instead of re-deriving the rule.
+/// Keeps only listings that pass [`IS_PUBLIC`]. Shared by `count_listings` and
+/// `list_listings` so `total` stays aligned with the returned pages; `pub` so
+/// contact reveal (EP-11) can reuse it instead of re-deriving the rule.
 pub fn push_public_visibility(qb: &mut QueryBuilder<'_, Postgres>) {
-    qb.push(
-        " AND l.published_at IS NOT NULL AND EXISTS (\
-            SELECT 1 FROM listing_media c WHERE c.listing_id = l.id AND c.is_cover\
-        )",
-    );
+    qb.push(" AND ").push(IS_PUBLIC);
 }
 
 /// Whole-value place match, ignoring case and accents. The column side must stay
@@ -208,6 +217,114 @@ pub async fn list_owner_listings(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Narrows `l` to one visibility value, in the order the service derives it.
+fn push_visibility_filter(qb: &mut QueryBuilder<'_, Postgres>, visibility: AdminListingVisibility) {
+    qb.push(" AND ");
+    match visibility {
+        AdminListingVisibility::Draft => qb.push("l.published_at IS NULL"),
+        AdminListingVisibility::NoPhoto => qb.push(format_args!(
+            "l.published_at IS NOT NULL AND NOT {HAS_COVER}"
+        )),
+        AdminListingVisibility::Public => qb.push(IS_PUBLIC),
+        AdminListingVisibility::Hidden => qb.push(format_args!(
+            "l.published_at IS NOT NULL AND {HAS_COVER} AND NOT {IS_PUBLIC}"
+        )),
+    };
+}
+
+fn push_admin_filters(
+    qb: &mut QueryBuilder<'_, Postgres>,
+    filters: &ListingFilters,
+    visibility: Option<AdminListingVisibility>,
+) {
+    push_filters(qb, filters);
+    if let Some(visibility) = visibility {
+        push_visibility_filter(qb, visibility);
+    }
+}
+
+/// The back-office `SELECT`, up to an open `WHERE`, shared by the page and the single read.
+fn admin_listing_select<'args>() -> QueryBuilder<'args, Postgres> {
+    let mut qb = QueryBuilder::new(
+        "SELECT \
+            l.id, \
+            l.title, \
+            l.type AS listing_type, \
+            l.status, \
+            l.city, \
+            l.neighborhood, \
+            l.price::float8 AS price, \
+            to_char(l.published_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS published_at, \
+            to_char(l.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at, ",
+    );
+    qb.push(format_args!(
+        "{HAS_COVER} AS has_photo, \
+            {IS_PUBLIC} AS is_public, \
+            u.id AS owner_id, \
+            u.first_name AS owner_first_name, \
+            u.last_name AS owner_last_name, \
+            u.email AS owner_email \
+         FROM listings l \
+         JOIN users u ON u.id = l.owner_id \
+         WHERE 1 = 1"
+    ));
+    qb
+}
+
+/// Number of listings matching the filters, whatever their state.
+pub async fn count_admin_listings(
+    pool: &PgPool,
+    filters: &ListingFilters,
+    visibility: Option<AdminListingVisibility>,
+) -> Result<i64, AppError> {
+    let mut qb: QueryBuilder<Postgres> =
+        QueryBuilder::new("SELECT COUNT(*) FROM listings l WHERE 1 = 1");
+    push_admin_filters(&mut qb, filters, visibility);
+
+    qb.build_query_scalar()
+        .fetch_one(pool)
+        .await
+        .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// One page of every listing matching the filters, newest first. Drafts and
+/// listings without a photo are included.
+pub async fn list_admin_listings(
+    pool: &PgPool,
+    filters: &ListingFilters,
+    visibility: Option<AdminListingVisibility>,
+    limit: u32,
+    offset: u64,
+) -> Result<Vec<AdminListingRow>, AppError> {
+    let mut qb = admin_listing_select();
+    push_admin_filters(&mut qb, filters, visibility);
+    // Rows inserted in one transaction share `created_at`; `id` keeps the pages stable.
+    qb.push(" ORDER BY l.created_at DESC, l.id DESC LIMIT ");
+    qb.push_bind(i64::from(limit));
+    qb.push(" OFFSET ");
+    qb.push_bind(offset as i64);
+
+    qb.build_query_as::<AdminListingRow>()
+        .fetch_all(pool)
+        .await
+        .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// The back-office row for `id`, or `None` when the id doesn't exist.
+pub async fn find_admin_listing(
+    pool: &PgPool,
+    id: Uuid,
+) -> Result<Option<AdminListingRow>, AppError> {
+    let mut qb = admin_listing_select();
+    qb.push(" AND l.id = ");
+    qb.push_bind(id);
+
+    qb.build_query_as::<AdminListingRow>()
+        .fetch_optional(pool)
+        .await
+        .map_err(|error| AppError::Database(error.to_string()))
+}
+
 /// Full detail for one listing (owner joined, media excluded — see
 /// [`find_media_for_listing`]). Returns `None` when the id doesn't exist.
 pub async fn find_listing_by_id(
@@ -357,6 +474,24 @@ pub async fn update_listing_status(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// Sets the status of `id` whoever owns it, and returns whether the listing exists. Kept
+/// apart from `update_listing_status` so the owner route can't lose its ownership check.
+pub async fn set_listing_status_by_id(
+    pool: &PgPool,
+    id: Uuid,
+    status: ListingStatus,
+) -> Result<bool, AppError> {
+    sqlx::query!(
+        r#"UPDATE listings SET status = $2 WHERE id = $1"#,
+        id,
+        status as ListingStatus,
+    )
+    .execute(pool)
+    .await
+    .map(|result| result.rows_affected() > 0)
+    .map_err(|error| AppError::Database(error.to_string()))
+}
+
 /// Sets `published_at` on `owner_id`'s draft `id`. A listing that is already published
 /// keeps its original date, so matching no row is not an error.
 pub async fn publish_listing(pool: &PgPool, id: Uuid, owner_id: Uuid) -> Result<(), AppError> {
@@ -394,6 +529,19 @@ where
     .await
     .map(|row| row.is_some())
     .map_err(|error| AppError::Database(error.to_string()))
+}
+
+/// Locks listing `id` until the transaction ends, whoever owns it, and returns whether
+/// it exists. Same row lock as [`lock_owned_listing`].
+pub async fn lock_listing<'e, E>(executor: E, id: Uuid) -> Result<bool, AppError>
+where
+    E: sqlx::PgExecutor<'e>,
+{
+    sqlx::query_scalar!(r#"SELECT id FROM listings WHERE id = $1 FOR UPDATE"#, id)
+        .fetch_optional(executor)
+        .await
+        .map(|row| row.is_some())
+        .map_err(|error| AppError::Database(error.to_string()))
 }
 
 /// Storage keys of every photo attached to `listing_id`.
