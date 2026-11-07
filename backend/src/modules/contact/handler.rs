@@ -17,8 +17,9 @@ const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
 /// Phone numbers of a listing's owner, for a signed-in seeker or owner.
 ///
 /// The listing must be publicly visible, available or not, and its owner
-/// active. Otherwise the 404 is identical to the one for an unknown id. Each
-/// 200 counts toward a per-user cap; other responses do not.
+/// active. Otherwise the 404 is identical to the one for an unknown id. A
+/// per-user cap limits the distinct listings revealed per window; revealing a
+/// listing again within the window does not count.
 #[utoipa::path(
     get,
     path = "/listings/{id}/contact",
@@ -29,8 +30,8 @@ const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
         (status = 401, description = "Missing, malformed, invalid or expired access token, or suspended account"),
         (status = 403, description = "Caller is an admin"),
         (status = 404, description = "Listing not found, not publicly visible, or its owner is inactive"),
-        (status = 429, description = "CONTACT_RATE_LIMITED: the caller used up their reveals for the current window",
-            headers(("Retry-After" = u64, description = "Seconds until the caller can reveal again"))),
+        (status = 429, description = "CONTACT_RATE_LIMITED: the caller reached the cap of distinct listings for the current window",
+            headers(("Retry-After" = u64, description = "Seconds left in the current window"))),
     )
 )]
 pub async fn get_owner_contact(

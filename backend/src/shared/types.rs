@@ -1,6 +1,7 @@
+use std::collections::HashSet;
 use std::fmt;
-use std::sync::atomic::AtomicU32;
-use std::time::Instant;
+use std::sync::{Mutex, PoisonError};
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -128,26 +129,72 @@ pub fn registration_key(ticket: &str) -> String {
     format!("reg:{ticket}")
 }
 
-/// One user's owner contact reveals in the current fixed window. `started_at`
-/// dates the window, so a refusal can tell when the next reveal is allowed.
+/// The distinct listings one user revealed in the current fixed window.
 #[derive(Debug)]
 pub struct RevealWindow {
-    pub started_at: Instant,
-    pub count: AtomicU32,
+    started_at: Instant,
+    listings: Mutex<HashSet<Uuid>>,
 }
 
 impl RevealWindow {
     pub fn start() -> Self {
         Self {
             started_at: Instant::now(),
-            count: AtomicU32::new(0),
+            listings: Mutex::new(HashSet::new()),
         }
+    }
+
+    /// Records `listing_id` and returns `true`, or `false` when it is a new
+    /// listing and `max_listings` are already recorded.
+    pub fn admit(&self, listing_id: Uuid, max_listings: usize) -> bool {
+        // A panicking holder cannot leave the set half-written, so poison is ignored.
+        let mut listings = self.listings.lock().unwrap_or_else(PoisonError::into_inner);
+        listings.contains(&listing_id)
+            || (listings.len() < max_listings && listings.insert(listing_id))
+    }
+
+    /// Whole seconds, rounded up and at least 1, until a window of `length` ends.
+    pub fn seconds_left(&self, length: Duration) -> u64 {
+        let remaining = length.saturating_sub(self.started_at.elapsed());
+        let rounded_up = remaining.as_secs() + u64::from(remaining.subsec_nanos() > 0);
+        rounded_up.max(1)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reveal_window_admits_distinct_listings_up_to_the_max() {
+        let window = RevealWindow::start();
+
+        assert!(window.admit(Uuid::new_v4(), 2));
+        assert!(window.admit(Uuid::new_v4(), 2));
+        assert!(!window.admit(Uuid::new_v4(), 2));
+    }
+
+    #[test]
+    fn reveal_window_admits_a_known_listing_without_counting_it() {
+        let window = RevealWindow::start();
+        let known = Uuid::new_v4();
+
+        assert!(window.admit(known, 2));
+        assert!(window.admit(known, 2));
+        assert!(window.admit(Uuid::new_v4(), 2));
+        assert!(window.admit(known, 2), "still admitted at the max");
+    }
+
+    #[test]
+    fn reveal_window_seconds_left_rounds_up_and_never_reaches_zero() {
+        let window = RevealWindow {
+            started_at: Instant::now() - Duration::from_millis(1_500),
+            listings: Mutex::default(),
+        };
+
+        assert_eq!(window.seconds_left(Duration::from_secs(10)), 9);
+        assert_eq!(window.seconds_left(Duration::from_secs(1)), 1);
+    }
 
     #[test]
     fn test_generate_produces_unique_ids() {

@@ -15,6 +15,9 @@ where
     async fn get(&self, key: &K) -> Option<V>;
     async fn insert(&self, key: K, value: V);
     async fn invalidate(&self, key: &K);
+    /// The value at `key`, inserting `value` if there is none. Concurrent
+    /// callers on a vacant key all get the one value that was stored.
+    async fn get_or_insert(&self, key: K, value: V) -> V;
 }
 
 #[async_trait]
@@ -33,5 +36,9 @@ where
 
     async fn invalidate(&self, key: &K) {
         self.inner.invalidate(key).await;
+    }
+
+    async fn get_or_insert(&self, key: K, value: V) -> V {
+        self.inner.get_with(key, async { value }).await
     }
 }
