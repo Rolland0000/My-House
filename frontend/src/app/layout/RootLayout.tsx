@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Outlet, useNavigate } from "react-router";
 import { SiteFooter, SiteHeader } from "../../shared/components";
 import type { SiteHeaderRole } from "../../shared/components";
+import { removeAdminQueries } from "../../features/admin";
 import { logout, OwnerActivationModal, useAuth } from "../../features/auth";
 import { removeContactQueries } from "../../features/contact";
 import { removeOwnerScopedQueries } from "../../features/listings";
@@ -57,6 +58,7 @@ export function RootLayout() {
       clearSession();
       removeOwnerScopedQueries(queryClient);
       removeContactQueries(queryClient);
+      removeAdminQueries(queryClient);
       navigate(destination);
     }
   }

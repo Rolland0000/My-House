@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Outlet, useNavigate } from "react-router";
 import { SiteHeader } from "../../shared/components";
 import { logout, useAuth } from "../../features/auth";
-import { useOwnerRequestQueue } from "../../features/admin";
+import { removeAdminQueries, useOwnerRequestQueue } from "../../features/admin";
 import { removeOwnerScopedQueries } from "../../features/listings";
 
 export function AdminLayout() {
@@ -19,6 +19,7 @@ export function AdminLayout() {
     } finally {
       clearSession();
       removeOwnerScopedQueries(queryClient);
+      removeAdminQueries(queryClient);
       navigate("/");
     }
   }

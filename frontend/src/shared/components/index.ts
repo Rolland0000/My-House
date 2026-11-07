@@ -32,6 +32,8 @@ export type { InputProps } from "./Input";
 export { Modal } from "./Modal";
 export type { ModalProps, ModalSize } from "./Modal";
 
+export { OwnerFilterChip } from "./OwnerFilterChip";
+
 export { Pagination } from "./Pagination";
 export type { PaginationProps } from "./Pagination";
 
