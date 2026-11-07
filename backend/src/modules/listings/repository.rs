@@ -41,9 +41,9 @@ pub struct ListingFilters {
     pub price_max: Option<i64>,
 }
 
-/// Keeps only listings that pass [`IS_PUBLIC`]. Shared by `count_listings` and
+/// Keeps only listings that pass `IS_PUBLIC`. Shared by `count_listings` and
 /// `list_listings` so `total` stays aligned with the returned pages; `pub` so
-/// contact reveal (EP-11) can reuse it instead of re-deriving the rule.
+/// contact reveal can reuse it instead of re-deriving the rule.
 pub fn push_public_visibility(qb: &mut QueryBuilder<'_, Postgres>) {
     qb.push(" AND ").push(IS_PUBLIC);
 }
@@ -217,7 +217,7 @@ pub async fn list_owner_listings(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
-/// Narrows `l` to one visibility value, in the order the service derives it.
+/// Narrows `l` to one visibility value, matching what `admin_listing_visibility` derives.
 fn push_visibility_filter(qb: &mut QueryBuilder<'_, Postgres>, visibility: AdminListingVisibility) {
     qb.push(" AND ");
     match visibility {

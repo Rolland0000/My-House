@@ -158,7 +158,7 @@ pub struct ListingMediaRow {
     pub created_at_micros: i64,
 }
 
-/// One row of the back-office listing table. It has no description or photo
+/// One row of the back-office listing table. It has no description or photo URL
 /// column, so neither can reach the response.
 #[derive(Debug, FromRow)]
 pub struct AdminListingRow {
