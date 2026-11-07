@@ -97,10 +97,15 @@ function AdminUsersPage() {
         </div>
       ) : data && data.data.length > 0 ? (
         <>
+          {/* Focusable so keyboard users can scroll the table sideways at tablet width.
+              `relative` makes it clip the sr-only elements, which would otherwise widen the page. */}
           <div
+            role="region"
+            aria-label="Users table"
             aria-busy={isPlaceholderData}
+            tabIndex={0}
             className={cn(
-              "overflow-x-auto border border-border bg-surface",
+              "relative overflow-x-auto border border-border bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
               isPlaceholderData && "opacity-60"
             )}
           >

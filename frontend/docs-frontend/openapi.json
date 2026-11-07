@@ -233,7 +233,6 @@
           {
             "name": "state",
             "in": "query",
-            "description": "Inlined: `utoipa` does not collect schemas from query parameters.",
             "required": false,
             "schema": {
               "type": "string",
