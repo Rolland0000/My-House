@@ -117,6 +117,11 @@ impl From<AdminUserRow> for AdminUserDto {
     }
 }
 
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminUserResponse {
+    pub data: AdminUserDto,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -202,6 +207,27 @@ mod tests {
         assert_eq!(parse("suspended").unwrap(), AccountState::Suspended);
         assert!(parse("inactive").is_err());
         assert!(parse("Active").is_err());
+    }
+
+    #[test]
+    fn admin_user_response_uses_the_data_envelope() {
+        let json = serde_json::to_value(AdminUserResponse {
+            data: AdminUserDto::from(AdminUserRow {
+                id: Uuid::nil(),
+                email: "owner@example.com".to_string(),
+                first_name: None,
+                last_name: None,
+                phone: None,
+                role: Role::Seeker,
+                is_active: true,
+                created_at: "2026-11-01T08:00:00Z".to_string(),
+                listing_count: 0,
+            }),
+        })
+        .unwrap();
+
+        assert_eq!(json.as_object().unwrap().len(), 1);
+        assert_eq!(json["data"]["role"], "seeker");
     }
 
     #[test]

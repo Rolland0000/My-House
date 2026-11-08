@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.5
+> **Version :** 1.6
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.5 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.6 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -90,9 +90,9 @@ backend/
     │   │
     │   ├── users/
     │   │   ├── mod.rs
-    │   │   ├── router.rs              # /users/me, /users/me/avatar
+    │   │   ├── router.rs              # /users/me, /users/me/avatar, /admin/users*
     │   │   ├── handler.rs
-    │   │   ├── service.rs             # Profil, suppression de compte, upload avatar (cf. §3.1)
+    │   │   ├── service.rs             # Profil, suppression de compte, upload avatar (cf. §3.1), modération des comptes
     │   │   ├── repository.rs          # users CRUD ; lit listing_media et owner_requests.identity_documents (suppression de compte)
     │   │   ├── model.rs
     │   │   └── dto.rs
@@ -108,9 +108,9 @@ backend/
     │   │
     │   ├── listings/
     │   │   ├── mod.rs
-    │   │   ├── router.rs              # /listings, /search, /users/me/listings
+    │   │   ├── router.rs              # /listings, /search, /users/me/listings, /admin/listings*
     │   │   ├── handler.rs
-    │   │   ├── service.rs             # Validation, visibilité publique, publication, recherche
+    │   │   ├── service.rs             # Validation, visibilité publique, publication, recherche, modération des biens
     │   │   ├── repository.rs          # Feed et recherche : une seule paire count/list (QueryBuilder)
     │   │   ├── model.rs
     │   │   └── dto.rs
@@ -136,7 +136,7 @@ backend/
     │   │
     │   ├── admin/
     │   │   ├── mod.rs
-    │   │   ├── router.rs              # /admin/owner-requests/*
+    │   │   ├── router.rs              # /admin/owner-requests* seulement
     │   │   └── handler.rs             # Délègue à owner_requests::service, pas de service propre
     │   │
     │   └── contact/
@@ -169,6 +169,8 @@ backend/
 
 La recherche n'a pas de module à elle : `GET /search` est servi par `listings`, qui partage avec le feed les filtres, la règle de visibilité et les deux requêtes SQL (cf. §4.4 et ARCHITECTURE.md ADR-12).
 
+Les routes admin de modération vivent dans le module qui possède les données : `/admin/listings*` dans `listings`, `/admin/users*` dans `users` (cf. §4.7 et ARCHITECTURE.md ADR-13). Le module `admin` ne porte que `/admin/owner-requests*`, qu'il délègue à `owner_requests`.
+
 ### 1.2 Frontend
 
 ```
@@ -199,7 +201,8 @@ frontend/
     │   └── layout/
     │       ├── RootLayout.tsx
     │       ├── AuthLayout.tsx
-    │       └── AdminLayout.tsx
+    │       ├── AdminLayout.tsx
+    │       └── useSuspendedRedirect.ts # Compte suspendu : purge des caches, retour à la connexion
     │
     ├── features/                      # Logique pure dans des .ts testés par un *.test.ts voisin (vitest)
     │   ├── auth/
@@ -213,6 +216,7 @@ frontend/
     │   │   ├── hooks/                 # useAuth, useOtpRequest, useOtpVerify, useRegister
     │   │   ├── AuthContext.tsx
     │   │   ├── tokenRole.ts
+    │   │   ├── suspendedSignOut.ts    # État de navigation lu par AuthFlow après une suspension
     │   │   ├── constants.ts
     │   │   ├── api.ts
     │   │   └── index.ts
@@ -235,6 +239,7 @@ frontend/
     │   │   │   ├── PublishListingAction.tsx
     │   │   │   ├── DeleteListingAction.tsx
     │   │   │   ├── ListingStatusControl.tsx
+    │   │   │   ├── ListingStatusSwitch.tsx        # Interrupteur partagé avec le back-office
     │   │   │   ├── OwnerListings.tsx          # « Mes biens » (GET /users/me/listings)
     │   │   │   └── OwnerListingRow.tsx        # Statut et suppression d'un bien
     │   │   ├── hooks/                 # useListings, useOwnerListings, useCreateListing, useUpdateListing,
@@ -248,9 +253,9 @@ frontend/
     │   │   ├── listingDeletion.ts
     │   │   ├── listingPhotos.ts
     │   │   ├── photoOrder.ts
-    │   │   ├── ownerListingsPage.ts
     │   │   ├── ownerListingsCache.ts
     │   │   ├── removeOwnerScopedQueries.ts
+    │   │   ├── invalidatePublicListingQueries.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
@@ -259,14 +264,11 @@ frontend/
     │   │   │   ├── SearchPage.tsx             # Mot-clé, filtres et résultats, tout l'état dans l'URL
     │   │   │   ├── SearchBar.tsx
     │   │   │   ├── FilterPanel.tsx            # Cases à cocher type et statut, ville, quartier, prix
-    │   │   │   ├── PriceRangeFilter.tsx       # Curseur double et champs min/max, en XAF
-    │   │   │   └── OwnerFilterChip.tsx        # Puce du filtre owner_id, retirable
+    │   │   │   └── PriceRangeFilter.tsx       # Curseur double et champs min/max, en XAF
     │   │   ├── hooks/
-    │   │   │   ├── useSearch.ts               # Clé ["listings", "search", params]
-    │   │   │   └── useUrlDraft.ts             # Brouillon éditable d'une valeur portée par l'URL
+    │   │   │   └── useSearch.ts               # Clé ["listings", "search", params]
     │   │   ├── searchCriteria.ts              # URL ↔ critères ↔ paramètres d'API
     │   │   ├── priceRange.ts
-    │   │   ├── ownerFilter.ts
     │   │   ├── api.ts
     │   │   └── index.ts
     │   │
@@ -296,9 +298,25 @@ frontend/
     │   │   ├── components/
     │   │   │   ├── OwnerRequestQueueList.tsx
     │   │   │   ├── OwnerRequestDetail.tsx
-    │   │   │   └── DocumentViewer.tsx
+    │   │   │   ├── DocumentViewer.tsx
+    │   │   │   ├── AdminListingsPage.tsx      # /admin/listings : filtres dans l'URL
+    │   │   │   ├── AdminListingRow.tsx        # Visibilité, statut, suppression d'un bien
+    │   │   │   ├── AdminDeleteListingAction.tsx
+    │   │   │   ├── AdminUsersPage.tsx         # /admin/users : recherche et filtres dans l'URL
+    │   │   │   ├── AdminUsersSearch.tsx
+    │   │   │   ├── AdminUserRow.tsx           # Rôle, état et actions d'un compte
+    │   │   │   ├── AccountStateAction.tsx     # Suspendre / réactiver
+    │   │   │   ├── RevokeOwnerAction.tsx      # Retirer le rôle owner
+    │   │   │   └── DeleteUserAction.tsx
     │   │   ├── hooks/                 # useOwnerRequestQueue, useOwnerRequestDetail,
-    │   │   │                          # useOwnerRequestDocument, useReviewOwnerRequest
+    │   │   │                          # useOwnerRequestDocument, useReviewOwnerRequest,
+    │   │   │                          # useAdminListings, useUpdateAdminListingStatus, useDeleteAdminListing,
+    │   │   │                          # useAdminUsers, useUpdateAdminUserState, useRevokeOwnerRole,
+    │   │   │                          # useDeleteAdminUser
+    │   │   ├── adminListingsCriteria.ts       # URL ↔ filtres de /admin/listings
+    │   │   ├── adminListingVisibilityBadge.ts
+    │   │   ├── adminUsersCriteria.ts          # URL ↔ filtres de /admin/users
+    │   │   ├── adminUserBadges.ts
     │   │   ├── ownerRequestStatusBadge.ts
     │   │   ├── reviewErrorMessage.ts
     │   │   ├── api.ts
@@ -321,6 +339,7 @@ frontend/
         │   ├── Alert.tsx
         │   ├── Badge.tsx
         │   ├── Button.tsx
+        │   ├── buttonClasses.ts
         │   ├── Card.tsx
         │   ├── Checkbox.tsx           # Case native dans son <label> (MH-64-FE), réutilisée par les filtres
         │   ├── DimensionRule.tsx
@@ -329,6 +348,7 @@ frontend/
         │   ├── FormField.tsx
         │   ├── Input.tsx
         │   ├── Modal.tsx
+        │   ├── OwnerFilterChip.tsx    # Puce du filtre owner_id, retirable (recherche et back-office)
         │   ├── Pagination.tsx
         │   ├── Select.tsx
         │   ├── SiteFooter.tsx
@@ -339,9 +359,11 @@ frontend/
         │   └── Toast.tsx
         ├── hooks/
         │   ├── useCountdown.ts
+        │   ├── useDebouncedUrlDraft.ts # Brouillon d'un texte porté par l'URL, validé après une pause de frappe
         │   ├── useDebouncedValue.ts   # + TEXT_FILTER_DEBOUNCE_MS, partagé par le feed et la recherche
         │   ├── useLoginPath.ts        # Lien de connexion qui ramène à la page courante (MH-70)
-        │   └── usePagination.ts
+        │   ├── usePagination.ts
+        │   └── useUrlDraft.ts         # Brouillon éditable d'une valeur portée par l'URL
         ├── api/
         │   ├── client.ts              # Instance fetch (base URL, headers, refresh, paramètres répétés)
         │   ├── constants.ts           # Bornes de champs alignées sur backend/src/shared/validation.rs
@@ -351,8 +373,12 @@ frontend/
             ├── format.ts
             ├── imageFileCheck.ts
             ├── mediaUrl.ts
+            ├── ownerFilter.ts
+            ├── pageParam.ts
+            ├── paginatedRows.ts
             ├── pagination.ts
-            └── returnTo.ts            # Paramètre ?redirect= de /login, limité aux chemins internes (MH-70)
+            ├── returnTo.ts            # Paramètre ?redirect= de /login, limité aux chemins internes (MH-70)
+            └── uuid.ts
 ```
 
 ---
@@ -466,7 +492,7 @@ CREATE TABLE listings (
     surface_m2    INTEGER,
     rooms         INTEGER,
     search_vector TSVECTOR,
-    published_at  TIMESTAMPTZ,   -- Migration 20260927094513. NULL = brouillon ; visible publiquement seulement si non NULL et au moins une photo
+    published_at  TIMESTAMPTZ,   -- Migration 20260927094513. NULL = brouillon ; visibilité publique : cf. §4.3
     created_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
@@ -751,9 +777,9 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 | Méthode | Endpoint              | Auth | Description                                                                                                   |
 | -------- | --------------------- | ---- | ------------------------------------------------------------------------------------------------------------- |
 | `POST` | `/auth/otp/request` | Non  | Envoie un OTP. Gère login et inscription selon si l'email est connu.                                         |
-| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. **Ne crée aucun compte.** Email connu → `{ is_new_user: false, access_token }` + cookie `refresh_token`. Email inconnu → `{ is_new_user: true, registration_ticket }`, sans cookie. |
+| `POST` | `/auth/otp/verify`  | Non  | Vérifie le code. **Ne crée aucun compte.** Email connu → `{ is_new_user: false, access_token }` + cookie `refresh_token`. Email inconnu → `{ is_new_user: true, registration_ticket }`, sans cookie. Compte suspendu → `401 ACCOUNT_SUSPENDED`. |
 | `POST` | `/auth/register`    | Non  | Consomme le `registration_ticket` (usage unique, TTL 10 min) et crée `users` + `refresh_tokens` en **une transaction**. Retourne `{ access_token }` + cookie `refresh_token`. |
-| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie, **révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. |
+| `POST` | `/auth/refresh`     | Cookie | Lit le refresh token du cookie, **révoque l'ancien et en émet un nouveau** (rotation). Renvoie `{ access_token }` + cookie mis à jour. Réutilisation d'un token déjà révoqué → 401 et révocation de toute la famille. Compte suspendu → `401 ACCOUNT_SUSPENDED` et cookie effacé. |
 | `POST` | `/auth/logout`      | JWT  | Révoque le refresh token courant et efface le cookie.                                                          |
 
 **`POST /auth/otp/request`**
@@ -796,7 +822,21 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 
 // Response 401 — code invalide ou expiré
 { "error": { "code": "OTP_INVALID", "message": "Code invalide ou expiré.", "status": 401 } }
+
+// Response 401 — code valide, compte suspendu : ni token, ni cookie
+{ "error": { "code": "ACCOUNT_SUSPENDED", "message": "Account is suspended.", "status": 401 } }
 ```
+
+La suspension n'est vérifiée qu'une fois le code prouvé : sans accès à la boîte mail, on ne peut pas savoir qu'un compte est suspendu. `POST /auth/otp/request` répond donc comme pour tout autre compte.
+
+**`POST /auth/refresh`**
+
+```json
+// Response 401 — compte suspendu ; Set-Cookie efface refresh_token
+{ "error": { "code": "ACCOUNT_SUSPENDED", "message": "Account is suspended.", "status": 401 } }
+```
+
+Ce refus passe avant les contrôles de révocation et d'expiration : tous les tokens du compte reçoivent la même réponse, la fenêtre de grâce de la rotation n'émet rien, et aucune famille n'est révoquée. Toute route authentifiée renvoie aussi `401 ACCOUNT_SUSPENDED` pour un compte suspendu (extracteur `AuthUser`).
 
 **`POST /auth/register`**
 
@@ -920,7 +960,7 @@ sont `null` tant que la demande n'a pas été traitée par un admin.
 
 | Méthode | Endpoint           | Auth | Rôle      | Description                                          |
 | -------- | ------------------ | ---- | ---------- | ----------------------------------------------------- |
-| `POST` | `/owner-requests` | JWT  | `seeker` | Soumet la demande complète en un seul appel (atomique) |
+| `POST` | `/owner-requests` | JWT  | `seeker` ou `owner` | Soumet la demande complète en un seul appel (atomique). `403` pour un admin |
 
 **`POST /owner-requests`**
 
@@ -966,7 +1006,9 @@ Soumission atomique : si l'upload d'un document échoue, toute la requête écho
 
 `PATCH /listings/:id/cover` et `PUT /listings/:id/media/order` sont servis par le module `media`, seul à écrire dans `listing_media`. `GET /users/me/listings` est servi par `listings`.
 
-**Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL` et il a au moins une photo (une ligne de couverture). Elle s'applique au feed, à son total, au filtre `owner_id`, à la recherche (§4.4) et au détail. Sur `GET /listings/:id`, l'authentification est optionnelle : le propriétaire voit toujours son bien, quel que soit son état ; tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
+**Règle de visibilité publique** : un bien est visible publiquement si et seulement si `published_at IS NOT NULL`, il a au moins une photo (une ligne de couverture), et son owner est actif (`is_active`) et a le rôle `owner` en base. Elle s'applique au feed, à son total, au filtre `owner_id`, à la recherche (§4.4), au détail et à la révélation du contact (§4.6). Masquer un bien ne modifie aucune ligne : il revient inchangé après une réactivation ou une nouvelle approbation.
+
+Sur `GET /listings/:id`, l'authentification est optionnelle : un owner actif au rôle `owner` voit son bien quel que soit son état. Tout autre appelant (anonyme, seeker, admin, autre owner) reçoit un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu si le bien n'est pas public. Sur cette route, un owner rétrogradé reçoit ce même `404` pour ses propres biens, même si son jeton porte encore le rôle `owner`. Un en-tête `Authorization` absent est traité comme anonyme ; un en-tête présent mais mal formé, invalide, expiré, ou un compte suspendu, renvoie `401` (jamais un repli sur l'anonyme).
 
 **Prix** : `price` est le loyer mensuel, en XAF, sans centimes. En entrée (`POST`, `PUT`, `price_min`, `price_max`), c'est un entier. En sortie, c'est un nombre JSON à virgule (`150000.0`), lu depuis `price::float8`. La devise n'apparaît pas dans l'API : la colonne `currency` vaut toujours `XAF` au MVP (§2.2).
 
@@ -1255,7 +1297,7 @@ L'ancienne cover est rétrogradée et la nouvelle promue dans une seule transact
 | -------- | ----------- | ---- | ----------------------------- |
 | `GET`  | `/search` | Non  | Mots-clés + filtres combinés |
 
-Servi par le module `listings` (tag OpenAPI `listings`), pas par un module dédié (cf. ARCHITECTURE.md ADR-12). Le feed et la recherche passent par les deux mêmes requêtes SQL (comptage et page) : ils partagent la règle de visibilité publique (§4.3), les filtres et la pagination, et `total` reste aligné sur les pages. Réponse : même enveloppe et mêmes éléments que `GET /listings`.
+Servi par le module `listings` (tag OpenAPI `listings`), pas par un module dédié (cf. ARCHITECTURE.md ADR-12). Le feed et la recherche passent par les deux mêmes requêtes SQL (comptage et page) : ils partagent la règle de visibilité publique (§4.3 : publié, au moins une photo, owner actif au rôle `owner`), les filtres et la pagination, et `total` reste aligné sur les pages. Réponse : même enveloppe et mêmes éléments que `GET /listings`.
 
 **Query params**
 
@@ -1339,7 +1381,7 @@ Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphon
 { "error": { "code": "CONTACT_RATE_LIMITED", "message": "Too many contact reveals. Please wait before trying again.", "status": 429 } }
 ```
 
-**Conditions de révélation** : le bien est visible publiquement (règle du §4.3), qu'il soit `available` ou `unavailable`, et son owner est actif et a un téléphone de profil. Si une condition manque, la réponse est un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un owner qui appelle la route sur son propre bien reçoit ses numéros aux mêmes conditions.
+**Conditions de révélation** : le bien est visible publiquement (règle du §4.3, donc son owner est actif et a le rôle `owner`), qu'il soit `available` ou `unavailable`, et son owner a un téléphone de profil. Si une condition manque, la réponse est un `404 LISTING_NOT_FOUND` identique à celui d'un id inconnu. Un owner qui appelle la route sur son propre bien reçoit ses numéros aux mêmes conditions.
 
 **Plafond par utilisateur** : au plus `CONTACT_REVEAL_MAX_PER_WINDOW` biens distincts par `CONTACT_REVEAL_WINDOW_SECONDS` (30 par 8 h par défaut, cf. §8), en fenêtre fixe ouverte par la première révélation comptée. Révéler à nouveau un bien déjà révélé dans la fenêtre réussit, ne compte pas, et reste possible une fois le plafond atteint. Le plafond s'applique après la lecture en base : un `404` ne compte pas, n'ouvre pas de fenêtre, et reste un `404` même plafond atteint. À la fin de la fenêtre, l'utilisateur peut révéler de nouveau le maximum de biens distincts. Le compte est par `user_id`, pas par IP : deux utilisateurs derrière la même IP ont chacun le leur. Chaque refus écrit une ligne de log `warn` avec le `user_id`. Le compte vit en mémoire (moka) : un redémarrage le remet à zéro (cf. ARCHITECTURE.md R-12). La limite générique par IP (`RATE_LIMIT_*`, `429 RATE_LIMITED`) s'applique aussi à cette route.
 
@@ -1348,7 +1390,7 @@ Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphon
 | `200` | Numéros révélés ; compte dans le plafond si le bien est nouveau dans la fenêtre       |
 | `401` | Jeton absent, mal formé, invalide ou expiré, ou compte suspendu                       |
 | `403` | Appelant admin                                                                        |
-| `404` | `LISTING_NOT_FOUND` : bien inconnu, non visible publiquement, owner inactif ou sans téléphone |
+| `404` | `LISTING_NOT_FOUND` : bien inconnu, non visible publiquement (owner suspendu ou rétrogradé compris), ou owner sans téléphone |
 | `429` | `CONTACT_RATE_LIMITED` : plafond atteint et bien pas encore révélé dans la fenêtre. L'en-tête `Retry-After` donne les secondes restantes dans la fenêtre |
 
 `401`, `403`, `404` et `429` ne comptent pas dans le plafond.
@@ -1357,17 +1399,237 @@ Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphon
 
 ### 4.7 Admin
 
-| Méthode   | Endpoint                      | Auth            | Description                                                |
-| ---------- | ----------------------------- | --------------- | ---------------------------------------------------------- |
-| `GET`    | `/admin/listings`           | JWT (`admin`) | Liste tous les biens. Query :`?status=&page=`            |
-| `PATCH`  | `/admin/listings/:id`       | JWT (`admin`) | Modifier statut d'un bien                                  |
-| `DELETE` | `/admin/listings/:id`       | JWT (`admin`) | Supprimer un bien                                          |
-| `GET`    | `/admin/users`              | JWT (`admin`) | Liste tous les utilisateurs. Query :`?role=&page=`       |
-| `PATCH`  | `/admin/users/:id`          | JWT (`admin`) | Suspendre / réactiver `{ is_active: bool }`             |
-| `DELETE` | `/admin/users/:id`          | JWT (`admin`) | Supprimer un compte                                        |
-| `GET`    | `/admin/owner-requests`     | JWT (`admin`) | Liste les demandes. Query :`?status=pending&page=`       |
-| `GET`    | `/admin/owner-requests/:id/documents/:doc_id` | JWT (`admin`) | Lecture contrôlée d'un document d'identité — proxie le storage (exception au principe no-proxy, cf. ARCHITECTURE.md §7.3) |
-| `PATCH`  | `/admin/owner-requests/:id` | JWT (`admin`) | Statuer `{ status: "approved"\|"rejected", admin_note? }` |
+Toutes ces routes exigent un JWT de rôle `admin` : `401` sans jeton valable ou pour un compte suspendu, `403 FORBIDDEN` pour un seeker ou un owner. Tag OpenAPI `admin`. Chaque groupe de routes vit dans le module qui possède ses données (cf. ARCHITECTURE.md ADR-13).
+
+| Méthode   | Endpoint                                      | Module           | Description                                       |
+| ---------- | --------------------------------------------- | ---------------- | ------------------------------------------------- |
+| `GET`    | `/admin/listings`                           | `listings`       | Liste tous les biens, quel que soit leur état     |
+| `PATCH`  | `/admin/listings/:id`                       | `listings`       | Change le statut de disponibilité d'un bien       |
+| `DELETE` | `/admin/listings/:id`                       | `listings`       | Supprime un bien et ses photos                    |
+| `GET`    | `/admin/users`                              | `users`          | Liste tous les comptes                            |
+| `PATCH`  | `/admin/users/:id`                          | `users`          | Suspend ou réactive un compte                     |
+| `DELETE` | `/admin/users/:id`                          | `users`          | Supprime un compte, ses données et ses fichiers   |
+| `POST`   | `/admin/users/:id/revoke-owner`             | `users`          | Retire le rôle owner                              |
+| `GET`    | `/admin/owner-requests`                     | `admin`          | File des demandes owner                           |
+| `GET`    | `/admin/owner-requests/:id`                 | `admin`          | Détail d'une demande, identité et documents       |
+| `GET`    | `/admin/owner-requests/:id/documents/:doc_id` | `admin`        | Lecture contrôlée d'un document d'identité        |
+| `PATCH`  | `/admin/owner-requests/:id`                 | `admin`          | Approuve ou rejette une demande                   |
+
+Les listes utilisent l'enveloppe paginée commune (`page` : défaut 1 ; `per_page` : défaut 20, ramené à 50 au plus).
+
+**`GET /admin/listings`**
+
+Tous les biens, brouillons et biens sans photo compris, du plus récent au plus ancien (`created_at` décroissant, puis `id` décroissant). Les filtres se combinent (ET).
+
+| Paramètre    | Type     | Description                                                   |
+| ------------ | -------- | ------------------------------------------------------------- |
+| `status`     | `enum`   | `available\|unavailable` ; absent : les deux                  |
+| `visibility` | `enum`   | Voir le tableau ci-dessous ; absent : toutes                  |
+| `owner_id`   | `uuid`   | Biens d'un owner ; un owner inconnu donne une page vide       |
+| `page`       | `integer` | Défaut : 1                                                   |
+| `per_page`   | `integer` | Défaut : 20, max : 50                                        |
+
+| `visibility` | Signification                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `draft`      | Brouillon : `published_at` nul                                                            |
+| `no_photo`   | Publié, sans photo                                                                        |
+| `public`     | Visible publiquement (règle du §4.3)                                                      |
+| `hidden`     | Publié avec une photo, mais masqué : son owner est suspendu ou n'a plus le rôle `owner`   |
+
+```json
+// Response 200
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Appartement à Bastos",
+      "type": "apartment",
+      "city": "Yaoundé",
+      "neighborhood": "Bastos",
+      "price": 150000.0,
+      "status": "available",
+      "visibility": "hidden",
+      "published_at": "2026-11-01T08:00:00Z",
+      "created_at": "2026-10-30T08:00:00Z",
+      "owner": { "id": "uuid", "first_name": "Moussa", "last_name": "Diallo", "email": "owner@example.com" }
+    }
+  ],
+  "pagination": { "page": 1, "per_page": 20, "total": 1, "total_pages": 1 }
+}
+```
+
+`published_at` vaut `null` pour un brouillon. Un élément ne porte ni description, ni photo, ni téléphone. `400 INVALID_QUERY_PARAM` pour un `status` ou une `visibility` inconnus, un `owner_id` mal formé, ou un `page` ou `per_page` non entier.
+
+**`PATCH /admin/listings/:id`**
+
+Fonctionne sur tout bien, brouillon compris. `published_at` et le contenu du bien ne changent pas. Redemander le statut courant répond aussi `200`.
+
+```json
+// Request
+{ "status": "unavailable" }
+
+// Response 200 : même élément que GET /admin/listings
+{ "data": { "id": "uuid", "status": "unavailable", "visibility": "public", "...": "..." } }
+```
+
+| Code    | Cas                                                                                   |
+| ------- | ------------------------------------------------------------------------------------- |
+| `200` | Statut posé                                                                             |
+| `400` | Corps JSON mal formé                                                                    |
+| `404` | `LISTING_NOT_FOUND` : id inconnu                                                        |
+| `422` | `VALIDATION_FAILED` sur `status` : absent, ou autre que `available` / `unavailable`     |
+
+**`DELETE /admin/listings/:id`**
+
+Supprime définitivement le bien et ses photos. Response `204`, sans corps. Même séquence que `DELETE /listings/:id` (§4.3) : la ligne est verrouillée, le `DELETE` SQL est commité, puis les fichiers sont supprimés en best-effort. `404 LISTING_NOT_FOUND` pour un id inconnu ou un bien déjà supprimé.
+
+**`GET /admin/users`**
+
+Tous les comptes, le compte admin compris, du plus récent au plus ancien (`created_at` décroissant, puis `id` décroissant). Les filtres se combinent (ET).
+
+| Paramètre  | Type      | Description                                                                                      |
+| ---------- | --------- | ------------------------------------------------------------------------------------------------ |
+| `role`     | `enum`    | `seeker\|owner\|admin` ; absent : tous                                                           |
+| `state`    | `enum`    | `active\|suspended` (`suspended` : `is_active = false`) ; absent : tous                          |
+| `q`        | `string`  | Sous-chaîne de l'email, du prénom ou du nom, sans tenir compte de la casse ni des accents. 100 caractères max après trim ; vide : pas de recherche |
+| `page`     | `integer` | Défaut : 1                                                                                       |
+| `per_page` | `integer` | Défaut : 20, max : 50                                                                            |
+
+```json
+// Response 200
+{
+  "data": [
+    {
+      "id": "uuid",
+      "email": "owner@example.com",
+      "first_name": "Moussa",
+      "last_name": "Diallo",
+      "phone": "+237 6 77 12 34 56",
+      "role": "owner",
+      "is_active": true,
+      "created_at": "2026-09-01T10:00:00Z",
+      "listing_count": 3
+    }
+  ],
+  "pagination": { "page": 1, "per_page": 20, "total": 1, "total_pages": 1 }
+}
+```
+
+`listing_count` compte tous les biens du compte, brouillons compris. Un élément ne porte jamais les données d'identité d'une demande owner. `400 INVALID_QUERY_PARAM` pour un `role` ou un `state` inconnu, un `q` trop long ou contenant un caractère NUL, ou un `page` ou `per_page` non entier.
+
+**`PATCH /admin/users/:id`**
+
+Suspend (`false`) ou réactive (`true`) un compte. Redemander l'état courant répond aussi `200` et ne change rien. Effets sur la connexion, les sessions et les biens : ARCHITECTURE.md §8.1.
+
+```json
+// Request
+{ "is_active": false }
+
+// Response 200 : même élément que GET /admin/users
+{ "data": { "id": "uuid", "is_active": false, "...": "..." } }
+```
+
+| Code    | Cas                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| `200` | État posé                                                                             |
+| `400` | Corps JSON mal formé                                                                  |
+| `403` | `FORBIDDEN` : appelant non admin. `ADMIN_ACCOUNT_PROTECTED` : la cible est un compte admin |
+| `404` | `USER_NOT_FOUND` : id inconnu                                                         |
+| `422` | `VALIDATION_FAILED` sur `is_active` : absent, ou non booléen                          |
+
+**`DELETE /admin/users/:id`**
+
+Supprime le compte, ses biens, ses demandes owner et leurs fichiers, avec le même nettoyage que `DELETE /users/me` (cf. ARCHITECTURE.md §8.1). La session ouverte du compte prend fin. Response `204`, sans corps.
+
+| Code    | Cas                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| `204` | Compte, données et fichiers supprimés                                                 |
+| `403` | `FORBIDDEN` : appelant non admin. `ADMIN_ACCOUNT_PROTECTED` : la cible est un compte admin |
+| `404` | `USER_NOT_FOUND` : id inconnu                                                         |
+
+**`POST /admin/users/:id/revoke-owner`**
+
+Pas de corps. Remet le compte au rôle `seeker`, qu'il soit actif ou suspendu. Ses biens sont conservés et sortent de la vue publique (`hidden`). Aucun email n'est envoyé. Délai d'application et nouvelle demande : ARCHITECTURE.md §8.1 et R-14.
+
+```json
+// Response 200 : même élément que GET /admin/users
+{ "data": { "id": "uuid", "role": "seeker", "...": "..." } }
+
+// Response 409
+{ "error": { "code": "NOT_AN_OWNER", "message": "This user is not an owner.", "status": 409 } }
+```
+
+| Code    | Cas                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| `200` | Rôle retiré                                                                           |
+| `403` | `FORBIDDEN` : appelant non admin. `ADMIN_ACCOUNT_PROTECTED` : la cible est un compte admin |
+| `404` | `USER_NOT_FOUND` : id inconnu                                                         |
+| `409` | `NOT_AN_OWNER` : la cible n'a pas le rôle `owner`, y compris après une révocation concurrente |
+
+**`GET /admin/owner-requests`**
+
+File des demandes, de la plus récente à la plus ancienne. `status` : `pending\|approved\|rejected` ; absent : toutes. Une valeur inconnue donne `400 INVALID_QUERY_PARAM`. `page` et `per_page` comme ci-dessus. Un élément ne porte ni `identity_data` ni documents.
+
+```json
+// Response 200
+{
+  "data": [
+    {
+      "id": "uuid",
+      "email": "user@example.com",
+      "full_name": "Moussa Diallo",
+      "phone": "+237 6 77 12 34 56",
+      "secondary_phone": null,
+      "status": "pending",
+      "created_at": "2026-09-01T10:00:00Z",
+      "reviewed_at": null,
+      "admin_note": null
+    }
+  ],
+  "pagination": { "page": 1, "per_page": 20, "total": 1, "total_pages": 1 }
+}
+```
+
+**`GET /admin/owner-requests/:id`**
+
+Seule route qui renvoie `identity_data` et les descripteurs de documents, une demande à la fois. `storage_key` n'est jamais exposé. `side` est omis quand le document n'a pas de face. `404 OWNER_REQUEST_NOT_FOUND` pour un id inconnu.
+
+```json
+// Response 200 : mêmes champs que la file, plus identity_data et documents
+{
+  "data": {
+    "id": "uuid",
+    "status": "pending",
+    "identity_data": { "full_name": "Moussa Diallo", "id_type": "national_id", "id_number": "123456789" },
+    "documents": [
+      { "doc_id": "uuid", "original_filename": "recto.jpg", "content_type": "image/jpeg", "side": "front" }
+    ],
+    "...": "..."
+  }
+}
+```
+
+**`GET /admin/owner-requests/:id/documents/:doc_id`**
+
+Renvoie les octets du document : seule lecture du storage proxifiée par le backend (exception au principe no-proxy, cf. ARCHITECTURE.md §7.3). En-têtes : `Content-Type` déterminé à l'upload par les magic bytes, `Content-Disposition: inline` avec le nom d'origine assaini, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`. Chaque accès écrit une ligne de log. `404 OWNER_REQUEST_NOT_FOUND` pour une demande inconnue ; `404 OWNER_REQUEST_DOCUMENT_NOT_FOUND` pour un document inconnu dans cette demande, ou absent du storage.
+
+**`PATCH /admin/owner-requests/:id`**
+
+L'approbation passe aussi le compte de `seeker` à `owner`, dans la même transaction. L'email de décision part après le commit, en best-effort. Si le compte a des biens masqués par une révocation, l'approbation les rend de nouveau publics, inchangés.
+
+```json
+// Request
+{ "status": "approved", "admin_note": "Dossier complet." }
+
+// Response 200 : même forme que GET /admin/owner-requests/:id
+```
+
+| Code    | Cas                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| `200` | Décision enregistrée                                                                  |
+| `400` | JSON mal formé ; `status` autre que `approved` / `rejected` ; `BAD_REQUEST` si `admin_note` dépasse 1000 caractères après trim |
+| `404` | `OWNER_REQUEST_NOT_FOUND` : id inconnu                                                |
+| `409` | `OWNER_REQUEST_ALREADY_REVIEWED` : la demande n'est plus `pending`                    |
 
 ---
 
@@ -1651,6 +1913,7 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | OAuth (Google, Facebook)      | `auth`                 | V2                     |
 | Application mobile native     | —                       | V2                     |
 | Tableau de bord admin complet | `admin`                | V2                     |
+| Signalement d'un bien (« Report this listing ») et file de signalements admin | `listings`, `admin` | V2 |
 | Redis                         | `infra`                | V2 si moka insuffisant |
 | Stockage S3-compatible (MinIO/AWS S3) | `infra/storage` | V2 — `LocalFsStorage` au MVP |
 | Conformité RGPD complète    | Transverse               | Avant go-live EU       |
@@ -1670,3 +1933,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §1.1/§1.2 : arbres tels que construits (pas de module `search`, `GET /search` servi par `listings` ; module `owner_requests` ; `features/search/` et `Checkbox` partagée). §2.2 : `published_at`, `currency`, `immutable_unaccent` et `idx_listings_city_normalized`, libellés de type français et anglais dans `search_vector` (MH-66). §3.1 : appelants du `StorageProvider` (avatar et pièces d'identité hors `media`). §4.3 : filtres `neighborhood` et `status`, `type` répétable, visibilité publique, prix en XAF, endpoints `POST`, `PUT`, `PATCH status`, `DELETE`, `publish`, `cover`, `media/order` et `/users/me/listings`, règles de validation. §4.4 : contrat de MH-64-BE. §8 : `ALLOWED_ORIGINS`, rate-limit générique, `TRUSTED_PROXIES`. Fichier renommé sans numéro de version |
 | 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §1.1/§1.2 : module `contact` et `features/contact/` tels que construits, `useLoginPath` et `returnTo` (MH-70). §4.6 : réponse avec `phone` et `secondary_phone` et origine de ce dernier, conditions de révélation, cas 401, 403, 404 et 429 `CONTACT_RATE_LIMITED` avec `Retry-After`, plafond par utilisateur. §8 : `CONTACT_REVEAL_MAX_PER_WINDOW` et `CONTACT_REVEAL_WINDOW_SECONDS` |
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §1.1 : `contact::service` lit d'abord, compte ensuite. §4.6 : 30 biens distincts par 8 h, fenêtre ouverte par la première révélation comptée, un bien déjà révélé ne compte pas et reste accessible au plafond, un `404` n'ouvre pas de fenêtre. §8 : description de `CONTACT_REVEAL_MAX_PER_WINDOW` |
+| 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §1.1 : routes admin dans `listings` et `users`, `admin` limité aux demandes owner. §1.2 : pages et hooks admin dans `features/admin/`, redirection du compte suspendu, helpers déplacés vers `shared/`. §2.2 : renvoi à la règle de visibilité. §4.1 : `ACCOUNT_SUSPENDED` sur `/auth/otp/verify` et `/auth/refresh`. §4.3, §4.4 et §4.6 : la visibilité publique exige un owner actif au rôle `owner`. §4.7 : contrat complet des sept routes de modération (filtres, valeurs de `visibility`, `ADMIN_ACCOUNT_PROTECTED`, `NOT_AN_OWNER`) et des quatre routes de demandes owner. §4.2bis : rôles réellement admis pour `POST /owner-requests`. §9 : signalement d'un bien en V2 |
