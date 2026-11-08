@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET role = 'seeker' WHERE id = $1 AND role = 'owner'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4831aa13d1cb911726d27162ff92c0700c1d3196d227c933a9f04fd7784460ff"
+}

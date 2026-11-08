@@ -21,14 +21,16 @@ macro_rules! has_cover_sql {
 /// A macro so `IS_PUBLIC` can embed it with `concat!`.
 macro_rules! owner_is_eligible_sql {
     () => {
-        "EXISTS (SELECT 1 FROM users owner WHERE owner.id = l.owner_id AND owner.is_active)"
+        "EXISTS (SELECT 1 FROM users owner WHERE owner.id = l.owner_id \
+            AND owner.is_active AND owner.role = 'owner')"
     };
 }
 
 /// True once listing `l` has a photo: the first upload is always marked cover.
 const HAS_COVER: &str = has_cover_sql!();
 
-/// True while the owner of listing `l` may keep listings online, and see their own.
+/// True while the owner of listing `l` is active and still has the owner role.
+/// Otherwise the listing leaves public view and its owner can't open it either.
 const OWNER_IS_ELIGIBLE: &str = owner_is_eligible_sql!();
 
 /// The public-visibility rule for listing `l`: published with a photo, by an eligible owner.
