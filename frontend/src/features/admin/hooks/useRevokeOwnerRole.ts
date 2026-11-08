@@ -14,7 +14,7 @@ export function useRevokeOwnerRole(id: string) {
     mutationKey: adminUserMutationKey(id),
     mutationFn: () => revokeOwnerRole(id),
     retry: false,
-    // Returning the promise keeps the row locked until the refetch shows the seeker badge.
+    // Awaiting the refetch keeps the row locked until it shows the seeker badge.
     onSuccess: async () => {
       await refreshAdminData();
       showToast("Owner role revoked.", { variant: "success" });

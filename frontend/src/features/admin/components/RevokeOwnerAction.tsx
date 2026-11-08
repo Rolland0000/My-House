@@ -46,7 +46,11 @@ function RevokeOwnerAction({ user }: RevokeOwnerActionProps) {
             <Button variant="secondary" onClick={handleClose} disabled={revoke.isPending}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={() => revoke.mutate()} isLoading={revoke.isPending}>
+            <Button
+              variant="danger"
+              onClick={() => revoke.mutate(undefined, { onSuccess: () => setIsOpen(false) })}
+              isLoading={revoke.isPending}
+            >
               Revoke owner role
             </Button>
           </>
