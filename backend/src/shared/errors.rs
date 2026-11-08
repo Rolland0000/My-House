@@ -128,6 +128,9 @@ pub enum AppError {
     #[error("A listing needs at least one photo to be published.")]
     PhotoRequired,
 
+    #[error("This user is not an owner.")]
+    NotAnOwner,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
     #[error("File exceeds the maximum allowed size.")]
     PayloadTooLarge,
@@ -210,6 +213,7 @@ impl AppError {
             Self::CoverPhotoRequired => (StatusCode::CONFLICT, "COVER_PHOTO_REQUIRED"),
             Self::MediaOrderConflict => (StatusCode::CONFLICT, "MEDIA_ORDER_CONFLICT"),
             Self::PhotoRequired => (StatusCode::CONFLICT, "PHOTO_REQUIRED"),
+            Self::NotAnOwner => (StatusCode::CONFLICT, "NOT_AN_OWNER"),
             // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
@@ -398,6 +402,15 @@ mod tests {
 
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "PHOTO_REQUIRED");
+    }
+
+    #[tokio::test]
+    async fn test_not_an_owner_is_409() {
+        let response = AppError::NotAnOwner.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "NOT_AN_OWNER");
     }
 
     #[tokio::test]
