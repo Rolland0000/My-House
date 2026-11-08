@@ -74,9 +74,6 @@ pub enum AppError {
     AccountSuspended,
 
     // ── 403 Forbidden ────────────────────────────────────────────────────────
-    #[error("Account is inactive.")]
-    AccountInactive,
-
     #[error("Insufficient permissions to access this resource.")]
     Forbidden,
 
@@ -190,7 +187,6 @@ impl AppError {
             Self::RefreshTokenInvalid => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED"),
             Self::AccountSuspended => (StatusCode::UNAUTHORIZED, "ACCOUNT_SUSPENDED"),
             // 403
-            Self::AccountInactive => (StatusCode::FORBIDDEN, "ACCOUNT_INACTIVE"),
             Self::Forbidden => (StatusCode::FORBIDDEN, "FORBIDDEN"),
             Self::AdminAccountProtected => (StatusCode::FORBIDDEN, "ADMIN_ACCOUNT_PROTECTED"),
             // 404

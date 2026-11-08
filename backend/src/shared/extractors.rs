@@ -16,10 +16,9 @@ use crate::shared::rbac::{require_role, Role};
 use crate::shared::token_decoder::TokenDecoder;
 
 /// Authenticated caller identity, extracted from the access token on every
-/// protected route. `is_active` is rechecked on each request (via a
-/// short-TTL cache, not proactively invalidated on suspend — MH-32,
-/// ARCHITECTURE.md §8.1) so a suspension takes effect within the cache TTL
-/// even against a token still inside its own validity window.
+/// protected route. `is_active` is rechecked on each request through a
+/// short-TTL cache, so a suspension takes effect within the cache TTL even
+/// against a token still inside its own validity window.
 #[derive(Debug, Clone, Copy)]
 pub struct AuthUser {
     pub user_id: Uuid,

@@ -13,7 +13,8 @@ use crate::shared::rbac::Role;
 use crate::shared::session_cookie::clear_refresh_cookie;
 
 use super::dto::{
-    AdminUserDto, AdminUserListQuery, AvatarUploadForm, UpdateMeDto, UserDto, UserResponse,
+    AdminUserDto, AdminUserListQuery, AvatarUploadForm, UpdateAccountStateDto, UpdateMeDto,
+    UserDto, UserResponse,
 };
 use super::service;
 
@@ -175,6 +176,41 @@ pub async fn delete_user(
 
     tracing::info!(admin_id = %user.user_id, deleted_user_id = %id, "user account deleted by admin");
     Ok(StatusCode::NO_CONTENT)
+}
+
+#[utoipa::path(
+    patch,
+    path = "/admin/users/{id}",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "User id")),
+    request_body = UpdateAccountStateDto,
+    responses(
+        (status = 200, description = "Account suspended or reactivated; the current value also returns 200", body = AdminUserDto),
+        (status = 400, description = "Malformed JSON body"),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"),
+        (status = 404, description = "No user with this id"),
+        (status = 422, description = "`is_active` is missing or not a boolean"),
+    )
+)]
+pub async fn update_user_state(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+    AppJson(payload): AppJson<UpdateAccountStateDto>,
+) -> Result<Json<AdminUserDto>, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    let updated = service::set_active_for_admin(
+        state.db(),
+        state.cache().is_active_status().as_ref(),
+        user.user_id,
+        id,
+        payload,
+    )
+    .await?;
+
+    Ok(Json(updated))
 }
 
 /// Reads the `file` part, skipping any other field. The part's declared

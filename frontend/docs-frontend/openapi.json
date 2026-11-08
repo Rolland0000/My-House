@@ -497,6 +497,61 @@
             "description": "No user with this id"
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "update_user_state",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccountStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Account suspended or reactivated; the current value also returns 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON body"
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"
+          },
+          "404": {
+            "description": "No user with this id"
+          },
+          "422": {
+            "description": "`is_active` is missing or not a boolean"
+          }
+        }
       }
     },
     "/api/v1/auth/logout": {
@@ -579,7 +634,7 @@
             }
           },
           "401": {
-            "description": "Invalid, expired, or attempt-exhausted OTP code"
+            "description": "Invalid, expired, or attempt-exhausted OTP code (`OTP_INVALID`), or suspended account (`ACCOUNT_SUSPENDED`)"
           }
         }
       }
@@ -602,7 +657,7 @@
             }
           },
           "401": {
-            "description": "Missing, unknown, expired, or reused refresh token"
+            "description": "Missing, unknown, expired, or reused refresh token (`UNAUTHORIZED`), or suspended account (`ACCOUNT_SUSPENDED`, cookie cleared)"
           }
         }
       }
@@ -3134,6 +3189,18 @@
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateAccountStateDto": {
+        "type": "object",
+        "description": "Body of `PATCH /admin/users/:id`. `is_active` is read as raw JSON so a missing\nor non-boolean value is reported as a `422` field error, not a `400`.",
+        "required": [
+          "is_active"
+        ],
+        "properties": {
+          "is_active": {
+            "type": "boolean"
           }
         }
       },

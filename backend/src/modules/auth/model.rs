@@ -19,6 +19,7 @@ pub struct RefreshTokenLookup {
     pub id: Uuid,
     pub user_id: Uuid,
     pub role: Role,
+    pub is_active: bool,
     pub is_revoked: bool,
     pub is_expired: bool,
 }

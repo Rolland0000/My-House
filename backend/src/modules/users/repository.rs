@@ -6,6 +6,10 @@ use crate::shared::rbac::Role;
 
 use super::model::{AdminUserRow, UserRow};
 
+fn db_err(error: sqlx::Error) -> AppError {
+    AppError::Database(error.to_string())
+}
+
 /// `is_active` for `user_id`, or `None` if the user no longer exists.
 /// Backs the `AuthUser` extractor's cache-miss fallback (MH-32).
 pub async fn find_is_active(pool: &PgPool, user_id: Uuid) -> Result<Option<bool>, AppError> {
@@ -159,6 +163,65 @@ pub async fn list_for_admin(
     .map_err(|error| AppError::Database(error.to_string()))
 }
 
+/// The admin list item for `user_id`, or `None` if the user no longer exists.
+pub async fn find_for_admin(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Option<AdminUserRow>, AppError> {
+    sqlx::query_as!(
+        AdminUserRow,
+        r#"
+        SELECT
+            u.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            u.phone,
+            u.role AS "role: Role",
+            u.is_active,
+            to_char(u.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "created_at!",
+            (SELECT COUNT(*) FROM listings l WHERE l.owner_id = u.id) AS "listing_count!"
+        FROM users u
+        WHERE u.id = $1
+        "#,
+        user_id,
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// Sets `is_active` and returns whether it changed. Reactivating deletes the refresh tokens so
+/// old sessions stay closed; a revoked one, replayed later, would count as theft and end the new session.
+pub async fn set_is_active(
+    pool: &PgPool,
+    user_id: Uuid,
+    is_active: bool,
+) -> Result<bool, AppError> {
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let changed = sqlx::query!(
+        "UPDATE users SET is_active = $2 WHERE id = $1 AND is_active <> $2",
+        user_id,
+        is_active,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(db_err)?
+    .rows_affected()
+        > 0;
+
+    if changed && is_active {
+        sqlx::query!("DELETE FROM refresh_tokens WHERE user_id = $1", user_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(db_err)?;
+    }
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(changed)
+}
+
 /// Whether any user row currently has `role = 'admin'`.
 pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
     sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM users WHERE role = 'admin') AS "exists!""#)
@@ -234,18 +297,31 @@ pub async fn delete_by_id(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError
 /// insert on the `users.email` unique constraint.
 ///
 /// `true` = row inserted, `false` = existing account promoted (`xmax = 0`
-/// distinguishes the two in an upsert).
+/// distinguishes the two in an upsert). A promoted account loses its refresh tokens:
+/// sessions opened before the promotion, a suspended account's included, don't come back.
 pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<bool, AppError> {
-    sqlx::query_scalar!(
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let row = sqlx::query!(
         r#"
         INSERT INTO users (email, role, is_active)
         VALUES ($1, 'admin', true)
         ON CONFLICT (email) DO UPDATE SET role = 'admin', is_active = true
-        RETURNING (xmax = 0) AS "created!"
+        RETURNING id, (xmax = 0) AS "created!"
         "#,
         email
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
-    .map_err(|error| AppError::Database(error.to_string()))
+    .map_err(db_err)?;
+
+    if !row.created {
+        sqlx::query!("DELETE FROM refresh_tokens WHERE user_id = $1", row.id)
+            .execute(&mut *tx)
+            .await
+            .map_err(db_err)?;
+    }
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(row.created)
 }

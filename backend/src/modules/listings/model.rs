@@ -120,7 +120,7 @@ pub struct ListingSummaryRow {
 
 /// Full row for `GET /listings/:id`, excluding media (fetched separately via
 /// [`ListingMediaRow`] since it's a one-to-many relation).
-#[derive(Debug)]
+#[derive(Debug, FromRow)]
 pub struct ListingDetailRow {
     pub id: Uuid,
     pub title: String,
@@ -138,9 +138,12 @@ pub struct ListingDetailRow {
     pub created_at: String,
     /// `NULL` means draft; formatted the same way as `created_at`.
     pub published_at: Option<String>,
-    /// True when the listing has a cover row — the public-visibility check
-    /// pairs this with `published_at` (see `service::is_visible_to`).
+    /// True when the listing has a cover row; `publish` requires one.
     pub has_photo: bool,
+    /// Computed in SQL by the public-visibility rule.
+    pub is_public: bool,
+    /// Computed in SQL; lets the owner see a listing that isn't public.
+    pub owner_is_eligible: bool,
     pub owner_id: Uuid,
     pub owner_first_name: Option<String>,
     pub owner_last_name: Option<String>,

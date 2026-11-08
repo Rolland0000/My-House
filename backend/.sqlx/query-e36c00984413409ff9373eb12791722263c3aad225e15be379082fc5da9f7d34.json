@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n            rt.id,\n            rt.user_id,\n            u.role AS \"role: Role\",\n            (rt.revoked_at IS NOT NULL) AS \"is_revoked!\",\n            (rt.expires_at < NOW())     AS \"is_expired!\"\n        FROM refresh_tokens rt\n        JOIN users u ON u.id = rt.user_id\n        WHERE rt.token_hash = $1\n        LIMIT 1\n        ",
+  "query": "\n        SELECT\n            rt.id,\n            rt.user_id,\n            u.role AS \"role: Role\",\n            u.is_active,\n            (rt.revoked_at IS NOT NULL) AS \"is_revoked!\",\n            (rt.expires_at < NOW())     AS \"is_expired!\"\n        FROM refresh_tokens rt\n        JOIN users u ON u.id = rt.user_id\n        WHERE rt.token_hash = $1\n        LIMIT 1\n        ",
   "describe": {
     "columns": [
       {
@@ -31,11 +31,16 @@
       },
       {
         "ordinal": 3,
-        "name": "is_revoked!",
+        "name": "is_active",
         "type_info": "Bool"
       },
       {
         "ordinal": 4,
+        "name": "is_revoked!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
         "name": "is_expired!",
         "type_info": "Bool"
       }
@@ -49,9 +54,10 @@
       false,
       false,
       false,
+      false,
       null,
       null
     ]
   },
-  "hash": "8758e9cc19001187d29f93f7bdd80ba5a253a40392d0033a3cfc46b598c6aeda"
+  "hash": "e36c00984413409ff9373eb12791722263c3aad225e15be379082fc5da9f7d34"
 }
