@@ -33,7 +33,7 @@ function OwnerRequestStatusBlock({ role }: OwnerRequestStatusBlockProps) {
   if (data === undefined) return null;
   if ((role === "owner" || role === "admin") && data === null) return null;
 
-  const view = ownerRequestStatusView(data);
+  const view = ownerRequestStatusView(data, role);
 
   return (
     <div className="flex flex-col gap-2 border-b border-border pb-6">
@@ -47,7 +47,7 @@ function OwnerRequestStatusBlock({ role }: OwnerRequestStatusBlockProps) {
       )}
       {view.showCta && (
         <Link to="/owner-request" className="text-sm font-semibold text-primary underline">
-          {view.state === "rejected" ? "Submit a new request" : "Become an owner"}
+          {view.state === "no-request" ? "Become an owner" : "Submit a new request"}
         </Link>
       )}
     </div>

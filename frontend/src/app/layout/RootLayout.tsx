@@ -31,7 +31,9 @@ export function RootLayout() {
   const isSeeker = status === "authenticated" && profile?.role === "seeker";
   const { data: ownerRequest } = useOwnerRequestStatus({ enabled: isSeeker });
   const ownerRequestView =
-    isSeeker && ownerRequest !== undefined ? ownerRequestStatusView(ownerRequest) : null;
+    isSeeker && ownerRequest !== undefined
+      ? ownerRequestStatusView(ownerRequest, profile?.role)
+      : null;
 
   const user =
     status === "authenticated" && profile

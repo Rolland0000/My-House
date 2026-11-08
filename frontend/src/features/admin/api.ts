@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiGetBlob, apiPatch } from "../../shared/api/client";
+import { apiDelete, apiGet, apiGetBlob, apiPatch, apiPost } from "../../shared/api/client";
 import type { components, paths } from "../../shared/api/types";
 import type { ListingStatus } from "../listings";
 
@@ -119,6 +119,10 @@ export function listAdminUsers(params: ListAdminUsersParams): Promise<AdminUsers
 
 export function updateAdminUserState(id: string, isActive: boolean): Promise<AdminUser> {
   return apiPatch(`/api/v1/admin/users/${encodeURIComponent(id)}`, { is_active: isActive });
+}
+
+export function revokeOwnerRole(id: string): Promise<AdminUser> {
+  return apiPost(`/api/v1/admin/users/${encodeURIComponent(id)}/revoke-owner`);
 }
 
 export function deleteAdminUser(id: string): Promise<void> {

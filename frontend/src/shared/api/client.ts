@@ -45,6 +45,7 @@ export class ApiError extends Error {
 }
 
 const ACCOUNT_SUSPENDED_CODE = "ACCOUNT_SUSPENDED";
+const NOT_AN_OWNER_CODE = "NOT_AN_OWNER";
 
 export function isNotFound(error: unknown): boolean {
   return error instanceof ApiError && error.status === 404;
@@ -52,6 +53,10 @@ export function isNotFound(error: unknown): boolean {
 
 export function isAccountSuspended(error: unknown): boolean {
   return error instanceof ApiError && error.code === ACCOUNT_SUSPENDED_CODE;
+}
+
+export function isNotAnOwner(error: unknown): boolean {
+  return error instanceof ApiError && error.code === NOT_AN_OWNER_CODE;
 }
 
 function readRetryAfter(response: Response): number | undefined {

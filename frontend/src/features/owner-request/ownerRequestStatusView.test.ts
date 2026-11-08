@@ -45,4 +45,21 @@ describe("ownerRequestStatusView", () => {
   it("omits the admin note for a rejected request that has none", () => {
     expect(ownerRequestStatusView(request("rejected")).adminNote).toBeNull();
   });
+
+  it("returns the withdrawn state with a CTA for a seeker whose latest request is approved", () => {
+    const view = ownerRequestStatusView(request("approved"), "seeker");
+    expect(view.state).toBe("withdrawn");
+    expect(view.title).toBe("Your owner access was withdrawn by an administrator");
+    expect(view.showCta).toBe(true);
+  });
+
+  it("keeps the approved state for an owner", () => {
+    expect(ownerRequestStatusView(request("approved"), "owner").state).toBe("approved");
+  });
+
+  it("ignores the seeker role when the latest request is not approved", () => {
+    expect(ownerRequestStatusView(null, "seeker").state).toBe("no-request");
+    expect(ownerRequestStatusView(request("pending"), "seeker").state).toBe("pending");
+    expect(ownerRequestStatusView(request("rejected"), "seeker").state).toBe("rejected");
+  });
 });

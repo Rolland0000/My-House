@@ -1,7 +1,11 @@
+import type { components } from "../../shared/api/types";
 import type { BadgeTone } from "../../shared/components";
 import type { OwnerRequest } from "./api";
 
-export type OwnerRequestViewState = "no-request" | "pending" | "approved" | "rejected";
+type Role = components["schemas"]["Role"];
+
+export type OwnerRequestViewState =
+  "no-request" | "pending" | "approved" | "rejected" | "withdrawn";
 
 export interface OwnerRequestStatusView {
   state: OwnerRequestViewState;
@@ -49,11 +53,26 @@ const VIEWS: Record<OwnerRequestViewState, BaseView> = {
     description: "You can review the note below and submit a new request.",
     showCta: true,
   },
+  withdrawn: {
+    state: "withdrawn",
+    badgeTone: "neutral",
+    badgeLabel: "Withdrawn",
+    title: "Your owner access was withdrawn by an administrator",
+    description: "You can submit a new request to become an owner again.",
+    showCta: true,
+  },
 };
 
-/** `data` is `null` when the caller has never applied. */
-export function ownerRequestStatusView(data: OwnerRequest | null): OwnerRequestStatusView {
-  const base = data ? VIEWS[data.status] : VIEWS["no-request"];
+/**
+ * `data` is `null` when the caller has never applied. An approved request held
+ * by a seeker means an admin revoked the owner role afterwards.
+ */
+export function ownerRequestStatusView(
+  data: OwnerRequest | null,
+  role?: Role
+): OwnerRequestStatusView {
+  const isWithdrawn = data?.status === "approved" && role === "seeker";
+  const base = !data ? VIEWS["no-request"] : isWithdrawn ? VIEWS.withdrawn : VIEWS[data.status];
   const adminNote = data?.status === "rejected" ? (data.admin_note ?? null) : null;
   return { ...base, adminNote };
 }

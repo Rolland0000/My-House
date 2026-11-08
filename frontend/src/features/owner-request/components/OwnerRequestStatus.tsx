@@ -1,13 +1,16 @@
 import { Link, useNavigate } from "react-router";
 import { Alert, Badge, Card, EmptyState, Spinner } from "../../../shared/components";
+import { useProfile } from "../../profile";
 import { useOwnerRequestStatus } from "../hooks/useOwnerRequestStatus";
 import { ownerRequestStatusView } from "../ownerRequestStatusView";
 
 function OwnerRequestStatus() {
   const navigate = useNavigate();
   const { data, isPending, error } = useOwnerRequestStatus();
+  // The role tells an approved request apart from one whose owner access was withdrawn.
+  const { data: profile, isPending: isProfilePending } = useProfile();
 
-  if (isPending) {
+  if (isPending || isProfilePending) {
     return (
       <div className="flex justify-center py-16">
         <Spinner size="lg" label="Loading…" />
@@ -29,7 +32,7 @@ function OwnerRequestStatus() {
         {!error &&
           data &&
           (() => {
-            const view = ownerRequestStatusView(data);
+            const view = ownerRequestStatusView(data, profile?.role);
             return (
               <div className="flex flex-col gap-3">
                 <Badge tone={view.badgeTone}>{view.badgeLabel}</Badge>
