@@ -30,7 +30,7 @@ macro_rules! owner_is_eligible_sql {
 const HAS_COVER: &str = has_cover_sql!();
 
 /// True while the owner of listing `l` is active and still has the owner role.
-/// Otherwise the listing is hidden from everyone, its owner included.
+/// Otherwise the listing leaves public view and its owner can't open it either.
 const OWNER_IS_ELIGIBLE: &str = owner_is_eligible_sql!();
 
 /// The public-visibility rule for listing `l`: published with a photo, by an eligible owner.
