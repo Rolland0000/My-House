@@ -236,3 +236,27 @@ fn multipart_error(error: axum::extract::multipart::MultipartError) -> AppError 
     }
     AppError::BadRequest(error.body_text())
 }
+
+#[utoipa::path(
+    post,
+    path = "/admin/users/{id}/revoke-owner",
+    tag = "admin",
+    params(("id" = Uuid, Path, description = "User id")),
+    responses(
+        (status = 200, description = "Owner role revoked: the user is a seeker again and their listings are hidden", body = AdminUserDto),
+        (status = 401, description = "Missing or invalid access token"),
+        (status = 403, description = "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"),
+        (status = 404, description = "No user with this id"),
+        (status = 409, description = "The user is not an owner (`NOT_AN_OWNER`)"),
+    )
+)]
+pub async fn revoke_owner(
+    State(state): State<AppState>,
+    user: AuthUser,
+    Path(id): Path<Uuid>,
+) -> Result<Json<AdminUserDto>, AppError> {
+    user.require_role(&[Role::Admin])?;
+
+    let updated = service::revoke_owner_for_admin(state.db(), user.user_id, id).await?;
+    Ok(Json(updated))
+}

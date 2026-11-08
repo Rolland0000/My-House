@@ -222,6 +222,19 @@ pub async fn set_is_active(
     Ok(changed)
 }
 
+/// Turns an owner back into a seeker; `false` when the user is no longer an owner.
+pub async fn demote_owner(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError> {
+    let result = sqlx::query!(
+        "UPDATE users SET role = 'seeker' WHERE id = $1 AND role = 'owner'",
+        user_id,
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+
+    Ok(result.rows_affected() > 0)
+}
+
 /// Whether any user row currently has `role = 'admin'`.
 pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
     sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM users WHERE role = 'admin') AS "exists!""#)

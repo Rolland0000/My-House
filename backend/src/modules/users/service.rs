@@ -174,6 +174,31 @@ pub async fn set_active_for_admin(
     Ok(AdminUserRow { is_active, ..user }.into())
 }
 
+/// Backs `POST /admin/users/:id/revoke-owner`. Listings are kept; the visibility
+/// rule hides them until the user is approved as owner again.
+pub async fn revoke_owner_for_admin(
+    pool: &PgPool,
+    admin_id: Uuid,
+    user_id: Uuid,
+) -> Result<AdminUserDto, AppError> {
+    let user = repository::find_for_admin(pool, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)?;
+    ensure_revocable(user.role)?;
+
+    // No row changed: a concurrent revocation or deletion came first.
+    if !repository::demote_owner(pool, user_id).await? {
+        return Err(AppError::NotAnOwner);
+    }
+    tracing::info!(%admin_id, %user_id, "owner role revoked by admin");
+
+    Ok(AdminUserRow {
+        role: Role::Seeker,
+        ..user
+    }
+    .into())
+}
+
 /// A missing or non-boolean value is a 422 on `is_active`.
 fn parse_is_active(request: UpdateAccountStateDto) -> Result<bool, AppError> {
     let is_active = request.is_active.and_then(|value| value.as_bool());
@@ -219,6 +244,16 @@ fn ensure_not_admin(role: Role) -> Result<(), AppError> {
     match role {
         Role::Admin => Err(AppError::AdminAccountProtected),
         Role::Seeker | Role::Owner => Ok(()),
+    }
+}
+
+/// Only an owner can lose the owner role, and admin accounts stay protected.
+fn ensure_revocable(role: Role) -> Result<(), AppError> {
+    ensure_not_admin(role)?;
+    if role == Role::Owner {
+        Ok(())
+    } else {
+        Err(AppError::NotAnOwner)
     }
 }
 
@@ -302,6 +337,19 @@ mod tests {
         assert!(ensure_not_admin(Role::Owner).is_ok());
         assert!(matches!(
             ensure_not_admin(Role::Admin),
+            Err(AppError::AdminAccountProtected)
+        ));
+    }
+
+    #[test]
+    fn only_an_owner_role_can_be_revoked() {
+        assert!(ensure_revocable(Role::Owner).is_ok());
+        assert!(matches!(
+            ensure_revocable(Role::Seeker),
+            Err(AppError::NotAnOwner)
+        ));
+        assert!(matches!(
+            ensure_revocable(Role::Admin),
             Err(AppError::AdminAccountProtected)
         ));
     }
