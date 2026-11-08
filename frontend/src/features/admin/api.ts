@@ -57,6 +57,8 @@ export const ADMIN_USERS_KEY = [ADMIN_QUERY_ROOT, "users"] as const;
 export const adminUsersQueryKey = (params: ListAdminUsersParams) =>
   [...ADMIN_USERS_KEY, params] as const;
 
+export const USER_GONE_MESSAGE = "This account no longer exists.";
+
 /** Lets a row lock its actions while a mutation on that account runs. */
 export const adminUserMutationKey = (id: string) => ["admin-user", id] as const;
 
@@ -113,6 +115,10 @@ export function deleteAdminListing(id: string): Promise<void> {
 
 export function listAdminUsers(params: ListAdminUsersParams): Promise<AdminUsersResult> {
   return apiGet<AdminUsersResult>("/api/v1/admin/users", params);
+}
+
+export function updateAdminUserState(id: string, isActive: boolean): Promise<AdminUser> {
+  return apiPatch(`/api/v1/admin/users/${encodeURIComponent(id)}`, { is_active: isActive });
 }
 
 export function deleteAdminUser(id: string): Promise<void> {

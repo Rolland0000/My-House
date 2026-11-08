@@ -5,6 +5,7 @@ import { withoutRow } from "../../../shared/utils/paginatedRows";
 import {
   ADMIN_QUERY_ROOT,
   ADMIN_USERS_KEY,
+  USER_GONE_MESSAGE,
   adminUserMutationKey,
   deleteAdminUser,
   type AdminUsersResult,
@@ -34,7 +35,7 @@ export function useDeleteAdminUser(id: string) {
     onError: (error) => {
       if (!isNotFound(error)) return;
       removeRow();
-      showToast("This account no longer exists.", { variant: "error" });
+      showToast(USER_GONE_MESSAGE, { variant: "error" });
     },
   });
 }

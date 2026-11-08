@@ -3,20 +3,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Outlet, useNavigate } from "react-router";
 import { SiteFooter, SiteHeader } from "../../shared/components";
 import type { SiteHeaderRole } from "../../shared/components";
-import { removeAdminQueries } from "../../features/admin";
 import { logout, OwnerActivationModal, useAuth } from "../../features/auth";
-import { removeContactQueries } from "../../features/contact";
-import { removeOwnerScopedQueries } from "../../features/listings";
 import { ownerRequestStatusView, useOwnerRequestStatus } from "../../features/owner-request";
 import { useProfile } from "../../features/profile";
 import { formatInitials } from "../../shared/utils/format";
 import { useLoginPath } from "../../shared/hooks/useLoginPath";
+import { removeSessionQueries, useSuspendedRedirect } from "./useSuspendedRedirect";
 
 export function RootLayout() {
   const { status, sessionRole, clearSession } = useAuth();
   const navigate = useNavigate();
   const signInPath = useLoginPath();
   const queryClient = useQueryClient();
+  useSuspendedRedirect();
   const { data: profile, isFetchedAfterMount: isProfileFresh } = useProfile({
     enabled: status === "authenticated",
   });
@@ -56,9 +55,7 @@ export function RootLayout() {
       await logout();
     } finally {
       clearSession();
-      removeOwnerScopedQueries(queryClient);
-      removeContactQueries(queryClient);
-      removeAdminQueries(queryClient);
+      removeSessionQueries(queryClient);
       navigate(destination);
     }
   }

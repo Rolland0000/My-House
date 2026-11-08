@@ -3,6 +3,7 @@ import { Badge } from "../../../shared/components";
 import { formatFullName } from "../../../shared/utils/format";
 import { ROLE_BADGE, userStateBadge } from "../adminUserBadges";
 import type { AdminUser } from "../api";
+import { AccountStateAction } from "./AccountStateAction";
 import { DeleteUserAction } from "./DeleteUserAction";
 
 const NO_VALUE = "—";
@@ -47,7 +48,14 @@ function AdminUserRow({ user }: AdminUserRowProps) {
       <td className={`${CELL_CLASSES} whitespace-nowrap text-text-muted`}>
         {new Date(user.created_at).toLocaleDateString()}
       </td>
-      <td className={CELL_CLASSES}>{user.role !== "admin" && <DeleteUserAction user={user} />}</td>
+      <td className={CELL_CLASSES}>
+        {user.role !== "admin" && (
+          <div className="flex items-center gap-4">
+            <AccountStateAction user={user} />
+            <DeleteUserAction user={user} />
+          </div>
+        )}
+      </td>
     </tr>
   );
 }

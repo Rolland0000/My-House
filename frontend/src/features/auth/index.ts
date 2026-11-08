@@ -5,6 +5,7 @@ export type { AuthStatus, AuthContextValue } from "./AuthContext";
 // and a static re-export here would pull it into the eager bundle.
 
 export { OwnerActivationModal } from "./components/OwnerActivationModal";
+export { isSuspendedSignOut, SUSPENDED_SIGN_OUT_STATE } from "./suspendedSignOut";
 
 export { useAuth } from "./hooks/useAuth";
 export { useOtpRequest } from "./hooks/useOtpRequest";
