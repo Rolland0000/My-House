@@ -297,18 +297,31 @@ pub async fn delete_by_id(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError
 /// insert on the `users.email` unique constraint.
 ///
 /// `true` = row inserted, `false` = existing account promoted (`xmax = 0`
-/// distinguishes the two in an upsert).
+/// distinguishes the two in an upsert). A promoted account loses its refresh tokens:
+/// sessions opened before the promotion, a suspended account's included, don't come back.
 pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<bool, AppError> {
-    sqlx::query_scalar!(
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let row = sqlx::query!(
         r#"
         INSERT INTO users (email, role, is_active)
         VALUES ($1, 'admin', true)
         ON CONFLICT (email) DO UPDATE SET role = 'admin', is_active = true
-        RETURNING (xmax = 0) AS "created!"
+        RETURNING id, (xmax = 0) AS "created!"
         "#,
         email
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
-    .map_err(|error| AppError::Database(error.to_string()))
+    .map_err(db_err)?;
+
+    if !row.created {
+        sqlx::query!("DELETE FROM refresh_tokens WHERE user_id = $1", row.id)
+            .execute(&mut *tx)
+            .await
+            .map_err(db_err)?;
+    }
+
+    tx.commit().await.map_err(db_err)?;
+    Ok(row.created)
 }

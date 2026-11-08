@@ -203,7 +203,7 @@ pub async fn refresh(State(state): State<AppState>, jar: CookieJar) -> Result<Re
     .await
     {
         Ok(outcome) => outcome,
-        // Otherwise every later page load would retry the refresh and be refused again.
+        // Clearing the cookie stops later page loads from retrying a refused refresh.
         Err(AppError::AccountSuspended) => {
             let jar = jar.remove(clear_refresh_cookie(cookie_domain));
             return Ok((jar, AppError::AccountSuspended).into_response());

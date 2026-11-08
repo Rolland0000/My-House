@@ -140,8 +140,9 @@ pub struct ListingDetailRow {
     pub published_at: Option<String>,
     /// True when the listing has a cover row; `publish` requires one.
     pub has_photo: bool,
-    /// Read by `service::is_visible_to`, like `owner_is_eligible`.
+    /// Computed in SQL by the public-visibility rule.
     pub is_public: bool,
+    /// Computed in SQL; lets the owner see a listing that isn't public.
     pub owner_is_eligible: bool,
     pub owner_id: Uuid,
     pub owner_first_name: Option<String>,

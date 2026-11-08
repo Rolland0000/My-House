@@ -18,7 +18,7 @@ macro_rules! has_cover_sql {
     };
 }
 
-/// Same reason as [`has_cover_sql`].
+/// A macro so `IS_PUBLIC` can embed it with `concat!`.
 macro_rules! owner_is_eligible_sql {
     () => {
         "EXISTS (SELECT 1 FROM users owner WHERE owner.id = l.owner_id AND owner.is_active)"
