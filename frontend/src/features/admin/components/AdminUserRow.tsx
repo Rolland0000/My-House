@@ -5,6 +5,7 @@ import { ROLE_BADGE, userStateBadge } from "../adminUserBadges";
 import type { AdminUser } from "../api";
 import { AccountStateAction } from "./AccountStateAction";
 import { DeleteUserAction } from "./DeleteUserAction";
+import { RevokeOwnerAction } from "./RevokeOwnerAction";
 
 const NO_VALUE = "—";
 const CELL_CLASSES = "px-4 py-3 align-middle";
@@ -51,6 +52,7 @@ function AdminUserRow({ user }: AdminUserRowProps) {
       <td className={CELL_CLASSES}>
         {user.role !== "admin" && (
           <div className="flex items-center gap-4">
+            {user.role === "owner" && <RevokeOwnerAction user={user} />}
             <AccountStateAction user={user} />
             <DeleteUserAction user={user} />
           </div>

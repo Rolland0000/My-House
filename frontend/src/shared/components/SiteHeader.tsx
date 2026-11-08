@@ -17,7 +17,7 @@ interface SiteHeaderProps {
   user?: SiteHeaderUser | null;
   /** Seeker only — shows the "Owner request pending" badge. */
   ownerRequestStatus?: "pending" | null;
-  /** Seeker only — shows the "Become an owner" CTA (no request yet, or the last one rejected). */
+  /** Seeker only — shows the "Become an owner" CTA (no request yet, the last one rejected, or owner access withdrawn). */
   ownerRequestCta?: boolean;
   /** Owner only — no data source yet, accepted for a future verified-owner chip. */
   verified?: boolean;

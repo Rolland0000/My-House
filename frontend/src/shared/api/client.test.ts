@@ -4,6 +4,7 @@ import {
   apiGet,
   buildQueryString,
   isAccountSuspended,
+  isNotAnOwner,
   isNotFound,
   setSuspendedHandler,
   setUnauthorizedHandler,
@@ -22,6 +23,14 @@ describe("isAccountSuspended", () => {
     expect(isAccountSuspended(new ApiError(401, "ACCOUNT_SUSPENDED", "suspended"))).toBe(true);
     expect(isAccountSuspended(new ApiError(401, "UNAUTHORIZED", "no"))).toBe(false);
     expect(isAccountSuspended(new Error("network"))).toBe(false);
+  });
+});
+
+describe("isNotAnOwner", () => {
+  it("is true only for the NOT_AN_OWNER code", () => {
+    expect(isNotAnOwner(new ApiError(409, "NOT_AN_OWNER", "seeker"))).toBe(true);
+    expect(isNotAnOwner(new ApiError(409, "PHOTO_REQUIRED", "no"))).toBe(false);
+    expect(isNotAnOwner(new Error("network"))).toBe(false);
   });
 });
 
