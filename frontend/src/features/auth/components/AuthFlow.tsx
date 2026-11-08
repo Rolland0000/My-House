@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 import { Check } from "lucide-react";
 import { Alert, Spinner } from "../../../shared/components";
 import { cn } from "../../../shared/utils/cn";
 import { RETURN_TO_PARAM, safeReturnTo } from "../../../shared/utils/returnTo";
+import { ACCOUNT_SUSPENDED_MESSAGE } from "../constants";
 import { useAuth } from "../hooks/useAuth";
+import { isSuspendedSignOut } from "../suspendedSignOut";
 import { OtpRequestForm } from "./OtpRequestForm";
 import { OtpVerifyForm } from "./OtpVerifyForm";
 import { RegistrationForm } from "./RegistrationForm";
@@ -64,6 +66,7 @@ function markInterrupted(pending: boolean): void {
 function AuthFlow() {
   const { status } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   // Every navigation to `returnTo` uses `replace`, so Back never shows the sign-in form again.
   const returnTo = safeReturnTo(searchParams.get(RETURN_TO_PARAM));
@@ -96,6 +99,9 @@ function AuthFlow() {
         <div>
           <AuthStepIndicator screen={screen} />
           <div className="flex flex-col gap-5">
+            {isSuspendedSignOut(location.state) && (
+              <Alert variant="error">{ACCOUNT_SUSPENDED_MESSAGE}</Alert>
+            )}
             {wasInterrupted && (
               <Alert variant="info">
                 Your registration was interrupted and no account was created. Request a new code to

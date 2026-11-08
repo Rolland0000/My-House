@@ -44,8 +44,14 @@ export class ApiError extends Error {
   }
 }
 
+const ACCOUNT_SUSPENDED_CODE = "ACCOUNT_SUSPENDED";
+
 export function isNotFound(error: unknown): boolean {
   return error instanceof ApiError && error.status === 404;
+}
+
+export function isAccountSuspended(error: unknown): boolean {
+  return error instanceof ApiError && error.code === ACCOUNT_SUSPENDED_CODE;
 }
 
 function readRetryAfter(response: Response): number | undefined {
@@ -57,9 +63,11 @@ function readRetryAfter(response: Response): number | undefined {
 
 type AccessTokenGetter = () => string | null;
 type UnauthorizedHandler = () => Promise<string | null>;
+type SuspendedHandler = () => void;
 
 let readAccessToken: AccessTokenGetter = () => null;
 let handleUnauthorized: UnauthorizedHandler | null = null;
+let handleSuspended: SuspendedHandler | null = null;
 
 // Registered once by AuthProvider. Going through callbacks rather than an
 // import keeps the access token out of this module's own state — and out of
@@ -70,6 +78,10 @@ export function setAccessTokenGetter(getter: AccessTokenGetter): void {
 
 export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
   handleUnauthorized = handler;
+}
+
+export function setSuspendedHandler(handler: SuspendedHandler | null): void {
+  handleSuspended = handler;
 }
 
 /** `/auth/*` answers 401 on its own terms — refreshing there would loop. */
@@ -90,25 +102,37 @@ function send(path: string, init?: RequestInit): Promise<Response> {
   });
 }
 
+/** Reads a clone, so a response can be inspected and still be thrown later. */
+async function toApiError(response: Response): Promise<ApiError> {
+  const body: Partial<ErrorEnvelope> | null = await response
+    .clone()
+    .json()
+    .catch(() => null);
+  return new ApiError(
+    response.status,
+    body?.error?.code ?? "UNKNOWN_ERROR",
+    body?.error?.message ?? response.statusText,
+    readRetryAfter(response),
+    body?.error?.fields ?? []
+  );
+}
+
 async function sendWithRetry(path: string, init?: RequestInit): Promise<Response> {
   let response = await send(path, init);
 
   if (response.status === 401 && handleUnauthorized && !isAuthPath(path)) {
-    const refreshedToken = await handleUnauthorized();
-    if (refreshedToken) {
-      response = await send(path, init);
+    if (isAccountSuspended(await toApiError(response))) {
+      handleSuspended?.();
+    } else {
+      const refreshedToken = await handleUnauthorized();
+      if (refreshedToken) {
+        response = await send(path, init);
+      }
     }
   }
 
   if (!response.ok) {
-    const body: Partial<ErrorEnvelope> | null = await response.json().catch(() => null);
-    throw new ApiError(
-      response.status,
-      body?.error?.code ?? "UNKNOWN_ERROR",
-      body?.error?.message ?? response.statusText,
-      readRetryAfter(response),
-      body?.error?.fields ?? []
-    );
+    throw await toApiError(response);
   }
 
   return response;

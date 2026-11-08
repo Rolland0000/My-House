@@ -1,7 +1,10 @@
 import { Link, Outlet } from "react-router";
 import { Card } from "../../shared/components";
+import { useSuspendedRedirect } from "./useSuspendedRedirect";
 
 export function AuthLayout() {
+  useSuspendedRedirect();
+
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <div className="flex h-14 items-center border-b border-border bg-surface px-6">

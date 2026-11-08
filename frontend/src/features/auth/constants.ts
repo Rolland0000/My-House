@@ -5,3 +5,5 @@ export const OTP_CODE_LENGTH = 6;
 export const OTP_RATE_LIMIT_COOLDOWN_SECONDS = 60;
 
 export const OTP_RESEND_INITIAL_COOLDOWN_SECONDS = 45;
+
+export const ACCOUNT_SUSPENDED_MESSAGE = "Your account has been suspended.";

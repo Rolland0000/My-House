@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { Alert, Button } from "../../../shared/components";
-import { ApiError } from "../../../shared/api/client";
+import { ApiError, isAccountSuspended } from "../../../shared/api/client";
 import { useCountdown } from "../../../shared/hooks/useCountdown";
 import { formatCountdown } from "../../../shared/utils/format";
 import { useOtpRequest } from "../hooks/useOtpRequest";
 import { useOtpVerify } from "../hooks/useOtpVerify";
 import {
+  ACCOUNT_SUSPENDED_MESSAGE,
   OTP_CODE_LENGTH,
   OTP_RATE_LIMIT_COOLDOWN_SECONDS,
   OTP_RESEND_INITIAL_COOLDOWN_SECONDS,
@@ -106,6 +107,10 @@ function OtpVerifyForm({ email, onBack, onVerified }: OtpVerifyFormProps) {
         <Alert variant="error">
           Invalid or expired code. Check the code you received by email, or request a new one.
         </Alert>
+      )}
+
+      {isAccountSuspended(verifyOtp.error) && (
+        <Alert variant="error">{ACCOUNT_SUSPENDED_MESSAGE}</Alert>
       )}
 
       {isResendRateLimited && (
