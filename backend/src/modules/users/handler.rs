@@ -13,8 +13,8 @@ use crate::shared::rbac::Role;
 use crate::shared::session_cookie::clear_refresh_cookie;
 
 use super::dto::{
-    AdminUserDto, AdminUserListQuery, AvatarUploadForm, UpdateAccountStateDto, UpdateMeDto,
-    UserDto, UserResponse,
+    AdminUserDto, AdminUserListQuery, AdminUserResponse, AvatarUploadForm, UpdateAccountStateDto,
+    UpdateMeDto, UserDto, UserResponse,
 };
 use super::service;
 
@@ -185,7 +185,7 @@ pub async fn delete_user(
     params(("id" = Uuid, Path, description = "User id")),
     request_body = UpdateAccountStateDto,
     responses(
-        (status = 200, description = "Account suspended or reactivated; the current value also returns 200", body = AdminUserDto),
+        (status = 200, description = "Account suspended or reactivated; the current value also returns 200", body = AdminUserResponse),
         (status = 400, description = "Malformed JSON body"),
         (status = 401, description = "Missing or invalid access token"),
         (status = 403, description = "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"),
@@ -198,7 +198,7 @@ pub async fn update_user_state(
     user: AuthUser,
     Path(id): Path<Uuid>,
     AppJson(payload): AppJson<UpdateAccountStateDto>,
-) -> Result<Json<AdminUserDto>, AppError> {
+) -> Result<Json<AdminUserResponse>, AppError> {
     user.require_role(&[Role::Admin])?;
 
     let updated = service::set_active_for_admin(
@@ -210,7 +210,7 @@ pub async fn update_user_state(
     )
     .await?;
 
-    Ok(Json(updated))
+    Ok(Json(AdminUserResponse { data: updated }))
 }
 
 /// Reads the `file` part, skipping any other field. The part's declared
@@ -243,7 +243,7 @@ fn multipart_error(error: axum::extract::multipart::MultipartError) -> AppError 
     tag = "admin",
     params(("id" = Uuid, Path, description = "User id")),
     responses(
-        (status = 200, description = "Owner role revoked: the user is a seeker again and their listings are hidden", body = AdminUserDto),
+        (status = 200, description = "Owner role revoked: the user is a seeker again and their listings are hidden", body = AdminUserResponse),
         (status = 401, description = "Missing or invalid access token"),
         (status = 403, description = "Caller is not an admin (`FORBIDDEN`), or the target is an admin account (`ADMIN_ACCOUNT_PROTECTED`)"),
         (status = 404, description = "No user with this id"),
@@ -254,9 +254,9 @@ pub async fn revoke_owner(
     State(state): State<AppState>,
     user: AuthUser,
     Path(id): Path<Uuid>,
-) -> Result<Json<AdminUserDto>, AppError> {
+) -> Result<Json<AdminUserResponse>, AppError> {
     user.require_role(&[Role::Admin])?;
 
     let updated = service::revoke_owner_for_admin(state.db(), user.user_id, id).await?;
-    Ok(Json(updated))
+    Ok(Json(AdminUserResponse { data: updated }))
 }

@@ -15,7 +15,8 @@ use super::dto::{
     SearchListingsQuery,
 };
 use super::model::{
-    AdminListingRow, AdminListingVisibility, ListingFields, ListingStatus, ListingType,
+    AdminListingRow, AdminListingVisibility, ListingDetailRow, ListingFields, ListingStatus,
+    ListingType,
 };
 use super::repository::{self, ListingFilters};
 
@@ -139,6 +140,24 @@ pub async fn get_listing_detail(
         return Err(AppError::ListingNotFound);
     }
 
+    with_sorted_media(pool, row).await
+}
+
+/// Reads a listing back after its owner's committed write. Skips the visibility
+/// check: a demoted owner's still-valid token must not turn that write into a 404.
+async fn written_listing_detail(pool: &PgPool, id: Uuid) -> Result<ListingDetailDto, AppError> {
+    let row = repository::find_listing_by_id(pool, id)
+        .await?
+        .ok_or(AppError::ListingNotFound)?;
+
+    with_sorted_media(pool, row).await
+}
+
+async fn with_sorted_media(
+    pool: &PgPool,
+    row: ListingDetailRow,
+) -> Result<ListingDetailDto, AppError> {
+    let id = row.id;
     let mut media = repository::find_media_for_listing(pool, id).await?;
     media.sort_by_key(|row| {
         display_order_key(row.is_cover, row.position, row.created_at_micros, row.id)
@@ -212,7 +231,7 @@ pub async fn create_listing(
 ) -> Result<ListingDetailDto, AppError> {
     let fields = validate_listing(request)?;
     let id = repository::insert_listing(pool, owner_id, &fields).await?;
-    get_listing_detail(pool, id, Some(owner_id)).await
+    written_listing_detail(pool, id).await
 }
 
 /// Validates and replaces the editable fields of `owner_id`'s listing `id`.
@@ -227,8 +246,7 @@ pub async fn update_listing(
     repository::update_listing(pool, id, owner_id, &fields)
         .await?
         .ok_or(AppError::ListingNotFound)?;
-    // Owner-aware read: an edited draft still answers 200.
-    get_listing_detail(pool, id, Some(owner_id)).await
+    written_listing_detail(pool, id).await
 }
 
 /// Parses the requested status; a missing or unknown label is a 422 on `status`.
@@ -302,7 +320,7 @@ pub async fn publish_listing(
     if publish_decision(row.published_at.is_some(), row.has_photo)? == PublishDecision::Publish {
         repository::publish_listing(pool, id, owner_id).await?;
     }
-    get_listing_detail(pool, id, Some(owner_id)).await
+    written_listing_detail(pool, id).await
 }
 
 /// Deletes `owner_id`'s listing `id` and its photos, under the same row lock as uploads.

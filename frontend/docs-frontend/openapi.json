@@ -531,7 +531,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
+                  "$ref": "#/components/schemas/AdminUserResponse"
                 }
               }
             }
@@ -578,7 +578,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
+                  "$ref": "#/components/schemas/AdminUserResponse"
                 }
               }
             }
@@ -2130,6 +2130,17 @@
           },
           "role": {
             "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "AdminUserResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminUserDto"
           }
         }
       },

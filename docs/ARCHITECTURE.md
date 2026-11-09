@@ -1,7 +1,7 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 1.5
+> **Version :** 1.6
 > **Statut :** Validé
 > **Dernière mise à jour :** Novembre 2026
 
@@ -232,17 +232,19 @@ graph TB
 graph TB
     subgraph MODULES["Modules de Domaine"]
         AUTH["auth\n─────\nOTP passwordless\nJWT access + refresh\nRate limiting OTP"]
-        USERS["users\n─────\nProfil seeker/owner/admin\nAvatar\nSuppression du compte"]
+        USERS["users\n─────\nProfil seeker/owner/admin\nAvatar\nSuppression du compte\nRoutes /admin/users* : liste, suspension,\nretrait du rôle owner, suppression"]
         OWNER_REQ["owner_requests\n─────\nDemande upgrade owner\nPièces d'identité (privées)\nRevue admin"]
-        LISTINGS["listings\n─────\nCRUD des biens, brouillon → publication\nStatuts available/unavailable\nFeed public + recherche full-text\n(GET /listings, GET /search)"]
+        LISTINGS["listings\n─────\nCRUD des biens, brouillon → publication\nStatuts available/unavailable\nFeed public + recherche full-text\n(GET /listings, GET /search)\nRoutes /admin/listings* : liste,\nstatut, suppression"]
         MEDIA["media\n─────\nPhotos des listings\nQuota, cover, ordre d'affichage\nSeul writer de listing_media"]
         CONTACT["contact\n─────\nRévélation des numéros owner\nPlafond par utilisateur\n(V2 : messagerie in-app)"]
         NOTIF["notifications\n─────\nEmail OTP\nEmail notifications\n(V2 : push)"]
-        ADMIN["admin\n─────\nRoutes /admin/*\nFile des demandes owner\n(modération biens/users\npas encore livrée)"]
+        ADMIN["admin\n─────\nRoutes /admin/owner-requests*\nFile et revue des demandes owner\nDélègue à owner_requests\n(pas de service propre)"]
     end
 ```
 
 La recherche n'est pas un module : `listings` sert le feed et `GET /search` avec les mêmes filtres, la même règle de visibilité et les mêmes requêtes (ADR-12).
+
+Les routes admin de modération sont dans le module qui possède les données : `/admin/listings*` dans `listings`, `/admin/users*` dans `users` (ADR-13). Le module `admin` ne contient plus que les routes des demandes owner.
 
 ### 5.3 Dépendances Inter-Modules
 
@@ -264,8 +266,8 @@ graph TD
 
     LISTINGS -->|"supprime les photos d'un bien via"| STORAGE
 
-    CONTACT -.->|"lit numéro depuis (prévu)"| USERS
-    CONTACT -.->|"vérifie la visibilité via (prévu)"| LISTINGS
+    CONTACT -->|"lit téléphone et demande approuvée\n(tables partagées)"| USERS
+    CONTACT -->|"réutilise la règle de visibilité de"| LISTINGS
 
     ADMIN -->|"délègue la revue des demandes à"| OWNER_REQ
 
@@ -279,9 +281,9 @@ graph TD
     SHARED -.->|"utilisé par tous"| ADMIN
 ```
 
-**Règle de dépendance :** les modules interagissent uniquement via des traits de service définis dans `shared/` ou via injection au bootstrap. Aucun module n'importe jamais l'implémentation concrète d'un autre. Trois écarts existent aujourd'hui (`owner_requests` → `users`, `admin` → `owner_requests`, et `auth` / `owner_requests` → `notifications`) ; ils sont suivis en R-11 (§11).
+**Règle de dépendance :** les modules interagissent uniquement via des traits de service définis dans `shared/` ou via injection au bootstrap. Aucun module n'importe jamais l'implémentation concrète d'un autre. Cinq écarts existent aujourd'hui (`owner_requests` → `users`, `admin` → `owner_requests`, `auth` / `owner_requests` → `notifications`, `contact` → `listings::repository`, et `shared::extractors` → `users::repository`) ; ils sont suivis en R-11 (§11).
 
-`users`, `listings` et `media` n'importent aucun autre module mais partagent des tables : `listings` lit `listing_media` (cover, visibilité), `media` verrouille la ligne `listings` avant d'écrire une photo, et `users` lit les clés de `listing_media` et de `owner_requests.identity_documents` pour nettoyer le storage à la suppression d'un compte. Changer la forme JSONB de `identity_documents` impose donc de revoir aussi cette lecture. L'upload passe par les helpers partagés `shared::file_validation` et `shared::storage_key` ; chaque module appelle ensuite `StorageProvider` lui-même (TECHNICAL_SPEC_MVP.md §3.1).
+`users`, `listings` et `media` n'importent aucun autre module mais partagent des tables : `listings` lit `listing_media` (cover, visibilité) et `users` (owner actif au rôle `owner`, visibilité), `users` compte les lignes `listings` de chaque compte pour le back-office, `media` verrouille la ligne `listings` avant d'écrire une photo, et `users` lit les clés de `listing_media` et de `owner_requests.identity_documents` pour nettoyer le storage à la suppression d'un compte. Changer la forme JSONB de `identity_documents` impose donc de revoir aussi cette lecture. L'upload passe par les helpers partagés `shared::file_validation` et `shared::storage_key` ; chaque module appelle ensuite `StorageProvider` lui-même (TECHNICAL_SPEC_MVP.md §3.1).
 
 ---
 
@@ -430,7 +432,7 @@ sequenceDiagram
 
     Seeker->>Frontend: Ouvre le feed ou la page /search
     Frontend->>Listings: GET /listings ou GET /search?q=…&type=…&price_max=…
-    Listings->>DB: Même requête : visibilité publique (publié + cover),\nfiltres, mots-clés (search_vector), tri
+    Listings->>DB: Même requête : visibilité publique (publié + cover + owner éligible),\nfiltres, mots-clés (search_vector), tri
     Listings-->>Frontend: Page de résultats (cover + résumé)
     Note over Frontend,StorageProvider: Le frontend charge les images\ndirectement depuis le volume statique — pas de proxy backend
 
@@ -538,8 +540,8 @@ Aucun code métier n'est modifié lors de la migration V2 — seule l'implément
 | Refresh token — rotation  | Chaque appel`/auth/refresh` révoque l'ancien token et en émet un nouveau. Réutilisation d'un token déjà consommé = signal de vol → révocation de toute la famille de tokens liés                                                                                                                                                      |
 | OTP                        | Code 6 chiffres, CSPRNG, hashé SHA-256, stocké dans moka (TTL 10 min, usage unique)                                                                                                                                                                                                                                                            |
 | Rate limiting              | 1 demande OTP / 60s par email, 3 tentatives max par code                                                                                                                                                                                                                                                                                         |
-| Autorisation               | Rôles portés dans le JWT claims — vérifiés par extracteur Axum sur chaque route protégée                                                                                                                                                                                                                                                  |
-| Compte actif               | `is_active` revérifié en base par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login) — une suspension admin prend effet immédiatement, y compris sur une session déjà active                                                                                                                 |
+| Autorisation               | Rôles portés dans le JWT claims — vérifiés par extracteur Axum sur chaque route protégée. Le rôle n'est pas relu en base avant le prochain refresh (R-14) |
+| Compte actif               | `is_active` revérifié par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login), via un cache moka de 8 secondes. Une suspension, une réactivation ou une suppression par l'admin invalide cette entrée : elle prend effet immédiatement, y compris sur une session déjà active |
 | Compte admin               | **Un seul compte `admin` au MVP**, créé par un script de bootstrap (variables d'environnement ou commande CLI dédiée) au déploiement initial — aucune route d'auto-inscription ou de promotion vers `admin` n'existe. Le rôle `admin` n'est jamais atteignable via `POST /owner-requests` ni via aucun endpoint utilisateur |
 
 **Modèle de rôles et transitions :**
@@ -555,7 +557,29 @@ stateDiagram-v2
     owner --> [*] : Suppression compte
 ```
 
-**Suppression de compte :** la cascade SQL (`ON DELETE CASCADE`) supprime les lignes liées (listings, listing_media, owner_requests, refresh_tokens), mais ne touche jamais le storage physique. Le nettoyage des fichiers (photos de listings, avatar, documents d'identité) est effectué applicativement — `StorageProvider::delete()` appelé pour chaque media avant l'exécution du `DELETE` SQL — pour éviter toute accumulation de fichiers orphelins.
+`owner_pending` n'est pas un rôle stocké : c'est un seeker dont une demande est `pending`. La suspension n'apparaît pas dans ce diagramme parce qu'elle ne change pas le rôle : elle porte sur `is_active`, et un seeker comme un owner peuvent être suspendus. Aucune action de modération (suspension, suppression, retrait de rôle) ne peut viser un compte admin (`403 ADMIN_ACCOUNT_PROTECTED`).
+
+**Suspension et réactivation** (`PATCH /admin/users/:id`) :
+
+| Aspect | Comportement |
+| ------ | ------------ |
+| Connexion | `/auth/otp/verify` refuse le compte avec `401 ACCOUNT_SUSPENDED`, une fois le code prouvé : sans accès à la boîte mail, on ne peut pas savoir qu'un compte est suspendu |
+| Refresh | `/auth/refresh` répond `401 ACCOUNT_SUSPENDED` avant les contrôles de révocation et d'expiration, et efface le cookie. La fenêtre de grâce de la rotation n'émet rien |
+| Sessions ouvertes | L'entrée `is_active` du cache est invalidée : la requête suivante reçoit `401 ACCOUNT_SUSPENDED`, et le frontend déconnecte la personne en affichant le motif |
+| Biens | Ceux d'un owner suspendu quittent le feed, la recherche, le détail et la révélation du contact. Ils ne sont pas modifiés et apparaissent `hidden` dans `/admin/listings` |
+| Réactivation | Les biens redeviennent publics, inchangés. Tous les refresh tokens du compte sont supprimés : les anciennes sessions restent fermées et il faut se reconnecter par OTP. Seul un access token émis avant la suspension redevient valable jusqu'à son expiration (15 min au plus) |
+
+**Retrait du rôle owner** (`POST /admin/users/:id/revoke-owner`, transition `owner --> seeker`) :
+
+| Aspect | Comportement |
+| ------ | ------------ |
+| Rôle | `users.role` repasse à `seeker`, que le compte soit actif ou suspendu. Une cible qui n'a pas le rôle `owner` reçoit `409 NOT_AN_OWNER`. Le JWT déjà émis garde le rôle `owner` jusqu'à son expiration ou au prochain refresh (R-14) |
+| Biens | Aucune ligne `listings` ou `listing_media` n'est modifiée. La règle de visibilité les retire de la vue publique, et l'ancien owner ne peut plus ouvrir leur détail, même avec un jeton encore porteur du rôle `owner`. Ce qu'il crée ou publie pendant le délai de R-14 reste masqué |
+| Nouvelle demande | Redevenu seeker, le compte peut refaire `POST /owner-requests` (transition `seeker --> owner_pending`). Une demande `pending` au moment du retrait est conservée et bloque une nouvelle soumission. Une nouvelle approbation rend les biens publics, inchangés, et le `secondary_phone` exposé est celui de cette dernière demande |
+
+Les deux décisions masquent les biens sans toucher au storage : les photos restent accessibles à qui possède leur URL directe, puisque nginx les sert sans passer par le backend. La règle exigeant `role = 'owner'`, les biens d'un owner promu admin par le bootstrap sont aussi masqués ; ce cas ne se présente qu'au démarrage sans admin existant.
+
+**Suppression de compte :** la cascade SQL (`ON DELETE CASCADE`) supprime les lignes liées (listings, listing_media, owner_requests, refresh_tokens), mais ne touche jamais le storage physique. Le nettoyage des fichiers (photos de listings, avatar, documents d'identité) est effectué applicativement — `StorageProvider::delete()` appelé pour chaque media avant l'exécution du `DELETE` SQL — pour éviter toute accumulation de fichiers orphelins. `DELETE /admin/users/:id` suit le même chemin, refuse un compte admin et invalide l'entrée `is_active` du cache pour clore la session ouverte.
 
 **Suppression d'un bien ou d'une photo :** l'ordre est inversé. Le `DELETE` SQL est commité d'abord, puis les fichiers sont supprimés en best-effort. Une panne du storage ne peut laisser qu'un fichier orphelin : aucune ligne ne pointe vers un fichier absent.
 
@@ -637,7 +661,8 @@ Le plafond s'applique après la lecture en base, donc un 404 ne compte pas et n'
 | ADR-11 | **Inscription atomique via `POST /auth/register` + ticket opaque** | Création du compte dès `/auth/otp/verify`, complété ensuite par `PUT /users/me` | L'ancien flux laissait un compte fantôme (email seul, authentifiable) si l'utilisateur abandonnait entre les deux appels. `users` + `refresh_tokens` sont désormais insérés dans une seule transaction, tous champs obligatoires présents ; le ticket (usage unique, TTL 10 min) porte la preuve de possession de l'email entre les deux appels |
 | ADR-09 | **Rotation du refresh token à chaque usage**                  | Refresh token statique valable 30 jours sans rotation | Détection de vol (réutilisation d'un token déjà consommé) et révocation immédiate de la famille de tokens ; le TTL 30 jours reste un plafond indépendant             |
 | ADR-10 | **Refresh token en cookie `httpOnly` + `SameSite=Strict`** | Refresh token retourné en JSON body                  | Protection contre le vol via XSS (non accessible en JS) ;`SameSite=Strict` neutralise le CSRF sans token dédié, suffisant pour un MVP mono-domaine                       |
-| ADR-12 | **Recherche hébergée dans le module `listings`** (`GET /search`, MH-64) | Module `search` séparé, avec son handler, son service et son repository | La recherche lit les mêmes lignes que le feed, avec la même règle de visibilité (publié + au moins une photo) et les mêmes filtres. Feed et recherche partagent donc `ListingFilters` et une seule paire de requêtes (comptage + page) : `total` reste aligné sur les pages, et une règle ne peut pas diverger entre les deux. Un module séparé aurait dû dupliquer ces requêtes ou importer le repository de `listings`, ce que la règle de dépendance (§5.3) interdit. Conséquence : une extraction vers un moteur dédié (R-02) passera par un découpage de `listings::repository`, pas par le remplacement d'un module |
+| ADR-12 | **Recherche hébergée dans le module `listings`** (`GET /search`, MH-64) | Module `search` séparé, avec son handler, son service et son repository | La recherche lit les mêmes lignes que le feed, avec la même règle de visibilité (TECHNICAL_SPEC §4.3) et les mêmes filtres. Feed et recherche partagent donc `ListingFilters` et une seule paire de requêtes (comptage + page) : `total` reste aligné sur les pages, et une règle ne peut pas diverger entre les deux. Un module séparé aurait dû dupliquer ces requêtes ou importer le repository de `listings`, ce que la règle de dépendance (§5.3) interdit. Conséquence : une extraction vers un moteur dédié (R-02) passera par un découpage de `listings::repository`, pas par le remplacement d'un module |
+| ADR-13 | **Routes admin de modération hébergées dans le module qui possède les données** (`/admin/listings*` dans `listings`, `/admin/users*` dans `users`, MH-72 à MH-75) | Module `admin` avec ses propres requêtes sur `listings` et `users` ; module `admin` déléguant aux services de ces modules | Même raisonnement que ADR-12 : la liste admin réutilise les filtres et le fragment SQL de visibilité du feed, la suppression d'un bien réutilise le verrou et le nettoyage du storage, la suppression d'un compte celui de `users`. Un module `admin` séparé aurait dû dupliquer ces règles, au risque de les voir diverger, ou importer les modules concernés, ce qui aurait étendu l'écart suivi en R-11. Conséquences : le préfixe `/admin/*` ne désigne pas un module, le contrôle du rôle reste dans chaque handler (`require_role`), le tag OpenAPI `admin` regroupe les routes, et le module `admin` ne porte plus que les demandes owner |
 
 ---
 
@@ -693,9 +718,10 @@ Qualité Système
 | R-08 | **Trigger `fn_update_listing_search_vector` exécute un `SELECT` sur `users` par ligne** modifiée — un changement de nom d'owner avec N listings déclenche N requêtes dans le trigger de cascade | Faible au volume MVP           | Faible                                           | Acceptable au MVP ; à revisiter (dénormalisation ou recalcul batch) si le volume de listings par owner augmente significativement |
 | R-09 | **Un seul compte admin** — aucune redondance opérationnelle ; indisponibilité de l'admin bloque toute validation owner et toute modération                                                             | Faible (MVP, équipe réduite) | Moyen                                            | Rôle superviseur (charge de validation distribuée) prévu en V2                                                                   |
 | R-10 | **Rappel mensuel de disponibilité (LIST-03 du CDC) non implémenté au MVP** — exigence `Must` du cahier des charges différée faute de mécanisme de tâche planifiée                               | Certaine (déjà connu)        | Faible produit / Moyen conformité contractuelle | Implémenter en V2 via tâche planifiée in-process ou cron externe ; amendement explicite du CDC en attendant (cf. CDC v2.1 §6.3) |
-| R-11 | **Règle de dépendance inter-modules non respectée partout** (§5.3) : `owner_requests` appelle `users::service`, `admin` appelle `owner_requests::service`, `auth` et `owner_requests` appellent `notifications` directement, sans trait dans `shared/` | Certaine (déjà dans le code) | Faible au MVP / Moyen si un module est extrait | Introduire les traits de service dans `shared/` et l'injection au bootstrap avant toute extraction de module ; d'ici là, ne pas ajouter de nouvel import direct |
+| R-11 | **Règle de dépendance inter-modules non respectée partout** (§5.3) : `owner_requests` appelle `users::service`, `admin` appelle `owner_requests::service`, `auth` et `owner_requests` appellent `notifications` directement, `contact` importe `listings::repository::push_public_visibility` et `shared::extractors` importe `users::repository::find_is_active`, sans trait dans `shared/` | Certaine (déjà dans le code) | Faible au MVP / Moyen si un module est extrait | Introduire les traits de service dans `shared/` et l'injection au bootstrap avant toute extraction de module ; d'ici là, ne pas ajouter de nouvel import direct |
 | R-12 | **Compte des révélations du contact en mémoire** (§8.8) : il repart de zéro à chaque redémarrage du backend et n'est pas partagé entre instances, donc un utilisateur peut dépasser le plafond en profitant d'un redéploiement ou de plusieurs instances | Faible (MVP mono-instance, redémarrages rares) | Faible au MVP / Moyen si scaling horizontal | Même mitigation que R-01 : passer le cache sur Redis via le trait `AppCacheProvider`, sans toucher au module `contact` |
 | R-13 | **Numéro secondaire non modifiable** : `secondary_phone` est saisi dans la demande owner et aucune route ne le change après approbation ; un owner qui change de numéro secondaire continue d'exposer l'ancien | Moyenne | Faible produit / Moyen confiance des seekers | Ajouter la modification du numéro secondaire au profil owner (V2) ; d'ici là, le téléphone de profil reste modifiable via `PUT /users/me` |
+| R-14 | **Retrait du rôle owner appliqué avec jusqu'à 15 minutes de délai** : le rôle est porté par le JWT et `AuthUser` relit `is_active`, pas `role`. Jusqu'à l'expiration de l'access token (15 min au plus) ou au prochain refresh, la personne garde les droits owner sur l'API. Ses écritures aboutissent et répondent normalement, mais restent masquées | Certaine à chaque retrait de rôle | Faible : ses biens sont déjà masqués, et ce qu'elle crée ou publie pendant le délai reste masqué par la règle de visibilité | Accepté au MVP. Si le délai devient gênant, relire le rôle dans `AuthUser` sur le modèle de `is_active` (cache court invalidé par l'action admin) |
 
 ---
 
@@ -727,3 +753,4 @@ Qualité Système
 | 1.3     | Novembre 2026 | MH-68, alignement sur le code après EP-09 et EP-10. §5.2/§5.3 : recherche hébergée dans `listings`, module `owner_requests`, dépendances réelles et tables partagées. §6.2 : la demande owner passe par `owner_requests`, sans `media`. §6.3 : parcours owner brouillon → photos → publication, ordre d'affichage des photos (cover d'abord), feed et recherche sur la même requête. §9 : ADR-12 (recherche dans `listings`). §11 : R-02 reformulé, R-11 ajouté. Numéro de version aligné sur l'en-tête (1.x), fichier renommé sans numéro de version |
 | 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §6.3 : étape contact livrée, deux numéros (`phone`, `secondary_phone`), conditions de révélation, retour à l'annonce après connexion. §8.8 : plafond de révélations par utilisateur comme protection des coordonnées des owners. §11 : R-12 (compteur en mémoire) et R-13 (numéro secondaire non modifiable) ajoutés |
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §5.2 : module `contact` livré. §6.3 : lecture en base avant le comptage. §8.8 : 30 biens distincts par 8 h, un bien déjà révélé ne compte pas, un 404 n'ouvre pas de fenêtre, balayage d'ids accepté. §11 : R-12 reformulé |
+| 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §5.2 : le module `admin` ne porte que les demandes owner, routes de modération dans `listings` et `users`. §5.3 : tables partagées mises à jour, dépendances réelles de `contact`, écarts complétés. §6.3 : visibilité publique avec owner éligible. §8.1 : cache `is_active`, suspension (connexion, refresh, sessions ouvertes, biens) et retrait du rôle owner (rôle, biens, nouvelle demande), suppression d'un compte par l'admin. §9 : ADR-13 (routes admin dans le module qui possède les données), ADR-12 renvoie à la règle de visibilité. §11 : R-14 (délai du retrait de rôle) ajouté, R-11 complété |

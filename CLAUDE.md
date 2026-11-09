@@ -16,9 +16,9 @@ Target markets: Cameroon and francophone Africa. Two-person team, web-first (mob
 
 Authoritative specs — defer to these over general best practices when they conflict:
 
-- `docs/ARCHITECTURE.md` (arc42, v1.3) — modules, ADRs, runtime flows, deployment. Read before any cross-module or architectural change.
-- `docs/TECHNICAL_SPEC_MVP.md` (v1.3) — DDL, API contract, folder structure. Read before touching schema, endpoints, or module layout.
-- `docs/MyHouse_CahierDesCharges.docx` (v2.2) — functional requirements (ISO 29148). Source of truth for feature scope.
+- `docs/ARCHITECTURE.md` (arc42, v1.6) — modules, ADRs, runtime flows, deployment. Read before any cross-module or architectural change.
+- `docs/TECHNICAL_SPEC_MVP.md` (v1.6) — DDL, API contract, folder structure. Read before touching schema, endpoints, or module layout.
+- `docs/MyHouse_CahierDesCharges.docx` (v2.4) — functional requirements (ISO 29148). Source of truth for feature scope.
 
 
 ## Key Decisions Already Locked — Do Not Re-litigate

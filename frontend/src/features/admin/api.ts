@@ -21,6 +21,7 @@ type OwnerRequestQueueResponse = components["schemas"]["PaginatedResponse_AdminO
 type AdminOwnerRequestDetailResponse = components["schemas"]["AdminOwnerRequestDetailResponse"];
 type AdminListingsResponse = components["schemas"]["PaginatedResponse_AdminListingDto"];
 type AdminListingResponse = components["schemas"]["AdminListingResponse"];
+type AdminUserResponse = components["schemas"]["AdminUserResponse"];
 
 export interface ListOwnerRequestsParams {
   status?: string;
@@ -117,11 +118,11 @@ export function listAdminUsers(params: ListAdminUsersParams): Promise<AdminUsers
   return apiGet<AdminUsersResult>("/api/v1/admin/users", params);
 }
 
-export function updateAdminUserState(id: string, isActive: boolean): Promise<AdminUser> {
+export function updateAdminUserState(id: string, isActive: boolean): Promise<AdminUserResponse> {
   return apiPatch(`/api/v1/admin/users/${encodeURIComponent(id)}`, { is_active: isActive });
 }
 
-export function revokeOwnerRole(id: string): Promise<AdminUser> {
+export function revokeOwnerRole(id: string): Promise<AdminUserResponse> {
   return apiPost(`/api/v1/admin/users/${encodeURIComponent(id)}/revoke-owner`);
 }
 
