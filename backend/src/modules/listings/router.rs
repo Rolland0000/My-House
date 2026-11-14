@@ -19,5 +19,5 @@ pub fn router() -> OpenApiRouter<AppState> {
         // Mounted under /users/me, but kept here because it reads listings.
         .routes(routes!(handler::list_mine)) // owner
         .routes(routes!(handler::admin_list)) // admin
-        .routes(routes!(handler::admin_update_status, handler::admin_delete)) // admin
+        .routes(routes!(handler::admin_delete)) // admin
 }

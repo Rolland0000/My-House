@@ -9,10 +9,11 @@ import { PhoneNumber } from "./PhoneNumber";
 
 const NOT_FOUND_MESSAGE = "This property is no longer available for contact.";
 const RATE_LIMITED_MESSAGE = "You have revealed many numbers recently. Please try again later.";
+const ADMIN_NOTE = "Administrator accounts can't reveal owner phone numbers.";
 const OTHER_ERROR_MESSAGE = "We couldn't load the numbers. Please try again.";
 
-/** `hidden` covers the owner, an admin, and a viewer not known yet. */
-export type ContactAccess = "sign-in" | "reveal" | "hidden";
+/** `hidden` covers the owner and a viewer not known yet; an admin gets a note instead of the button. */
+export type ContactAccess = "sign-in" | "reveal" | "admin" | "hidden";
 
 interface ContactRevealProps {
   listingId: string;
@@ -30,6 +31,7 @@ function ContactReveal({ listingId, access }: ContactRevealProps) {
         </Link>
       )}
       {access === "reveal" && <OwnerContact listingId={listingId} />}
+      {access === "admin" && <Alert variant="info">{ADMIN_NOTE}</Alert>}
       {/* role="note": a role="alert" would be announced every time the page loads. */}
       <Alert variant="warning" role="note" title="Before you contact this owner">
         Never send money before visiting the property. My House does not hold deposits and is not a

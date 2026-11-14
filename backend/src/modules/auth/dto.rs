@@ -70,3 +70,24 @@ pub struct RegisterTokenDto {
 pub struct RegisterResponse {
     pub data: RegisterTokenDto,
 }
+
+/// Hand-written `Debug` so the password can't reach logs through a `{:?}`.
+#[derive(Deserialize, ToSchema)]
+pub struct AdminLoginDto {
+    pub email: String,
+    pub password: String,
+}
+
+impl std::fmt::Debug for AdminLoginDto {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AdminLoginDto")
+            .field("email", &self.email)
+            .field("password", &"<redacted>")
+            .finish()
+    }
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct AdminLoginResponse {
+    pub data: RefreshTokenDto,
+}

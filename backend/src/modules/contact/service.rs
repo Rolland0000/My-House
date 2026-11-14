@@ -4,9 +4,14 @@ use std::time::Duration;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use lettre::Address;
+
 use crate::infra::cache::AppCacheProvider;
+use crate::infra::mailer::Mailer;
+use crate::modules::notifications;
 use crate::shared::errors::AppError;
 use crate::shared::types::RevealWindow;
+use crate::shared::validation::required_name;
 
 use super::dto::ContactDto;
 use super::repository;
@@ -61,6 +66,77 @@ async fn count_reveal(
     Err(AppError::ContactRateLimited {
         retry_after_seconds,
     })
+}
+
+const MESSAGE_MIN_LENGTH: usize = 10;
+const MESSAGE_MAX_LENGTH: usize = 2000;
+const EMAIL_MAX_LENGTH: usize = 255;
+
+/// Fields of a Contact-page message, as received.
+pub struct ContactMessageInput<'a> {
+    pub name: &'a str,
+    pub email: &'a str,
+    pub message: &'a str,
+}
+
+/// The checked, trimmed fields of a message.
+struct ValidMessage<'a> {
+    name: &'a str,
+    email: &'a str,
+    message: &'a str,
+}
+
+fn validate_message<'a>(input: &ContactMessageInput<'a>) -> Result<ValidMessage<'a>, AppError> {
+    let name = required_name(input.name, "name")?;
+    let email = input.email.trim();
+    if email.chars().count() > EMAIL_MAX_LENGTH || email.parse::<Address>().is_err() {
+        return Err(AppError::BadRequest("email is not a valid address.".into()));
+    }
+    let message = input.message.trim();
+    if !(MESSAGE_MIN_LENGTH..=MESSAGE_MAX_LENGTH).contains(&message.chars().count()) {
+        return Err(AppError::BadRequest(format!(
+            "message must be between {MESSAGE_MIN_LENGTH} and {MESSAGE_MAX_LENGTH} characters."
+        )));
+    }
+    if name.contains('\0') || message.contains('\0') {
+        return Err(AppError::BadRequest(
+            "text contains an invalid character.".into(),
+        ));
+    }
+    Ok(ValidMessage {
+        name,
+        email,
+        message,
+    })
+}
+
+/// Validates a Contact-page message and mails it to the fixed admin recipient.
+///
+/// One message per sender address per rate-limit window, on top of the
+/// per-IP limit. Delivery is best-effort, like every other email.
+pub async fn send_contact_message(
+    rate_limit_cache: &dyn AppCacheProvider<String, ()>,
+    mailer: &Mailer,
+    admin_email: &str,
+    input: ContactMessageInput<'_>,
+) -> Result<(), AppError> {
+    let valid = validate_message(&input)?;
+
+    let key = format!("contact_message:{}", valid.email.to_lowercase());
+    if rate_limit_cache.get(&key).await.is_some() {
+        return Err(AppError::RateLimited);
+    }
+    rate_limit_cache.insert(key, ()).await;
+
+    notifications::service::send_contact_message_email(
+        mailer,
+        valid.name,
+        valid.email,
+        valid.message,
+        admin_email,
+    )
+    .await;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -161,5 +237,55 @@ mod tests {
         count_reveal(windows.as_ref(), cap(1), Uuid::new_v4(), Uuid::new_v4())
             .await
             .expect("second user");
+    }
+    fn input<'a>(name: &'a str, email: &'a str, message: &'a str) -> ContactMessageInput<'a> {
+        ContactMessageInput {
+            name,
+            email,
+            message,
+        }
+    }
+
+    #[test]
+    fn a_complete_message_is_trimmed_and_accepted() {
+        let valid =
+            validate_message(&input(" Awa ", " awa@example.com ", " I need some help. ")).unwrap();
+        assert_eq!(valid.name, "Awa");
+        assert_eq!(valid.email, "awa@example.com");
+        assert_eq!(valid.message, "I need some help.");
+    }
+
+    #[test]
+    fn rejects_an_invalid_email_address() {
+        for email in [
+            "",
+            "not-an-email",
+            "a@b@c.com",
+            "a@example.com\r\nBcc: x@y.z",
+        ] {
+            assert!(matches!(
+                validate_message(&input("Awa", email, "I need some help.")),
+                Err(AppError::BadRequest(_))
+            ));
+        }
+    }
+
+    #[test]
+    fn rejects_a_message_outside_the_length_bounds() {
+        let too_long = "a".repeat(MESSAGE_MAX_LENGTH + 1);
+        for message in ["", "too short", too_long.as_str()] {
+            assert!(matches!(
+                validate_message(&input("Awa", "awa@example.com", message)),
+                Err(AppError::BadRequest(_))
+            ));
+        }
+        let at_limit = "a".repeat(MESSAGE_MAX_LENGTH);
+        assert!(validate_message(&input("Awa", "awa@example.com", &at_limit)).is_ok());
+    }
+
+    #[test]
+    fn rejects_a_blank_name_and_the_nul_character() {
+        assert!(validate_message(&input("  ", "awa@example.com", "I need some help.")).is_err());
+        assert!(validate_message(&input("Awa", "awa@example.com", "I need\0 some help.")).is_err());
     }
 }

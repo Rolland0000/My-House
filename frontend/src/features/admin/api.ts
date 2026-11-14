@@ -20,11 +20,11 @@ export type AccountState = NonNullable<ListAdminUsersParams["state"]>;
 type OwnerRequestQueueResponse = components["schemas"]["PaginatedResponse_AdminOwnerRequestDto"];
 type AdminOwnerRequestDetailResponse = components["schemas"]["AdminOwnerRequestDetailResponse"];
 type AdminListingsResponse = components["schemas"]["PaginatedResponse_AdminListingDto"];
-type AdminListingResponse = components["schemas"]["AdminListingResponse"];
 type AdminUserResponse = components["schemas"]["AdminUserResponse"];
 
 export interface ListOwnerRequestsParams {
   status?: string;
+  q?: string;
   page?: number;
   per_page?: number;
 }
@@ -33,6 +33,7 @@ export interface ListAdminListingsParams {
   status?: ListingStatus;
   visibility?: AdminListingVisibility;
   owner_id?: string;
+  q?: string;
   page?: number;
 }
 
@@ -50,7 +51,7 @@ export const ADMIN_LISTINGS_KEY = [ADMIN_QUERY_ROOT, "listings"] as const;
 export const adminListingsQueryKey = (params: ListAdminListingsParams) =>
   [...ADMIN_LISTINGS_KEY, params] as const;
 
-/** Shared by a row's status change and delete, so either one locks both. */
+/** Locks a row's actions while a delete runs on it. */
 export const adminListingActionKey = (id: string) => ["admin-listing-action", id] as const;
 
 export const ADMIN_USERS_KEY = [ADMIN_QUERY_ROOT, "users"] as const;
@@ -73,6 +74,7 @@ export function listOwnerRequests(
 ): Promise<OwnerRequestQueueResponse> {
   return apiGet<OwnerRequestQueueResponse>("/api/v1/admin/owner-requests", {
     status: params.status,
+    q: params.q,
     page: params.page,
     per_page: params.per_page,
   });
@@ -99,15 +101,9 @@ export function listAdminListings(params: ListAdminListingsParams): Promise<Admi
     status: params.status,
     visibility: params.visibility,
     owner_id: params.owner_id,
+    q: params.q,
     page: params.page,
   });
-}
-
-export function updateAdminListingStatus(
-  id: string,
-  status: ListingStatus
-): Promise<AdminListingResponse> {
-  return apiPatch(`/api/v1/admin/listings/${id}`, { status });
 }
 
 export function deleteAdminListing(id: string): Promise<void> {

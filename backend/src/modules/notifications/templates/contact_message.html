@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Nouveau message de contact</title>
+</head>
+<body>
+  <p>Bonjour,</p>
+  <p>Un visiteur a écrit via la page Contact :</p>
+  <ul>
+    <li>Nom : {{ sender_name }}</li>
+    <li>Email : {{ sender_email }}</li>
+  </ul>
+  <p style="white-space: pre-wrap;">{{ message }}</p>
+  <p>Répondez directement à l'adresse e-mail indiquée ci-dessus.</p>
+</body>
+</html>

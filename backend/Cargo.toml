@@ -35,6 +35,7 @@ time = "0.3"
 rand = "0.8"
 ipnet = "2.12.1"
 infer = "0.22"
+argon2 = "0.5"
 
 
 [dev-dependencies]

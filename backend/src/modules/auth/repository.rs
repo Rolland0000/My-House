@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::shared::errors::AppError;
 use crate::shared::rbac::Role;
 
-use super::model::{NewAccount, RefreshTokenLookup};
+use super::model::{AdminLoginRow, NewAccount, RefreshTokenLookup};
 
 fn db_err(error: sqlx::Error) -> AppError {
     AppError::Database(error.to_string())
@@ -111,18 +111,6 @@ pub async fn revoke(pool: &PgPool, token_hash: &str) -> Result<(), AppError> {
     Ok(())
 }
 
-/// Whether `email` already belongs to a registered user — resolves the OTP
-/// request's `is_new` flag without exposing anything else about the row.
-pub async fn email_exists(pool: &PgPool, email: &str) -> Result<bool, AppError> {
-    sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM users WHERE email = $1) AS "exists!""#,
-        email
-    )
-    .fetch_one(pool)
-    .await
-    .map_err(db_err)
-}
-
 /// Existing account's id, current role and `is_active`, for `/auth/otp/verify`'s
 /// known-email branch. Writes nothing to `users`.
 pub async fn find_user_by_email(
@@ -138,6 +126,79 @@ pub async fn find_user_by_email(
     .map_err(db_err)?;
 
     Ok(row.map(|r| (r.id, r.role, r.is_active)))
+}
+
+/// Admin account matching `email`, with its password hash and lock state.
+/// Non-admin accounts are invisible here, so they can never sign in with a password.
+pub async fn find_admin_for_login(
+    pool: &PgPool,
+    email: &str,
+) -> Result<Option<AdminLoginRow>, AppError> {
+    sqlx::query_as!(
+        AdminLoginRow,
+        r#"
+        SELECT
+            id,
+            password_hash,
+            is_active,
+            CASE WHEN locked_until > NOW()
+                THEN CEIL(EXTRACT(EPOCH FROM (locked_until - NOW())))::BIGINT
+            END AS "lock_remaining_seconds",
+            (locked_until IS NOT NULL AND locked_until <= NOW()) AS "lock_expired!"
+        FROM users
+        WHERE email = $1 AND role = 'admin'
+        "#,
+        email
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// Counts one wrong password and sets the lock once `max_attempts` is reached.
+/// Increment and lock decision are a single statement, so concurrent
+/// failures can't skip past the threshold.
+pub async fn record_failed_login(
+    pool: &PgPool,
+    user_id: Uuid,
+    max_attempts: i32,
+    lock_minutes: i32,
+) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+        UPDATE users
+        SET failed_login_attempts = failed_login_attempts + 1,
+            locked_until = CASE
+                WHEN failed_login_attempts + 1 >= $2
+                    THEN NOW() + make_interval(mins => $3)
+                ELSE locked_until
+            END
+        WHERE id = $1
+        "#,
+        user_id,
+        max_attempts,
+        lock_minutes
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+    Ok(())
+}
+
+/// Clears the failure counter and any lock; a no-op write is skipped.
+pub async fn reset_login_failures(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {
+    sqlx::query!(
+        r#"
+        UPDATE users
+        SET failed_login_attempts = 0, locked_until = NULL
+        WHERE id = $1 AND (failed_login_attempts > 0 OR locked_until IS NOT NULL)
+        "#,
+        user_id
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+    Ok(())
 }
 
 /// Creates the account and its first refresh token in one transaction.

@@ -5,5 +5,7 @@ use crate::app_state::AppState;
 use crate::modules::contact::handler;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::new().routes(routes!(handler::get_owner_contact)) // seeker, owner
+    OpenApiRouter::new()
+        .routes(routes!(handler::get_owner_contact)) // seeker, owner
+        .routes(routes!(handler::post_message)) // public
 }

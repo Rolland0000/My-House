@@ -268,7 +268,7 @@ pub struct ListingStatusResponse {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET, PATCH, DELETE /admin/listings
+// GET, DELETE /admin/listings
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Filters accepted by `GET /admin/listings`; they combine.
@@ -279,6 +279,8 @@ pub struct AdminListingsQuery {
     pub visibility: Option<AdminListingVisibility>,
     /// An unknown owner gives an empty page.
     pub owner_id: Option<Uuid>,
+    /// Matches the title, the city, or the owner's name or email, ignoring case and accents.
+    pub q: Option<String>,
     pub page: Option<u32>,
     pub per_page: Option<u32>,
 }
@@ -333,11 +335,6 @@ impl AdminListingDto {
             },
         }
     }
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct AdminListingResponse {
-    pub data: AdminListingDto,
 }
 
 #[cfg(test)]

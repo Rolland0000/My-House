@@ -6,11 +6,11 @@ use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 use crate::shared::rbac::Role;
 
-use super::dto::ContactResponse;
-use super::service::{self, RevealCap};
+use super::dto::{ContactMessageAck, ContactMessageDto, ContactMessageResponse, ContactResponse};
+use super::service::{self, ContactMessageInput, RevealCap};
 
 const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
 
@@ -53,6 +53,41 @@ pub async fn get_owner_contact(
     )
     .await?;
     Ok(Json(ContactResponse { data }))
+}
+
+/// Emails a message from the Contact page to the platform administrator. Public.
+#[utoipa::path(
+    post,
+    path = "/contact/messages",
+    tag = "contact",
+    request_body = ContactMessageDto,
+    responses(
+        (status = 200, description = "Message accepted for delivery", body = ContactMessageResponse),
+        (status = 400, description = "Missing or over-long field, invalid email address, or message outside 10-2000 characters"),
+        (status = 429, description = "This address already sent a message recently, or too many requests from this IP"),
+    )
+)]
+pub async fn post_message(
+    State(state): State<AppState>,
+    AppJson(payload): AppJson<ContactMessageDto>,
+) -> Result<Json<ContactMessageResponse>, AppError> {
+    service::send_contact_message(
+        state.cache().otp_rate_limit().as_ref(),
+        state.mailer(),
+        &state.config().admin_notification_email,
+        ContactMessageInput {
+            name: &payload.name,
+            email: &payload.email,
+            message: &payload.message,
+        },
+    )
+    .await?;
+
+    Ok(Json(ContactMessageResponse {
+        data: ContactMessageAck {
+            message: "Message sent".to_string(),
+        },
+    }))
 }
 
 #[cfg(test)]

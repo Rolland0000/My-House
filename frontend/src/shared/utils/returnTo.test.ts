@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loginPath, safeReturnTo } from "./returnTo";
+import { adminLoginPath, loginPath, safeAdminReturnTo, safeReturnTo } from "./returnTo";
 
 describe("loginPath", () => {
   it("adds no target for home", () => {
@@ -45,5 +45,33 @@ describe("safeReturnTo", () => {
 
   it("keeps a page whose path only starts with login", () => {
     expect(safeReturnTo("/login-help")).toBe("/login-help");
+  });
+});
+
+describe("adminLoginPath", () => {
+  it("adds no target for the admin home", () => {
+    expect(adminLoginPath("/admin")).toBe("/admin/login");
+  });
+
+  it("encodes the target", () => {
+    expect(adminLoginPath("/admin/users?page=2")).toBe(
+      "/admin/login?redirect=%2Fadmin%2Fusers%3Fpage%3D2"
+    );
+  });
+});
+
+describe("safeAdminReturnTo", () => {
+  it("keeps a page of the admin area", () => {
+    expect(safeAdminReturnTo("/admin/users?page=2")).toBe("/admin/users?page=2");
+  });
+
+  it.each([
+    ["missing", null],
+    ["a public page", "/listings/42"],
+    ["a look-alike prefix", "/administrator"],
+    ["the admin sign-in page", "/admin/login"],
+    ["another origin", "//evil.example/admin"],
+  ])("falls back to the admin home for %s", (_label, raw) => {
+    expect(safeAdminReturnTo(raw)).toBe("/admin");
   });
 });

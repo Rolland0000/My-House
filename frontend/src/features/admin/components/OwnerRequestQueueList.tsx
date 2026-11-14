@@ -9,6 +9,7 @@ import {
   Select,
   Spinner,
 } from "../../../shared/components";
+import { AdminSearchBox } from "./AdminSearchBox";
 import { useOwnerRequestQueue } from "../hooks/useOwnerRequestQueue";
 import { ownerRequestStatusBadge } from "../ownerRequestStatusBadge";
 
@@ -21,10 +22,12 @@ const STATUS_OPTIONS = [
 
 function OwnerRequestQueueList() {
   const [status, setStatus] = useState("pending");
+  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
   const { data, isPending, error } = useOwnerRequestQueue({
     status: status || undefined,
+    q: query || undefined,
     page,
   });
 
@@ -33,10 +36,16 @@ function OwnerRequestQueueList() {
     setPage(1);
   }
 
+  function handleSearch(text: string) {
+    setQuery(text);
+    setPage(1);
+  }
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-ink-900">Owner requests</h1>
+      <h1 className="mb-6 text-2xl font-bold text-ink-900">Owner requests</h1>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <AdminSearchBox target="name or email" value={query} onSearch={handleSearch} />
         <Select
           aria-label="Filter by status"
           className="w-44"
@@ -55,7 +64,14 @@ function OwnerRequestQueueList() {
       {error && <Alert variant="error">The queue is unavailable. Please try again.</Alert>}
 
       {!isPending && !error && data && data.data.length === 0 && (
-        <EmptyState title="No requests" description="No owner request matches this filter." />
+        <EmptyState
+          title="No requests"
+          description={
+            query
+              ? "No owner request matches this search."
+              : "No owner request matches this filter."
+          }
+        />
       )}
 
       {!isPending && !error && data && data.data.length > 0 && (

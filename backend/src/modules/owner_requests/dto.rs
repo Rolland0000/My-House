@@ -88,6 +88,8 @@ pub struct ReviewOwnerRequestRequest {
 #[into_params(parameter_in = Query)]
 pub struct ListOwnerRequestsQuery {
     pub status: Option<String>,
+    /// Matches the applicant's name or email, ignoring case and accents.
+    pub q: Option<String>,
     pub page: Option<u32>,
     pub per_page: Option<u32>,
 }

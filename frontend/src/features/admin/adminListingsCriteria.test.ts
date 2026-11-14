@@ -9,8 +9,9 @@ import {
 
 const OWNER_ID = "3f2b8c1e-9a4d-4e6f-8b2a-1c5d7e9f0a3b";
 
-const EMPTY: AdminListingsCriteria = { status: "", visibility: "", ownerId: "", page: 1 };
+const EMPTY: AdminListingsCriteria = { q: "", status: "", visibility: "", ownerId: "", page: 1 };
 const FULL: AdminListingsCriteria = {
+  q: "villa douala",
   status: "unavailable",
   visibility: "no_photo",
   ownerId: OWNER_ID,
@@ -46,6 +47,12 @@ describe("parseAdminListingsCriteria", () => {
     expect(parse(`owner_id=${OWNER_ID}`).ownerId).toBe(OWNER_ID);
   });
 
+  it("trims the search text and drops one that is too long", () => {
+    expect(parse("q=%20villa%20").q).toBe("villa");
+    expect(parse(`q=${"a".repeat(101)}`).q).toBe("");
+    expect(parse(`q=${"é".repeat(100)}`).q).toBe("é".repeat(100));
+  });
+
   it("falls back to page 1 for an invalid page", () => {
     for (const page of ["0", "-2", "abc", "1.5", "", "4294967296"]) {
       expect(parse(`page=${page}`).page).toBe(1);
@@ -61,7 +68,7 @@ describe("toAdminListingsUrlParams", () => {
 
   it("writes keys in a fixed order", () => {
     expect(toAdminListingsUrlParams(FULL).toString()).toBe(
-      `status=unavailable&visibility=no_photo&owner_id=${OWNER_ID}&page=3`
+      `q=villa+douala&status=unavailable&visibility=no_photo&owner_id=${OWNER_ID}&page=3`
     );
   });
 });
@@ -73,6 +80,7 @@ describe("toAdminListingsRequest", () => {
 
   it("passes every filter through under its API name", () => {
     expect(toAdminListingsRequest(FULL)).toEqual({
+      q: "villa douala",
       status: "unavailable",
       visibility: "no_photo",
       owner_id: OWNER_ID,
@@ -88,6 +96,7 @@ describe("hasAdminListingsFilters", () => {
   });
 
   it("counts each filter", () => {
+    expect(hasAdminListingsFilters({ ...EMPTY, q: "villa" })).toBe(true);
     expect(hasAdminListingsFilters({ ...EMPTY, status: "available" })).toBe(true);
     expect(hasAdminListingsFilters({ ...EMPTY, visibility: "draft" })).toBe(true);
     expect(hasAdminListingsFilters({ ...EMPTY, ownerId: OWNER_ID })).toBe(true);

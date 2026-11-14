@@ -250,14 +250,42 @@ fn push_visibility_filter(qb: &mut QueryBuilder<'_, Postgres>, visibility: Admin
     };
 }
 
+/// Fields the back-office search looks in. `strpos` rather than `LIKE`: `unaccent` turns
+/// fullwidth `％` and `＿` into wildcards.
+const ADMIN_SEARCH_FIELDS: [&str; 4] = [
+    "l.title",
+    "l.city",
+    "concat_ws(' ', u.first_name, u.last_name)",
+    "u.email",
+];
+
+fn push_admin_search(qb: &mut QueryBuilder<'_, Postgres>, search: &str) {
+    qb.push(" AND (");
+    for (index, field) in ADMIN_SEARCH_FIELDS.iter().enumerate() {
+        if index > 0 {
+            qb.push(" OR ");
+        }
+        qb.push(format_args!(
+            "strpos(lower(immutable_unaccent({field})), lower(immutable_unaccent("
+        ));
+        qb.push_bind(search.to_owned());
+        qb.push("))) > 0");
+    }
+    qb.push(")");
+}
+
 fn push_admin_filters(
     qb: &mut QueryBuilder<'_, Postgres>,
     filters: &ListingFilters,
     visibility: Option<AdminListingVisibility>,
+    search: Option<&str>,
 ) {
     push_filters(qb, filters);
     if let Some(visibility) = visibility {
         push_visibility_filter(qb, visibility);
+    }
+    if let Some(search) = search {
+        push_admin_search(qb, search);
     }
 }
 
@@ -294,10 +322,12 @@ pub async fn count_admin_listings(
     pool: &PgPool,
     filters: &ListingFilters,
     visibility: Option<AdminListingVisibility>,
+    search: Option<&str>,
 ) -> Result<i64, AppError> {
-    let mut qb: QueryBuilder<Postgres> =
-        QueryBuilder::new("SELECT COUNT(*) FROM listings l WHERE 1 = 1");
-    push_admin_filters(&mut qb, filters, visibility);
+    let mut qb: QueryBuilder<Postgres> = QueryBuilder::new(
+        "SELECT COUNT(*) FROM listings l JOIN users u ON u.id = l.owner_id WHERE 1 = 1",
+    );
+    push_admin_filters(&mut qb, filters, visibility, search);
 
     qb.build_query_scalar()
         .fetch_one(pool)
@@ -311,11 +341,12 @@ pub async fn list_admin_listings(
     pool: &PgPool,
     filters: &ListingFilters,
     visibility: Option<AdminListingVisibility>,
+    search: Option<&str>,
     limit: u32,
     offset: u64,
 ) -> Result<Vec<AdminListingRow>, AppError> {
     let mut qb = admin_listing_select();
-    push_admin_filters(&mut qb, filters, visibility);
+    push_admin_filters(&mut qb, filters, visibility, search);
     // Rows inserted in one transaction share `created_at`; `id` keeps the pages stable.
     qb.push(" ORDER BY l.created_at DESC, l.id DESC LIMIT ");
     qb.push_bind(i64::from(limit));
@@ -324,21 +355,6 @@ pub async fn list_admin_listings(
 
     qb.build_query_as::<AdminListingRow>()
         .fetch_all(pool)
-        .await
-        .map_err(|error| AppError::Database(error.to_string()))
-}
-
-/// The back-office row for `id`, or `None` when the id doesn't exist.
-pub async fn find_admin_listing(
-    pool: &PgPool,
-    id: Uuid,
-) -> Result<Option<AdminListingRow>, AppError> {
-    let mut qb = admin_listing_select();
-    qb.push(" AND l.id = ");
-    qb.push_bind(id);
-
-    qb.build_query_as::<AdminListingRow>()
-        .fetch_optional(pool)
         .await
         .map_err(|error| AppError::Database(error.to_string()))
 }
@@ -493,24 +509,6 @@ pub async fn update_listing_status(
     .fetch_optional(pool)
     .await
     .map(|row| row.map(|row| (row.id, row.status)))
-    .map_err(|error| AppError::Database(error.to_string()))
-}
-
-/// Sets the status of `id` whoever owns it, and returns whether the listing exists. Kept
-/// apart from `update_listing_status` so the owner route can't lose its ownership check.
-pub async fn set_listing_status_by_id(
-    pool: &PgPool,
-    id: Uuid,
-    status: ListingStatus,
-) -> Result<bool, AppError> {
-    sqlx::query!(
-        r#"UPDATE listings SET status = $2 WHERE id = $1"#,
-        id,
-        status as ListingStatus,
-    )
-    .execute(pool)
-    .await
-    .map(|result| result.rows_affected() > 0)
     .map_err(|error| AppError::Database(error.to_string()))
 }
 

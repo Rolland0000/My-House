@@ -168,7 +168,13 @@ pub async fn otp_request(
         });
     }
 
-    let is_new = !repository::email_exists(pool, email).await?;
+    let existing = repository::find_user_by_email(pool, email).await?;
+    // Admins sign in with a password only. Answering like any other request
+    // keeps the response from revealing which email belongs to an admin.
+    if matches!(existing, Some((_, Role::Admin, _))) {
+        return Ok(());
+    }
+    let is_new = existing.is_none();
     let raw_code = crypto::generate_otp_code();
     let code_hash = crypto::hash_otp_code(&raw_code);
 
@@ -286,6 +292,11 @@ pub(in crate::modules::auth) async fn verify_otp(
         .await?
         .ok_or(AppError::OtpInvalid)?;
 
+    // Defence in depth: `otp_request` never issues a code for an admin.
+    if role == Role::Admin {
+        return Err(AppError::OtpInvalid);
+    }
+
     // Only here, once the code is proven: refusing earlier would reveal the
     // suspension to anyone who knows the email.
     if !is_active {
@@ -378,4 +389,109 @@ pub(in crate::modules::auth) async fn register(
         )?,
         raw_refresh_token,
     })
+}
+
+/// Wrong passwords tolerated before the admin account locks.
+const ADMIN_LOGIN_MAX_ATTEMPTS: i32 = 5;
+/// How long the admin account stays locked once the limit is reached.
+const ADMIN_LOGIN_LOCK_MINUTES: i32 = 15;
+const ADMIN_EMAIL_MAX_LENGTH: usize = 255;
+const ADMIN_PASSWORD_MAX_LENGTH: usize = 1024;
+
+/// Entry point wired by the handler. Unknown email, non-admin account, account
+/// without a password and wrong password all answer
+/// [`AppError::InvalidCredentials`]; an unknown email still pays the hashing
+/// cost so timing doesn't tell them apart.
+pub(in crate::modules::auth) async fn admin_login(
+    pool: &PgPool,
+    config: &SessionConfig,
+    email: &str,
+    password: &str,
+) -> Result<SessionOutcome, AppError> {
+    let email = email.trim();
+    if email.is_empty()
+        || email.len() > ADMIN_EMAIL_MAX_LENGTH
+        || password.is_empty()
+        || password.len() > ADMIN_PASSWORD_MAX_LENGTH
+    {
+        return Err(AppError::InvalidCredentials);
+    }
+
+    let admin = match repository::find_admin_for_login(pool, email).await? {
+        Some(admin) if admin.password_hash.is_some() => admin,
+        _ => {
+            run_blocking(|password| crypto::verify_against_dummy(&password), password).await?;
+            return Err(AppError::InvalidCredentials);
+        }
+    };
+    let stored_hash = admin.password_hash.unwrap_or_default();
+
+    // Refused before the password is checked: a locked account must not act as
+    // a guessing oracle, and the counter must not grow while it is locked.
+    if let Some(remaining) = admin.lock_remaining_seconds {
+        return Err(AppError::AdminLoginLocked {
+            retry_after_seconds: remaining.max(1) as u64,
+        });
+    }
+    if admin.lock_expired {
+        repository::reset_login_failures(pool, admin.id).await?;
+    }
+
+    let password_matches = run_blocking(
+        move |password| crypto::verify_password(&password, &stored_hash),
+        password,
+    )
+    .await?;
+    if !password_matches {
+        repository::record_failed_login(
+            pool,
+            admin.id,
+            ADMIN_LOGIN_MAX_ATTEMPTS,
+            ADMIN_LOGIN_LOCK_MINUTES,
+        )
+        .await?;
+        return Err(AppError::InvalidCredentials);
+    }
+
+    // Only for a proven password: refusing earlier would reveal the suspension.
+    if !admin.is_active {
+        return Err(AppError::AccountSuspended);
+    }
+
+    repository::reset_login_failures(pool, admin.id).await?;
+
+    let raw_refresh_token = Uuid::new_v4().to_string();
+    let refresh_token_hash = crypto::hash_refresh_token(&raw_refresh_token);
+    repository::insert_refresh_token(
+        pool,
+        admin.id,
+        &refresh_token_hash,
+        config.jwt_refresh_ttl_days as i32,
+    )
+    .await?;
+
+    Ok(SessionOutcome {
+        access_token: mint(
+            admin.id,
+            Role::Admin,
+            &config.jwt_secret,
+            config.jwt_access_ttl_seconds,
+        )?,
+        raw_refresh_token,
+    })
+}
+
+/// Argon2 is CPU-bound; keeping it off the runtime workers.
+async fn run_blocking<T, F>(work: F, password: &str) -> Result<T, AppError>
+where
+    T: Send + 'static,
+    F: FnOnce(String) -> T + Send + 'static,
+{
+    let password = password.to_owned();
+    tokio::task::spawn_blocking(move || work(password))
+        .await
+        .map_err(|error| {
+            tracing::error!(%error, "password task failed");
+            AppError::Internal
+        })
 }

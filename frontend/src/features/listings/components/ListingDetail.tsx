@@ -53,8 +53,10 @@ function ListingDetail() {
   const contactAccess: ContactAccess =
     status === "anonymous"
       ? "sign-in"
-      : status === "authenticated" && profile && !isOwner && profile.role !== "admin"
-        ? "reveal"
+      : status === "authenticated" && profile && !isOwner
+        ? profile.role === "admin"
+          ? "admin"
+          : "reveal"
         : "hidden";
 
   const location = [listing.city, listing.neighborhood].filter(Boolean).join(" · ");

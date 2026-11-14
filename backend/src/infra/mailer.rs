@@ -150,6 +150,7 @@ mod tests {
             admin_notification_email: "admin@myhouse.app".to_string(),
             admin_bootstrap_on_startup: false,
             admin_bootstrap_email: None,
+            admin_bootstrap_password: None,
             rate_limit_max_requests: 100,
             rate_limit_window_seconds: 60,
             trusted_proxies: vec![],

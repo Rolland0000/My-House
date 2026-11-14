@@ -4,6 +4,7 @@ import { SiteHeader } from "../../shared/components";
 import { logout, useAuth } from "../../features/auth";
 import { removeAdminQueries, useOwnerRequestQueue } from "../../features/admin";
 import { removeOwnerScopedQueries } from "../../features/listings";
+import { useProfile } from "../../features/profile";
 
 export function AdminLayout() {
   const { clearSession } = useAuth();
@@ -11,6 +12,7 @@ export function AdminLayout() {
   const queryClient = useQueryClient();
   // per_page: 1 only to read pagination.total for the header badge — a separate
   // cache entry from the queue list's own query, not meant to share one.
+  const { data: profile } = useProfile();
   const { data } = useOwnerRequestQueue({ status: "pending", page: 1, per_page: 1 });
 
   async function handleSignOut() {
@@ -28,6 +30,7 @@ export function AdminLayout() {
     <div className="flex min-h-screen flex-col">
       <SiteHeader
         role="admin"
+        adminEmail={profile?.email}
         pendingRequestCount={data?.pagination.total}
         onSignOut={handleSignOut}
       />

@@ -389,13 +389,17 @@ pub async fn list_admin_listings(
         status: query.status,
         ..ListingFilters::default()
     };
-    let total = repository::count_admin_listings(pool, &filters, query.visibility).await?;
+    let search = keyword_filter(query.q)?;
+    let total =
+        repository::count_admin_listings(pool, &filters, query.visibility, search.as_deref())
+            .await?;
     let meta = PaginationMeta::new(query.page, query.per_page, total as u64);
 
     let rows = repository::list_admin_listings(
         pool,
         &filters,
         query.visibility,
+        search.as_deref(),
         meta.per_page,
         meta.offset(),
     )
@@ -403,24 +407,6 @@ pub async fn list_admin_listings(
     let data = rows.into_iter().map(admin_listing_dto).collect();
 
     Ok(PaginatedResponse::new(data, meta))
-}
-
-/// Sets the status of any listing, draft included, and returns its back-office item.
-/// `published_at` and the content are left alone.
-pub async fn admin_set_listing_status(
-    pool: &PgPool,
-    id: Uuid,
-    request: ListingStatusRequest,
-) -> Result<AdminListingDto, AppError> {
-    let status = parse_status(request)?;
-    if !repository::set_listing_status_by_id(pool, id, status).await? {
-        return Err(AppError::ListingNotFound);
-    }
-    // A delete can land between the update and this read.
-    let row = repository::find_admin_listing(pool, id)
-        .await?
-        .ok_or(AppError::ListingNotFound)?;
-    Ok(admin_listing_dto(row))
 }
 
 /// Deletes any listing and its photos, under the same row lock as uploads.

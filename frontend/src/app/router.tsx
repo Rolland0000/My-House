@@ -7,7 +7,7 @@ import { RequireOwner } from "./RequireOwner";
 import { RootLayout } from "./layout/RootLayout";
 import { AdminLayout } from "./layout/AdminLayout";
 import { Spinner } from "../shared/components";
-import { LOGIN_PATH } from "../shared/utils/returnTo";
+import { ADMIN_LOGIN_PATH, LOGIN_PATH } from "../shared/utils/returnTo";
 
 const ListingFeed = lazy(() =>
   import("../features/listings/components/ListingFeed").then((m) => ({ default: m.ListingFeed }))
@@ -22,6 +22,17 @@ const ListingDetail = lazy(() =>
 );
 const AuthFlow = lazy(() =>
   import("../features/auth/components/AuthFlow").then((m) => ({ default: m.AuthFlow }))
+);
+const AboutPage = lazy(() =>
+  import("../features/about/components/AboutPage").then((m) => ({ default: m.AboutPage }))
+);
+const ContactPage = lazy(() =>
+  import("../features/contact/components/ContactPage").then((m) => ({ default: m.ContactPage }))
+);
+const AdminLoginPage = lazy(() =>
+  import("../features/auth/components/AdminLoginPage").then((m) => ({
+    default: m.AdminLoginPage,
+  }))
 );
 const ProfileForm = lazy(() =>
   import("../features/profile/components/ProfileForm").then((m) => ({ default: m.ProfileForm }))
@@ -99,6 +110,8 @@ export const router = createBrowserRouter([
       { index: true, element: withSuspense(ListingFeed) },
       { path: "search", element: withSuspense(SearchPage) },
       { path: "listings/:id", element: withSuspense(ListingDetail) },
+      { path: "about", element: withSuspense(AboutPage) },
+      { path: "contact", element: withSuspense(ContactPage) },
       {
         path: "profile",
         element: <RequireAuth>{withSuspense(ProfileForm)}</RequireAuth>,
@@ -151,9 +164,14 @@ export const router = createBrowserRouter([
     children: [{ index: true, element: withSuspense(AuthFlow) }],
   },
   {
+    path: ADMIN_LOGIN_PATH,
+    Component: AuthLayout,
+    children: [{ index: true, element: withSuspense(AdminLoginPage) }],
+  },
+  {
     path: "/admin",
     element: (
-      <RequireAuth>
+      <RequireAuth adminArea>
         <RequireAdmin>
           <AdminLayout />
         </RequireAdmin>

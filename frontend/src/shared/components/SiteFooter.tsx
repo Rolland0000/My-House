@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { PRICE_CURRENCY } from "../utils/format";
 
 type SiteFooterVariant = "public" | "none";
@@ -6,12 +7,42 @@ interface SiteFooterProps {
   variant?: SiteFooterVariant;
 }
 
-const columns: { heading: string; links: string[] }[] = [
-  { heading: "Explore", links: ["Home", "Listings", "Search"] },
-  { heading: "Company", links: ["About", "Contact"] },
-  { heading: "Owners", links: ["Post a property", "Become a verified owner"] },
-  { heading: "Legal", links: ["Legal notice", "Terms of use", "Report a listing"] },
+interface FooterLink {
+  label: string;
+  /** Left out while the page doesn't exist: the label then renders as plain text, never a dead link. */
+  to?: string;
+}
+
+const columns: { heading: string; links: FooterLink[] }[] = [
+  {
+    heading: "Explore",
+    links: [
+      { label: "Home", to: "/" },
+      { label: "Listings", to: "/" },
+      { label: "Search", to: "/search" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About", to: "/about" },
+      { label: "Contact", to: "/contact" },
+    ],
+  },
+  {
+    heading: "Owners",
+    links: [
+      { label: "Post a property", to: "/owner/listings/new" },
+      { label: "Become a verified owner", to: "/owner-request" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [{ label: "Legal notice" }, { label: "Terms of use" }, { label: "Report a listing" }],
+  },
 ];
+
+const FOOTER_LINK_CLASS = "text-sm font-medium text-[#DDE2E9]";
 
 function SiteFooter({ variant = "public" }: SiteFooterProps) {
   if (variant === "none") return null;
@@ -35,11 +66,21 @@ function SiteFooter({ variant = "public" }: SiteFooterProps) {
               <div key={column.heading}>
                 <p className="mb-3 text-xs font-semibold text-white">{column.heading}</p>
                 <div className="flex flex-col gap-2">
-                  {column.links.map((link) => (
-                    <span key={link} className="text-sm font-medium text-[#DDE2E9]">
-                      {link}
-                    </span>
-                  ))}
+                  {column.links.map((link) =>
+                    link.to ? (
+                      <Link
+                        key={link.label}
+                        to={link.to}
+                        className={`${FOOTER_LINK_CLASS} hover:text-white hover:underline`}
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <span key={link.label} className={FOOTER_LINK_CLASS}>
+                        {link.label}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
             ))}

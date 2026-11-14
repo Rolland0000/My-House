@@ -55,6 +55,16 @@ struct OwnerRequestRejectedTemplate<'a> {
     reason: Option<&'a str>,
 }
 
+/// Context for `contact_message.html` — a Contact-page message, sent to the
+/// fixed admin recipient. The sender's text is HTML-escaped by Askama.
+#[derive(Template)]
+#[template(path = "contact_message.html")]
+struct ContactMessageTemplate<'a> {
+    sender_name: &'a str,
+    sender_email: &'a str,
+    message: &'a str,
+}
+
 /// One of the five MVP notification templates, carrying the context data it
 /// needs to render. This is the "template identifier + context variables"
 /// entry point required by MH-29 — matching on this enum, not a raw string
@@ -78,6 +88,11 @@ pub enum NotificationTemplate<'a> {
     OwnerRequestRejected {
         user_name: &'a str,
         reason: Option<&'a str>,
+    },
+    ContactMessage {
+        sender_name: &'a str,
+        sender_email: &'a str,
+        message: &'a str,
     },
 }
 
@@ -111,6 +126,16 @@ pub fn render(template: NotificationTemplate<'_>) -> Result<String, AppError> {
         NotificationTemplate::OwnerRequestRejected { user_name, reason } => {
             OwnerRequestRejectedTemplate { user_name, reason }.render()
         }
+        NotificationTemplate::ContactMessage {
+            sender_name,
+            sender_email,
+            message,
+        } => ContactMessageTemplate {
+            sender_name,
+            sender_email,
+            message,
+        }
+        .render(),
     };
 
     rendered.map_err(|error| {
@@ -255,6 +280,38 @@ pub async fn send_owner_request_rejected_email(
     mailer
         .send(address, "Your owner request has been rejected", body)
         .await;
+}
+
+/// Sends a Contact-page message to the fixed admin recipient. Best-effort like
+/// every other send here: a render or delivery failure is logged and swallowed.
+pub async fn send_contact_message_email(
+    mailer: &Mailer,
+    sender_name: &str,
+    sender_email: &str,
+    message: &str,
+    admin_email: &str,
+) {
+    let body = match render(NotificationTemplate::ContactMessage {
+        sender_name,
+        sender_email,
+        message,
+    }) {
+        Ok(body) => body,
+        Err(error) => {
+            tracing::error!(error = %error, "notifications: failed to render contact_message email");
+            return;
+        }
+    };
+
+    let address: Address = match admin_email.parse() {
+        Ok(address) => address,
+        Err(error) => {
+            tracing::error!(error = %error, admin_email, "notifications: invalid admin recipient address");
+            return;
+        }
+    };
+
+    mailer.send(address, "New contact message", body).await;
 }
 
 #[cfg(test)]

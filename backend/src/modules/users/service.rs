@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::config::AppConfig;
 use crate::infra::cache::AppCacheProvider;
 use crate::infra::storage::{delete_storage_objects, StorageProvider};
+use crate::shared::crypto;
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
@@ -24,26 +25,52 @@ use super::repository;
 /// Startup-only entry point — called once from `main` before the HTTP server
 /// starts accepting requests. There is no HTTP route that reaches this: the
 /// admin role is never creatable through the API surface. No-op when
-/// disabled or when an admin row already exists — never reconciles, merges,
-/// or deletes.
+/// disabled. Creates the admin when none exists; otherwise only gives a
+/// password to an admin that has none — a password already set is never
+/// reconciled, merged, or overwritten.
 pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), AppError> {
     if !config.admin_bootstrap_on_startup {
         return Ok(());
     }
     // Guaranteed `Some` when the flag is on — `AppConfig::from_env` rejects the
     // combination at startup.
-    let Some(email) = config.admin_bootstrap_email.as_deref() else {
+    let (Some(email), Some(password)) = (
+        config.admin_bootstrap_email.as_deref(),
+        config.admin_bootstrap_password.as_ref(),
+    ) else {
         return Ok(());
     };
-    if repository::admin_exists(pool).await? {
+
+    let admin_exists = repository::admin_exists(pool).await?;
+    if admin_exists && !repository::admin_without_password_exists(pool).await? {
         return Ok(());
     }
-    if repository::upsert_admin(pool, email).await? {
-        tracing::info!(email, "admin account bootstrapped");
-    } else {
-        tracing::warn!(email, "existing account promoted to admin by bootstrap");
+
+    let password_hash = hash_password_blocking(password.expose().to_owned()).await?;
+
+    if !admin_exists {
+        if repository::upsert_admin(pool, email, &password_hash).await? {
+            tracing::info!(email, "admin account bootstrapped");
+        } else {
+            tracing::warn!(email, "existing account promoted to admin by bootstrap");
+        }
+        return Ok(());
+    }
+
+    for updated_email in repository::set_missing_admin_passwords(pool, &password_hash).await? {
+        tracing::info!(email = %updated_email, "password set on existing admin account");
     }
     Ok(())
+}
+
+/// Argon2 is CPU-bound; running it on a runtime worker would stall other tasks.
+async fn hash_password_blocking(password: String) -> Result<String, AppError> {
+    tokio::task::spawn_blocking(move || crypto::hash_password(&password))
+        .await
+        .map_err(|error| {
+            tracing::error!(%error, "password hashing task failed");
+            AppError::Internal
+        })?
 }
 
 pub async fn get_me(pool: &PgPool, user_id: Uuid) -> Result<UserRow, AppError> {

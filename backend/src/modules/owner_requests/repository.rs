@@ -103,19 +103,26 @@ pub async fn find_current_for_user(
     .map_err(db_err)
 }
 
-/// Count of requests matching `status` (or every request, when `None`) —
+/// Count of requests matching `status` and `search` (every request, when both are `None`) —
 /// paired with `list_for_admin` to build the pagination envelope.
 pub async fn count_for_admin(
     pool: &PgPool,
     status: Option<OwnerRequestStatus>,
+    search: Option<&str>,
 ) -> Result<i64, AppError> {
     sqlx::query_scalar!(
         r#"
         SELECT COUNT(*) AS "count!"
-        FROM owner_requests
-        WHERE ($1::owner_request_status IS NULL OR status = $1)
+        FROM owner_requests orq
+        JOIN users u ON u.id = orq.user_id
+        WHERE ($1::owner_request_status IS NULL OR orq.status = $1)
+          AND ($2::text IS NULL
+               OR strpos(lower(immutable_unaccent(concat_ws(' ', u.first_name, u.last_name))), lower(immutable_unaccent($2))) > 0
+               OR strpos(lower(immutable_unaccent(concat_ws(' ', u.last_name, u.first_name))), lower(immutable_unaccent($2))) > 0
+               OR strpos(lower(immutable_unaccent(u.email)), lower(immutable_unaccent($2))) > 0)
         "#,
         status as Option<OwnerRequestStatus>,
+        search,
     )
     .fetch_one(pool)
     .await
@@ -129,6 +136,7 @@ pub async fn count_for_admin(
 pub async fn list_for_admin(
     pool: &PgPool,
     status: Option<OwnerRequestStatus>,
+    search: Option<&str>,
     limit: i64,
     offset: i64,
 ) -> Result<Vec<AdminOwnerRequestRow>, AppError> {
@@ -149,10 +157,15 @@ pub async fn list_for_admin(
         FROM owner_requests orq
         JOIN users u ON u.id = orq.user_id
         WHERE ($1::owner_request_status IS NULL OR orq.status = $1)
+          AND ($2::text IS NULL
+               OR strpos(lower(immutable_unaccent(concat_ws(' ', u.first_name, u.last_name))), lower(immutable_unaccent($2))) > 0
+               OR strpos(lower(immutable_unaccent(concat_ws(' ', u.last_name, u.first_name))), lower(immutable_unaccent($2))) > 0
+               OR strpos(lower(immutable_unaccent(u.email)), lower(immutable_unaccent($2))) > 0)
         ORDER BY orq.created_at DESC
-        LIMIT $2 OFFSET $3
+        LIMIT $3 OFFSET $4
         "#,
         status as Option<OwnerRequestStatus>,
+        search,
         limit,
         offset,
     )

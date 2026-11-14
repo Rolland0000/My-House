@@ -151,6 +151,28 @@ impl fmt::Debug for SmtpCredentials {
     }
 }
 
+/// `ADMIN_BOOTSTRAP_PASSWORD` — initial admin password, kept out of logs.
+#[derive(Clone)]
+pub struct AdminBootstrapPassword(String);
+
+impl AdminBootstrapPassword {
+    pub fn expose(&self) -> &str {
+        &self.0
+    }
+}
+
+impl fmt::Debug for AdminBootstrapPassword {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("AdminBootstrapPassword(<redacted>)")
+    }
+}
+
+/// Value shipped in `.env.example`; accepted in development only.
+pub const ADMIN_PASSWORD_PLACEHOLDER: &str = "change-me-admin-password";
+
+/// Shortest admin password accepted outside development.
+pub const ADMIN_PASSWORD_MIN_LENGTH: usize = 12;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AppConfig
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,6 +242,10 @@ pub struct AppConfig {
     /// Email to bootstrap the admin account with. Required when
     /// `admin_bootstrap_on_startup` is `true` — validated in [`AppConfig::from_env`].
     pub admin_bootstrap_email: Option<String>,
+    /// Initial admin password. Required when `admin_bootstrap_on_startup` is
+    /// `true`; outside development it must meet [`ADMIN_PASSWORD_MIN_LENGTH`]
+    /// and differ from [`ADMIN_PASSWORD_PLACEHOLDER`].
+    pub admin_bootstrap_password: Option<AdminBootstrapPassword>,
 
     // ── Rate limiting ────────────────────────────────────────────────────────
     /// Generic per-IP request cap within `rate_limit_window_seconds` (MH-39).
@@ -285,6 +311,41 @@ fn smtp_credentials(
         });
     }
     Ok(Some(credentials))
+}
+
+/// Read `ADMIN_BOOTSTRAP_PASSWORD`. Not trimmed: spaces are legitimate password
+/// characters. Only read when the bootstrap is enabled; outside development the
+/// strength policy is enforced here so a weak password fails the boot.
+fn admin_bootstrap_password(
+    app_env: &AppEnv,
+    bootstrap_enabled: bool,
+) -> Result<Option<AdminBootstrapPassword>, ConfigError> {
+    if !bootstrap_enabled {
+        return Ok(None);
+    }
+    let password = optional_non_empty("ADMIN_BOOTSTRAP_PASSWORD")
+        .ok_or_else(|| ConfigError::Missing("ADMIN_BOOTSTRAP_PASSWORD".to_string()))?;
+
+    if !app_env.is_dev() {
+        let reason = if password.chars().count() < ADMIN_PASSWORD_MIN_LENGTH {
+            Some(format!(
+                "must be at least {ADMIN_PASSWORD_MIN_LENGTH} characters (APP_ENV={app_env})"
+            ))
+        } else if password == ADMIN_PASSWORD_PLACEHOLDER {
+            Some(format!(
+                "must not be the .env.example placeholder (APP_ENV={app_env})"
+            ))
+        } else {
+            None
+        };
+        if let Some(reason) = reason {
+            return Err(ConfigError::Invalid {
+                key: "ADMIN_BOOTSTRAP_PASSWORD".to_string(),
+                reason,
+            });
+        }
+    }
+    Ok(Some(AdminBootstrapPassword(password)))
 }
 
 /// Parse an optional variable as `bool`, falling back to `default`.
@@ -481,6 +542,8 @@ impl AppConfig {
         if admin_bootstrap_on_startup && admin_bootstrap_email.is_none() {
             return Err(ConfigError::Missing("ADMIN_BOOTSTRAP_EMAIL".to_string()));
         }
+        let admin_bootstrap_password =
+            admin_bootstrap_password(&app_env, admin_bootstrap_on_startup)?;
 
         // ── Rate limiting ─────────────────────────────────────────────────────
         let rate_limit_max_requests = require_u32("RATE_LIMIT_MAX_REQUESTS")?;
@@ -536,6 +599,7 @@ impl AppConfig {
             admin_notification_email,
             admin_bootstrap_on_startup,
             admin_bootstrap_email,
+            admin_bootstrap_password,
             rate_limit_max_requests,
             rate_limit_window_seconds,
             trusted_proxies,
@@ -590,6 +654,7 @@ mod tests {
         env::set_var("ADMIN_NOTIFICATION_EMAIL", "admin@myhouse.app");
         env::remove_var("ADMIN_BOOTSTRAP_ON_STARTUP");
         env::remove_var("ADMIN_BOOTSTRAP_EMAIL");
+        env::remove_var("ADMIN_BOOTSTRAP_PASSWORD");
         env::set_var("RATE_LIMIT_MAX_REQUESTS", "100");
         env::set_var("RATE_LIMIT_WINDOW_SECONDS", "60");
         env::set_var("TRUSTED_PROXIES", "");
@@ -892,6 +957,7 @@ mod tests {
         set_valid_env();
         env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
         env::set_var("ADMIN_BOOTSTRAP_EMAIL", "root@myhouse.app");
+        env::set_var("ADMIN_BOOTSTRAP_PASSWORD", "dev-only-password");
         let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
         assert!(cfg.admin_bootstrap_on_startup);
         assert_eq!(
@@ -906,11 +972,93 @@ mod tests {
         set_valid_env();
         env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
         env::set_var("ADMIN_BOOTSTRAP_EMAIL", "  root@myhouse.app  ");
+        env::set_var("ADMIN_BOOTSTRAP_PASSWORD", "dev-only-password");
         let cfg = AppConfig::from_env(AppEnv::Development).expect("should load without error");
         assert_eq!(
             cfg.admin_bootstrap_email.as_deref(),
             Some("root@myhouse.app")
         );
+    }
+
+    fn enable_admin_bootstrap(password: &str) {
+        env::set_var("ADMIN_BOOTSTRAP_ON_STARTUP", "true");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "root@myhouse.app");
+        env::set_var("ADMIN_BOOTSTRAP_PASSWORD", password);
+    }
+
+    #[test]
+    fn rejects_admin_bootstrap_enabled_without_password() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap("");
+        let err = AppConfig::from_env(AppEnv::Development)
+            .expect_err("bootstrap without a password must fail");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "ADMIN_BOOTSTRAP_PASSWORD"));
+    }
+
+    #[test]
+    fn development_accepts_the_placeholder_and_short_passwords() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap(ADMIN_PASSWORD_PLACEHOLDER);
+        assert!(AppConfig::from_env(AppEnv::Development).is_ok());
+        env::set_var("ADMIN_BOOTSTRAP_PASSWORD", "short");
+        assert!(AppConfig::from_env(AppEnv::Development).is_ok());
+    }
+
+    #[test]
+    fn production_rejects_short_admin_password() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap("elevenchars");
+        let err = production_config_error();
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "ADMIN_BOOTSTRAP_PASSWORD")
+        );
+    }
+
+    #[test]
+    fn production_rejects_the_env_example_placeholder() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap(ADMIN_PASSWORD_PLACEHOLDER);
+        let err = production_config_error();
+        assert!(
+            matches!(err, ConfigError::Invalid { key, .. } if key == "ADMIN_BOOTSTRAP_PASSWORD")
+        );
+    }
+
+    #[test]
+    fn production_accepts_a_twelve_character_password() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap("twelve-chars");
+        set_production_smtp();
+        let cfg = AppConfig::from_env(AppEnv::Production).expect("12 characters is enough");
+        assert_eq!(
+            cfg.admin_bootstrap_password.as_ref().map(|p| p.expose()),
+            Some("twelve-chars")
+        );
+    }
+
+    #[test]
+    fn admin_bootstrap_password_debug_is_redacted() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap("dev-only-password");
+        let cfg = AppConfig::from_env(AppEnv::Development).expect("should load");
+        assert!(!format!("{cfg:?}").contains("dev-only-password"));
+    }
+
+    fn set_production_smtp() {
+        env::set_var("SMTP_SECURITY", "tls");
+        env::set_var("SMTP_USERNAME", "user");
+        env::set_var("SMTP_PASSWORD", "pass");
+    }
+
+    fn production_config_error() -> ConfigError {
+        set_production_smtp();
+        AppConfig::from_env(AppEnv::Production).expect_err("config must be rejected")
     }
 
     #[test]

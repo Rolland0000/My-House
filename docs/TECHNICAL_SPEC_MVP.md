@@ -1370,6 +1370,9 @@ La cover ne peut pas être supprimée sans en avoir désigné une autre au préa
 | Méthode | Endpoint                  | Auth | Rôle                 | Description                        |
 | -------- | ------------------------- | ---- | --------------------- | ---------------------------------- |
 | `GET`  | `/listings/:id/contact` | JWT  | `seeker` ou `owner` | Révèle les numéros de l'owner |
+| `POST` | `/contact/messages`     | —    | public               | Envoie un message de la page Contact à `ADMIN_NOTIFICATION_EMAIL` |
+
+`POST /contact/messages` reçoit `{ name, email, message }` (message de 10 à 2000 caractères) et répond `200`. Un message par adresse et par fenêtre `OTP_RATE_LIMIT_SECONDS`, sinon `429 RATE_LIMITED`; l'envoi SMTP est best-effort (template `contact_message.html`). `GET /admin/owner-requests?q=` cherche dans le nom et l'e-mail du demandeur, sans tenir compte de la casse ni des accents.
 
 Servi par le module `contact` (tag OpenAPI `contact`). `phone` est le téléphone du profil de l'owner. `secondary_phone` est le numéro secondaire saisi dans sa demande owner : celle approuvée le plus récemment, `null` s'il n'en a pas donné. Les deux numéros sont renvoyés tels que stockés.
 
@@ -1404,13 +1407,12 @@ Toutes ces routes exigent un JWT de rôle `admin` : `401` sans jeton valable ou 
 | Méthode   | Endpoint                                      | Module           | Description                                       |
 | ---------- | --------------------------------------------- | ---------------- | ------------------------------------------------- |
 | `GET`    | `/admin/listings`                           | `listings`       | Liste tous les biens, quel que soit leur état     |
-| `PATCH`  | `/admin/listings/:id`                       | `listings`       | Change le statut de disponibilité d'un bien       |
 | `DELETE` | `/admin/listings/:id`                       | `listings`       | Supprime un bien et ses photos                    |
 | `GET`    | `/admin/users`                              | `users`          | Liste tous les comptes                            |
 | `PATCH`  | `/admin/users/:id`                          | `users`          | Suspend ou réactive un compte                     |
 | `DELETE` | `/admin/users/:id`                          | `users`          | Supprime un compte, ses données et ses fichiers   |
 | `POST`   | `/admin/users/:id/revoke-owner`             | `users`          | Retire le rôle owner                              |
-| `GET`    | `/admin/owner-requests`                     | `admin`          | File des demandes owner                           |
+| `GET`    | `/admin/owner-requests`                     | `admin`          | File des demandes owner (filtres `status`, `q`)   |
 | `GET`    | `/admin/owner-requests/:id`                 | `admin`          | Détail d'une demande, identité et documents       |
 | `GET`    | `/admin/owner-requests/:id/documents/:doc_id` | `admin`        | Lecture contrôlée d'un document d'identité        |
 | `PATCH`  | `/admin/owner-requests/:id`                 | `admin`          | Approuve ou rejette une demande                   |
@@ -1458,26 +1460,9 @@ Tous les biens, brouillons et biens sans photo compris, du plus récent au plus 
 }
 ```
 
-`published_at` vaut `null` pour un brouillon. Un élément ne porte ni description, ni photo, ni téléphone. `400 INVALID_QUERY_PARAM` pour un `status` ou une `visibility` inconnus, un `owner_id` mal formé, ou un `page` ou `per_page` non entier.
+`published_at` vaut `null` pour un brouillon. Un élément ne porte ni description, ni photo, ni téléphone. Le paramètre `q` (100 caractères max) filtre sur le titre, la ville, le nom ou l'e-mail du propriétaire, sans tenir compte de la casse ni des accents. `400 INVALID_QUERY_PARAM` pour un `status` ou une `visibility` inconnus, un `owner_id` mal formé, un `q` trop long, ou un `page` ou `per_page` non entier.
 
-**`PATCH /admin/listings/:id`**
-
-Fonctionne sur tout bien, brouillon compris. `published_at` et le contenu du bien ne changent pas. Redemander le statut courant répond aussi `200`.
-
-```json
-// Request
-{ "status": "unavailable" }
-
-// Response 200 : même élément que GET /admin/listings
-{ "data": { "id": "uuid", "status": "unavailable", "visibility": "public", "...": "..." } }
-```
-
-| Code    | Cas                                                                                   |
-| ------- | ------------------------------------------------------------------------------------- |
-| `200` | Statut posé                                                                             |
-| `400` | Corps JSON mal formé                                                                    |
-| `404` | `LISTING_NOT_FOUND` : id inconnu                                                        |
-| `422` | `VALIDATION_FAILED` sur `status` : absent, ou autre que `available` / `unavailable`     |
+Le statut de disponibilité n'est modifiable que par le propriétaire du bien (`PATCH /listings/:id/status`) : l'admin le consulte, il ne le change pas (`PATCH /admin/listings/:id` n'existe pas).
 
 **`DELETE /admin/listings/:id`**
 
@@ -1885,7 +1870,8 @@ ADMIN_NOTIFICATION_EMAIL=admin@myhouse.app     # destinataire fixe — admin uni
 
 # ── Admin Bootstrap ──────────────────────────────────────────
 ADMIN_BOOTSTRAP_EMAIL=admin@myhouse.app # email du compte admin unique, créé au démarrage si absent en DB ; requis si ON_STARTUP=true
-ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, vérifie/crée le compte admin au boot (idempotent)
+ADMIN_BOOTSTRAP_PASSWORD=change-me-admin-password # requis si ON_STARTUP=true ; haché Argon2id ; hors dev : ≥ 12 caractères et différent de cette valeur
+ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, crée l'admin au boot, ou lui pose un mot de passe s'il n'en a pas (jamais d'écrasement)
 
 # ── Rate limiting générique ──────────────────────────────────
 RATE_LIMIT_MAX_REQUESTS=100     # obligatoire, > 0 ; requêtes par IP et par fenêtre (distinct de OTP_RATE_LIMIT_SECONDS)
