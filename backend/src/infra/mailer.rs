@@ -85,10 +85,8 @@ impl Mailer {
         })
     }
 
-    /// Sends an email in a background task. Fire-and-forget: the request
-    /// never waits for the relay, so a slow relay cannot stall it and the
-    /// response time does not depend on whether an email was sent. An SMTP
-    /// failure is logged and never returned.
+    /// Sends in a background task, so the request never waits on the relay.
+    /// An SMTP failure is logged, never returned.
     pub async fn send(&self, to: Address, subject: &str, body: String) {
         let message = Message::builder()
             .from(self.from.clone())

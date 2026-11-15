@@ -43,10 +43,9 @@ impl AppServer {
 
     /// Starts the HTTP server and blocks until a shutdown signal is received.
     ///
-    /// Same behaviour as `axum::serve` with connect info (HTTP/1, peer address
-    /// for the rate limiter), plus a header read timeout. On SIGINT or SIGTERM
-    /// the server stops accepting connections and drains in-flight requests
-    /// for at most [`SHUTDOWN_DRAIN_TIMEOUT`].
+    /// `axum::serve` with connect info, plus a header read timeout. On SIGINT or
+    /// SIGTERM it stops accepting connections and drains in-flight requests for
+    /// at most [`SHUTDOWN_DRAIN_TIMEOUT`].
     pub async fn run(self) -> Result<(), Box<dyn std::error::Error>> {
         let app = build_router(self.state);
 

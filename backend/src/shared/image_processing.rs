@@ -1,9 +1,6 @@
-//! Image checks beyond the magic-byte validation of `file_validation`.
-//!
-//! Public images (listing photos, avatars) are decoded and re-encoded before
-//! storage: the output carries no metadata (EXIF GPS included), nothing that
-//! was appended to or hidden in the original file, and pixels only. Private
-//! identity documents keep their original bytes and get a dimension check.
+//! Image checks beyond the magic-byte validation of `file_validation`. Public
+//! images are re-encoded to pixels only (no EXIF, no appended data); identity
+//! documents keep their bytes and only get a dimension check.
 
 use std::io::Cursor;
 
@@ -71,11 +68,9 @@ pub fn check_image_dimensions(bytes: &[u8], validated: &ValidatedFile) -> Result
     }
 }
 
-/// Decodes a public image within the limits above, applies its EXIF rotation
-/// (phones store it there, not in the pixels) and writes the pixels back.
-/// JPEG stays JPEG and PNG stays PNG; WebP becomes JPEG, or PNG when it has
-/// transparency, because the `image` WebP encoder is lossless only and would
-/// inflate photos.
+/// Decodes within the limits above, applies the EXIF rotation and re-encodes.
+/// WebP becomes JPEG (PNG if transparent): the `image` WebP encoder is
+/// lossless only and would inflate photos.
 pub async fn reencode_public_image(
     bytes: Bytes,
     validated: &ValidatedFile,

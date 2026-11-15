@@ -257,11 +257,9 @@ fn parse_is_active(request: UpdateAccountStateDto) -> Result<bool, AppError> {
     is_active.ok_or(AppError::Internal)
 }
 
-/// Deletes the files before the rows that reference them, in one transaction
-/// that locks the account and its listings first, so no upload can add a file
-/// between the key enumeration and the `DELETE`. The connection stays held
-/// during the storage deletes. After a partial failure, a retry re-enumerates
-/// whatever remains.
+/// Deletes the files, then the rows, in one transaction that first locks the
+/// account and its listings so no upload slips in between. The connection is
+/// held during the storage deletes; a retry re-enumerates whatever remains.
 async fn delete_user_and_files(
     pool: &PgPool,
     storage: &dyn StorageProvider,

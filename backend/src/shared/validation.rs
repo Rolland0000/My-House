@@ -92,12 +92,9 @@ pub fn optional_note<'a>(raw: Option<&'a str>, field: &str) -> Result<Option<&'a
 /// Longest address an SMTP path can carry (RFC 5321 §4.5.3.1.3).
 pub const MAX_EMAIL_LENGTH: usize = 254;
 
-/// Canonical form of an email address, or `None` if it is not a valid ASCII
-/// address. Every cache key and `users.email` lookup goes through it, so one
-/// mailbox maps to one account and one OTP cooldown whatever its casing.
-///
-/// ASCII only: Rust's lowercase and PostgreSQL's `lower()` then always agree,
-/// which the `users_email_canonical` check constraint relies on.
+/// Canonical email (trimmed, lowercase), or `None` if invalid. Every lookup
+/// and cache key goes through it. ASCII only, so Rust's lowercase matches
+/// Postgres `lower()`, which `users_email_canonical` relies on.
 pub fn normalize_email(raw: &str) -> Option<String> {
     let trimmed = raw.trim();
     if trimmed.len() > MAX_EMAIL_LENGTH || !trimmed.is_ascii() {

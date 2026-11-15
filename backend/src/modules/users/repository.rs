@@ -263,11 +263,9 @@ pub async fn admin_exists(pool: &PgPool) -> Result<bool, AppError> {
 
 /// Storage keys of every listing photo owned by `user_id`, read from
 /// `listing_media.storage_key` rather than reconstructed from `url`.
-/// Locks the account row and every listing it owns for the caller's
-/// transaction, and returns the current avatar URL (`None` when the account
-/// is gone). An upload that has not yet written its row waits on these locks
-/// and then fails, deleting its own file, instead of slipping in between the
-/// key enumeration and the `DELETE`.
+/// Locks the account row and its listings for the caller's transaction and
+/// returns the avatar URL (`None` when the account is gone). A concurrent
+/// upload waits on these locks, then fails and deletes its own file.
 pub async fn lock_account_for_deletion(
     connection: &mut sqlx::PgConnection,
     user_id: Uuid,

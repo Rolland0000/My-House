@@ -233,8 +233,9 @@ impl AppError {
             Self::MediaOrderConflict => (StatusCode::CONFLICT, "MEDIA_ORDER_CONFLICT"),
             Self::PhotoRequired => (StatusCode::CONFLICT, "PHOTO_REQUIRED"),
             Self::NotAnOwner => (StatusCode::CONFLICT, "NOT_AN_OWNER"),
-            // 413
+            // 408
             Self::RequestTimeout => (StatusCode::REQUEST_TIMEOUT, "REQUEST_TIMEOUT"),
+            // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),
