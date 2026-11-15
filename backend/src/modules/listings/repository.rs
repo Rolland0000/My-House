@@ -62,14 +62,14 @@ pub struct ListingFilters {
 /// Keeps only listings that pass `IS_PUBLIC`. Shared by `count_listings` and
 /// `list_listings` so `total` stays aligned with the returned pages; `pub` so
 /// contact reveal can reuse it instead of re-deriving the rule.
-pub fn push_public_visibility(qb: &mut QueryBuilder<'_, Postgres>) {
+pub fn push_public_visibility(qb: &mut QueryBuilder<Postgres>) {
     qb.push(" AND ").push(IS_PUBLIC);
 }
 
 /// Whole-value place match, ignoring case and accents. The column side must stay
 /// `lower(immutable_unaccent(..))` to use `idx_listings_city_normalized`.
 /// `column` is a code constant, never client input; `pub` so search can reuse it.
-pub fn push_place_match(qb: &mut QueryBuilder<'_, Postgres>, column: &'static str, value: &str) {
+pub fn push_place_match(qb: &mut QueryBuilder<Postgres>, column: &'static str, value: &str) {
     qb.push(format_args!(
         " AND lower(immutable_unaccent({column})) = lower(immutable_unaccent("
     ));
@@ -79,13 +79,13 @@ pub fn push_place_match(qb: &mut QueryBuilder<'_, Postgres>, column: &'static st
 
 /// Builds the tsquery for `keywords` with `unaccent` then the `french` configuration, as the
 /// trigger that fills `search_vector` does. If the two differ, accents and stems stop matching.
-fn push_keyword_query(qb: &mut QueryBuilder<'_, Postgres>, keywords: &str) {
+fn push_keyword_query(qb: &mut QueryBuilder<Postgres>, keywords: &str) {
     qb.push("websearch_to_tsquery('french', unaccent(");
     qb.push_bind(keywords.to_owned());
     qb.push("))");
 }
 
-fn push_filters(qb: &mut QueryBuilder<'_, Postgres>, filters: &ListingFilters) {
+fn push_filters(qb: &mut QueryBuilder<Postgres>, filters: &ListingFilters) {
     if let Some(owner_id) = filters.owner_id {
         qb.push(" AND l.owner_id = ");
         qb.push_bind(owner_id);
@@ -236,7 +236,7 @@ pub async fn list_owner_listings(
 }
 
 /// Narrows `l` to one visibility value, matching what `admin_listing_visibility` derives.
-fn push_visibility_filter(qb: &mut QueryBuilder<'_, Postgres>, visibility: AdminListingVisibility) {
+fn push_visibility_filter(qb: &mut QueryBuilder<Postgres>, visibility: AdminListingVisibility) {
     qb.push(" AND ");
     match visibility {
         AdminListingVisibility::Draft => qb.push("l.published_at IS NULL"),
@@ -259,7 +259,7 @@ const ADMIN_SEARCH_FIELDS: [&str; 4] = [
     "u.email",
 ];
 
-fn push_admin_search(qb: &mut QueryBuilder<'_, Postgres>, search: &str) {
+fn push_admin_search(qb: &mut QueryBuilder<Postgres>, search: &str) {
     qb.push(" AND (");
     for (index, field) in ADMIN_SEARCH_FIELDS.iter().enumerate() {
         if index > 0 {
@@ -275,7 +275,7 @@ fn push_admin_search(qb: &mut QueryBuilder<'_, Postgres>, search: &str) {
 }
 
 fn push_admin_filters(
-    qb: &mut QueryBuilder<'_, Postgres>,
+    qb: &mut QueryBuilder<Postgres>,
     filters: &ListingFilters,
     visibility: Option<AdminListingVisibility>,
     search: Option<&str>,
@@ -290,7 +290,7 @@ fn push_admin_filters(
 }
 
 /// The back-office `SELECT`, up to an open `WHERE`, shared by the page and the single read.
-fn admin_listing_select<'args>() -> QueryBuilder<'args, Postgres> {
+fn admin_listing_select() -> QueryBuilder<Postgres> {
     let mut qb = QueryBuilder::new(
         "SELECT \
             l.id, \
