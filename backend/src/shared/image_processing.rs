@@ -183,15 +183,25 @@ mod tests {
         !crc
     }
 
-    /// A PNG whose header claims `side`×`side` pixels.
+    fn append_png_chunk(png: &mut Vec<u8>, kind: &[u8; 4], data: &[u8]) {
+        let mut typed = kind.to_vec();
+        typed.extend_from_slice(data);
+        png.extend_from_slice(&(data.len() as u32).to_be_bytes());
+        png.extend_from_slice(&typed);
+        png.extend_from_slice(&crc32(&typed).to_be_bytes());
+    }
+
+    /// A PNG whose header claims `side`×`side` pixels, with no pixel data.
+    /// The `png` decoder reads up to the first IDAT before reporting the
+    /// dimensions, so the file must not stop right after IHDR.
     fn png_claiming(side: u32) -> Vec<u8> {
-        let mut ihdr = b"IHDR".to_vec();
-        ihdr.extend_from_slice(&side.to_be_bytes());
+        let mut ihdr = side.to_be_bytes().to_vec();
         ihdr.extend_from_slice(&side.to_be_bytes());
         ihdr.extend_from_slice(&[8, 2, 0, 0, 0]);
-        let mut png = b"\x89PNG\r\n\x1a\n\0\0\0\x0d".to_vec();
-        png.extend_from_slice(&ihdr);
-        png.extend_from_slice(&crc32(&ihdr).to_be_bytes());
+        let mut png = b"\x89PNG\r\n\x1a\n".to_vec();
+        append_png_chunk(&mut png, b"IHDR", &ihdr);
+        append_png_chunk(&mut png, b"IDAT", &[]);
+        append_png_chunk(&mut png, b"IEND", &[]);
         png
     }
 
