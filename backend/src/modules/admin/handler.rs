@@ -27,7 +27,7 @@ use crate::shared::rbac::Role;
     params(ListOwnerRequestsQuery),
     responses(
         (status = 200, description = "Paginated owner-request queue", body = PaginatedResponse<AdminOwnerRequestDto>),
-        (status = 400, description = "Invalid `status` filter value"),
+        (status = 400, description = "Invalid `status` filter value, or `q` too long"),
         (status = 401, description = "Missing or invalid access token"),
         (status = 403, description = "Caller is not an admin"),
     )
@@ -42,6 +42,7 @@ pub async fn list_owner_requests(
     let response = service::list_for_admin(
         state.db(),
         query.status.as_deref(),
+        query.q,
         query.page,
         query.per_page,
     )

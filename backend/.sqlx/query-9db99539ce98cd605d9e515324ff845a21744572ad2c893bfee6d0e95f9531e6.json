@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            id,\n            password_hash,\n            is_active,\n            CASE WHEN locked_until > NOW()\n                THEN CEIL(EXTRACT(EPOCH FROM (locked_until - NOW())))::BIGINT\n            END AS \"lock_remaining_seconds\",\n            (locked_until IS NOT NULL AND locked_until <= NOW()) AS \"lock_expired!\"\n        FROM users\n        WHERE email = $1 AND role = 'admin'\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "password_hash",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "lock_remaining_seconds",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "lock_expired!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "9db99539ce98cd605d9e515324ff845a21744572ad2c893bfee6d0e95f9531e6"
+}

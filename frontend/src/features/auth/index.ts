@@ -1,13 +1,14 @@
 export { AuthProvider } from "./AuthContext";
 export type { AuthStatus, AuthContextValue } from "./AuthContext";
 
-// AuthFlow is deliberately not re-exported: router.tsx lazy-loads it by path,
+// AuthFlow and AdminLoginPage are deliberately not re-exported: router.tsx lazy-loads them by path,
 // and a static re-export here would pull it into the eager bundle.
 
 export { OwnerActivationModal } from "./components/OwnerActivationModal";
 export { isSuspendedSignOut, SUSPENDED_SIGN_OUT_STATE } from "./suspendedSignOut";
 
 export { useAuth } from "./hooks/useAuth";
+export { useAdminLogin } from "./hooks/useAdminLogin";
 export { useOtpRequest } from "./hooks/useOtpRequest";
 export { useOtpVerify } from "./hooks/useOtpVerify";
 export { useRegister } from "./hooks/useRegister";
@@ -16,6 +17,7 @@ export {
   requestOtp,
   verifyOtp,
   registerAccount,
+  adminLogin,
   refreshSession,
   logout,
   type OtpVerifyToken,

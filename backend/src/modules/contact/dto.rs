@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 /// Phone numbers of a listing's owner, exactly as stored.
@@ -15,4 +15,23 @@ pub struct ContactDto {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ContactResponse {
     pub data: ContactDto,
+}
+
+/// Body of `POST /contact/messages`.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ContactMessageDto {
+    pub name: String,
+    pub email: String,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ContactMessageAck {
+    pub message: String,
+}
+
+/// Envelope for `POST /contact/messages`.
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ContactMessageResponse {
+    pub data: ContactMessageAck,
 }

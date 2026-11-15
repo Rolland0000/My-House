@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutDashboard, Menu, X } from "lucide-react";
 import { Badge } from "./Badge";
 import { cn } from "../utils/cn";
 import { useLoginPath } from "../hooks/useLoginPath";
@@ -21,6 +21,10 @@ interface SiteHeaderProps {
   ownerRequestCta?: boolean;
   /** Owner only — no data source yet, accepted for a future verified-owner chip. */
   verified?: boolean;
+  /** An admin browsing the public site — shows the shortcut back to the back office. */
+  showAdminLink?: boolean;
+  /** Admin only — the signed-in admin's email, shown in the bar. */
+  adminEmail?: string;
   /** Admin only — count of pending owner requests, shown as a badge on the nav item. */
   pendingRequestCount?: number;
   onSignOut?: () => void;
@@ -39,9 +43,11 @@ const wordmark = (
   </Link>
 );
 
-/** A nav item with no real route yet renders as inert text, matching the brief's
- *  "bare, unlinked" treatment for About/Contact and any owner/admin page that
- *  doesn't exist in the router yet — never a dead link. */
+const ABOUT_PATH = "/about";
+const CONTACT_PATH = "/contact";
+const ADMIN_HOME_PATH = "/admin";
+
+/** A nav item with no real route yet renders as inert text — never a dead link. */
 function NavItem({ to, current, children }: { to?: string; current?: boolean; children: string }) {
   const classes = cn(
     "border-b-2 py-1.5 text-sm",
@@ -203,9 +209,21 @@ function publicLinks(pathname: string): NavLinkSpec[] {
     { label: "Home", to: "/" },
     { label: "Listings", to: "/", current: pathname === "/" },
     { label: "Search", to: SEARCH_PATH, current: pathname === SEARCH_PATH },
-    { label: "About" },
-    { label: "Contact" },
+    { label: "About", to: ABOUT_PATH, current: pathname === ABOUT_PATH },
+    { label: "Contact", to: CONTACT_PATH, current: pathname === CONTACT_PATH },
   ];
+}
+
+const adminLinkClass =
+  "flex flex-none items-center gap-1.5 rounded-sm bg-ink-900 px-3 py-2 text-sm font-semibold text-white hover:bg-ink-600";
+
+function AdminDashboardLink({ onClick }: { onClick?: () => void }) {
+  return (
+    <Link to={ADMIN_HOME_PATH} onClick={onClick} className={adminLinkClass}>
+      <LayoutDashboard className="size-4" aria-hidden="true" />
+      Admin dashboard
+    </Link>
+  );
 }
 
 function PublicHeader() {
@@ -272,11 +290,13 @@ function SeekerHeader({
   user,
   ownerRequestStatus,
   ownerRequestCta,
+  showAdminLink,
   onSignOut,
 }: {
   user?: SiteHeaderUser | null;
   ownerRequestStatus?: "pending" | null;
   ownerRequestCta?: boolean;
+  showAdminLink?: boolean;
   onSignOut?: () => void;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -316,10 +336,16 @@ function SeekerHeader({
             <UserMenu user={user} profileHref="/profile" onSignOut={onSignOut} />
           </div>
         )}
+        {showAdminLink && (
+          <div className="hidden sm:block">
+            <AdminDashboardLink />
+          </div>
+        )}
         <HamburgerButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen((open) => !open)} />
       </div>
       {isMenuOpen && (
         <MobileMenu links={links} onClose={() => setIsMenuOpen(false)}>
+          {showAdminLink && <AdminDashboardLink onClick={() => setIsMenuOpen(false)} />}
           {ownerRequestStatus === "pending" && <Badge tone="warning">Owner request pending</Badge>}
           {ownerRequestCta && (
             <Link
@@ -365,8 +391,8 @@ function ownerLinks(pathname: string): NavLinkSpec[] {
     { label: "Listings", to: "/", current: pathname === "/" },
     { label: "Search", to: SEARCH_PATH, current: pathname === SEARCH_PATH },
     { label: "My properties", to: OWNER_LISTINGS_PATH, current: pathname === OWNER_LISTINGS_PATH },
-    { label: "About" },
-    { label: "Contact" },
+    { label: "About", to: ABOUT_PATH, current: pathname === ABOUT_PATH },
+    { label: "Contact", to: CONTACT_PATH, current: pathname === CONTACT_PATH },
   ];
 }
 
@@ -464,9 +490,11 @@ function adminNavClasses(current: boolean) {
 }
 
 function AdminHeader({
+  adminEmail,
   pendingRequestCount,
   onSignOut,
 }: {
+  adminEmail?: string;
   pendingRequestCount?: number;
   onSignOut?: () => void;
 }) {
@@ -493,7 +521,7 @@ function AdminHeader({
         </NavLink>
       </nav>
       <span className="flex-1 sm:hidden" />
-      <span className="hidden flex-none text-sm text-[#8E9AAC] sm:inline">admin@myhouse.app</span>
+      <span className="hidden flex-none text-sm text-[#8E9AAC] sm:inline">{adminEmail}</span>
       <button
         type="button"
         onClick={onSignOut}
@@ -511,13 +539,19 @@ function SiteHeader({
   ownerRequestStatus,
   ownerRequestCta,
   verified,
+  showAdminLink,
+  adminEmail,
   pendingRequestCount,
   onSignOut,
 }: SiteHeaderProps) {
   if (role === "admin") {
     return (
       <header className="bg-ink-900">
-        <AdminHeader pendingRequestCount={pendingRequestCount} onSignOut={onSignOut} />
+        <AdminHeader
+          adminEmail={adminEmail}
+          pendingRequestCount={pendingRequestCount}
+          onSignOut={onSignOut}
+        />
       </header>
     );
   }
@@ -530,6 +564,7 @@ function SiteHeader({
           user={user}
           ownerRequestStatus={ownerRequestStatus}
           ownerRequestCta={ownerRequestCta}
+          showAdminLink={showAdminLink}
           onSignOut={onSignOut}
         />
       )}

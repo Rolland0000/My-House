@@ -89,9 +89,11 @@ export function setSuspendedHandler(handler: SuspendedHandler | null): void {
   handleSuspended = handler;
 }
 
-/** `/auth/*` answers 401 on its own terms — refreshing there would loop. */
+const ADMIN_LOGIN_API_PATH = "/api/v1/admin/auth/login";
+
+/** `/auth/*` and the admin sign-in answer 401 on their own terms — refreshing there would loop. */
 function isAuthPath(path: string): boolean {
-  return path.startsWith("/api/v1/auth/");
+  return path.startsWith("/api/v1/auth/") || path === ADMIN_LOGIN_API_PATH;
 }
 
 function send(path: string, init?: RequestInit): Promise<Response> {

@@ -23,6 +23,7 @@ import {
 } from "../adminListingsCriteria";
 import { useAdminListings } from "../hooks/useAdminListings";
 import { AdminListingRow } from "./AdminListingRow";
+import { AdminSearchBox } from "./AdminSearchBox";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -37,7 +38,7 @@ const VISIBILITY_OPTIONS = [
   })),
 ];
 
-const COLUMNS = ["Title", "Owner", "City", "Type", "Price", "Status", "Visibility", "Created"];
+const COLUMNS = ["Title", "Owner", "City", "Type", "Status", "Visibility", "Created"];
 
 function AdminListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,8 +59,8 @@ function AdminListingsPage() {
     }
   }, [criteria, isPlaceholderData, totalPages, setSearchParams]);
 
-  function changeFilters(patch: Partial<AdminListingsCriteria>) {
-    setSearchParams(toAdminListingsUrlParams({ ...criteria, ...patch, page: 1 }));
+  function changeFilters(patch: Partial<AdminListingsCriteria>, replace = false) {
+    setSearchParams(toAdminListingsUrlParams({ ...criteria, ...patch, page: 1 }), { replace });
   }
 
   function removeOwnerFilter() {
@@ -70,8 +71,14 @@ function AdminListingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-ink-900">Properties</h1>
+      <h1 className="text-2xl font-bold text-ink-900">Properties</h1>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <AdminSearchBox
+          target="title, city or owner"
+          value={criteria.q}
+          onSearch={(q, settled) => changeFilters({ q }, settled)}
+        />
         <div className="flex flex-wrap items-center gap-3">
           <Select
             aria-label="Filter by status"

@@ -10,9 +10,9 @@ use axum::Json;
 use axum_extra::extract::cookie::CookieJar;
 
 use super::dto::{
-    OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse, OtpVerifyDto, OtpVerifyResponse,
-    OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto, RegisterDto, RegisterResponse,
-    RegisterTokenDto,
+    AdminLoginDto, AdminLoginResponse, OtpRequestDto, OtpRequestMessageDto, OtpRequestResponse,
+    OtpVerifyDto, OtpVerifyResponse, OtpVerifyTokenDto, RefreshResponse, RefreshTokenDto,
+    RegisterDto, RegisterResponse, RegisterTokenDto,
 };
 use super::service;
 
@@ -249,4 +249,46 @@ pub async fn logout(
 
     let cookie_domain = state.config().cookie_domain.clone();
     Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
+}
+
+/// Password sign-in for the admin account — the only way to open an admin
+/// session. Opens the same rotating refresh session as the OTP flow.
+#[utoipa::path(
+    post,
+    path = "/admin/auth/login",
+    tag = "auth",
+    request_body = AdminLoginDto,
+    responses(
+        (status = 200, description = "Admin session issued; refresh cookie set", body = AdminLoginResponse),
+        (status = 401, description = "Wrong email or password (`INVALID_CREDENTIALS`), or suspended account (`ACCOUNT_SUSPENDED`)"),
+        (status = 429, description = "Account locked after repeated failures (`ADMIN_LOGIN_LOCKED`, `Retry-After` header)"),
+    )
+)]
+pub async fn admin_login(
+    State(state): State<AppState>,
+    jar: CookieJar,
+    Json(payload): Json<AdminLoginDto>,
+) -> Result<(CookieJar, Json<AdminLoginResponse>), AppError> {
+    let app_config = state.config();
+    let cookie_domain = app_config.cookie_domain.clone();
+    let config = service::SessionConfig::new(
+        state.jwt_secret().clone(),
+        app_config.jwt_access_ttl_seconds,
+        app_config.jwt_refresh_ttl_days,
+    );
+    let outcome =
+        service::admin_login(state.db(), &config, &payload.email, &payload.password).await?;
+
+    Ok((
+        jar.add(build_refresh_cookie(
+            outcome.raw_refresh_token,
+            cookie_domain,
+            config.jwt_refresh_ttl_days,
+        )),
+        Json(AdminLoginResponse {
+            data: RefreshTokenDto {
+                access_token: outcome.access_token,
+            },
+        }),
+    ))
 }

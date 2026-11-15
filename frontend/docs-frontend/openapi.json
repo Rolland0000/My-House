@@ -9,11 +9,44 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/admin/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Password sign-in for the admin account — the only way to open an admin\nsession. Opens the same rotating refresh session as the OTP flow.",
+        "operationId": "admin_login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Admin session issued; refresh cookie set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Wrong email or password (`INVALID_CREDENTIALS`), or suspended account (`ACCOUNT_SUSPENDED`)"
+          },
+          "429": {
+            "description": "Account locked after repeated failures (`ADMIN_LOGIN_LOCKED`, `Retry-After` header)"
+          }
+        }
+      }
+    },
     "/api/v1/admin/listings": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "Every listing on the platform, drafts and listings without a photo included, newest first.",
         "operationId": "admin_list",
         "parameters": [
@@ -41,6 +74,15 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Matches the title, the city, or the owner's name or email, ignoring case and accents.",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -76,7 +118,7 @@
             }
           },
           "400": {
-            "description": "Unknown `status` or `visibility` value, malformed `owner_id`, or non-integer `page` or `per_page`"
+            "description": "Unknown `status` or `visibility` value, malformed `owner_id`, non-integer `page` or `per_page`, or `q` too long"
           },
           "401": {
             "description": "Missing or invalid access token"
@@ -89,9 +131,7 @@
     },
     "/api/v1/admin/listings/{id}": {
       "delete": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "Permanently deletes any listing and its photos.",
         "operationId": "admin_delete",
         "parameters": [
@@ -120,75 +160,26 @@
             "description": "Listing not found or already deleted"
           }
         }
-      },
-      "patch": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "Marks any listing as available or unavailable. Works on drafts too, and never\nchanges the content or the publication state.",
-        "operationId": "admin_update_status",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Listing id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListingStatusRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Status set; setting the current status also returns 200",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminListingResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Malformed JSON body"
-          },
-          "401": {
-            "description": "Missing or invalid access token"
-          },
-          "403": {
-            "description": "Caller is not an admin"
-          },
-          "404": {
-            "description": "Listing not found"
-          },
-          "422": {
-            "description": "`status` is missing or not one of the two labels"
-          }
-        }
       }
     },
     "/api/v1/admin/owner-requests": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "Admin-only queue of owner requests. Delegates entirely to\n`owner_requests::service` — this module never opens its own access to the\n`owner_requests` table.",
         "operationId": "list_owner_requests",
         "parameters": [
           {
             "name": "status",
             "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Matches the applicant's name or email, ignoring case and accents.",
             "required": false,
             "schema": {
               "type": "string"
@@ -227,7 +218,7 @@
             }
           },
           "400": {
-            "description": "Invalid `status` filter value"
+            "description": "Invalid `status` filter value, or `q` too long"
           },
           "401": {
             "description": "Missing or invalid access token"
@@ -240,9 +231,7 @@
     },
     "/api/v1/admin/owner-requests/{id}": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "One request's full detail, including `identity_data` and every document\ndescriptor — the only admin-facing route allowed to return them.",
         "operationId": "get_owner_request",
         "parameters": [
@@ -280,9 +269,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "Records an admin's approve/reject decision. Delegates the whole\ntransaction (status write, role promotion on approval, notification) to\n`owner_requests::service::review` — this handler only authorizes and logs.",
         "operationId": "review_owner_request",
         "parameters": [
@@ -338,9 +325,7 @@
     },
     "/api/v1/admin/owner-requests/{id}/documents/{doc_id}": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "summary": "Streams one identity document's raw bytes back to an admin — the sole\nbackend endpoint that proxies storage reads instead of leaving a file to\nbe served statically (`ARCHITECTURE.md` §7.3). `content_type` comes from\nthe upload-time magic-byte check, not from client input, so it's safe to\necho straight into the response header.",
         "operationId": "get_owner_request_document",
         "parameters": [
@@ -386,9 +371,7 @@
     },
     "/api/v1/admin/users": {
       "get": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "operationId": "list_users",
         "parameters": [
           {
@@ -406,10 +389,7 @@
             "schema": {
               "type": "string",
               "description": "`suspended` means `is_active = false`.",
-              "enum": [
-                "active",
-                "suspended"
-              ]
+              "enum": ["active", "suspended"]
             }
           },
           {
@@ -467,9 +447,7 @@
     },
     "/api/v1/admin/users/{id}": {
       "delete": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "operationId": "delete_user",
         "parameters": [
           {
@@ -499,9 +477,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "operationId": "update_user_state",
         "parameters": [
           {
@@ -556,9 +532,7 @@
     },
     "/api/v1/admin/users/{id}/revoke-owner": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "operationId": "revoke_owner",
         "parameters": [
           {
@@ -600,9 +574,7 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "The access token itself keeps authenticating requests until its own\n(max 15 min) expiry — MH-35's stateless JWTs can't be invalidated early.\nLogout only guarantees the session can't be *refreshed* again.",
         "operationId": "logout",
         "responses": {
@@ -617,9 +589,7 @@
     },
     "/api/v1/auth/otp/request": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Identical 200 response whether `payload.email` is registered or not —\nthe endpoint must never let a caller enumerate accounts.",
         "operationId": "otp_request",
         "requestBody": {
@@ -651,9 +621,7 @@
     },
     "/api/v1/auth/otp/verify": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Second half of the unified auth endpoint (seeker_auth_flow.mermaid §2):\nverifies the code cached by `/auth/otp/request`. A known email gets its\nsession straight away; an unknown one gets a single-use registration\nticket — no account row and no cookie until `/auth/register` runs.",
         "operationId": "otp_verify",
         "requestBody": {
@@ -685,9 +653,7 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "operationId": "refresh",
         "responses": {
           "200": {
@@ -708,9 +674,7 @@
     },
     "/api/v1/auth/register": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Creates the account in one transaction from the ticket handed out by\n`/auth/otp/verify`, and opens the session.",
         "operationId": "register",
         "requestBody": {
@@ -746,11 +710,44 @@
         }
       }
     },
+    "/api/v1/contact/messages": {
+      "post": {
+        "tags": ["contact"],
+        "summary": "Emails a message from the Contact page to the platform administrator. Public.",
+        "operationId": "post_message",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactMessageDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Message accepted for delivery",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or over-long field, invalid email address, or message outside 10-2000 characters"
+          },
+          "429": {
+            "description": "This address already sent a message recently, or too many requests from this IP"
+          }
+        }
+      }
+    },
     "/api/v1/listings": {
       "get": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Public paginated feed of listings (cover photo + summary).",
         "operationId": "list",
         "parameters": [
@@ -842,9 +839,7 @@
         }
       },
       "post": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Creates a listing owned by the caller, with status `available`.",
         "operationId": "create",
         "requestBody": {
@@ -885,9 +880,7 @@
     },
     "/api/v1/listings/{id}": {
       "get": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Full listing detail — description, media, owner info (no phone).",
         "description": "Authentication is optional: the owner always sees their own listing,\nwhatever its state; anyone else gets a 404 for a draft or a published\nlisting with no photo, identical to the 404 for an unknown id.",
         "operationId": "get_by_id",
@@ -923,9 +916,7 @@
         }
       },
       "put": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Replaces the editable fields of one of the caller's listings. Status,\npublication state, owner and timestamps are never taken from the body.",
         "operationId": "update",
         "parameters": [
@@ -979,9 +970,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Permanently deletes one of the caller's listings and its photos.",
         "operationId": "delete",
         "parameters": [
@@ -1014,9 +1003,7 @@
     },
     "/api/v1/listings/{id}/contact": {
       "get": {
-        "tags": [
-          "contact"
-        ],
+        "tags": ["contact"],
         "summary": "Phone numbers of a listing's owner, for a signed-in seeker or owner.",
         "description": "The listing must be publicly visible, available or not, and its owner\nactive. Otherwise the 404 is identical to the one for an unknown id. A\nper-user cap limits the distinct listings revealed per window; revealing a\nlisting again within the window does not count.",
         "operationId": "get_owner_contact",
@@ -1070,9 +1057,7 @@
     },
     "/api/v1/listings/{id}/cover": {
       "patch": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "operationId": "promote_cover",
         "parameters": [
           {
@@ -1121,9 +1106,7 @@
     },
     "/api/v1/listings/{id}/media/order": {
       "put": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "operationId": "reorder_media",
         "parameters": [
           {
@@ -1182,9 +1165,7 @@
     },
     "/api/v1/listings/{id}/publish": {
       "post": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Publishes one of the caller's drafts. It needs at least one photo, and can't be undone.",
         "operationId": "publish",
         "parameters": [
@@ -1227,9 +1208,7 @@
     },
     "/api/v1/listings/{id}/status": {
       "patch": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Marks one of the caller's listings as available or unavailable. Works on\ndrafts too, and never changes the publication state.",
         "operationId": "update_status",
         "parameters": [
@@ -1285,9 +1264,7 @@
     },
     "/api/v1/media/upload": {
       "post": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "operationId": "upload_media",
         "requestBody": {
           "description": "listing_id (uuid) and one image file (JPEG, PNG or WebP, 5 MB max)",
@@ -1337,9 +1314,7 @@
     },
     "/api/v1/media/{id}": {
       "delete": {
-        "tags": [
-          "media"
-        ],
+        "tags": ["media"],
         "operationId": "delete_media",
         "parameters": [
           {
@@ -1374,9 +1349,7 @@
     },
     "/api/v1/owner-requests": {
       "post": {
-        "tags": [
-          "owner_requests"
-        ],
+        "tags": ["owner_requests"],
         "operationId": "submit_owner_request",
         "requestBody": {
           "description": "phone, optional secondary_phone, identity_data (JSON string), and either two image documents (front, back) or one PDF",
@@ -1423,9 +1396,7 @@
     },
     "/api/v1/search": {
       "get": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "Searches the public listings by keywords and filters.",
         "description": "With `q`, a title match comes first, then a match in the city, neighborhood,\nowner name or type label, then a match in the description only. Without\n`q`, the feed order applies (newest first).",
         "operationId": "search",
@@ -1549,9 +1520,7 @@
     },
     "/api/v1/users/me": {
       "get": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "operationId": "get_me",
         "responses": {
           "200": {
@@ -1573,9 +1542,7 @@
         }
       },
       "put": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "operationId": "update_me",
         "requestBody": {
           "content": {
@@ -1610,9 +1577,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "summary": "Deletes the caller's own account only — `user_id` comes from the access\ntoken, never from a path or body parameter. The refresh cookie is cleared\nunconditionally: the account row (and its refresh tokens, via cascade) is\nalready gone by the time this runs.",
         "operationId": "delete_me",
         "responses": {
@@ -1630,9 +1595,7 @@
     },
     "/api/v1/users/me/avatar": {
       "post": {
-        "tags": [
-          "users"
-        ],
+        "tags": ["users"],
         "operationId": "upload_avatar",
         "requestBody": {
           "description": "Image (JPEG, PNG or WebP, 5 MB max) in a `file` field",
@@ -1676,9 +1639,7 @@
     },
     "/api/v1/users/me/listings": {
       "get": {
-        "tags": [
-          "listings"
-        ],
+        "tags": ["listings"],
         "summary": "The caller's listings in any state, drafts and listings without a photo included, newest first.",
         "operationId": "list_mine",
         "parameters": [
@@ -1725,9 +1686,7 @@
     },
     "/api/v1/users/me/owner-request": {
       "get": {
-        "tags": [
-          "owner_requests"
-        ],
+        "tags": ["owner_requests"],
         "operationId": "get_owner_request_status",
         "responses": {
           "200": {
@@ -1768,9 +1727,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Checks PostgreSQL connectivity via `SELECT 1`.",
         "operationId": "check",
         "responses": {
@@ -1799,9 +1756,7 @@
     },
     "/health/storage": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Throwaway smoke check confirming `Arc<dyn StorageProvider>` (MH-27) is reachable\nfrom a handler via `State<AppState>` extraction. No module has real uploads yet\n(first real caller is EP-08/Media) — this only proves the plumbing compiles and\nresolves through the extractor, mirroring [`check`] above.",
         "operationId": "check_storage",
         "responses": {
@@ -1846,10 +1801,7 @@
             "format": "uuid"
           },
           "neighborhood": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "owner": {
             "$ref": "#/components/schemas/AdminListingOwnerDto"
@@ -1859,10 +1811,7 @@
             "format": "double"
           },
           "published_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "ISO 8601 UTC, or `null` for a draft."
           },
           "status": {
@@ -1882,52 +1831,49 @@
       "AdminListingOwnerDto": {
         "type": "object",
         "description": "Owner info as the back office sees it: adds the email, still no phone.",
-        "required": [
-          "id",
-          "email"
-        ],
+        "required": ["id", "email"],
         "properties": {
           "email": {
             "type": "string"
           },
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "last_name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        }
-      },
-      "AdminListingResponse": {
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/AdminListingDto"
+            "type": ["string", "null"]
           }
         }
       },
       "AdminListingVisibility": {
         "type": "string",
         "description": "How the back office labels a listing under the public rule. Derived on each\nread and never stored, so it has no Postgres enum.",
-        "enum": [
-          "draft",
-          "no_photo",
-          "public",
-          "hidden"
-        ]
+        "enum": ["draft", "no_photo", "public", "hidden"]
+      },
+      "AdminLoginDto": {
+        "type": "object",
+        "description": "Hand-written `Debug` so the password can't reach logs through a `{:?}`.",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminLoginResponse": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RefreshTokenDto"
+          }
+        }
       },
       "AdminOwnerRequestDetailDto": {
         "type": "object",
@@ -1944,10 +1890,7 @@
         ],
         "properties": {
           "admin_note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "created_at": {
             "type": "string"
@@ -1975,16 +1918,10 @@
             "type": "string"
           },
           "reviewed_at": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "secondary_phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
             "$ref": "#/components/schemas/OwnerRequestStatus"
@@ -1993,9 +1930,7 @@
       },
       "AdminOwnerRequestDetailResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/AdminOwnerRequestDetailDto"
@@ -2005,11 +1940,7 @@
       "AdminOwnerRequestDocumentDto": {
         "type": "object",
         "description": "One document descriptor in the admin queue — never carries `storage_key`.",
-        "required": [
-          "doc_id",
-          "original_filename",
-          "content_type"
-        ],
+        "required": ["doc_id", "original_filename", "content_type"],
         "properties": {
           "content_type": {
             "type": "string"
@@ -2022,30 +1953,17 @@
             "type": "string"
           },
           "side": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "AdminOwnerRequestDto": {
         "type": "object",
         "description": "One row of the admin owner-request queue. Carries only what triage needs\nat a glance — no `identity_data`, no documents; those live behind\n[`AdminOwnerRequestDetailDto`].",
-        "required": [
-          "id",
-          "email",
-          "full_name",
-          "phone",
-          "status",
-          "created_at"
-        ],
+        "required": ["id", "email", "full_name", "phone", "status", "created_at"],
         "properties": {
           "admin_note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "created_at": {
             "type": "string"
@@ -2064,16 +1982,10 @@
             "type": "string"
           },
           "reviewed_at": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "secondary_phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
             "$ref": "#/components/schemas/OwnerRequestStatus"
@@ -2083,14 +1995,7 @@
       "AdminUserDto": {
         "type": "object",
         "description": "One account in the admin user list. Never carries owner-request identity data.",
-        "required": [
-          "id",
-          "email",
-          "role",
-          "is_active",
-          "created_at",
-          "listing_count"
-        ],
+        "required": ["id", "email", "role", "is_active", "created_at", "listing_count"],
         "properties": {
           "created_at": {
             "type": "string"
@@ -2099,10 +2004,7 @@
             "type": "string"
           },
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
@@ -2112,10 +2014,7 @@
             "type": "boolean"
           },
           "last_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "listing_count": {
             "type": "integer",
@@ -2123,10 +2022,7 @@
             "description": "Listings the user owns, drafts included."
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -2135,9 +2031,7 @@
       },
       "AdminUserResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/AdminUserDto"
@@ -2147,9 +2041,7 @@
       "AvatarUploadForm": {
         "type": "object",
         "description": "Documents the avatar upload body for the OpenAPI schema. Nothing\ndeserializes into it — the handler walks the multipart fields itself.",
-        "required": [
-          "file"
-        ],
+        "required": ["file"],
         "properties": {
           "file": {
             "type": "string",
@@ -2160,30 +2052,57 @@
       "ContactDto": {
         "type": "object",
         "description": "Phone numbers of a listing's owner, exactly as stored.",
-        "required": [
-          "phone",
-          "secondary_phone"
-        ],
+        "required": ["phone", "secondary_phone"],
         "properties": {
           "phone": {
             "type": "string",
             "description": "The owner's profile phone."
           },
           "secondary_phone": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Secondary number from the owner's most recent approved owner request."
+          }
+        }
+      },
+      "ContactMessageAck": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactMessageDto": {
+        "type": "object",
+        "description": "Body of `POST /contact/messages`.",
+        "required": ["name", "email", "message"],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ContactMessageResponse": {
+        "type": "object",
+        "description": "Envelope for `POST /contact/messages`.",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ContactMessageAck"
           }
         }
       },
       "ContactResponse": {
         "type": "object",
         "description": "Envelope for `GET /listings/:id/contact`.",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ContactDto"
@@ -2193,9 +2112,7 @@
       "HealthStatus": {
         "type": "object",
         "description": "Health check response body.",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string"
@@ -2237,10 +2154,7 @@
             }
           },
           "neighborhood": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "owner": {
             "$ref": "#/components/schemas/OwnerDetailDto"
@@ -2250,27 +2164,18 @@
             "format": "double"
           },
           "published_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "ISO 8601 UTC, or `null` for a draft."
           },
           "rooms": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "format": "int32"
           },
           "status": {
             "$ref": "#/components/schemas/ListingStatus"
           },
           "surface_m2": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "format": "int32"
           },
           "title": {
@@ -2284,9 +2189,7 @@
       "ListingDetailResponse": {
         "type": "object",
         "description": "Envelope for `GET /listings/:id`, `POST /listings` and `PUT /listings/:id` — single-object `{ \"data\": {...} }`,\ndistinct from the paginated list envelope used by `GET /listings`.",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ListingDetailDto"
@@ -2296,12 +2199,7 @@
       "ListingMediaDto": {
         "type": "object",
         "description": "One media attachment in a listing detail response.",
-        "required": [
-          "id",
-          "url",
-          "is_cover",
-          "position"
-        ],
+        "required": ["id", "url", "is_cover", "position"],
         "properties": {
           "id": {
             "type": "string",
@@ -2322,63 +2220,35 @@
       "ListingRequest": {
         "type": "object",
         "description": "Body of `POST /listings` and `PUT /listings/:id`. Every field is optional at\nthe serde level so a missing one is reported as a `422` field error rather\nthan a `400`; the schema still marks the required ones. `owner_id`, `status`\nand `published_at` in the body are ignored.",
-        "required": [
-          "title",
-          "description",
-          "type",
-          "price",
-          "city",
-          "neighborhood"
-        ],
+        "required": ["title", "description", "type", "price", "city", "neighborhood"],
         "properties": {
           "city": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "description": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "20 to 2,000 characters after trimming."
           },
           "neighborhood": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "price": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "format": "int64",
             "description": "Whole XAF, 1 to 9,999,999,999."
           },
           "rooms": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "format": "int64",
             "description": "0 to 100."
           },
           "surface_m2": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "format": "int64",
             "description": "1 to 100,000."
           },
           "title": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "5 to 120 characters after trimming."
           },
           "type": {
@@ -2388,17 +2258,11 @@
       },
       "ListingStatus": {
         "type": "string",
-        "enum": [
-          "available",
-          "unavailable"
-        ]
+        "enum": ["available", "unavailable"]
       },
       "ListingStatusDto": {
         "type": "object",
-        "required": [
-          "id",
-          "status"
-        ],
+        "required": ["id", "status"],
         "properties": {
           "id": {
             "type": "string",
@@ -2412,9 +2276,7 @@
       "ListingStatusRequest": {
         "type": "object",
         "description": "Body of `PATCH /listings/:id/status`. `status` is read as a string so a\nmissing or unknown label is reported as a `422` field error, not a `400`.",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/ListingStatus"
@@ -2423,9 +2285,7 @@
       },
       "ListingStatusResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/ListingStatusDto"
@@ -2434,34 +2294,20 @@
       },
       "ListingSummaryDto": {
         "type": "object",
-        "required": [
-          "id",
-          "title",
-          "type",
-          "status",
-          "city",
-          "price",
-          "owner"
-        ],
+        "required": ["id", "title", "type", "status", "city", "price", "owner"],
         "properties": {
           "city": {
             "type": "string"
           },
           "cover_photo_url": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "neighborhood": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "owner": {
             "$ref": "#/components/schemas/OwnerSummaryDto"
@@ -2471,10 +2317,7 @@
             "format": "double"
           },
           "published_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "ISO 8601 UTC, or `null` for a draft. Never `null` in the public feed."
           },
           "status": {
@@ -2490,23 +2333,11 @@
       },
       "ListingType": {
         "type": "string",
-        "enum": [
-          "apartment",
-          "studio",
-          "house",
-          "room",
-          "villa",
-          "other"
-        ]
+        "enum": ["apartment", "studio", "house", "room", "villa", "other"]
       },
       "MediaDto": {
         "type": "object",
-        "required": [
-          "id",
-          "url",
-          "is_cover",
-          "position"
-        ],
+        "required": ["id", "url", "is_cover", "position"],
         "properties": {
           "id": {
             "type": "string",
@@ -2526,9 +2357,7 @@
       },
       "MediaListResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "type": "array",
@@ -2540,9 +2369,7 @@
       },
       "MediaResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/MediaDto"
@@ -2551,9 +2378,7 @@
       },
       "OtpRequestDto": {
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "properties": {
           "email": {
             "type": "string"
@@ -2563,9 +2388,7 @@
       "OtpRequestMessageDto": {
         "type": "object",
         "description": "`{ \"data\": { \"message\": \"...\" } }` — identical shape whether `email` is\nknown or unknown, so the response can never be used to enumerate\nregistered accounts.",
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "properties": {
           "message": {
             "type": "string"
@@ -2574,9 +2397,7 @@
       },
       "OtpRequestResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OtpRequestMessageDto"
@@ -2585,10 +2406,7 @@
       },
       "OtpVerifyDto": {
         "type": "object",
-        "required": [
-          "email",
-          "code"
-        ],
+        "required": ["email", "code"],
         "properties": {
           "code": {
             "type": "string"
@@ -2600,9 +2418,7 @@
       },
       "OtpVerifyResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OtpVerifyTokenDto"
@@ -2612,71 +2428,45 @@
       "OtpVerifyTokenDto": {
         "type": "object",
         "description": "`is_new_user` discriminates the two shapes: `false` carries `access_token`,\n`true` carries `registration_ticket` for `POST /auth/register`.",
-        "required": [
-          "is_new_user"
-        ],
+        "required": ["is_new_user"],
         "properties": {
           "access_token": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "is_new_user": {
             "type": "boolean"
           },
           "registration_ticket": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "OwnerDetailDto": {
         "type": "object",
         "description": "Owner info as embedded in a listing detail (adds avatar, still no phone —\nphone reveal is gated behind `GET /listings/:id/contact`, out of scope here).",
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "properties": {
           "avatar_url": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "last_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "OwnerRequestDto": {
         "type": "object",
-        "required": [
-          "id",
-          "status",
-          "created_at"
-        ],
+        "required": ["id", "status", "created_at"],
         "properties": {
           "admin_note": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Only ever populated when `status` is `rejected`."
           },
           "created_at": {
@@ -2687,10 +2477,7 @@
             "format": "uuid"
           },
           "reviewed_at": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
             "$ref": "#/components/schemas/OwnerRequestStatus"
@@ -2699,9 +2486,7 @@
       },
       "OwnerRequestResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/OwnerRequestDto"
@@ -2710,11 +2495,7 @@
       },
       "OwnerRequestStatus": {
         "type": "string",
-        "enum": [
-          "pending",
-          "approved",
-          "rejected"
-        ]
+        "enum": ["pending", "approved", "rejected"]
       },
       "OwnerRequestStatusResponse": {
         "type": "object",
@@ -2735,11 +2516,7 @@
       "OwnerRequestSubmissionForm": {
         "type": "object",
         "description": "Documents the submission body for the OpenAPI schema. Nothing\ndeserializes into it — the handler walks the multipart fields itself.",
-        "required": [
-          "phone",
-          "identity_data",
-          "documents"
-        ],
+        "required": ["phone", "identity_data", "documents"],
         "properties": {
           "documents": {
             "type": "array",
@@ -2757,45 +2534,31 @@
             "type": "string"
           },
           "secondary_phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "OwnerSummaryDto": {
         "type": "object",
         "description": "Owner info as embedded in a listing summary (no avatar, no phone).",
-        "required": [
-          "id"
-        ],
+        "required": ["id"],
         "properties": {
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "last_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "PaginatedResponse_AdminListingDto": {
         "type": "object",
         "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
-        "required": [
-          "data",
-          "pagination"
-        ],
+        "required": ["data", "pagination"],
         "properties": {
           "data": {
             "type": "array",
@@ -2824,10 +2587,7 @@
                   "format": "uuid"
                 },
                 "neighborhood": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "owner": {
                   "$ref": "#/components/schemas/AdminListingOwnerDto"
@@ -2837,10 +2597,7 @@
                   "format": "double"
                 },
                 "published_at": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
+                  "type": ["string", "null"],
                   "description": "ISO 8601 UTC, or `null` for a draft."
                 },
                 "status": {
@@ -2866,30 +2623,17 @@
       "PaginatedResponse_AdminOwnerRequestDto": {
         "type": "object",
         "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
-        "required": [
-          "data",
-          "pagination"
-        ],
+        "required": ["data", "pagination"],
         "properties": {
           "data": {
             "type": "array",
             "items": {
               "type": "object",
               "description": "One row of the admin owner-request queue. Carries only what triage needs\nat a glance — no `identity_data`, no documents; those live behind\n[`AdminOwnerRequestDetailDto`].",
-              "required": [
-                "id",
-                "email",
-                "full_name",
-                "phone",
-                "status",
-                "created_at"
-              ],
+              "required": ["id", "email", "full_name", "phone", "status", "created_at"],
               "properties": {
                 "admin_note": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "created_at": {
                   "type": "string"
@@ -2908,16 +2652,10 @@
                   "type": "string"
                 },
                 "reviewed_at": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "secondary_phone": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "status": {
                   "$ref": "#/components/schemas/OwnerRequestStatus"
@@ -2933,24 +2671,14 @@
       "PaginatedResponse_AdminUserDto": {
         "type": "object",
         "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
-        "required": [
-          "data",
-          "pagination"
-        ],
+        "required": ["data", "pagination"],
         "properties": {
           "data": {
             "type": "array",
             "items": {
               "type": "object",
               "description": "One account in the admin user list. Never carries owner-request identity data.",
-              "required": [
-                "id",
-                "email",
-                "role",
-                "is_active",
-                "created_at",
-                "listing_count"
-              ],
+              "required": ["id", "email", "role", "is_active", "created_at", "listing_count"],
               "properties": {
                 "created_at": {
                   "type": "string"
@@ -2959,10 +2687,7 @@
                   "type": "string"
                 },
                 "first_name": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "id": {
                   "type": "string",
@@ -2972,10 +2697,7 @@
                   "type": "boolean"
                 },
                 "last_name": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "listing_count": {
                   "type": "integer",
@@ -2983,10 +2705,7 @@
                   "description": "Listings the user owns, drafts included."
                 },
                 "phone": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "role": {
                   "$ref": "#/components/schemas/Role"
@@ -3002,43 +2721,26 @@
       "PaginatedResponse_ListingSummaryDto": {
         "type": "object",
         "description": "Full paginated response envelope.\n\nGeneric over the item type so every module can reuse it:\n`PaginatedResponse<ListingSummaryDto>`, `PaginatedResponse<UserDto>`, etc.",
-        "required": [
-          "data",
-          "pagination"
-        ],
+        "required": ["data", "pagination"],
         "properties": {
           "data": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": [
-                "id",
-                "title",
-                "type",
-                "status",
-                "city",
-                "price",
-                "owner"
-              ],
+              "required": ["id", "title", "type", "status", "city", "price", "owner"],
               "properties": {
                 "city": {
                   "type": "string"
                 },
                 "cover_photo_url": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "id": {
                   "type": "string",
                   "format": "uuid"
                 },
                 "neighborhood": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": ["string", "null"]
                 },
                 "owner": {
                   "$ref": "#/components/schemas/OwnerSummaryDto"
@@ -3048,10 +2750,7 @@
                   "format": "double"
                 },
                 "published_at": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
+                  "type": ["string", "null"],
                   "description": "ISO 8601 UTC, or `null` for a draft. Never `null` in the public feed."
                 },
                 "status": {
@@ -3074,12 +2773,7 @@
       "PaginationMeta": {
         "type": "object",
         "description": "Pagination metadata included alongside `data` in list responses.",
-        "required": [
-          "page",
-          "per_page",
-          "total",
-          "total_pages"
-        ],
+        "required": ["page", "per_page", "total", "total_pages"],
         "properties": {
           "page": {
             "type": "integer",
@@ -3105,9 +2799,7 @@
       },
       "PromoteCoverRequest": {
         "type": "object",
-        "required": [
-          "media_id"
-        ],
+        "required": ["media_id"],
         "properties": {
           "media_id": {
             "type": "string",
@@ -3118,9 +2810,7 @@
       "RefreshResponse": {
         "type": "object",
         "description": "`{ \"data\": { \"access_token\": \"...\" } }` — matches the envelope used\nelsewhere (e.g. `ListingDetailResponse`) and by the sibling\n`/auth/otp/verify` endpoint's actual JSON example.",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/RefreshTokenDto"
@@ -3129,9 +2819,7 @@
       },
       "RefreshTokenDto": {
         "type": "object",
-        "required": [
-          "access_token"
-        ],
+        "required": ["access_token"],
         "properties": {
           "access_token": {
             "type": "string"
@@ -3141,17 +2829,10 @@
       "RegisterDto": {
         "type": "object",
         "description": "`last_name` and `phone` are mandatory for every non-admin account.",
-        "required": [
-          "registration_ticket",
-          "last_name",
-          "phone"
-        ],
+        "required": ["registration_ticket", "last_name", "phone"],
         "properties": {
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "last_name": {
             "type": "string"
@@ -3166,9 +2847,7 @@
       },
       "RegisterResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/RegisterTokenDto"
@@ -3177,9 +2856,7 @@
       },
       "RegisterTokenDto": {
         "type": "object",
-        "required": [
-          "access_token"
-        ],
+        "required": ["access_token"],
         "properties": {
           "access_token": {
             "type": "string"
@@ -3191,10 +2868,7 @@
         "description": "A missing or `null` list deserializes to `None`, which the service reports\nas a 422 on `media_ids`.",
         "properties": {
           "media_ids": {
-            "type": [
-              "array",
-              "null"
-            ],
+            "type": ["array", "null"],
             "items": {
               "type": "string",
               "format": "uuid"
@@ -3205,22 +2879,14 @@
       "ReviewDecision": {
         "type": "string",
         "description": "Only `approved`/`rejected` are constructible, so `serde` itself rejects\n`\"pending\"` or any other value as a 400 — no separate validation needed.",
-        "enum": [
-          "approved",
-          "rejected"
-        ]
+        "enum": ["approved", "rejected"]
       },
       "ReviewOwnerRequestRequest": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "admin_note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
             "$ref": "#/components/schemas/ReviewDecision"
@@ -3229,18 +2895,12 @@
       },
       "Role": {
         "type": "string",
-        "enum": [
-          "seeker",
-          "owner",
-          "admin"
-        ]
+        "enum": ["seeker", "owner", "admin"]
       },
       "StorageStatus": {
         "type": "object",
         "description": "Storage backend response body.",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string"
@@ -3250,9 +2910,7 @@
       "UpdateAccountStateDto": {
         "type": "object",
         "description": "Body of `PATCH /admin/users/:id`. `is_active` is read as raw JSON so a missing\nor non-boolean value is reported as a `422` field error, not a `400`.",
-        "required": [
-          "is_active"
-        ],
+        "required": ["is_active"],
         "properties": {
           "is_active": {
             "type": "boolean"
@@ -3262,16 +2920,10 @@
       "UpdateMeDto": {
         "type": "object",
         "description": "Same obligations as `RegisterDto`: `phone` being required is what keeps an\nomitted field from silently erasing the stored number.",
-        "required": [
-          "last_name",
-          "phone"
-        ],
+        "required": ["last_name", "phone"],
         "properties": {
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "last_name": {
             "type": "string"
@@ -3284,10 +2936,7 @@
       "UploadMediaForm": {
         "type": "object",
         "description": "Documents the upload body for the OpenAPI schema. Nothing deserializes\ninto it — the handler walks the multipart fields itself.",
-        "required": [
-          "listing_id",
-          "file"
-        ],
+        "required": ["listing_id", "file"],
         "properties": {
           "file": {
             "type": "string",
@@ -3300,19 +2949,10 @@
       },
       "UserDto": {
         "type": "object",
-        "required": [
-          "id",
-          "email",
-          "role",
-          "is_active",
-          "created_at"
-        ],
+        "required": ["id", "email", "role", "is_active", "created_at"],
         "properties": {
           "avatar_url": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "created_at": {
             "type": "string"
@@ -3321,10 +2961,7 @@
             "type": "string"
           },
           "first_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "id": {
             "type": "string",
@@ -3334,16 +2971,10 @@
             "type": "boolean"
           },
           "last_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -3352,9 +2983,7 @@
       },
       "UserResponse": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "$ref": "#/components/schemas/UserDto"
@@ -3364,11 +2993,7 @@
       "ValidatedIdentityData": {
         "type": "object",
         "description": "Validated, re-serializable form of [`IdentityData`] — only the trimmed,\nbounds-checked fields ever reach the database, never the client's raw JSON.\nAlso the shape read back out of `identity_data` for the admin detail read\n(`Deserialize`), and its OpenAPI-documented form (`ToSchema`).",
-        "required": [
-          "full_name",
-          "id_type",
-          "id_number"
-        ],
+        "required": ["full_name", "id_type", "id_number"],
         "properties": {
           "full_name": {
             "type": "string"

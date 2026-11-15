@@ -1,11 +1,10 @@
 import { useIsMutating } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { Badge } from "../../../shared/components";
-import { formatFullName, formatPrice, PRICE_CURRENCY } from "../../../shared/utils/format";
-import { ListingStatusSwitch, typeLabels } from "../../listings";
+import { formatFullName } from "../../../shared/utils/format";
+import { AVAILABILITY_BADGE, typeLabels } from "../../listings";
 import { ADMIN_VISIBILITY_BADGE } from "../adminListingVisibilityBadge";
 import { adminListingActionKey, type AdminListing } from "../api";
-import { useUpdateAdminListingStatus } from "../hooks/useUpdateAdminListingStatus";
 import { AdminDeleteListingAction } from "./AdminDeleteListingAction";
 
 const CELL_CLASSES = "px-4 py-3 align-middle";
@@ -15,10 +14,10 @@ interface AdminListingRowProps {
 }
 
 function AdminListingRow({ listing }: AdminListingRowProps) {
-  const { mutate } = useUpdateAdminListingStatus(listing.id);
   const isActionPending = useIsMutating({ mutationKey: adminListingActionKey(listing.id) }) > 0;
   const { owner } = listing;
   const visibility = ADMIN_VISIBILITY_BADGE[listing.visibility];
+  const availability = AVAILABILITY_BADGE[listing.status];
 
   return (
     <tr className="border-b border-border last:border-b-0">
@@ -36,17 +35,10 @@ function AdminListingRow({ listing }: AdminListingRowProps) {
       </td>
       <td className={`${CELL_CLASSES} text-text`}>{listing.city}</td>
       <td className={`${CELL_CLASSES} text-text`}>{typeLabels[listing.type]}</td>
-      <td className={`${CELL_CLASSES} whitespace-nowrap text-text`}>
-        {formatPrice(listing.price)} {PRICE_CURRENCY}
-      </td>
       <td className={CELL_CLASSES}>
-        <ListingStatusSwitch
-          listingId={listing.id}
-          listingTitle={listing.title}
-          status={listing.status}
-          isPending={isActionPending}
-          onChange={mutate}
-        />
+        <Badge tone={availability.tone} className="whitespace-nowrap">
+          {availability.label}
+        </Badge>
       </td>
       <td className={CELL_CLASSES}>
         <Badge tone={visibility.tone} className="whitespace-nowrap">

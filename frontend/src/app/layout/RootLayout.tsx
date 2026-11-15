@@ -69,6 +69,7 @@ export function RootLayout() {
         user={user}
         ownerRequestStatus={ownerRequestView?.state === "pending" ? "pending" : null}
         ownerRequestCta={ownerRequestView?.showCta ?? false}
+        showAdminLink={status === "authenticated" && profile?.role === "admin"}
         onSignOut={() => signOutTo("/")}
       />
       <main className="flex-1">

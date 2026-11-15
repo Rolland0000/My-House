@@ -312,17 +312,28 @@ pub async fn delete_by_id(pool: &PgPool, user_id: Uuid) -> Result<bool, AppError
 /// `true` = row inserted, `false` = existing account promoted (`xmax = 0`
 /// distinguishes the two in an upsert). A promoted account loses its refresh tokens:
 /// sessions opened before the promotion, a suspended account's included, don't come back.
-pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<bool, AppError> {
+/// `password_hash` replaces any previous value and the lockout counters restart.
+pub async fn upsert_admin(
+    pool: &PgPool,
+    email: &str,
+    password_hash: &str,
+) -> Result<bool, AppError> {
     let mut tx = pool.begin().await.map_err(db_err)?;
 
     let row = sqlx::query!(
         r#"
-        INSERT INTO users (email, role, is_active)
-        VALUES ($1, 'admin', true)
-        ON CONFLICT (email) DO UPDATE SET role = 'admin', is_active = true
+        INSERT INTO users (email, role, is_active, password_hash)
+        VALUES ($1, 'admin', true, $2)
+        ON CONFLICT (email) DO UPDATE SET
+            role = 'admin',
+            is_active = true,
+            password_hash = EXCLUDED.password_hash,
+            failed_login_attempts = 0,
+            locked_until = NULL
         RETURNING id, (xmax = 0) AS "created!"
         "#,
-        email
+        email,
+        password_hash
     )
     .fetch_one(&mut *tx)
     .await
@@ -337,4 +348,36 @@ pub async fn upsert_admin(pool: &PgPool, email: &str) -> Result<bool, AppError> 
 
     tx.commit().await.map_err(db_err)?;
     Ok(row.created)
+}
+
+/// Whether an admin row exists that has no password yet (created before
+/// password login existed).
+pub async fn admin_without_password_exists(pool: &PgPool) -> Result<bool, AppError> {
+    sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM users WHERE role = 'admin' AND password_hash IS NULL) AS "exists!""#
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(db_err)
+}
+
+/// Sets the password on every admin that has none, returning the emails
+/// updated. The `password_hash IS NULL` guard means a password that is already
+/// set is never overwritten.
+pub async fn set_missing_admin_passwords(
+    pool: &PgPool,
+    password_hash: &str,
+) -> Result<Vec<String>, AppError> {
+    sqlx::query_scalar!(
+        r#"
+        UPDATE users
+        SET password_hash = $1
+        WHERE role = 'admin' AND password_hash IS NULL
+        RETURNING email
+        "#,
+        password_hash
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(db_err)
 }

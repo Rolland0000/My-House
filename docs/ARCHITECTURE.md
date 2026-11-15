@@ -380,7 +380,7 @@ sequenceDiagram
     AdminModule-->>Frontend: 200 OK
 ```
 
-**Note — Admin unique au MVP :** un seul compte `admin` existe au MVP, créé par un script de bootstrap au démarrage (pas de self-service, pas d'endpoint de création d'admin). Ce compte unique traite l'intégralité de la modération (biens, utilisateurs, demandes owner) depuis le back-office. Le modèle V2 introduira un rôle **superviseur** intermédiaire, notamment pour distribuer la charge de validation des demandes owner entre plusieurs opérateurs — hors périmètre MVP (cf. §11, R-09).
+**Note — Admin unique au MVP :** un seul compte `admin` existe au MVP, créé par un script de bootstrap au démarrage (pas de self-service, pas d'endpoint de création d'admin). Il se connecte par e-mail + mot de passe (`POST /admin/auth/login`, haché Argon2id, verrouillage 15 min après 5 échecs) et non par OTP, que le backend lui refuse. Ce compte unique traite l'intégralité de la modération (biens, utilisateurs, demandes owner) depuis le back-office. Le modèle V2 introduira un rôle **superviseur** intermédiaire, notamment pour distribuer la charge de validation des demandes owner entre plusieurs opérateurs — hors périmètre MVP (cf. §11, R-09).
 
 **Note — Rappel mensuel de disponibilité (LIST-03 du cahier des charges) :** le CDC prévoit qu'un owner dont un bien reste marqué `available` sans mise à jour depuis un mois reçoive un rappel automatique. Ce mécanisme est **différé en V2** : il nécessite soit une tâche planifiée in-process (`tokio::time::interval`), soit un déclencheur externe (cron), et un suivi de dernière notification par listing — aucune de ces briques n'existe au MVP. Documenté comme dette produit/technique en §11 (R-10).
 
@@ -542,7 +542,7 @@ Aucun code métier n'est modifié lors de la migration V2 — seule l'implément
 | Rate limiting              | 1 demande OTP / 60s par email, 3 tentatives max par code                                                                                                                                                                                                                                                                                         |
 | Autorisation               | Rôles portés dans le JWT claims — vérifiés par extracteur Axum sur chaque route protégée. Le rôle n'est pas relu en base avant le prochain refresh (R-14) |
 | Compte actif               | `is_active` revérifié par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login), via un cache moka de 8 secondes. Une suspension, une réactivation ou une suppression par l'admin invalide cette entrée : elle prend effet immédiatement, y compris sur une session déjà active |
-| Compte admin               | **Un seul compte `admin` au MVP**, créé par un script de bootstrap (variables d'environnement ou commande CLI dédiée) au déploiement initial — aucune route d'auto-inscription ou de promotion vers `admin` n'existe. Le rôle `admin` n'est jamais atteignable via `POST /owner-requests` ni via aucun endpoint utilisateur |
+| Compte admin               | **Un seul compte `admin` au MVP**, créé par un script de bootstrap (variables d'environnement `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`, ou commande CLI dédiée) au déploiement initial — aucune route d'auto-inscription ou de promotion vers `admin` n'existe. Le rôle `admin` n'est jamais atteignable via `POST /owner-requests` ni via aucun endpoint utilisateur |
 
 **Modèle de rôles et transitions :**
 

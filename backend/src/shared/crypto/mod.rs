@@ -1,7 +1,7 @@
 //! Project-wide home for cryptographic operations: JWT access-token
 //! signing/verification ([`jwt`]), SHA-256 hashing for secrets that are
 //! only ever compared by their digest — refresh tokens and OTP codes
-//! ([`hashing`]) — and CSPRNG-backed OTP code generation ([`otp`]). Future
+//! ([`hashing`]), salted Argon2id hashing for admin passwords ([`password`]) — and CSPRNG-backed OTP code generation ([`otp`]). Future
 //! crypto needs extend this module rather than scattering calls elsewhere.
 //!
 //! HS256 (HMAC-SHA256) is used for JWTs, not an asymmetric algorithm:
@@ -21,7 +21,9 @@
 mod hashing;
 mod jwt;
 mod otp;
+mod password;
 
 pub use hashing::{hash_otp_code, hash_refresh_token};
 pub use jwt::{issue_access_token, verify_access_token, JwtTokenDecoder};
 pub use otp::generate_otp_code;
+pub use password::{hash_password, verify_against_dummy, verify_password};

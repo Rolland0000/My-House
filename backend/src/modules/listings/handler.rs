@@ -10,9 +10,9 @@ use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
 use super::dto::{
-    AdminListingDto, AdminListingResponse, AdminListingsQuery, ListListingsQuery,
-    ListingDetailResponse, ListingRequest, ListingStatusRequest, ListingStatusResponse,
-    ListingSummaryDto, OwnerListingsQuery, SearchListingsQuery,
+    AdminListingDto, AdminListingsQuery, ListListingsQuery, ListingDetailResponse, ListingRequest,
+    ListingStatusRequest, ListingStatusResponse, ListingSummaryDto, OwnerListingsQuery,
+    SearchListingsQuery,
 };
 use super::service;
 
@@ -253,7 +253,7 @@ pub async fn list_mine(
     params(AdminListingsQuery),
     responses(
         (status = 200, description = "Paginated list of listings", body = PaginatedResponse<AdminListingDto>),
-        (status = 400, description = "Unknown `status` or `visibility` value, malformed `owner_id`, or non-integer `page` or `per_page`"),
+        (status = 400, description = "Unknown `status` or `visibility` value, malformed `owner_id`, non-integer `page` or `per_page`, or `q` too long"),
         (status = 401, description = "Missing or invalid access token"),
         (status = 403, description = "Caller is not an admin"),
     )
@@ -267,43 +267,6 @@ pub async fn admin_list(
 
     let response = service::list_admin_listings(state.db(), query).await?;
     Ok(Json(response))
-}
-
-/// Marks any listing as available or unavailable. Works on drafts too, and never
-/// changes the content or the publication state.
-#[utoipa::path(
-    patch,
-    path = "/admin/listings/{id}",
-    tag = "admin",
-    params(("id" = Uuid, Path, description = "Listing id")),
-    request_body = ListingStatusRequest,
-    responses(
-        (status = 200, description = "Status set; setting the current status also returns 200", body = AdminListingResponse),
-        (status = 400, description = "Malformed JSON body"),
-        (status = 401, description = "Missing or invalid access token"),
-        (status = 403, description = "Caller is not an admin"),
-        (status = 404, description = "Listing not found"),
-        (status = 422, description = "`status` is missing or not one of the two labels"),
-    )
-)]
-pub async fn admin_update_status(
-    State(state): State<AppState>,
-    user: AuthUser,
-    Path(id): Path<Uuid>,
-    // Consumes the request body, so it must stay the last argument.
-    AppJson(payload): AppJson<ListingStatusRequest>,
-) -> Result<Json<AdminListingResponse>, AppError> {
-    user.require_role(ADMIN_ROLES)?;
-
-    let data = service::admin_set_listing_status(state.db(), id, payload).await?;
-    tracing::info!(
-        admin_id = %user.user_id,
-        listing_id = %id,
-        action = "set_status",
-        status = ?data.status,
-        "listing moderated"
-    );
-    Ok(Json(AdminListingResponse { data }))
 }
 
 /// Permanently deletes any listing and its photos.

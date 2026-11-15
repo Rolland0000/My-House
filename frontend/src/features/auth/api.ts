@@ -8,6 +8,7 @@ type OtpRequestResponse = components["schemas"]["OtpRequestResponse"];
 type OtpVerifyResponse = components["schemas"]["OtpVerifyResponse"];
 type RefreshResponse = components["schemas"]["RefreshResponse"];
 type RegisterResponse = components["schemas"]["RegisterResponse"];
+type AdminLoginResponse = components["schemas"]["AdminLoginResponse"];
 
 export function requestOtp(email: string): Promise<OtpRequestResponse> {
   return apiPost("/api/v1/auth/otp/request", { email });
@@ -20,6 +21,11 @@ export function verifyOtp(email: string, code: string): Promise<OtpVerifyRespons
 /** Creates the account from the ticket returned by [`verifyOtp`]. */
 export function registerAccount(payload: RegisterPayload): Promise<RegisterResponse> {
   return apiPost("/api/v1/auth/register", payload);
+}
+
+/** Password sign-in, reserved for the admin account. */
+export function adminLogin(email: string, password: string): Promise<AdminLoginResponse> {
+  return apiPost("/api/v1/admin/auth/login", { email, password });
 }
 
 export function refreshSession(): Promise<RefreshResponse> {

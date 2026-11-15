@@ -11,6 +11,7 @@ ignore = [
     # `basic-toml` (via askama_derive `config`, needed to read askama.toml) is
     # unmaintained with no replacement; compile-time only, parses our own file.
     "RUSTSEC-2026-0374",
+    "RUSTSEC-2026-0459",
 ]
 
 [licenses]

@@ -13,7 +13,7 @@ import {
 } from "../adminUsersCriteria";
 import { useAdminUsers } from "../hooks/useAdminUsers";
 import { AdminUserRow } from "./AdminUserRow";
-import { AdminUsersSearch } from "./AdminUsersSearch";
+import { AdminSearchBox } from "./AdminSearchBox";
 
 const ROLE_OPTIONS = [
   { value: "", label: "All roles" },
@@ -49,7 +49,8 @@ function AdminUsersPage() {
       <h1 className="text-2xl font-bold text-ink-900">Users</h1>
 
       <div className="flex flex-wrap items-center gap-3">
-        <AdminUsersSearch
+        <AdminSearchBox
+          target="email or name"
           value={criteria.q}
           onSearch={(q, settled) => changeFilter({ q }, settled)}
         />

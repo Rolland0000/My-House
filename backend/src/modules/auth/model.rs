@@ -23,3 +23,15 @@ pub struct RefreshTokenLookup {
     pub is_revoked: bool,
     pub is_expired: bool,
 }
+
+/// Admin row as `/admin/auth/login` needs it. The lock state is computed in SQL
+/// because this crate's sqlx build has no chrono/time feature.
+pub struct AdminLoginRow {
+    pub id: Uuid,
+    pub password_hash: Option<String>,
+    pub is_active: bool,
+    /// Seconds left on an active lock, `None` when not locked.
+    pub lock_remaining_seconds: Option<i64>,
+    /// A lock was set and has run out; its counters are stale.
+    pub lock_expired: bool,
+}

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiError,
   apiGet,
+  apiPost,
   buildQueryString,
   isAccountSuspended,
   isNotAnOwner,
@@ -70,6 +71,18 @@ describe("a 401 on an API path", () => {
 
     expect(onUnauthorized).toHaveBeenCalledOnce();
     expect(onSuspended).not.toHaveBeenCalled();
+  });
+
+  it("does not try to refresh when the admin sign-in itself answers 401", async () => {
+    const onUnauthorized = vi.fn().mockResolvedValue("token");
+    setUnauthorizedHandler(onUnauthorized);
+    respondWith401("INVALID_CREDENTIALS");
+
+    await expect(apiPost("/api/v1/admin/auth/login", {})).rejects.toMatchObject({
+      code: "INVALID_CREDENTIALS",
+    });
+
+    expect(onUnauthorized).not.toHaveBeenCalled();
   });
 });
 

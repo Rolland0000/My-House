@@ -1,6 +1,8 @@
 import { createPath, matchPath } from "react-router";
 
 export const LOGIN_PATH = "/login";
+export const ADMIN_LOGIN_PATH = "/admin/login";
+const ADMIN_HOME_PATH = "/admin";
 export const RETURN_TO_PARAM = "redirect";
 const HOME_PATH = "/";
 // Any origin works: parsing against it only tells whether the target stays on the same one.
@@ -33,4 +35,20 @@ export function safeReturnTo(raw: string | null): string {
   if (matchPath(LOGIN_PATH, url.pathname)) return HOME_PATH;
 
   return createPath(url);
+}
+
+/** The admin sign-in page, set to bring the admin back to `path` afterwards. */
+export function adminLoginPath(path: string): string {
+  if (path === ADMIN_HOME_PATH) return ADMIN_LOGIN_PATH;
+  return `${ADMIN_LOGIN_PATH}?${new URLSearchParams({ [RETURN_TO_PARAM]: path })}`;
+}
+
+/** Like [`safeReturnTo`], but only accepts a page of the admin area; anything else lands on its home. */
+export function safeAdminReturnTo(raw: string | null): string {
+  const target = safeReturnTo(raw);
+  const isAdminArea = target === ADMIN_HOME_PATH || target.startsWith(`${ADMIN_HOME_PATH}/`);
+  if (!isAdminArea || matchPath(ADMIN_LOGIN_PATH, new URL(target, PARSE_BASE).pathname)) {
+    return ADMIN_HOME_PATH;
+  }
+  return target;
 }

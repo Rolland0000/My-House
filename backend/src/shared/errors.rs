@@ -73,6 +73,11 @@ pub enum AppError {
     #[error("Account is suspended.")]
     AccountSuspended,
 
+    /// Same answer for an unknown email, a wrong password and an account
+    /// without a password, so the response can't be used to find admin emails.
+    #[error("Invalid email or password.")]
+    InvalidCredentials,
+
     // ── 403 Forbidden ────────────────────────────────────────────────────────
     #[error("Insufficient permissions to access this resource.")]
     Forbidden,
@@ -154,6 +159,11 @@ pub enum AppError {
     #[error("Too many requests. Please wait before trying again.")]
     RateLimited,
 
+    /// Admin account temporarily locked after repeated wrong passwords;
+    /// carries the seconds left, emitted as a `Retry-After` header.
+    #[error("Too many failed sign-in attempts. Please try again later.")]
+    AdminLoginLocked { retry_after_seconds: u64 },
+
     /// Per-user owner contact reveal cap; carries the seconds until the
     /// window ends, emitted as a `Retry-After` header.
     #[error("Too many contact reveals. Please wait before trying again.")]
@@ -189,6 +199,7 @@ impl AppError {
             Self::TokenExpired => (StatusCode::UNAUTHORIZED, "TOKEN_EXPIRED"),
             Self::RefreshTokenInvalid => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED"),
             Self::AccountSuspended => (StatusCode::UNAUTHORIZED, "ACCOUNT_SUSPENDED"),
+            Self::InvalidCredentials => (StatusCode::UNAUTHORIZED, "INVALID_CREDENTIALS"),
             // 403
             Self::Forbidden => (StatusCode::FORBIDDEN, "FORBIDDEN"),
             Self::AdminAccountProtected => (StatusCode::FORBIDDEN, "ADMIN_ACCOUNT_PROTECTED"),
@@ -223,6 +234,7 @@ impl AppError {
             // 429
             Self::OtpRateLimited { .. } => (StatusCode::TOO_MANY_REQUESTS, "OTP_RATE_LIMITED"),
             Self::RateLimited => (StatusCode::TOO_MANY_REQUESTS, "RATE_LIMITED"),
+            Self::AdminLoginLocked { .. } => (StatusCode::TOO_MANY_REQUESTS, "ADMIN_LOGIN_LOCKED"),
             Self::ContactRateLimited { .. } => {
                 (StatusCode::TOO_MANY_REQUESTS, "CONTACT_RATE_LIMITED")
             }
@@ -243,6 +255,9 @@ impl IntoResponse for AppError {
                 retry_after_seconds,
             }
             | Self::ContactRateLimited {
+                retry_after_seconds,
+            }
+            | Self::AdminLoginLocked {
                 retry_after_seconds,
             } => Some(*retry_after_seconds),
             _ => None,
@@ -317,6 +332,28 @@ mod tests {
         let json = parse_envelope(response).await;
         assert_eq!(json["error"]["code"], "LISTING_NOT_FOUND");
         assert_eq!(json["error"]["status"], 404);
+    }
+
+    #[tokio::test]
+    async fn test_invalid_credentials_produces_401() {
+        let response = AppError::InvalidCredentials.into_response();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "INVALID_CREDENTIALS");
+    }
+
+    #[tokio::test]
+    async fn test_admin_login_locked_produces_429_with_retry_after() {
+        let response = AppError::AdminLoginLocked {
+            retry_after_seconds: 900,
+        }
+        .into_response();
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert_eq!(response.headers()[RETRY_AFTER], "900");
+
+        let json = parse_envelope(response).await;
+        assert_eq!(json["error"]["code"], "ADMIN_LOGIN_LOCKED");
     }
 
     #[tokio::test]

@@ -12,7 +12,9 @@ use crate::shared::file_validation::{
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::storage_key::owner_request_document_key;
 use crate::shared::types::OwnerRequestId;
-use crate::shared::validation::{optional_note, optional_phone, required_name, required_phone};
+use crate::shared::validation::{
+    keyword_filter, optional_note, optional_phone, required_name, required_phone,
+};
 
 use super::dto::{AdminOwnerRequestDetailDto, AdminOwnerRequestDto, ReviewDecision};
 use super::model::{
@@ -118,16 +120,24 @@ pub async fn get_status(pool: &PgPool, user_id: Uuid) -> Result<Option<OwnerRequ
 pub async fn list_for_admin(
     pool: &PgPool,
     raw_status: Option<&str>,
+    raw_search: Option<String>,
     page: Option<u32>,
     per_page: Option<u32>,
 ) -> Result<PaginatedResponse<AdminOwnerRequestDto>, AppError> {
     let status = parse_status_filter(raw_status)?;
+    let search = keyword_filter(raw_search)?;
 
-    let total = repository::count_for_admin(pool, status).await?;
+    let total = repository::count_for_admin(pool, status, search.as_deref()).await?;
     let meta = PaginationMeta::new(page, per_page, total as u64);
 
-    let rows = repository::list_for_admin(pool, status, meta.per_page as i64, meta.offset() as i64)
-        .await?;
+    let rows = repository::list_for_admin(
+        pool,
+        status,
+        search.as_deref(),
+        meta.per_page as i64,
+        meta.offset() as i64,
+    )
+    .await?;
     let data = rows.into_iter().map(AdminOwnerRequestDto::from).collect();
     Ok(PaginatedResponse::new(data, meta))
 }
