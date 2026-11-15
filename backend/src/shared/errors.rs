@@ -139,6 +139,10 @@ pub enum AppError {
     #[error("This user is not an owner.")]
     NotAnOwner,
 
+    // ── 408 Request Timeout ──────────────────────────────────────────────────
+    #[error("The request took too long.")]
+    RequestTimeout,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
     #[error("Payload exceeds the maximum allowed size.")]
     PayloadTooLarge,
@@ -230,6 +234,7 @@ impl AppError {
             Self::PhotoRequired => (StatusCode::CONFLICT, "PHOTO_REQUIRED"),
             Self::NotAnOwner => (StatusCode::CONFLICT, "NOT_AN_OWNER"),
             // 413
+            Self::RequestTimeout => (StatusCode::REQUEST_TIMEOUT, "REQUEST_TIMEOUT"),
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422
             Self::InvalidDocument => (StatusCode::UNPROCESSABLE_ENTITY, "INVALID_DOCUMENT"),

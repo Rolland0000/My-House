@@ -83,6 +83,7 @@ pub(in crate::modules::auth) async fn refresh(
     {
         Some(_new_id) => {
             grace_cache.insert(row_id, new_raw_token.clone()).await;
+            purge_stale_tokens(pool, row.user_id).await;
             Ok(SessionOutcome {
                 access_token: mint(
                     row.user_id,
@@ -108,6 +109,19 @@ pub(in crate::modules::auth) async fn refresh(
             )
             .await
         }
+    }
+}
+
+/// Days an expired refresh token is kept before being purged.
+const REFRESH_TOKEN_RETENTION_DAYS: i32 = 30;
+
+/// Opportunistic cleanup on each rotation. Best-effort: a failure leaves
+/// stale rows for the next rotation and never fails the refresh.
+async fn purge_stale_tokens(pool: &PgPool, user_id: Uuid) {
+    if let Err(error) =
+        repository::purge_stale_tokens(pool, user_id, REFRESH_TOKEN_RETENTION_DAYS).await
+    {
+        tracing::warn!(%user_id, error = %error, "refresh: purge of expired tokens failed");
     }
 }
 

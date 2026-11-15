@@ -5,7 +5,7 @@
 //! a window boundary (the tail of one window plus the head of the next).
 //! Accepted at MVP scale — this is an abuse guard, not a traffic shaper.
 
-use std::net::{IpAddr, SocketAddr};
+use std::net::{IpAddr, Ipv6Addr, SocketAddr};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -96,6 +96,26 @@ impl RateLimitState {
     }
 }
 
+/// Bits of an IPv6 address that identify one subscriber: providers hand each
+/// customer at least a /64, which a client can rotate through freely.
+const IPV6_SUBSCRIBER_PREFIX_BITS: u32 = 64;
+
+/// The counter key for `ip`. IPv4 is counted per address; IPv6 per /64, so
+/// rotating addresses inside one's own prefix does not reset the count. An
+/// IPv4-mapped IPv6 address counts as its IPv4 address.
+fn rate_limit_key(ip: IpAddr) -> IpAddr {
+    match ip {
+        IpAddr::V4(_) => ip,
+        IpAddr::V6(v6) => match v6.to_ipv4_mapped() {
+            Some(v4) => IpAddr::V4(v4),
+            None => {
+                let mask = u128::MAX << (128 - IPV6_SUBSCRIBER_PREFIX_BITS);
+                IpAddr::V6(Ipv6Addr::from(u128::from(v6) & mask))
+            }
+        },
+    }
+}
+
 /// Axum middleware: rejects with `AppError::RateLimited` (429) once a
 /// client IP exceeds `max_requests` within the configured fixed window.
 pub async fn rate_limit(
@@ -106,7 +126,7 @@ pub async fn rate_limit(
 ) -> Response {
     let ip = state.resolve_client_ip(request.headers(), peer);
 
-    if state.allow(ip).await {
+    if state.allow(rate_limit_key(ip)).await {
         return next.run(request).await;
     }
 
@@ -132,6 +152,25 @@ mod tests {
     use crate::infra::cache::build_ip_rate_limit_cache;
 
     const NGINX: &str = "172.18.0.2";
+
+    #[test]
+    fn ipv6_addresses_in_one_slash_64_share_a_key() {
+        let first: IpAddr = "2001:db8:1:2:aaaa::1".parse().unwrap();
+        let rotated: IpAddr = "2001:db8:1:2:ffff:1:2:3".parse().unwrap();
+        let other_subscriber: IpAddr = "2001:db8:1:3::1".parse().unwrap();
+
+        assert_eq!(rate_limit_key(first), rate_limit_key(rotated));
+        assert_ne!(rate_limit_key(first), rate_limit_key(other_subscriber));
+    }
+
+    #[test]
+    fn ipv4_and_mapped_ipv4_keep_the_full_address() {
+        let v4: IpAddr = "203.0.113.7".parse().unwrap();
+        let mapped: IpAddr = "::ffff:203.0.113.7".parse().unwrap();
+
+        assert_eq!(rate_limit_key(v4), v4);
+        assert_eq!(rate_limit_key(mapped), v4);
+    }
 
     fn state(max_requests: u32, trusted: &[&str]) -> RateLimitState {
         state_with_window(max_requests, trusted, Duration::from_secs(60))

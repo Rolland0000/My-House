@@ -86,6 +86,28 @@ pub async fn rotate(
     Ok(Some(new_id))
 }
 
+/// Deletes `user_id`'s tokens expired for more than `retention_days`. Within
+/// that delay a replayed expired token still revokes its family; after it,
+/// the replay only gets a 401.
+pub async fn purge_stale_tokens(
+    pool: &PgPool,
+    user_id: Uuid,
+    retention_days: i32,
+) -> Result<u64, AppError> {
+    let deleted = sqlx::query!(
+        r#"
+        DELETE FROM refresh_tokens
+        WHERE user_id = $1 AND expires_at < NOW() - make_interval(days => $2)
+        "#,
+        user_id,
+        retention_days,
+    )
+    .execute(pool)
+    .await
+    .map_err(db_err)?;
+    Ok(deleted.rows_affected())
+}
+
 /// Revokes every still-active row for `user_id` — the theft response: the
 /// whole family, not just the reused row.
 pub async fn revoke_all_for_user(pool: &PgPool, user_id: Uuid) -> Result<(), AppError> {

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM refresh_tokens\n        WHERE user_id = $1 AND expires_at < NOW() - make_interval(days => $2)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8d4336ed867eb143c4a07b98196bef086208c27e60afdfe035955bedc2eb44d2"
+}

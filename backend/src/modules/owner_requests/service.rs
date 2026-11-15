@@ -9,6 +9,7 @@ use crate::shared::errors::AppError;
 use crate::shared::file_validation::{
     validate_image, validate_pdf, MAX_IMAGE_SIZE_BYTES, MAX_PDF_SIZE_BYTES,
 };
+use crate::shared::image_processing::check_image_dimensions;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::storage_key::owner_request_document_key;
 use crate::shared::types::OwnerRequestId;
@@ -323,6 +324,9 @@ fn classify_documents(
             .map(|(side, doc)| {
                 let validated =
                     validate_image(&doc.bytes, MAX_IMAGE_SIZE_BYTES).map_err(as_shape_error)?;
+                // Original bytes are kept for legibility; only an oversized
+                // image, a hazard for the admin's browser, is refused.
+                check_image_dimensions(&doc.bytes, &validated).map_err(as_shape_error)?;
                 Ok(ClassifiedDocument {
                     bytes: doc.bytes,
                     original_filename: display_filename(&doc.original_filename),
@@ -401,6 +405,16 @@ mod tests {
         );
     }
 
+    /// A real 2×2 JPEG: an image slot now reads the dimensions from the
+    /// header, which the 4-byte magic-number stub above does not have.
+    fn decodable_jpeg() -> Vec<u8> {
+        let mut bytes = Vec::new();
+        image::codecs::jpeg::JpegEncoder::new(&mut bytes)
+            .encode_image(&image::RgbImage::new(2, 2))
+            .unwrap();
+        bytes
+    }
+
     fn doc(bytes: &[u8]) -> UploadedDocument {
         UploadedDocument {
             bytes: Bytes::from(bytes.to_vec()),
@@ -410,7 +424,8 @@ mod tests {
 
     #[test]
     fn accepts_two_images_as_front_and_back() {
-        let classified = classify_documents(vec![doc(JPEG), doc(JPEG)]).unwrap();
+        let image = decodable_jpeg();
+        let classified = classify_documents(vec![doc(&image), doc(&image)]).unwrap();
         assert_eq!(classified[0].side, Some("front"));
         assert_eq!(classified[1].side, Some("back"));
     }

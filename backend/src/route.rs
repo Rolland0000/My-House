@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use axum::Router;
+use tower_http::timeout::RequestBodyTimeoutLayer;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_axum::routes;
@@ -12,6 +13,7 @@ use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
+use crate::middleware::timeout::{request_deadline, REQUEST_BODY_IDLE_TIMEOUT};
 use crate::modules::{admin, auth, contact, listings, media, owner_requests, users};
 
 /// Merges the module routers under `/api/v1` and returns the router with the
@@ -72,6 +74,8 @@ pub fn build_router(state: AppState) -> Router {
             rate_limit_state,
             rate_limit,
         ))
+        .layer(axum::middleware::from_fn(request_deadline))
+        .layer(RequestBodyTimeoutLayer::new(REQUEST_BODY_IDLE_TIMEOUT))
         .layer(axum::middleware::from_fn(request_id))
         .layer(cors)
         .with_state(state)
