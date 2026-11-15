@@ -47,7 +47,9 @@ services:
     env_file:
       - ./.env
     environment:
-      APP_ENV: ${APP_ENV:-production}
+      # Fixed, never interpolated: compose reads ${APP_ENV} from backend/.env,
+      # whose development value would otherwise start this service in dev mode.
+      APP_ENV: production
       # See backend-dev — same reasoning, "db" not "localhost", and
       # built from POSTGRES_* so credentials can't drift out of sync.
       DATABASE_URL: postgresql://${POSTGRES_USER:? Set POSTGRES_USER in .env or environment}:${POSTGRES_PASSWORD:? Set POSTGRES_PASSWORD in .env or environment}@db:5432/${POSTGRES_DB:? Set POSTGRES_DB in .env or environment}

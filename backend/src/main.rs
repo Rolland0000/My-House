@@ -25,11 +25,12 @@ async fn main() {
     // APP_ENV must be set by the OS / Docker / CI before the process
     // starts.  It is the ONLY variable that is never loaded from a .env file.
     //
-    //   APP_ENV=development      → developer machine  (loads .env)
-    //   APP_ENV=staging  → staging server      (no .env)
-    //   APP_ENV=prod     → production          (no .env)
+    //   APP_ENV=development  → developer machine  (loads .env)
+    //   APP_ENV=staging      → staging server      (no .env)
+    //   APP_ENV=production   → production          (no .env)
     //
-    // Absence defaults to `dev` so `cargo run` works without any extra setup.
+    // Absence is fatal. `cargo run` on the host gets `development` from
+    // `.cargo/config.toml`; the runtime image defaults to `production`.
     let app_env = AppEnv::from_real_env().unwrap_or_else(|err| {
         eprintln!("FATAL — APP_ENV: {err}");
         std::process::exit(1);

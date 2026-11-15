@@ -1,1 +1,6 @@
 [target.x86_64-apple-darwin]
+
+# Applies only to processes started by cargo (`cargo run`, `cargo test`,
+# `cargo watch -x run`); a value set by the shell or compose takes precedence.
+[env]
+APP_ENV = "development"

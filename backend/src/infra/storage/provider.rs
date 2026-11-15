@@ -35,32 +35,3 @@ pub trait StorageProvider: Send + Sync {
     /// though no MVP implementation uses it — do not drop it "to simplify."
     async fn presigned_url(&self, key: &str, expires_in: Duration) -> Result<String, AppError>;
 }
-
-/// Placeholder implementation used by [`super::build_storage_provider`] until a real
-/// backend (`LocalFsStorage` — MH-26, `AwsS3Storage` — V2) is implemented. Keeps the
-/// crate compiling against the finalized trait boundary independently of those tickets.
-pub(super) struct UnimplementedStorage;
-
-#[async_trait]
-impl StorageProvider for UnimplementedStorage {
-    async fn upload(
-        &self,
-        _key: &str,
-        _data: Bytes,
-        _content_type: &str,
-    ) -> Result<String, AppError> {
-        todo!("StorageProvider implementation lands in MH-26 (LocalFsStorage) / V2 (AwsS3Storage)")
-    }
-
-    async fn read(&self, _key: &str) -> Result<Bytes, AppError> {
-        todo!("StorageProvider implementation lands in MH-26 (LocalFsStorage) / V2 (AwsS3Storage)")
-    }
-
-    async fn delete(&self, _key: &str) -> Result<(), AppError> {
-        todo!("StorageProvider implementation lands in MH-26 (LocalFsStorage) / V2 (AwsS3Storage)")
-    }
-
-    async fn presigned_url(&self, _key: &str, _expires_in: Duration) -> Result<String, AppError> {
-        todo!("StorageProvider implementation lands in MH-26 (LocalFsStorage) / V2 (AwsS3Storage)")
-    }
-}

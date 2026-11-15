@@ -41,6 +41,9 @@ RUN apt-get update \
     && useradd --system --gid backend --no-create-home backend
 
 WORKDIR /app
+# The release image is a production artifact: started without an explicit
+# APP_ENV it must not fall into development mode. Staging overrides it.
+ENV APP_ENV=production
 COPY --from=builder /app/target/release/backend-my-house ./backend-my-house
 RUN mkdir -p /app/storage && chown -R backend:backend /app
 

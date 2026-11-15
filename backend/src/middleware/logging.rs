@@ -18,7 +18,7 @@ const REQUEST_ID_HEADER: &str = "x-request-id";
 /// Container-orchestrator probes, hit every few seconds by the Docker
 /// healthcheck. Their start/end events are demoted to DEBUG so they don't
 /// drown the INFO stream; `RUST_LOG=backend_my_house=debug` brings them back.
-const HEALTH_PATHS: [&str; 2] = ["/health", "/health/storage"];
+const HEALTH_PATHS: [&str; 1] = ["/health"];
 
 /// Resolves the request id: propagates an incoming `X-Request-Id` header
 /// verbatim if present, otherwise generates a new UUID v4.
