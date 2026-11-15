@@ -5,6 +5,7 @@ use std::{env, fmt};
 use super::app_config::AppEnv;
 use super::config_error::ConfigError;
 use super::env_reader::{optional_bool_or, optional_non_empty, require};
+use crate::shared::validation::normalize_email;
 
 /// Value shipped in `.env.example`; accepted in development only.
 pub const ADMIN_PASSWORD_PLACEHOLDER: &str = "change-me-admin-password";
@@ -49,10 +50,15 @@ impl AdminConfig {
     pub(super) fn from_env(app_env: &AppEnv) -> Result<Self, ConfigError> {
         let notification_email = require("ADMIN_NOTIFICATION_EMAIL")?;
         let bootstrap_on_startup = optional_bool_or("ADMIN_BOOTSTRAP_ON_STARTUP", false)?;
-        // Trimmed before storing: a stray space in the .env would otherwise be
-        // written into `users.email`, which is matched exactly at login.
+        // Normalised like every sign-in address: `users.email` is stored in
+        // canonical form, and the admin login looks it up the same way.
         let bootstrap_email = match env::var("ADMIN_BOOTSTRAP_EMAIL") {
-            Ok(raw) if !raw.trim().is_empty() => Some(raw.trim().to_string()),
+            Ok(raw) if !raw.trim().is_empty() => {
+                Some(normalize_email(&raw).ok_or_else(|| ConfigError::Invalid {
+                    key: "ADMIN_BOOTSTRAP_EMAIL".to_string(),
+                    reason: "must be a valid ASCII email address".to_string(),
+                })?)
+            }
             _ => None,
         };
         if bootstrap_on_startup && bootstrap_email.is_none() {
@@ -165,13 +171,23 @@ mod tests {
     }
 
     #[test]
-    fn trims_surrounding_whitespace_from_bootstrap_email() {
+    fn normalizes_the_bootstrap_email() {
         let _guard = ENV_LOCK.lock().unwrap();
         set_valid_env();
         enable_admin_bootstrap("dev-only-password");
-        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "  root@myhouse.app  ");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "  Root@MyHouse.app  ");
         let admin = load(AppEnv::Development).expect("should load");
         assert_eq!(admin.bootstrap_email.as_deref(), Some("root@myhouse.app"));
+    }
+
+    #[test]
+    fn rejects_an_invalid_bootstrap_email() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        enable_admin_bootstrap("dev-only-password");
+        env::set_var("ADMIN_BOOTSTRAP_EMAIL", "not-an-email");
+        let err = load(AppEnv::Development).expect_err("an invalid address must fail startup");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "ADMIN_BOOTSTRAP_EMAIL"));
     }
 
     #[test]

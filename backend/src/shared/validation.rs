@@ -10,7 +10,18 @@ pub const MAX_NAME_LENGTH: usize = 100;
 pub const MAX_PHONE_LENGTH: usize = 30;
 pub const MAX_ADMIN_NOTE_LENGTH: usize = 1000;
 
-/// Trims and rejects an empty or over-long mandatory name field.
+/// Single-line fields hold no control character at all: NUL would make
+/// Postgres fail the write with a 500, and line breaks have no place in a name.
+fn reject_control_chars(value: &str, field: &str) -> Result<(), AppError> {
+    if value.chars().any(char::is_control) {
+        return Err(AppError::BadRequest(format!(
+            "{field} contains an invalid character."
+        )));
+    }
+    Ok(())
+}
+
+/// Trims and rejects an empty, over-long or control-character mandatory name field.
 pub fn required_name<'a>(raw: &'a str, field: &str) -> Result<&'a str, AppError> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
@@ -21,6 +32,7 @@ pub fn required_name<'a>(raw: &'a str, field: &str) -> Result<&'a str, AppError>
             "{field} must be at most {MAX_NAME_LENGTH} characters."
         )));
     }
+    reject_control_chars(trimmed, field)?;
     Ok(trimmed)
 }
 
@@ -32,7 +44,8 @@ pub fn optional_name<'a>(raw: Option<&'a str>, field: &str) -> Result<Option<&'a
     }
 }
 
-/// Trims and rejects an empty or over-long phone number; format is not validated.
+/// Trims and rejects an empty, over-long or control-character phone number;
+/// the format itself is not validated.
 pub fn required_phone(raw: &str) -> Result<&str, AppError> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
@@ -43,6 +56,7 @@ pub fn required_phone(raw: &str) -> Result<&str, AppError> {
             "phone must be at most {MAX_PHONE_LENGTH} characters."
         )));
     }
+    reject_control_chars(trimmed, "phone")?;
     Ok(trimmed)
 }
 
@@ -54,15 +68,43 @@ pub fn optional_phone(raw: Option<&str>) -> Result<Option<&str>, AppError> {
     }
 }
 
-/// Trims a freeform admin note; absent or blank is `None`, over-length is an error.
+/// Trims a freeform admin note; absent or blank is `None`. Over-length, or a
+/// control character other than a line break or tab, is an error.
 pub fn optional_note<'a>(raw: Option<&'a str>, field: &str) -> Result<Option<&'a str>, AppError> {
     match raw.map(str::trim) {
         None | Some("") => Ok(None),
         Some(value) if value.chars().count() > MAX_ADMIN_NOTE_LENGTH => Err(AppError::BadRequest(
             format!("{field} must be at most {MAX_ADMIN_NOTE_LENGTH} characters."),
         )),
+        Some(value)
+            if value
+                .chars()
+                .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t')) =>
+        {
+            Err(AppError::BadRequest(format!(
+                "{field} contains an invalid character."
+            )))
+        }
         Some(value) => Ok(Some(value)),
     }
+}
+
+/// Longest address an SMTP path can carry (RFC 5321 §4.5.3.1.3).
+pub const MAX_EMAIL_LENGTH: usize = 254;
+
+/// Canonical form of an email address, or `None` if it is not a valid ASCII
+/// address. Every cache key and `users.email` lookup goes through it, so one
+/// mailbox maps to one account and one OTP cooldown whatever its casing.
+///
+/// ASCII only: Rust's lowercase and PostgreSQL's `lower()` then always agree,
+/// which the `users_email_canonical` check constraint relies on.
+pub fn normalize_email(raw: &str) -> Option<String> {
+    let trimmed = raw.trim();
+    if trimmed.len() > MAX_EMAIL_LENGTH || !trimmed.is_ascii() {
+        return None;
+    }
+    trimmed.parse::<lettre::Address>().ok()?;
+    Some(trimmed.to_ascii_lowercase())
 }
 
 /// Postgres rejects NUL in text values, so callers reject it before any query runs.
@@ -509,5 +551,57 @@ mod tests {
         errors.required_int("price", None, 1..=10);
         errors.required_text("title", None, 5..=10);
         assert_eq!(violated_fields(errors), vec!["type", "price", "title"]);
+    }
+
+    #[test]
+    fn single_line_fields_reject_nul_and_line_breaks() {
+        for raw in ["a\0b", "a\nb", "a\u{7f}b"] {
+            assert!(matches!(
+                required_name(raw, "last_name"),
+                Err(AppError::BadRequest(_))
+            ));
+            assert!(matches!(required_phone(raw), Err(AppError::BadRequest(_))));
+        }
+    }
+
+    #[test]
+    fn notes_keep_line_breaks_but_reject_nul() {
+        assert_eq!(
+            optional_note(Some("line one\nline two"), "admin_note").unwrap(),
+            Some("line one\nline two")
+        );
+        assert!(matches!(
+            optional_note(Some("a\0b"), "admin_note"),
+            Err(AppError::BadRequest(_))
+        ));
+    }
+
+    #[test]
+    fn normalize_email_trims_and_lowercases_every_variant_to_one_form() {
+        for raw in ["Ada@Example.CM", " ada@example.cm", "ADA@EXAMPLE.CM\t"] {
+            assert_eq!(normalize_email(raw).as_deref(), Some("ada@example.cm"));
+        }
+    }
+
+    #[test]
+    fn normalize_email_rejects_invalid_addresses() {
+        for raw in [
+            "",
+            "   ",
+            "not-an-email",
+            "a@",
+            "@example.cm",
+            "a b@example.cm",
+        ] {
+            assert_eq!(normalize_email(raw), None, "{raw:?} must be rejected");
+        }
+    }
+
+    #[test]
+    fn normalize_email_rejects_non_ascii_and_over_length() {
+        assert_eq!(normalize_email("é@exemple.cm"), None);
+        let domain = "example.cm";
+        let local = "a".repeat(MAX_EMAIL_LENGTH - domain.len());
+        assert_eq!(normalize_email(&format!("{local}@{domain}")), None);
     }
 }

@@ -25,9 +25,11 @@ pub async fn find_by_hash(
             u.role AS "role: Role",
             u.is_active,
             (rt.revoked_at IS NOT NULL) AS "is_revoked!",
-            (rt.expires_at < NOW())     AS "is_expired!"
+            (rt.expires_at < NOW())     AS "is_expired!",
+            (replacement.revoked_at IS NOT NULL) AS "replacement_revoked!"
         FROM refresh_tokens rt
         JOIN users u ON u.id = rt.user_id
+        LEFT JOIN refresh_tokens replacement ON replacement.id = rt.replaced_by_id
         WHERE rt.token_hash = $1
         LIMIT 1
         "#,

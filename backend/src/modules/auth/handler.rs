@@ -25,6 +25,7 @@ use super::service;
     request_body = OtpRequestDto,
     responses(
         (status = 200, description = "OTP code generated and emailed", body = OtpRequestResponse),
+        (status = 422, description = "Not a valid ASCII email address (`VALIDATION_FAILED`)"),
         (status = 429, description = "Too many requests for this email within the rate-limit window"),
     )
 )]
@@ -37,9 +38,13 @@ pub async fn otp_request(
         state.db(),
         state.cache().auth_challenge().as_ref(),
         state.cache().otp_rate_limit().as_ref(),
+        state.cache().otp_attempts().as_ref(),
         state.mailer(),
-        config.auth.otp_ttl_seconds,
-        config.auth.otp_rate_limit_seconds,
+        &service::OtpRequestConfig {
+            otp_ttl_seconds: config.auth.otp_ttl_seconds,
+            otp_rate_limit_seconds: config.auth.otp_rate_limit_seconds,
+            otp_max_attempts: config.auth.otp_max_attempts,
+        },
         &payload.email,
     )
     .await?;

@@ -613,6 +613,9 @@
               }
             }
           },
+          "422": {
+            "description": "Not a valid ASCII email address (`VALIDATION_FAILED`)"
+          },
           "429": {
             "description": "Too many requests for this email within the rate-limit window"
           }

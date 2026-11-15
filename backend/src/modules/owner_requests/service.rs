@@ -311,7 +311,7 @@ fn classify_documents(
             let validated = validate_pdf(&doc.bytes, MAX_PDF_SIZE_BYTES).map_err(as_shape_error)?;
             Ok(vec![ClassifiedDocument {
                 bytes: doc.bytes,
-                original_filename: doc.original_filename,
+                original_filename: display_filename(&doc.original_filename),
                 extension: validated.extension,
                 content_type: validated.content_type,
                 side: None,
@@ -325,7 +325,7 @@ fn classify_documents(
                     validate_image(&doc.bytes, MAX_IMAGE_SIZE_BYTES).map_err(as_shape_error)?;
                 Ok(ClassifiedDocument {
                     bytes: doc.bytes,
-                    original_filename: doc.original_filename,
+                    original_filename: display_filename(&doc.original_filename),
                     extension: validated.extension,
                     content_type: validated.content_type,
                     side: Some(side),
@@ -334,6 +334,24 @@ fn classify_documents(
             .collect(),
         _ => Err(AppError::InvalidDocument),
     }
+}
+
+/// Longest uploader-supplied filename kept for display to the admin.
+const MAX_ORIGINAL_FILENAME_LENGTH: usize = 255;
+/// Shown when the browser sent no usable filename.
+const DEFAULT_ORIGINAL_FILENAME: &str = "document";
+
+/// The uploader's filename as shown to the admin: base name only, control
+/// characters removed (JSONB refuses NUL), cut to a bounded length. It never
+/// reaches a storage key.
+fn display_filename(raw: &str) -> String {
+    let base_name = raw.rsplit(['/', '\\']).next().unwrap_or_default();
+    let printable: String = base_name.chars().filter(|c| !c.is_control()).collect();
+    let trimmed = printable.trim();
+    if trimmed.is_empty() {
+        return DEFAULT_ORIGINAL_FILENAME.to_string();
+    }
+    trimmed.chars().take(MAX_ORIGINAL_FILENAME_LENGTH).collect()
 }
 
 /// A format mismatch means the wrong kind of file was sent for this shape;
@@ -366,6 +384,22 @@ mod tests {
 
     const JPEG: &[u8] = &[0xFF, 0xD8, 0xFF, 0xE0];
     const PDF: &[u8] = b"%PDF-1.7\n1 0 obj\n";
+
+    #[test]
+    fn display_filename_keeps_the_base_name_without_control_characters() {
+        assert_eq!(display_filename("C:\\scans\\recto.jpg"), "recto.jpg");
+        assert_eq!(display_filename("../../id\0card.pdf"), "idcard.pdf");
+        assert_eq!(display_filename(" \n "), DEFAULT_ORIGINAL_FILENAME);
+    }
+
+    #[test]
+    fn display_filename_is_bounded() {
+        let long = format!("{}.pdf", "a".repeat(100_000));
+        assert_eq!(
+            display_filename(&long).chars().count(),
+            MAX_ORIGINAL_FILENAME_LENGTH
+        );
+    }
 
     fn doc(bytes: &[u8]) -> UploadedDocument {
         UploadedDocument {

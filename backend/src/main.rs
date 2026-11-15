@@ -8,8 +8,8 @@ use backend_my_house::{
     config::{AppConfig, AppEnv},
     infra::cache::{
         build_auth_challenge_cache, build_cache_provider, build_contact_reveal_rate_limit_cache,
-        build_ip_rate_limit_cache, build_otp_rate_limit_cache, build_refresh_replay_cache,
-        AppCache,
+        build_ip_rate_limit_cache, build_otp_attempt_cache, build_otp_rate_limit_cache,
+        build_refresh_replay_cache, AppCache,
     },
     infra::db,
     infra::mailer::Mailer,
@@ -116,6 +116,7 @@ async fn main() {
         build_refresh_replay_cache(),
         build_auth_challenge_cache(Duration::from_secs(config.auth.otp_ttl_seconds)),
         build_otp_rate_limit_cache(Duration::from_secs(config.auth.otp_rate_limit_seconds)),
+        build_otp_attempt_cache(),
         build_ip_rate_limit_cache(Duration::from_secs(config.rate_limit.window_seconds)),
         build_contact_reveal_rate_limit_cache(Duration::from_secs(
             config.rate_limit.contact_reveal_window_seconds,

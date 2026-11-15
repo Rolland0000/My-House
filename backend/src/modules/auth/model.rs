@@ -22,6 +22,9 @@ pub struct RefreshTokenLookup {
     pub is_active: bool,
     pub is_revoked: bool,
     pub is_expired: bool,
+    /// The token this one was rotated into has since been revoked, by a
+    /// logout or by a family revocation.
+    pub replacement_revoked: bool,
 }
 
 /// Admin row as `/admin/auth/login` needs it. The lock state is computed in SQL

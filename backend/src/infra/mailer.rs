@@ -7,6 +7,8 @@
 //! accidentally propagate an SMTP failure into a request-failing `?`. Send
 //! failures are logged via `tracing::error!` and otherwise swallowed.
 
+use std::time::Duration;
+
 use lettre::message::Mailbox;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::transport::smtp::client::{Tls, TlsParameters};
@@ -16,6 +18,14 @@ use lettre::{Address, AsyncTransport};
 use lettre::{Message, Tokio1Executor};
 
 use crate::config::{SmtpConfig, SmtpSecurity};
+
+/// TCP connect timeout. lettre's async transport applies its `timeout` to
+/// the connect step only, never to reading the relay's replies.
+const SMTP_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// Bound on one whole send, replies included, so a relay that accepts the
+/// connection and then stalls cannot hold a task and a socket forever.
+const SMTP_SEND_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Errors that can occur while building the SMTP transport at startup.
 ///
@@ -62,6 +72,7 @@ impl Mailer {
         let mut builder = AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.host)
             .port(config.port)
             .hello_name(hello_name(&from_address))
+            .timeout(Some(SMTP_CONNECT_TIMEOUT))
             .tls(tls_mode(config.security, &config.host)?);
         if let Some(credentials) = credentials(config) {
             builder = builder.credentials(credentials);
@@ -73,8 +84,10 @@ impl Mailer {
         })
     }
 
-    /// Sends an email. Fire-and-forget: an SMTP failure is logged and never
-    /// returned, so it can never fail the calling request.
+    /// Sends an email in a background task. Fire-and-forget: the request
+    /// never waits for the relay, so a slow relay cannot stall it and the
+    /// response time does not depend on whether an email was sent. An SMTP
+    /// failure is logged and never returned.
     pub async fn send(&self, to: Address, subject: &str, body: String) {
         let message = Message::builder()
             .from(self.from.clone())
@@ -90,9 +103,22 @@ impl Mailer {
             }
         };
 
-        if let Err(error) = self.transport.send(message).await {
-            tracing::error!(error = %error, to = %to, "mailer: SMTP send failed");
-        }
+        let transport = self.transport.clone();
+        tokio::spawn(async move {
+            match tokio::time::timeout(SMTP_SEND_TIMEOUT, transport.send(message)).await {
+                Ok(Ok(_)) => {}
+                Ok(Err(error)) => {
+                    tracing::error!(error = %error, to = %to, "mailer: SMTP send failed");
+                }
+                Err(_) => {
+                    tracing::error!(
+                        timeout_seconds = SMTP_SEND_TIMEOUT.as_secs(),
+                        to = %to,
+                        "mailer: SMTP send timed out"
+                    );
+                }
+            }
+        });
     }
 }
 
