@@ -1,4 +1,4 @@
-use axum::extract::{Multipart, Path, State};
+use axum::extract::{Multipart, State};
 use axum::http::StatusCode;
 use axum::Json;
 use axum_extra::extract::cookie::CookieJar;
@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AppQuery, AuthUser};
+use crate::shared::extractors::{AppJson, AppPath, AppQuery, AuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 use crate::shared::session_cookie::clear_refresh_cookie;
@@ -162,7 +162,7 @@ pub async fn list_users(
 pub async fn delete_user(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<StatusCode, AppError> {
     user.require_role(&[Role::Admin])?;
 
@@ -196,7 +196,7 @@ pub async fn delete_user(
 pub async fn update_user_state(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
     AppJson(payload): AppJson<UpdateAccountStateDto>,
 ) -> Result<Json<AdminUserResponse>, AppError> {
     user.require_role(&[Role::Admin])?;
@@ -253,7 +253,7 @@ fn multipart_error(error: axum::extract::multipart::MultipartError) -> AppError 
 pub async fn revoke_owner(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<Json<AdminUserResponse>, AppError> {
     user.require_role(&[Role::Admin])?;
 

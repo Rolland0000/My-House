@@ -1,11 +1,11 @@
-use axum::extract::{Path, Query, State};
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AppQuery, AuthUser, MaybeAuthUser};
+use crate::shared::extractors::{AppJson, AppPath, AppQuery, AuthUser, MaybeAuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
@@ -79,7 +79,7 @@ pub async fn search(
 )]
 pub async fn get_by_id(
     State(state): State<AppState>,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
     caller: MaybeAuthUser,
 ) -> Result<Json<ListingDetailResponse>, AppError> {
     let data =
@@ -133,7 +133,7 @@ pub async fn create(
 pub async fn update(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
     // Consumes the request body, so it must stay the last argument.
     AppJson(payload): AppJson<ListingRequest>,
 ) -> Result<Json<ListingDetailResponse>, AppError> {
@@ -163,7 +163,7 @@ pub async fn update(
 pub async fn update_status(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
     // Consumes the request body, so it must stay the last argument.
     AppJson(payload): AppJson<ListingStatusRequest>,
 ) -> Result<Json<ListingStatusResponse>, AppError> {
@@ -190,7 +190,7 @@ pub async fn update_status(
 pub async fn publish(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<Json<ListingDetailResponse>, AppError> {
     user.require_role(OWNER_ROLES)?;
 
@@ -214,7 +214,7 @@ pub async fn publish(
 pub async fn delete(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<StatusCode, AppError> {
     user.require_role(OWNER_ROLES)?;
 
@@ -237,7 +237,7 @@ pub async fn delete(
 pub async fn list_mine(
     State(state): State<AppState>,
     user: AuthUser,
-    Query(query): Query<OwnerListingsQuery>,
+    AppQuery(query): AppQuery<OwnerListingsQuery>,
 ) -> Result<Json<PaginatedResponse<ListingSummaryDto>>, AppError> {
     user.require_role(OWNER_ROLES)?;
 
@@ -285,7 +285,7 @@ pub async fn admin_list(
 pub async fn admin_delete(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<StatusCode, AppError> {
     user.require_role(ADMIN_ROLES)?;
 

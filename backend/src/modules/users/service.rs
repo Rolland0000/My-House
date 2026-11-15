@@ -9,6 +9,7 @@ use crate::shared::crypto;
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
+use crate::shared::pii::masked_email;
 use crate::shared::rbac::Role;
 use crate::shared::storage_key::{avatar_key, avatar_key_from_url};
 use crate::shared::types::UserId;
@@ -50,15 +51,21 @@ pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), Ap
 
     if !admin_exists {
         if repository::upsert_admin(pool, email, &password_hash).await? {
-            tracing::info!(email, "admin account bootstrapped");
+            tracing::info!(email = %masked_email(email), "admin account bootstrapped");
         } else {
-            tracing::warn!(email, "existing account promoted to admin by bootstrap");
+            tracing::warn!(
+                email = %masked_email(email),
+                "existing account promoted to admin by bootstrap"
+            );
         }
         return Ok(());
     }
 
     for updated_email in repository::set_missing_admin_passwords(pool, &password_hash).await? {
-        tracing::info!(email = %updated_email, "password set on existing admin account");
+        tracing::info!(
+            email = %masked_email(&updated_email),
+            "password set on existing admin account"
+        );
     }
     Ok(())
 }

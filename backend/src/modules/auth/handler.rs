@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 use crate::shared::session_cookie::{
     build_refresh_cookie, clear_refresh_cookie, REFRESH_TOKEN_COOKIE,
 };
@@ -31,7 +31,7 @@ use super::service;
 )]
 pub async fn otp_request(
     State(state): State<AppState>,
-    Json(payload): Json<OtpRequestDto>,
+    AppJson(payload): AppJson<OtpRequestDto>,
 ) -> Result<Json<OtpRequestResponse>, AppError> {
     let config = state.config();
     service::otp_request(
@@ -73,7 +73,7 @@ pub async fn otp_request(
 pub async fn otp_verify(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<OtpVerifyDto>,
+    AppJson(payload): AppJson<OtpVerifyDto>,
 ) -> Result<(CookieJar, Json<OtpVerifyResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();
@@ -140,7 +140,7 @@ pub async fn otp_verify(
 pub async fn register(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<RegisterDto>,
+    AppJson(payload): AppJson<RegisterDto>,
 ) -> Result<(CookieJar, Json<RegisterResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();
@@ -272,7 +272,7 @@ pub async fn logout(
 pub async fn admin_login(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<AdminLoginDto>,
+    AppJson(payload): AppJson<AdminLoginDto>,
 ) -> Result<(CookieJar, Json<AdminLoginResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();

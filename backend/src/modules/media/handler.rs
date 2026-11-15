@@ -1,11 +1,11 @@
-use axum::extract::{Multipart, Path, State};
+use axum::extract::{Multipart, State};
 use axum::http::StatusCode;
 use axum::Json;
 use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::extractors::{AppJson, AppPath, AuthUser};
 use crate::shared::rbac::Role;
 
 use super::dto::{
@@ -81,7 +81,7 @@ pub async fn upload_media(
 pub async fn delete_media(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(media_id): Path<Uuid>,
+    AppPath(media_id): AppPath<Uuid>,
 ) -> Result<StatusCode, AppError> {
     user.require_role(&[Role::Owner])?;
 
@@ -106,8 +106,8 @@ pub async fn delete_media(
 pub async fn promote_cover(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(listing_id): Path<Uuid>,
-    Json(payload): Json<PromoteCoverRequest>,
+    AppPath(listing_id): AppPath<Uuid>,
+    AppJson(payload): AppJson<PromoteCoverRequest>,
 ) -> Result<Json<MediaResponse>, AppError> {
     user.require_role(&[Role::Owner])?;
 
@@ -141,7 +141,7 @@ pub async fn promote_cover(
 pub async fn reorder_media(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(listing_id): Path<Uuid>,
+    AppPath(listing_id): AppPath<Uuid>,
     AppJson(payload): AppJson<ReorderMediaRequest>,
 ) -> Result<Json<MediaListResponse>, AppError> {
     user.require_role(&[Role::Owner])?;
