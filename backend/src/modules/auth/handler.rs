@@ -38,8 +38,8 @@ pub async fn otp_request(
         state.cache().auth_challenge().as_ref(),
         state.cache().otp_rate_limit().as_ref(),
         state.mailer(),
-        config.otp_ttl_seconds,
-        config.otp_rate_limit_seconds,
+        config.auth.otp_ttl_seconds,
+        config.auth.otp_rate_limit_seconds,
         &payload.email,
     )
     .await?;
@@ -71,12 +71,12 @@ pub async fn otp_verify(
     Json(payload): Json<OtpVerifyDto>,
 ) -> Result<(CookieJar, Json<OtpVerifyResponse>), AppError> {
     let app_config = state.config();
-    let cookie_domain = app_config.cookie_domain.clone();
+    let cookie_domain = app_config.auth.cookie_domain.clone();
     let config = service::OtpVerifyConfig::new(
         state.jwt_secret().clone(),
-        app_config.jwt_access_ttl_seconds,
-        app_config.jwt_refresh_ttl_days,
-        app_config.otp_max_attempts,
+        app_config.auth.jwt_access_ttl_seconds,
+        app_config.auth.jwt_refresh_ttl_days,
+        app_config.auth.otp_max_attempts,
     );
     let outcome = service::verify_otp(
         state.db(),
@@ -138,11 +138,11 @@ pub async fn register(
     Json(payload): Json<RegisterDto>,
 ) -> Result<(CookieJar, Json<RegisterResponse>), AppError> {
     let app_config = state.config();
-    let cookie_domain = app_config.cookie_domain.clone();
+    let cookie_domain = app_config.auth.cookie_domain.clone();
     let config = service::SessionConfig::new(
         state.jwt_secret().clone(),
-        app_config.jwt_access_ttl_seconds,
-        app_config.jwt_refresh_ttl_days,
+        app_config.auth.jwt_access_ttl_seconds,
+        app_config.auth.jwt_refresh_ttl_days,
     );
     let outcome = service::register(
         state.db(),
@@ -188,11 +188,11 @@ pub async fn refresh(State(state): State<AppState>, jar: CookieJar) -> Result<Re
         .ok_or(AppError::RefreshTokenInvalid)?;
 
     let app_config = state.config();
-    let cookie_domain = app_config.cookie_domain.clone();
+    let cookie_domain = app_config.auth.cookie_domain.clone();
     let config = service::SessionConfig::new(
         state.jwt_secret().clone(),
-        app_config.jwt_access_ttl_seconds,
-        app_config.jwt_refresh_ttl_days,
+        app_config.auth.jwt_access_ttl_seconds,
+        app_config.auth.jwt_refresh_ttl_days,
     );
     let outcome = match service::refresh(
         state.db(),
@@ -247,7 +247,7 @@ pub async fn logout(
         service::logout(state.db(), &raw_token).await?;
     }
 
-    let cookie_domain = state.config().cookie_domain.clone();
+    let cookie_domain = state.config().auth.cookie_domain.clone();
     Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
 }
 
@@ -270,11 +270,11 @@ pub async fn admin_login(
     Json(payload): Json<AdminLoginDto>,
 ) -> Result<(CookieJar, Json<AdminLoginResponse>), AppError> {
     let app_config = state.config();
-    let cookie_domain = app_config.cookie_domain.clone();
+    let cookie_domain = app_config.auth.cookie_domain.clone();
     let config = service::SessionConfig::new(
         state.jwt_secret().clone(),
-        app_config.jwt_access_ttl_seconds,
-        app_config.jwt_refresh_ttl_days,
+        app_config.auth.jwt_access_ttl_seconds,
+        app_config.auth.jwt_refresh_ttl_days,
     );
     let outcome =
         service::admin_login(state.db(), &config, &payload.email, &payload.password).await?;

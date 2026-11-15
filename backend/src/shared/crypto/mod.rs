@@ -6,7 +6,7 @@
 //!
 //! HS256 (HMAC-SHA256) is used for JWTs, not an asymmetric algorithm:
 //! MyHouse issues and verifies tokens from the same monolith process, so a
-//! shared secret (`JWT_SECRET`, length-validated at `AppConfig::from_env`)
+//! shared secret (`JWT_SECRET`, length-validated at `AuthConfig::from_env`)
 //! is the right trade-off — no keypair/PKI overhead for a benefit that only
 //! matters once issuance and verification live in separate services.
 //!

@@ -120,7 +120,7 @@ pub async fn delete_me(
 ) -> Result<CookieJar, AppError> {
     service::delete_account(state.db(), state.storage().as_ref(), user.user_id).await?;
 
-    let cookie_domain = state.config().cookie_domain.clone();
+    let cookie_domain = state.config().auth.cookie_domain.clone();
     Ok(jar.remove(clear_refresh_cookie(cookie_domain)))
 }
 

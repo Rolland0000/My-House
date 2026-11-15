@@ -99,7 +99,7 @@ async fn main() {
         });
 
     // ── 6. Build the SMTP mailer ───────────────────────────────────────────────
-    let mailer = Mailer::new(&config).unwrap_or_else(|err| {
+    let mailer = Mailer::new(&config.smtp).unwrap_or_else(|err| {
         eprintln!("FATAL — mailer configuration error: {err}");
         std::process::exit(1);
     });
@@ -113,11 +113,11 @@ async fn main() {
     let cache = AppCache::new(
         build_cache_provider(),
         build_refresh_replay_cache(),
-        build_auth_challenge_cache(Duration::from_secs(config.otp_ttl_seconds)),
-        build_otp_rate_limit_cache(Duration::from_secs(config.otp_rate_limit_seconds)),
-        build_ip_rate_limit_cache(Duration::from_secs(config.rate_limit_window_seconds)),
+        build_auth_challenge_cache(Duration::from_secs(config.auth.otp_ttl_seconds)),
+        build_otp_rate_limit_cache(Duration::from_secs(config.auth.otp_rate_limit_seconds)),
+        build_ip_rate_limit_cache(Duration::from_secs(config.rate_limit.window_seconds)),
         build_contact_reveal_rate_limit_cache(Duration::from_secs(
-            config.contact_reveal_window_seconds,
+            config.rate_limit.contact_reveal_window_seconds,
         )),
     );
 

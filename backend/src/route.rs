@@ -63,9 +63,9 @@ pub fn build_router(state: AppState) -> Router {
 
     let cors = build_cors_layer(state.config());
     let rate_limit_state = RateLimitState::new(
-        state.config().rate_limit_max_requests,
-        Duration::from_secs(state.config().rate_limit_window_seconds),
-        state.config().trusted_proxies.clone(),
+        state.config().rate_limit.max_requests,
+        Duration::from_secs(state.config().rate_limit.window_seconds),
+        state.config().rate_limit.trusted_proxies.clone(),
         state.cache().ip_rate_limit(),
     );
 
