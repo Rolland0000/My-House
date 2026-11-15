@@ -5,23 +5,24 @@ include:
 services:
   adminer:
     profiles: ["dev"]
-    image: adminer
+    image: adminer:5.5.1
     container_name: mh-adminer
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     depends_on:
       - db
   db:
-    image: postgres:16-alpine
+    image: postgres:16.16-alpine@sha256:81e77a4833487b8132fe4b00bedd39dc3f74b8641e387f19312a48f7de218c2e
     container_name: mh-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:? Set POSTGRES_USER in .env or environment}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:? Set POSTGRES_PASSWORD in .env or environment}
       POSTGRES_DB: ${POSTGRES_DB:? Set POSTGRES_DB in .env or environment}
+    # Loopback only: a host-side `cargo run` reaches it, other machines don't.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -33,12 +34,12 @@ services:
   # UI at http://localhost:8025 to inspect what Mailer::send actually sent.
   mailhog:
     profiles: ["dev"]
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.1
     container_name: mh-mailhog
     restart: unless-stopped
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
 volumes:
   postgres_data:

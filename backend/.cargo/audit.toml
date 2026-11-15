@@ -1,7 +1,8 @@
 [advisories]
 # Keep in sync with the `[advisories] ignore` list in deny.toml.
 ignore = [
-    # Transitive via sqlx-mysql, not reachable: only the "postgres" sqlx feature is enabled.
+    # `rsa` via jsonwebtoken `rust_crypto` (Marvin attack, no fixed release).
+    # Tokens are HS256-only; revisit if an RSA key is ever configured.
     "RUSTSEC-2023-0071",
     # `crypto-bigint` 0.5 (via jsonwebtoken `rust_crypto` -> p256/p384): only the
     # ECDSA path is affected, tokens are HS256-only. Revisit when jsonwebtoken

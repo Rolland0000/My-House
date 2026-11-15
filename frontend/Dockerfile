@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ── Builder ────
-FROM node:22-alpine AS builder
+FROM node:22.23-alpine AS builder
 
 WORKDIR /app
 
@@ -18,22 +18,23 @@ COPY . .
 RUN npm run build
 
 # ── Runtime ──────
-FROM nginx:stable-alpine AS runtime
+# Unprivileged variant: runs as the `nginx` user and listens on 8080.
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03 AS runtime
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
-    CMD wget -q --spider http://localhost/ || exit 1
+    CMD wget -q --spider http://127.0.0.1:8080/ || exit 1
 
 # ── Dev ────────
 # Toolchain only — no source is copied in. docker-compose bind-mounts the
 # frontend/ directory over /app in the dev profile; node_modules is kept in a
 # named volume so the host bind mount doesn't shadow container-installed
 # deps. Vite runs with HMR, bound to 0.0.0.0 so it's reachable from the host.
-FROM node:22-alpine AS dev
+FROM node:22.23-alpine AS dev
 
 WORKDIR /app
 
