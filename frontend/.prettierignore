@@ -1,3 +1,4 @@
 node_modules/
 dist/
 src/shared/api/types.ts
+docs-frontend/design_handoff_my_house/
