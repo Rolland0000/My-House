@@ -15,7 +15,7 @@ use lettre::transport::smtp::AsyncSmtpTransport;
 use lettre::{Address, AsyncTransport};
 use lettre::{Message, Tokio1Executor};
 
-use crate::config::{AppConfig, SmtpSecurity};
+use crate::config::{SmtpConfig, SmtpSecurity};
 
 /// Errors that can occur while building the SMTP transport at startup.
 ///
@@ -53,17 +53,16 @@ impl Mailer {
     ///
     /// `builder_dangerous` is used instead of `relay()` / `starttls_relay()`, which
     /// each hard-wire one TLS mode; here both the mode and the port come from config.
-    pub fn new(config: &AppConfig) -> Result<Self, MailerError> {
+    pub fn new(config: &SmtpConfig) -> Result<Self, MailerError> {
         let from_address: Address = config
-            .smtp_from
+            .from
             .parse()
-            .map_err(|error| MailerError::InvalidFrom(config.smtp_from.clone(), error))?;
+            .map_err(|error| MailerError::InvalidFrom(config.from.clone(), error))?;
 
-        let mut builder =
-            AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.smtp_host)
-                .port(config.smtp_port)
-                .hello_name(hello_name(&from_address))
-                .tls(tls_mode(config.smtp_security, &config.smtp_host)?);
+        let mut builder = AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.host)
+            .port(config.port)
+            .hello_name(hello_name(&from_address))
+            .tls(tls_mode(config.security, &config.host)?);
         if let Some(credentials) = credentials(config) {
             builder = builder.credentials(credentials);
         }
@@ -115,8 +114,8 @@ fn hello_name(from: &Address) -> ClientId {
 }
 
 /// Relay login, or `None` to send unauthenticated.
-fn credentials(config: &AppConfig) -> Option<Credentials> {
-    config.smtp_credentials.as_ref().map(|credentials| {
+fn credentials(config: &SmtpConfig) -> Option<Credentials> {
+    config.credentials.as_ref().map(|credentials| {
         Credentials::new(credentials.username.clone(), credentials.password.clone())
     })
 }
@@ -124,38 +123,15 @@ fn credentials(config: &AppConfig) -> Option<Credentials> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{AppEnv, SmtpCredentials, StorageProvider};
+    use crate::config::SmtpCredentials;
 
-    fn test_config() -> AppConfig {
-        AppConfig {
-            app_port: 3000,
-            app_env: AppEnv::Development,
-            database_url: "postgresql://x:x@localhost/x".to_string(),
-            jwt_secret: "a-super-secret-key-that-is-at-least-32-bytes-long!".to_string(),
-            jwt_access_ttl_seconds: 900,
-            jwt_refresh_ttl_days: 30,
-            otp_ttl_seconds: 600,
-            otp_max_attempts: 3,
-            otp_rate_limit_seconds: 60,
-            storage_provider: StorageProvider::Local,
-            local_storage_path: "/tmp".to_string(),
-            public_media_base_url: "http://localhost/media".to_string(),
-            cookie_domain: "localhost".to_string(),
-            allowed_origins: vec!["http://localhost".to_string()],
-            smtp_host: "localhost".to_string(),
-            smtp_port: 1025,
-            smtp_security: SmtpSecurity::None,
-            smtp_credentials: None,
-            smtp_from: "noreply@myhouse.app".to_string(),
-            admin_notification_email: "admin@myhouse.app".to_string(),
-            admin_bootstrap_on_startup: false,
-            admin_bootstrap_email: None,
-            admin_bootstrap_password: None,
-            rate_limit_max_requests: 100,
-            rate_limit_window_seconds: 60,
-            trusted_proxies: vec![],
-            contact_reveal_max_per_window: 20,
-            contact_reveal_window_seconds: 3600,
+    fn test_config() -> SmtpConfig {
+        SmtpConfig {
+            host: "localhost".to_string(),
+            port: 1025,
+            security: SmtpSecurity::None,
+            credentials: None,
+            from: "noreply@myhouse.app".to_string(),
         }
     }
 
@@ -168,7 +144,7 @@ mod tests {
     #[test]
     fn rejects_malformed_smtp_from() {
         let mut config = test_config();
-        config.smtp_from = "not-an-email".to_string();
+        config.from = "not-an-email".to_string();
         let err = Mailer::new(&config).expect_err("should fail on malformed SMTP_FROM");
         assert!(matches!(err, MailerError::InvalidFrom(_, _)));
     }
@@ -176,7 +152,7 @@ mod tests {
     #[test]
     fn builds_with_credentials_and_each_security_mode() {
         let mut config = test_config();
-        config.smtp_credentials = Some(SmtpCredentials {
+        config.credentials = Some(SmtpCredentials {
             username: "mailer".to_string(),
             password: "s3cret".to_string(),
         });
@@ -185,7 +161,7 @@ mod tests {
             SmtpSecurity::StartTls,
             SmtpSecurity::Tls,
         ] {
-            config.smtp_security = security;
+            config.security = security;
             assert!(Mailer::new(&config).is_ok(), "{security:?} should build");
         }
     }
@@ -221,7 +197,7 @@ mod tests {
     #[test]
     fn authenticates_with_configured_credentials() {
         let mut config = test_config();
-        config.smtp_credentials = Some(SmtpCredentials {
+        config.credentials = Some(SmtpCredentials {
             username: "mailer".to_string(),
             password: "s3cret".to_string(),
         });

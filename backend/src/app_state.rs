@@ -51,8 +51,8 @@ impl AppState {
         cache: AppCache,
     ) -> Self {
         let token_decoder: Arc<dyn TokenDecoder> =
-            Arc::new(JwtTokenDecoder::new(config.jwt_secret.as_bytes()));
-        let jwt_secret: Arc<[u8]> = Arc::from(config.jwt_secret.as_bytes());
+            Arc::new(JwtTokenDecoder::new(config.auth.jwt_secret.as_bytes()));
+        let jwt_secret: Arc<[u8]> = Arc::from(config.auth.jwt_secret.as_bytes());
 
         Self {
             inner: Arc::new(Inner {

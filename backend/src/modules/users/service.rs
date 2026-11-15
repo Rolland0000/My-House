@@ -29,14 +29,14 @@ use super::repository;
 /// password to an admin that has none — a password already set is never
 /// reconciled, merged, or overwritten.
 pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), AppError> {
-    if !config.admin_bootstrap_on_startup {
+    if !config.admin.bootstrap_on_startup {
         return Ok(());
     }
     // Guaranteed `Some` when the flag is on — `AppConfig::from_env` rejects the
     // combination at startup.
     let (Some(email), Some(password)) = (
-        config.admin_bootstrap_email.as_deref(),
-        config.admin_bootstrap_password.as_ref(),
+        config.admin.bootstrap_email.as_deref(),
+        config.admin.bootstrap_password.as_ref(),
     ) else {
         return Ok(());
     };

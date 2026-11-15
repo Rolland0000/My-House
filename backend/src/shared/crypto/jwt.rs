@@ -83,7 +83,7 @@ fn map_jwt_error(error: jsonwebtoken::errors::Error) -> AppError {
 }
 
 /// `TokenDecoder` backed by [`verify_access_token`]. Built once from
-/// `config.jwt_secret` in `AppState::new` and shared behind an `Arc`.
+/// `config.auth.jwt_secret` in `AppState::new` and shared behind an `Arc`.
 pub struct JwtTokenDecoder {
     secret: Vec<u8>,
 }

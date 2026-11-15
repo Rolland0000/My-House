@@ -51,7 +51,7 @@ pub async fn submit_owner_request(
         state.db(),
         state.storage().as_ref(),
         state.mailer(),
-        &state.config().admin_notification_email,
+        &state.config().admin.notification_email,
         user.user_id,
         &requester.email,
         submission,

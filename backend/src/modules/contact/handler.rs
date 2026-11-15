@@ -45,8 +45,8 @@ pub async fn get_owner_contact(
         state.db(),
         state.cache().contact_reveal_rate_limit().as_ref(),
         RevealCap {
-            max_per_window: state.config().contact_reveal_max_per_window,
-            window: Duration::from_secs(state.config().contact_reveal_window_seconds),
+            max_per_window: state.config().rate_limit.contact_reveal_max_per_window,
+            window: Duration::from_secs(state.config().rate_limit.contact_reveal_window_seconds),
         },
         user.user_id,
         id,
@@ -74,7 +74,7 @@ pub async fn post_message(
     service::send_contact_message(
         state.cache().otp_rate_limit().as_ref(),
         state.mailer(),
-        &state.config().admin_notification_email,
+        &state.config().admin.notification_email,
         ContactMessageInput {
             name: &payload.name,
             email: &payload.email,

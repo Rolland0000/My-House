@@ -19,10 +19,10 @@ use crate::config::{AppConfig, StorageProvider as StorageProviderKind};
 /// `AppConfig::from_env` — this function only has to handle the values the
 /// config layer accepts (`local`, `s3`).
 pub fn build_storage_provider(config: &AppConfig) -> Arc<dyn StorageProvider> {
-    match config.storage_provider {
+    match config.storage.provider {
         StorageProviderKind::Local => Arc::new(LocalFsStorage::new(
-            config.local_storage_path.clone(),
-            config.public_media_base_url.clone(),
+            config.storage.local_path.clone(),
+            config.storage.public_media_base_url.clone(),
         )),
         // Reserved for V2 — not implemented at MVP.
         StorageProviderKind::S3 => Arc::new(UnimplementedStorage),
