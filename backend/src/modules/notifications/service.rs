@@ -14,6 +14,7 @@ use lettre::Address;
 
 use crate::infra::mailer::Mailer;
 use crate::shared::errors::AppError;
+use crate::shared::pii::masked_email;
 
 /// Context for `otp.html` — OTP code delivery.
 #[derive(Template)]
@@ -155,7 +156,7 @@ pub async fn send_otp_email(mailer: &Mailer, to: &str, otp_code: &str, ttl_minut
     }) {
         Ok(body) => body,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: failed to render OTP email");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: failed to render OTP email");
             return;
         }
     };
@@ -163,7 +164,7 @@ pub async fn send_otp_email(mailer: &Mailer, to: &str, otp_code: &str, ttl_minut
     let address: Address = match to.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: invalid OTP recipient address");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: invalid OTP recipient address");
             return;
         }
     };
@@ -179,7 +180,7 @@ pub async fn send_welcome_email(mailer: &Mailer, to: &str, user_name: &str) {
     let body = match render(NotificationTemplate::Welcome { user_name }) {
         Ok(body) => body,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: failed to render welcome email");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: failed to render welcome email");
             return;
         }
     };
@@ -187,7 +188,7 @@ pub async fn send_welcome_email(mailer: &Mailer, to: &str, user_name: &str) {
     let address: Address = match to.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: invalid welcome recipient address");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: invalid welcome recipient address");
             return;
         }
     };
@@ -219,7 +220,7 @@ pub async fn send_owner_request_received_email(
     let address: Address = match admin_email.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, admin_email, "notifications: invalid admin recipient address");
+            tracing::error!(error = %error, admin_email = %masked_email(admin_email), "notifications: invalid admin recipient address");
             return;
         }
     };
@@ -235,7 +236,7 @@ pub async fn send_owner_request_approved_email(mailer: &Mailer, to: &str, user_n
     let body = match render(NotificationTemplate::OwnerRequestApproved { user_name }) {
         Ok(body) => body,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: failed to render owner_request_approved email");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: failed to render owner_request_approved email");
             return;
         }
     };
@@ -243,7 +244,7 @@ pub async fn send_owner_request_approved_email(mailer: &Mailer, to: &str, user_n
     let address: Address = match to.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: invalid owner_request_approved recipient address");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: invalid owner_request_approved recipient address");
             return;
         }
     };
@@ -264,7 +265,7 @@ pub async fn send_owner_request_rejected_email(
     let body = match render(NotificationTemplate::OwnerRequestRejected { user_name, reason }) {
         Ok(body) => body,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: failed to render owner_request_rejected email");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: failed to render owner_request_rejected email");
             return;
         }
     };
@@ -272,7 +273,7 @@ pub async fn send_owner_request_rejected_email(
     let address: Address = match to.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, to, "notifications: invalid owner_request_rejected recipient address");
+            tracing::error!(error = %error, to = %masked_email(to), "notifications: invalid owner_request_rejected recipient address");
             return;
         }
     };
@@ -306,7 +307,7 @@ pub async fn send_contact_message_email(
     let address: Address = match admin_email.parse() {
         Ok(address) => address,
         Err(error) => {
-            tracing::error!(error = %error, admin_email, "notifications: invalid admin recipient address");
+            tracing::error!(error = %error, admin_email = %masked_email(admin_email), "notifications: invalid admin recipient address");
             return;
         }
     };

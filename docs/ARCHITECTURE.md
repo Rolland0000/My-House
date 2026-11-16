@@ -1,7 +1,7 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 1.6
+> **Version :** 1.7
 > **Statut :** Validé
 > **Dernière mise à jour :** Novembre 2026
 
@@ -486,6 +486,8 @@ graph TB
 
 **Healthchecks :** postgres expose un healthcheck Docker natif. Le backend expose son propre endpoint `GET /health` (vérifie la connectivité PostgreSQL) utilisé comme healthcheck Docker. Le frontend ne démarre qu'après la disponibilité confirmée du backend.
 
+**Exposition :** en dev, les ports ne sont publiés que sur `127.0.0.1`. Mailhog affiche les codes OTP, il ne doit pas être joignable depuis le réseau (cf. TECHNICAL_SPEC §7.4).
+
 ### 7.2 Environnement Production (Cible)
 
 ```mermaid
@@ -507,6 +509,8 @@ graph TB
 
 > Le détail de l'infrastructure production (cloud provider, orchestration, CI/CD) est hors périmètre de ce document — défini dans un document Infrastructure dédié.
 
+> **Déploiement compose (MVP) :** nginx (`frontend-prod`) est le seul point d'entrée ; `backend-prod` et la base ne sont pas joignables depuis l'extérieur. TLS est terminé en amont de nginx, obligatoire puisque le cookie `refresh_token` est `Secure` (cf. TECHNICAL_SPEC §7.3).
+
 > **Note MVP :** ce diagramme représente la cible V2. Si une mise en production a lieu avant la migration S3, le filesystem local (volume persistant monté sur l'instance backend) reste utilisable sans changement de code métier — seule la variable `STORAGE_PROVIDER` change au moment de la migration (cf. §7.3).
 
 ### 7.3 Abstraction Storage — Portabilité Dev/Prod
@@ -515,7 +519,7 @@ Les modules qui écrivent ou lisent des fichiers (`media`, `users`, `owner_reque
 
 ```
 STORAGE_PROVIDER=local  →  LocalFsStorage  (MVP — dev et prod)
-STORAGE_PROVIDER=s3     →  AwsS3Storage    (V2 — non implémenté au MVP, trait déjà compatible)
+STORAGE_PROVIDER=s3     →  AwsS3Storage    (V2 ; au MVP, la valeur est refusée au démarrage)
 ```
 
 Aucun code métier n'est modifié lors de la migration V2 — seule l'implémentation concrète change.
@@ -537,11 +541,11 @@ Aucun code métier n'est modifié lors de la migration V2 — seule l'implément
 | Mécanisme                 | OTP Passwordless — email uniquement                                                                                                                                                                                                                                                                                                             |
 | Tokens                     | JWT access token (15 min) + refresh token (fenêtre glissante 30 jours, rotation à chaque usage)                                                                                                                                                                                                                                                |
 | Refresh token — transport | Cookie`httpOnly`, `Secure`, `SameSite=Strict` — jamais exposé en JSON au frontend                                                                                                                                                                                                                                                        |
-| Refresh token — rotation  | Chaque appel`/auth/refresh` révoque l'ancien token et en émet un nouveau. Réutilisation d'un token déjà consommé = signal de vol → révocation de toute la famille de tokens liés                                                                                                                                                      |
+| Refresh token — rotation  | Chaque appel`/auth/refresh` révoque l'ancien token et en émet un nouveau. Réutilisation d'un token déjà consommé = signal de vol → révocation de toute la famille de tokens liés. Chaque rotation purge les tokens du compte expirés depuis plus de 30 jours                                                                                                                                                      |
 | OTP                        | Code 6 chiffres, CSPRNG, hashé SHA-256, stocké dans moka (TTL 10 min, usage unique)                                                                                                                                                                                                                                                            |
-| Rate limiting              | 1 demande OTP / 60s par email, 3 tentatives max par code                                                                                                                                                                                                                                                                                         |
+| Rate limiting              | 3 essais par code. Entre deux demandes OTP pour une adresse : 60 s, doublé pour chaque code dont les essais sont épuisés, jusqu'à 5 min. Le compteur d'essais est gardé 24 h et repart à zéro au premier code correct. Limite générique par IP en plus, une adresse IPv6 comptant pour son /64 |
 | Autorisation               | Rôles portés dans le JWT claims — vérifiés par extracteur Axum sur chaque route protégée. Le rôle n'est pas relu en base avant le prochain refresh (R-14) |
-| Compte actif               | `is_active` revérifié par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login), via un cache moka de 8 secondes. Une suspension, une réactivation ou une suppression par l'admin invalide cette entrée : elle prend effet immédiatement, y compris sur une session déjà active |
+| Compte actif               | `is_active` revérifié par l'extracteur `AuthUser` sur **chaque** requête authentifiée (pas seulement au login), via un cache moka de 8 secondes. Une suspension, une réactivation ou une suppression, par l'admin ou par l'utilisateur lui-même, invalide cette entrée : elle prend effet immédiatement, y compris sur une session déjà active |
 | Compte admin               | **Un seul compte `admin` au MVP**, créé par un script de bootstrap (variables d'environnement `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`, ou commande CLI dédiée) au déploiement initial — aucune route d'auto-inscription ou de promotion vers `admin` n'existe. Le rôle `admin` n'est jamais atteignable via `POST /owner-requests` ni via aucun endpoint utilisateur |
 
 **Modèle de rôles et transitions :**
@@ -579,7 +583,7 @@ stateDiagram-v2
 
 Les deux décisions masquent les biens sans toucher au storage : les photos restent accessibles à qui possède leur URL directe, puisque nginx les sert sans passer par le backend. La règle exigeant `role = 'owner'`, les biens d'un owner promu admin par le bootstrap sont aussi masqués ; ce cas ne se présente qu'au démarrage sans admin existant.
 
-**Suppression de compte :** la cascade SQL (`ON DELETE CASCADE`) supprime les lignes liées (listings, listing_media, owner_requests, refresh_tokens), mais ne touche jamais le storage physique. Le nettoyage des fichiers (photos de listings, avatar, documents d'identité) est effectué applicativement — `StorageProvider::delete()` appelé pour chaque media avant l'exécution du `DELETE` SQL — pour éviter toute accumulation de fichiers orphelins. `DELETE /admin/users/:id` suit le même chemin, refuse un compte admin et invalide l'entrée `is_active` du cache pour clore la session ouverte.
+**Suppression de compte :** la cascade SQL (`ON DELETE CASCADE`) supprime les lignes liées (listings, listing_media, owner_requests, refresh_tokens), mais ne touche jamais le storage physique. Le service supprime donc les fichiers lui-même, dans une transaction : il verrouille la ligne `users` et les biens du compte (`FOR UPDATE`), relit l'avatar, liste les clés des photos et des pièces d'identité, appelle `StorageProvider::delete()` pour chacune, exécute le `DELETE` SQL puis commite. Un upload concurrent attend ce verrou, trouve ensuite le compte ou le bien supprimé et efface le fichier qu'il vient d'écrire. La transaction garde une connexion du pool pendant la suppression des fichiers, ce qui est accepté au MVP. `DELETE /users/me` et `DELETE /admin/users/:id` suivent ce chemin et invalident l'entrée `is_active` du cache pour clore la session ouverte ; la route admin refuse un compte admin.
 
 **Suppression d'un bien ou d'une photo :** l'ordre est inversé. Le `DELETE` SQL est commité d'abord, puis les fichiers sont supprimés en best-effort. Une panne du storage ne peut laisser qu'un fichier orphelin : aucune ligne ne pointe vers un fichier absent.
 
@@ -596,6 +600,8 @@ Toutes les erreurs convergent vers un type `AppError` centralisé, converti en r
   }
 }
 ```
+
+Les rejets des extracteurs (`AppJson`, `AppQuery`, `AppPath`) passent aussi par `AppError` et gardent cette enveloppe.
 
 ### 8.3 Pagination
 
@@ -617,6 +623,8 @@ Standard appliqué sur tous les endpoints de liste :
 
 Structured logging via `tracing` (écosystème Tokio). Format JSON en production, format lisible en développement. Niveau configurable via `RUST_LOG`.
 
+Les adresses e-mail sont masquées dans les logs (`shared::pii`). Un `X-Request-Id` reçu n'est repris que s'il compte 1 à 64 caractères parmi `[A-Za-z0-9_-]` ; sinon le serveur génère un UUID.
+
 ### 8.5 Configuration
 
 Variables d'environnement exclusivement — 12-factor app. Chargées au démarrage dans une struct `AppConfig` validée. Aucun fichier de configuration en production.
@@ -627,14 +635,15 @@ Variables d'environnement exclusivement — 12-factor app. Chargées au démarra
 Backend (utoipa) → /api/docs/openapi.json → openapi-typescript → src/shared/api/types.ts
 ```
 
-Le schéma OpenAPI est la source de vérité unique du contrat API. Les types TypeScript sont générés, jamais écrits manuellement.
+Le schéma OpenAPI est la source de vérité unique du contrat API. Les types TypeScript sont générés, jamais écrits manuellement. Le backend ne sert `/api/docs` qu'en `development` ; la CI génère les types depuis `frontend/docs-frontend/openapi.json`.
 
 ### 8.7 Health Check et Arrêt Propre (Graceful Shutdown)
 
 | Concept           | Détail                                                                                                                                                                                                                            |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /health`   | Endpoint non-authentifié, hors`/api/v1`. Vérifie la connectivité PostgreSQL (`SELECT 1`). Retourne `200` si prêt, `503` sinon. Utilisé comme healthcheck Docker et comme readiness probe pour un futur orchestrateur. |
-| Graceful shutdown | Le serveur Axum intercepte`SIGTERM` (`with_graceful_shutdown`) : arrête d'accepter de nouvelles connexions, laisse les requêtes en vol se terminer, puis quitte. Évite les requêtes coupées lors d'un redéploiement.     |
+| Graceful shutdown | Le serveur intercepte `SIGINT` et `SIGTERM` : il arrête d'accepter des connexions, laisse les requêtes en vol se terminer pendant 30 s au plus, puis quitte. Évite les requêtes coupées lors d'un redéploiement sans qu'une connexion lente bloque l'arrêt. |
+| Délais | Les en-têtes doivent arriver en 30 s. Un corps qui n'envoie plus rien pendant 30 s est coupé ; un upload lent mais continu passe. Une requête dure 10 minutes au plus (`408 REQUEST_TIMEOUT`). |
 
 ### 8.8 Protection des Coordonnées des Owners
 
@@ -675,7 +684,7 @@ Le plafond s'applique après la lecture en base, donc un 404 ne compte pas et n'
 | **Performance**     | Recherche full-text avec filtres             | < 500ms (P95)                                          |
 | **Performance**     | Chargement du feed (20 items + cover photos) | < 2s                                                   |
 | **Disponibilité**  | Uptime de la plateforme                      | 99.5%                                                  |
-| **Sécurité**      | Tentatives de brute-force sur OTP            | Bloqué après 3 tentatives, délai 60s entre demandes |
+| **Sécurité**      | Tentatives de brute-force sur OTP            | 3 essais par code ; 60 s entre demandes, doublé par code épuisé jusqu'à 5 min |
 | **Scalabilité**    | Passage de 10K à 100K utilisateurs          | Sans refactoring architectural                         |
 | **Maintenabilité** | Ajout d'un nouveau module de domaine         | Sans modifier les modules existants                    |
 
@@ -754,3 +763,4 @@ Qualité Système
 | 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §6.3 : étape contact livrée, deux numéros (`phone`, `secondary_phone`), conditions de révélation, retour à l'annonce après connexion. §8.8 : plafond de révélations par utilisateur comme protection des coordonnées des owners. §11 : R-12 (compteur en mémoire) et R-13 (numéro secondaire non modifiable) ajoutés |
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §5.2 : module `contact` livré. §6.3 : lecture en base avant le comptage. §8.8 : 30 biens distincts par 8 h, un bien déjà révélé ne compte pas, un 404 n'ouvre pas de fenêtre, balayage d'ids accepté. §11 : R-12 reformulé |
 | 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §5.2 : le module `admin` ne porte que les demandes owner, routes de modération dans `listings` et `users`. §5.3 : tables partagées mises à jour, dépendances réelles de `contact`, écarts complétés. §6.3 : visibilité publique avec owner éligible. §8.1 : cache `is_active`, suspension (connexion, refresh, sessions ouvertes, biens) et retrait du rôle owner (rôle, biens, nouvelle demande), suppression d'un compte par l'admin. §9 : ADR-13 (routes admin dans le module qui possède les données), ADR-12 renvoie à la règle de visibilité. §11 : R-14 (délai du retrait de rôle) ajouté, R-11 complété |
+| 1.7     | Novembre 2026 | MH-77, corrections de l'audit de sécurité du 12 novembre 2026. §7.1 et §7.2 : ports de dev en loopback, nginx seul point d'entrée en production, TLS en amont. §7.3 : `STORAGE_PROVIDER=s3` refusé au démarrage. §8.1 : délai OTP croissant, limite IPv6 par /64, purge des refresh tokens expirés, suppression de compte sous verrou, invalidation du cache `is_active` sur `DELETE /users/me`. §8.2 : enveloppe d'erreur pour les rejets d'extracteurs. §8.4 : e-mails masqués, `X-Request-Id` borné. §8.6 : Swagger UI en `development` seulement. §8.7 : délais du serveur et arrêt borné à 30 s. §10.1 : scénario brute-force OTP |

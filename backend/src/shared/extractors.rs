@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
+use axum::extract::{FromRef, FromRequest, FromRequestParts, Path, Request};
 use axum::http::request::Parts;
+use axum::http::StatusCode;
 use axum::Json;
 use axum_extra::extract::Query;
 use serde::de::DeserializeOwned;
@@ -111,7 +112,8 @@ where
 /// `axum::Json` with its deserialization rejection remapped to `AppError`.
 ///
 /// Axum answers a missing required field with a bare `422`; the API contract
-/// says a malformed body is a `400` in the standard error envelope.
+/// says a malformed body is a `400` in the standard error envelope. A body
+/// over the route's size limit keeps its `413`.
 pub struct AppJson<T>(pub T);
 
 impl<T, S> FromRequest<S> for AppJson<T>
@@ -125,7 +127,33 @@ where
         Json::<T>::from_request(request, state)
             .await
             .map(|Json(payload)| Self(payload))
-            .map_err(|rejection| AppError::BadRequest(rejection.body_text()))
+            .map_err(|rejection| {
+                if rejection.status() == StatusCode::PAYLOAD_TOO_LARGE {
+                    AppError::PayloadTooLarge
+                } else {
+                    AppError::BadRequest(rejection.body_text())
+                }
+            })
+    }
+}
+
+/// `axum::extract::Path` with its rejection remapped to `AppError`, so a
+/// malformed id (`/listings/not-a-uuid`) gets the standard error envelope
+/// instead of axum's plain-text body.
+pub struct AppPath<T>(pub T);
+
+impl<T, S> FromRequestParts<S> for AppPath<T>
+where
+    T: DeserializeOwned + Send,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Path::<T>::from_request_parts(parts, state)
+            .await
+            .map(|Path(params)| Self(params))
+            .map_err(|_| AppError::InvalidPathParam)
     }
 }
 

@@ -1,4 +1,4 @@
-use axum::extract::{Path, Query, State};
+use axum::extract::State;
 use axum::http::header::{
     CACHE_CONTROL, CONTENT_DISPOSITION, CONTENT_TYPE, X_CONTENT_TYPE_OPTIONS,
 };
@@ -13,7 +13,7 @@ use crate::modules::owner_requests::dto::{
 };
 use crate::modules::owner_requests::service;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::extractors::{AppJson, AppPath, AppQuery, AuthUser};
 use crate::shared::pagination::PaginatedResponse;
 use crate::shared::rbac::Role;
 
@@ -35,7 +35,7 @@ use crate::shared::rbac::Role;
 pub async fn list_owner_requests(
     State(state): State<AppState>,
     user: AuthUser,
-    Query(query): Query<ListOwnerRequestsQuery>,
+    AppQuery(query): AppQuery<ListOwnerRequestsQuery>,
 ) -> Result<Json<PaginatedResponse<AdminOwnerRequestDto>>, AppError> {
     user.require_role(&[Role::Admin])?;
 
@@ -68,7 +68,7 @@ pub async fn list_owner_requests(
 pub async fn get_owner_request(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<Json<AdminOwnerRequestDetailResponse>, AppError> {
     user.require_role(&[Role::Admin])?;
 
@@ -99,7 +99,7 @@ pub async fn get_owner_request(
 pub async fn get_owner_request_document(
     State(state): State<AppState>,
     user: AuthUser,
-    Path((id, doc_id)): Path<(Uuid, Uuid)>,
+    AppPath((id, doc_id)): AppPath<(Uuid, Uuid)>,
 ) -> Result<impl IntoResponse, AppError> {
     user.require_role(&[Role::Admin])?;
 
@@ -148,7 +148,7 @@ pub async fn get_owner_request_document(
 pub async fn review_owner_request(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
     AppJson(body): AppJson<ReviewOwnerRequestRequest>,
 ) -> Result<Json<AdminOwnerRequestDetailResponse>, AppError> {
     user.require_role(&[Role::Admin])?;

@@ -18,14 +18,27 @@ const REQUEST_ID_HEADER: &str = "x-request-id";
 /// Container-orchestrator probes, hit every few seconds by the Docker
 /// healthcheck. Their start/end events are demoted to DEBUG so they don't
 /// drown the INFO stream; `RUST_LOG=backend_my_house=debug` brings them back.
-const HEALTH_PATHS: [&str; 2] = ["/health", "/health/storage"];
+const HEALTH_PATHS: [&str; 1] = ["/health"];
 
-/// Resolves the request id: propagates an incoming `X-Request-Id` header
-/// verbatim if present, otherwise generates a new UUID v4.
+/// Longest client-supplied request id kept; it is repeated on every log line.
+const MAX_REQUEST_ID_LENGTH: usize = 64;
+
+/// A client id is kept only when it is short and made of `[A-Za-z0-9_-]`,
+/// so it can neither forge fields in the pretty log format nor bloat logs.
+fn is_acceptable_request_id(value: &str) -> bool {
+    (1..=MAX_REQUEST_ID_LENGTH).contains(&value.len())
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'-')
+}
+
+/// Resolves the request id: propagates an acceptable incoming `X-Request-Id`,
+/// otherwise generates a new UUID v4.
 fn resolve_request_id(headers: &HeaderMap) -> String {
     headers
         .get(REQUEST_ID_HEADER)
         .and_then(|value| value.to_str().ok())
+        .filter(|value| is_acceptable_request_id(value))
         .map(str::to_owned)
         .unwrap_or_else(|| Uuid::new_v4().to_string())
 }
@@ -102,6 +115,20 @@ mod tests {
         );
         let id = resolve_request_id(&headers);
         assert_eq!(id, "client-supplied-id-42");
+    }
+
+    #[test]
+    fn replaces_an_unsafe_or_over_long_request_id() {
+        let over_long = "a".repeat(MAX_REQUEST_ID_LENGTH + 1);
+        for unsafe_id in ["forged\" level=ERROR", over_long.as_str()] {
+            let mut headers = HeaderMap::new();
+            headers.insert(REQUEST_ID_HEADER, HeaderValue::from_str(unsafe_id).unwrap());
+            let id = resolve_request_id(&headers);
+            assert!(
+                Uuid::parse_str(&id).is_ok(),
+                "{unsafe_id:?} must be replaced"
+            );
+        }
     }
 
     #[test]

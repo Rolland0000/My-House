@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::AuthUser;
+use crate::shared::extractors::{AppJson, AuthUser};
 use crate::shared::session_cookie::{
     build_refresh_cookie, clear_refresh_cookie, REFRESH_TOKEN_COOKIE,
 };
@@ -25,21 +25,26 @@ use super::service;
     request_body = OtpRequestDto,
     responses(
         (status = 200, description = "OTP code generated and emailed", body = OtpRequestResponse),
+        (status = 422, description = "Not a valid ASCII email address (`VALIDATION_FAILED`)"),
         (status = 429, description = "Too many requests for this email within the rate-limit window"),
     )
 )]
 pub async fn otp_request(
     State(state): State<AppState>,
-    Json(payload): Json<OtpRequestDto>,
+    AppJson(payload): AppJson<OtpRequestDto>,
 ) -> Result<Json<OtpRequestResponse>, AppError> {
     let config = state.config();
     service::otp_request(
         state.db(),
         state.cache().auth_challenge().as_ref(),
         state.cache().otp_rate_limit().as_ref(),
+        state.cache().otp_attempts().as_ref(),
         state.mailer(),
-        config.auth.otp_ttl_seconds,
-        config.auth.otp_rate_limit_seconds,
+        &service::OtpRequestConfig {
+            otp_ttl_seconds: config.auth.otp_ttl_seconds,
+            otp_rate_limit_seconds: config.auth.otp_rate_limit_seconds,
+            otp_max_attempts: config.auth.otp_max_attempts,
+        },
         &payload.email,
     )
     .await?;
@@ -68,7 +73,7 @@ pub async fn otp_request(
 pub async fn otp_verify(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<OtpVerifyDto>,
+    AppJson(payload): AppJson<OtpVerifyDto>,
 ) -> Result<(CookieJar, Json<OtpVerifyResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();
@@ -135,7 +140,7 @@ pub async fn otp_verify(
 pub async fn register(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<RegisterDto>,
+    AppJson(payload): AppJson<RegisterDto>,
 ) -> Result<(CookieJar, Json<RegisterResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();
@@ -267,7 +272,7 @@ pub async fn logout(
 pub async fn admin_login(
     State(state): State<AppState>,
     jar: CookieJar,
-    Json(payload): Json<AdminLoginDto>,
+    AppJson(payload): AppJson<AdminLoginDto>,
 ) -> Result<(CookieJar, Json<AdminLoginResponse>), AppError> {
     let app_config = state.config();
     let cookie_domain = app_config.auth.cookie_domain.clone();

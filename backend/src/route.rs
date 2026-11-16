@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use axum::Router;
+use tower_http::timeout::RequestBodyTimeoutLayer;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_axum::routes;
@@ -8,11 +9,11 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api_doc::ApiDoc;
 use crate::app_state::AppState;
-use crate::config::AppEnv;
 use crate::infra::health;
 use crate::middleware::cors::build_cors_layer;
 use crate::middleware::logging::request_id;
 use crate::middleware::rate_limit::{rate_limit, RateLimitState};
+use crate::middleware::timeout::{request_deadline, REQUEST_BODY_IDLE_TIMEOUT};
 use crate::modules::{admin, auth, contact, listings, media, owner_requests, users};
 
 /// Merges the module routers under `/api/v1` and returns the router with the
@@ -37,7 +38,6 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health::check))
-        .routes(routes!(health::check_storage))
         .nest("/api/v1", api_v1)
         .split_for_parts()
 }
@@ -49,16 +49,16 @@ fn merged_router() -> (Router<AppState>, utoipa::openapi::OpenApi) {
 /// request regardless of role.
 ///
 /// The Swagger UI (which also serves the raw schema at
-/// `/api/docs/openapi.json`) is mounted everywhere except production — the
-/// API surface must not be discoverable by anyone probing a public
-/// deployment.
+/// `/api/docs/openapi.json`) is mounted in development only: staging is as
+/// reachable as production, and the frontend generates its types from a dev
+/// backend or from the committed schema.
 pub fn build_router(state: AppState) -> Router {
     let (router, openapi) = merged_router();
 
-    let router = if state.config().app_env == AppEnv::Production {
-        router
-    } else {
+    let router = if state.config().app_env.is_dev() {
         router.merge(SwaggerUi::new("/api/docs").url("/api/docs/openapi.json", openapi))
+    } else {
+        router
     };
 
     let cors = build_cors_layer(state.config());
@@ -74,6 +74,8 @@ pub fn build_router(state: AppState) -> Router {
             rate_limit_state,
             rate_limit,
         ))
+        .layer(axum::middleware::from_fn(request_deadline))
+        .layer(RequestBodyTimeoutLayer::new(REQUEST_BODY_IDLE_TIMEOUT))
         .layer(axum::middleware::from_fn(request_id))
         .layer(cors)
         .with_state(state)

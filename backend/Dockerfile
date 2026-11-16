@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ── Builder ───────────────────────────────────────────────────────────────────
-FROM rust:1-slim-bookworm AS builder
+FROM rust:1.97-slim-bookworm AS builder
 
 # ca-certificates + curl: utoipa-swagger-ui's build.rs downloads the Swagger UI
 # release archive over HTTPS via the `curl` system binary at compile time.
@@ -32,7 +32,7 @@ COPY src ./src
 RUN touch src/main.rs && cargo build --release
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl \
@@ -41,6 +41,9 @@ RUN apt-get update \
     && useradd --system --gid backend --no-create-home backend
 
 WORKDIR /app
+# The release image is a production artifact: started without an explicit
+# APP_ENV it must not fall into development mode. Staging overrides it.
+ENV APP_ENV=production
 COPY --from=builder /app/target/release/backend-my-house ./backend-my-house
 RUN mkdir -p /app/storage && chown -R backend:backend /app
 
@@ -57,7 +60,7 @@ CMD ["./backend-my-house"]
 # Toolchain only — no source is copied in. docker-compose bind-mounts the
 # backend/ directory over /app in the dev profile; cargo-watch rebuilds and
 # restarts the server on every save.
-FROM rust:1-slim-bookworm AS dev
+FROM rust:1.97-slim-bookworm AS dev
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential pkg-config curl \

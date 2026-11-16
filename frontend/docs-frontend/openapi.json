@@ -613,6 +613,9 @@
               }
             }
           },
+          "422": {
+            "description": "Not a valid ASCII email address (`VALIDATION_FAILED`)"
+          },
           "429": {
             "description": "Too many requests for this email within the rate-limit window"
           }
@@ -1753,25 +1756,6 @@
           }
         }
       }
-    },
-    "/health/storage": {
-      "get": {
-        "tags": ["health"],
-        "summary": "Throwaway smoke check confirming `Arc<dyn StorageProvider>` (MH-27) is reachable\nfrom a handler via `State<AppState>` extraction. No module has real uploads yet\n(first real caller is EP-08/Media) — this only proves the plumbing compiles and\nresolves through the extractor, mirroring [`check`] above.",
-        "operationId": "check_storage",
-        "responses": {
-          "200": {
-            "description": "Storage provider reachable via AppState",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StorageStatus"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -2896,16 +2880,6 @@
       "Role": {
         "type": "string",
         "enum": ["seeker", "owner", "admin"]
-      },
-      "StorageStatus": {
-        "type": "object",
-        "description": "Storage backend response body.",
-        "required": ["status"],
-        "properties": {
-          "status": {
-            "type": "string"
-          }
-        }
       },
       "UpdateAccountStateDto": {
         "type": "object",

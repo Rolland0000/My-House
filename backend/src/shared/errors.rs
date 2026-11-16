@@ -57,6 +57,9 @@ pub enum AppError {
     #[error("Invalid query parameter: {0}")]
     InvalidQueryParam(String),
 
+    #[error("Invalid path parameter.")]
+    InvalidPathParam,
+
     // ── 401 Unauthorized ─────────────────────────────────────────────────────
     #[error("Invalid or expired OTP code.")]
     OtpInvalid,
@@ -136,8 +139,12 @@ pub enum AppError {
     #[error("This user is not an owner.")]
     NotAnOwner,
 
+    // ── 408 Request Timeout ──────────────────────────────────────────────────
+    #[error("The request took too long.")]
+    RequestTimeout,
+
     // ── 413 Payload Too Large ────────────────────────────────────────────────
-    #[error("File exceeds the maximum allowed size.")]
+    #[error("Payload exceeds the maximum allowed size.")]
     PayloadTooLarge,
 
     // ── 422 Unprocessable Entity ─────────────────────────────────────────────
@@ -193,6 +200,7 @@ impl AppError {
             // 400
             Self::BadRequest(_) => (StatusCode::BAD_REQUEST, "BAD_REQUEST"),
             Self::InvalidQueryParam(_) => (StatusCode::BAD_REQUEST, "INVALID_QUERY_PARAM"),
+            Self::InvalidPathParam => (StatusCode::BAD_REQUEST, "INVALID_PATH_PARAM"),
             // 401
             Self::OtpInvalid => (StatusCode::UNAUTHORIZED, "OTP_INVALID"),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED"),
@@ -225,6 +233,8 @@ impl AppError {
             Self::MediaOrderConflict => (StatusCode::CONFLICT, "MEDIA_ORDER_CONFLICT"),
             Self::PhotoRequired => (StatusCode::CONFLICT, "PHOTO_REQUIRED"),
             Self::NotAnOwner => (StatusCode::CONFLICT, "NOT_AN_OWNER"),
+            // 408
+            Self::RequestTimeout => (StatusCode::REQUEST_TIMEOUT, "REQUEST_TIMEOUT"),
             // 413
             Self::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE"),
             // 422

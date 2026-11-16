@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.6
+> **Version :** 1.7
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.6 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.7 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -40,7 +40,10 @@ backend/
 │   ├── 20260830120000_users_profile_completeness.sql
 │   ├── 20260912081021_owner_requests_secondary_phone.sql
 │   ├── 20260927094513_listings_published_at.sql
-│   └── 20261024053122_search_vector_english_type_labels.sql
+│   ├── 20261024053122_search_vector_english_type_labels.sql
+│   ├── 20261115090000_admin_password_login.sql
+│   ├── 20261115114340_users_email_canonical.sql
+│   └── 20261115130252_refresh_tokens_retention.sql
 ├── seed/
 │   └── seed_listings.sql
 └── src/
@@ -48,7 +51,7 @@ backend/
     ├── lib.rs
     ├── app_server.rs                  # Bind, serve, graceful shutdown (SIGINT / SIGTERM)
     ├── app_state.rs                   # AppState injecté via State<AppState>
-    ├── route.rs                       # Routers des modules sous /api/v1, /health, Swagger UI hors production
+    ├── route.rs                       # Routers des modules sous /api/v1, /health, Swagger UI en development seulement
     ├── api_doc.rs                     # Métadonnées OpenAPI (utoipa)
     ├── bin/
     │   └── gen_openapi.rs             # Écrit frontend/docs-frontend/openapi.json sans DB ni serveur
@@ -60,19 +63,20 @@ backend/
     │   ├── mod.rs
     │   ├── cors.rs                    # CorsLayer (tower-http), origines lues dans ALLOWED_ORIGINS
     │   ├── logging.rs                 # tracing + request_id
-    │   └── rate_limit.rs              # Limite générique par IP (complète le rate-limit OTP spécifique)
+    │   ├── rate_limit.rs              # Limite générique par IP, IPv6 comptée par /64 (complète le rate-limit OTP)
+    │   └── timeout.rs                 # Durée maximale d'une requête (408) et inactivité du corps
     │
     ├── infra/
     │   ├── mod.rs
     │   ├── db.rs                      # Pool sqlx::PgPool
-    │   ├── health.rs                  # GET /health (PostgreSQL) et GET /health/storage
+    │   ├── health.rs                  # GET /health (PostgreSQL)
     │   ├── mailer.rs                  # Client SMTP (lettre)
     │   ├── cache/
     │   │   ├── mod.rs
     │   │   ├── provider.rs            # trait AppCacheProvider
     │   │   └── moka.rs                # impl moka — OTP et tickets d'inscription, is_active, rejeu refresh, rate-limits
     │   └── storage/
-    │       ├── mod.rs                 # Factory : sélection impl via STORAGE_PROVIDER (local au MVP)
+    │       ├── mod.rs                 # Factory : STORAGE_PROVIDER=local, seule valeur acceptée au MVP
     │       ├── provider.rs            # trait StorageProvider (incl. presigned_url, non utilisé au MVP)
     │       ├── local_fs.rs            # impl LocalFsStorage (MVP) — AwsS3Storage ajouté en V2
     │       ├── cleanup.rs             # Suppression best-effort d'une liste de clés
@@ -151,11 +155,13 @@ backend/
         ├── mod.rs
         ├── errors.rs                  # AppError → réponse HTTP structurée
         ├── pagination.rs              # PaginatedResponse<T>
-        ├── extractors.rs              # AuthUser, MaybeAuthUser, AppJson, AppQuery (revérifie is_active)
+        ├── extractors.rs              # AuthUser, MaybeAuthUser (revérifient is_active), AppJson, AppQuery, AppPath
         ├── rbac.rs                    # Contrôle de rôle (seeker/owner/admin), appelé dans les handlers
         ├── types.rs                   # NewType wrappers (UserId, ListingId...), valeurs de cache (AuthChallenge, RevealWindow)
-        ├── validation.rs              # Règles de champs (400 ou 422 FieldErrors), place_filter, keyword_filter
+        ├── validation.rs              # Règles de champs (400 ou 422 FieldErrors), normalize_email, place_filter, keyword_filter
         ├── file_validation.rs         # Magic bytes (infer) et tailles max, pour tous les uploads
+        ├── image_processing.rs        # Ré-encodage des images publiques, dimensions des pièces d'identité
+        ├── pii.rs                     # Adresse e-mail masquée pour les logs
         ├── storage_key.rs             # Seul constructeur des clés de storage (préfixes publics/privés)
         ├── media_order.rs             # Ordre d'affichage des photos (cover d'abord)
         ├── session_cookie.rs          # Attributs du cookie refresh_token
@@ -435,6 +441,11 @@ ALTER TABLE users
   CHECK (role = 'admin' OR (last_name IS NOT NULL AND phone IS NOT NULL))
   NOT VALID;
 
+-- Migration 20261115114340. L'e-mail est stocké sans espaces autour et en
+-- minuscules : UNIQUE(email) refuse donc la même adresse dans une autre casse.
+ALTER TABLE users
+  ADD CONSTRAINT users_email_canonical CHECK (email = lower(btrim(email)));
+
 -- ============================================================
 -- refresh_tokens
 -- ============================================================
@@ -444,12 +455,13 @@ CREATE TABLE refresh_tokens (
     token_hash      VARCHAR(255) NOT NULL,
     expires_at      TIMESTAMPTZ NOT NULL,
     revoked_at      TIMESTAMPTZ,                                   -- NULL = actif
-    replaced_by_id  UUID        REFERENCES refresh_tokens(id),     -- chaîne de rotation
+    replaced_by_id  UUID        REFERENCES refresh_tokens(id) ON DELETE SET NULL, -- chaîne de rotation
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_tokens_hash    ON refresh_tokens(token_hash);
+CREATE INDEX idx_refresh_tokens_replaced_by_id ON refresh_tokens(replaced_by_id); -- migration 20261115130252
 
 -- ============================================================
 -- owner_requests
@@ -624,6 +636,7 @@ CREATE TRIGGER tg_owner_requests_updated_at
 | ----------------------------------------- | ------------------------------------------------------------------------------------ |
 | `users.first_name` nullable             | Facultatif — certaines personnes n'ont qu'un nom                                  |
 | `users.last_name / phone` nullable en DDL | Rendus obligatoires hors admin par `users_profile_complete_for_non_admin` ; la colonne reste nullable pour le bootstrap admin |
+| `users.email` canonique                 | Le backend normalise chaque adresse avant de la lire ou de l'écrire : espaces retirés, minuscules, ASCII seulement, 254 caractères au plus. `users_email_canonical` impose cette forme en base |
 | OTP non stocké en DB                     | Géré exclusivement dans moka (in-memory, TTL 10 min)                               |
 | `storage_key` vs `url`                | `storage_key` = chemin interne pérenne. `url` = URL recalculable depuis la clé |
 | `is_cover` index partiel unique         | PostgreSQL garantit l'unicité de la cover sans contrainte applicative               |
@@ -632,7 +645,7 @@ CREATE TRIGGER tg_owner_requests_updated_at
 | `listings.published_at` nullable        | `NULL` = brouillon. La publication pose la date une fois, sans retour arrière au MVP. Les biens antérieurs à la colonne ont été rétro-remplis avec `created_at` |
 | `listings.currency` sans défaut         | Le repository écrit toujours `XAF` ; l'API ne l'expose pas, tous les prix sont en XAF au MVP |
 | Libellés de type dans `search_vector`  | Français et anglais, pour que « apartment » comme « appartement » trouvent le bien. Changer la liste demande une migration qui réindexe |
-| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token `revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id` |
+| `refresh_tokens.revoked_at` / `replaced_by_id` | Supportent la rotation : un refresh consomme le token courant et chaîne vers le nouveau. Réutilisation d'un token `revoked_at IS NOT NULL` ⇒ révocation de tous les tokens du `user_id`. Rétention : chaque rotation purge les tokens du même `user_id` expirés depuis plus de 30 jours. Un token purgé puis rejoué reçoit `401` sans révoquer la famille, ce qui n'arrive qu'après la fin de sa durée de vie |
 
 ---
 
@@ -645,7 +658,7 @@ infra/storage/
 ├── provider.rs     # trait StorageProvider
 ├── local_fs.rs     # impl LocalFsStorage  (STORAGE_PROVIDER=local — MVP)
 └── mod.rs          # fn build_storage_provider() → Arc<dyn StorageProvider>
-                     # AwsS3Storage (STORAGE_PROVIDER=s3) ajouté en V2
+                     # Seule la valeur local est acceptée au MVP ; AwsS3Storage arrive en V2
 ```
 
 **Interface :**
@@ -678,13 +691,15 @@ owner-requests/{request_id}/{uuid}.{ext}  — privé, jamais exposé en statique
 
 | Upload | Service | Validation | Clé |
 | ------ | ------- | ---------- | --- |
-| Photo de listing (`POST /media/upload`) | `media::service::upload` | `validate_image`, 5 MB | `listing_media_key` |
-| Avatar (`POST /users/me/avatar`) | `users::service::replace_avatar` | `validate_image`, 5 MB | `avatar_key` |
-| Pièces d'identité (`POST /owner-requests`) | `owner_requests::service::submit` | Un PDF (`validate_pdf`, 3 MB) ou deux images recto/verso (`validate_image`, 5 MB chacune) | `owner_request_document_key` |
+| Photo de listing (`POST /media/upload`) | `media::service::upload` | `validate_image`, 5 MB, puis ré-encodage | `listing_media_key` |
+| Avatar (`POST /users/me/avatar`) | `users::service::replace_avatar` | `validate_image`, 5 MB, puis ré-encodage | `avatar_key` |
+| Pièces d'identité (`POST /owner-requests`) | `owner_requests::service::submit` | Un PDF (`validate_pdf`, 3 MB) ou deux images recto/verso (`validate_image`, 5 MB chacune, dimensions contrôlées) | `owner_request_document_key` |
 
 `shared::file_validation` contrôle les magic bytes (crate `infer`) et la taille. `shared::storage_key` est le seul endroit qui construit une clé : il impose le préfixe public ou privé et génère le nom de fichier (UUID). `media::service` ne gère que les photos de listing, et reste le seul module qui écrit dans `listing_media`.
 
-L'ordre des écritures protège la base contre une URL morte. L'avatar est écrit, puis `users.avatar_url` pointe dessus, puis l'ancien fichier est supprimé en best-effort. Pour une demande owner, toutes les pièces sont validées en mémoire, puis envoyées au storage, puis la ligne `owner_requests` est insérée ; un échec à l'une des deux dernières étapes supprime les pièces déjà envoyées.
+Les photos de biens et les avatars passent ensuite par `shared::image_processing`, qui les décode puis les ré-encode avant l'envoi au storage. Le fichier stocké ne contient que les pixels : aucune métadonnée (la position GPS de l'EXIF comprise) ni contenu ajouté à l'image. La rotation EXIF est appliquée aux pixels. JPEG reste JPEG (qualité 85) et PNG reste PNG ; WebP devient JPEG, ou PNG s'il a de la transparence. Une image de plus de 8000 px de côté, ou dont le décodage demanderait plus de 256 MiB, reçoit `422 INVALID_FILE`. Deux ré-encodages tournent au plus en même temps. Les pièces d'identité gardent leurs octets d'origine : seules les dimensions lues dans l'en-tête sont contrôlées.
+
+L'ordre des écritures protège la base contre une URL morte. L'avatar est écrit, puis `users.avatar_url` est remplacée sous verrou de la ligne, qui rend l'ancienne URL, puis l'ancien fichier est supprimé en best-effort. Si le compte n'existe plus, le fichier qui vient d'être écrit est supprimé. Pour une demande owner, toutes les pièces sont validées en mémoire, puis envoyées au storage, puis la ligne `owner_requests` est insérée ; un échec à l'une des deux dernières étapes supprime les pièces déjà envoyées.
 
 ---
 
@@ -710,8 +725,8 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 | Aspect | Détail |
 | --- | --- |
 | Transport | SMTP uniquement (`lettre`), vers n'importe quel relais conforme aux standards. Authentification (`SMTP_USERNAME`/`SMTP_PASSWORD`) et chiffrement (`SMTP_SECURITY` : `none` \| `starttls` \| `tls`) inclus au MVP (MH-113). Changer de relais ne demande qu'un changement de variables d'environnement. Identifiants obligatoires en staging/production, et alors `SMTP_SECURITY` ≠ `none`. Pas de SDK fournisseur ni d'API transactionnelle HTTP (cf. §3bis.3, R-03 ARCHITECTURE.md) |
-| Synchronicité | Envoi **synchrone** dans le flux de la requête HTTP qui le déclenche — pas de file d'attente, pas de retry automatique |
-| Échec d'envoi | Un échec SMTP **ne fait pas échouer** la requête métier (ex: `POST /owner-requests` reste `201` même si l'email de notification admin échoue) — l'envoi est best-effort, journalisé via `tracing`, jamais bloquant pour l'écriture DB |
+| Synchronicité | Envoi en tâche de fond (`tokio::spawn`) : la requête qui le déclenche n'attend pas le relais. Connexion limitée à 10 s, envoi complet à 30 s. Pas de file d'attente persistante ni de retry automatique |
+| Échec d'envoi | Un échec SMTP **ne fait pas échouer** la requête métier (ex: `POST /owner-requests` reste `201` même si l'email de notification admin échoue) — l'envoi est best-effort, journalisé via `tracing`, jamais bloquant pour l'écriture DB. Les logs masquent l'adresse du destinataire (`shared::pii`) ; le message d'erreur renvoyé par le relais est journalisé tel quel et peut la contenir |
 | Notification in-app | **Aucune** au MVP — pas de table `notifications`, pas d'endpoint de liste, pas de badge. Le seul canal est l'email. L'admin consulte l'état des demandes directement via `GET /admin/owner-requests?status=pending` (pas de flux de notifications séparé) |
 | Rappel planifié (LIST-03) | **Hors scope MVP** — cf. ARCHITECTURE.md §6.2 et R-10. Aucune tâche planifiée n'existe dans le binaire backend au MVP |
 
@@ -754,6 +769,19 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 { "error": { "code": "LISTING_NOT_FOUND", "message": "...", "status": 404 } }
 ```
 
+**Erreurs communes à toutes les routes :**
+
+| Code | Cas |
+| ---- | --- |
+| `400` | `INVALID_PATH_PARAM` : paramètre de chemin invalide, un UUID mal formé par exemple. `BAD_REQUEST` : corps JSON illisible |
+| `408` | `REQUEST_TIMEOUT` : requête non terminée en 10 minutes |
+| `413` | `PAYLOAD_TOO_LARGE` : corps au-delà de la limite de la route |
+| `429` | `RATE_LIMITED` : limite générique par IP (`RATE_LIMIT_*`, cf. §8) |
+
+Le serveur coupe une connexion qui n'a pas fini d'envoyer ses en-têtes en 30 s. Un corps qui n'envoie plus rien pendant 30 s reçoit `400`. Devant le backend, nginx refuse un corps de plus de 11 Mo avec une page `413` hors enveloppe (cf. §7.3).
+
+Les noms, les téléphones et la note admin refusent tout caractère de contrôle avec `400 BAD_REQUEST`. La note accepte seulement le retour à la ligne et la tabulation.
+
 ---
 
 ### 4.0 Health Check
@@ -791,9 +819,16 @@ Vue bout-en-bout du chemin d'une notification, de l'événement déclencheur jus
 // Response 200
 { "data": { "message": "Code envoyé" } }
 
-// Response 429 — rate limit
+// Response 422 — adresse invalide
+{ "error": { "code": "VALIDATION_FAILED", "message": "...", "status": 422, "fields": [{ "field": "email", "message": "email is not a valid address." }] } }
+
+// Response 429 — rate limit, avec un en-tête Retry-After
 { "error": { "code": "OTP_RATE_LIMITED", "message": "Veuillez attendre avant de demander un nouveau code.", "status": 429 } }
 ```
+
+L'adresse est normalisée avant tout traitement : espaces retirés, minuscules, ASCII seulement, 254 caractères au plus. `/auth/otp/verify` refuse une adresse invalide avec `401 OTP_INVALID`.
+
+Entre deux demandes pour la même adresse, le délai vaut `OTP_RATE_LIMIT_SECONDS`. Il double pour chaque code dont les `OTP_MAX_ATTEMPTS` essais ont été consommés, jusqu'à 5 minutes. Le compteur d'essais est gardé 24 h par adresse et repart à zéro au premier code correct. Un essai est compté avant la comparaison du code, donc des essais concurrents ne dépassent pas le budget.
 
 **`POST /auth/otp/verify`**
 
@@ -926,7 +961,7 @@ Content-Type: multipart/form-data
 Body: { file: <binary> }
 ```
 
-Mêmes contraintes de validation que les photos de listing (magic bytes, formats JPEG/PNG/WebP, taille max 5 MB). Stocké sous `avatars/{user_id}/{uuid}.{ext}`. L'ancien avatar est supprimé du storage après écriture réussie du nouveau.
+Mêmes contraintes de validation que les photos de listing (magic bytes, formats JPEG/PNG/WebP, taille max 5 MB), puis ré-encodage (cf. §3.1). Stocké sous `avatars/{user_id}/{uuid}.{ext}`, l'extension suivant le format ré-encodé (`jpg` ou `png`). L'ancien avatar est supprimé du storage après écriture réussie du nouveau.
 
 ```json
 // Response 200
@@ -975,6 +1010,8 @@ Body: {
 ```
 
 Soumission atomique : si l'upload d'un document échoue, toute la requête échoue — aucun état intermédiaire n'est persisté (pas de `draft`). Les documents sont stockés sous `owner-requests/{request_id}/{uuid}.{ext}`, jamais exposés en statique — accès admin uniquement via `GET /admin/owner-requests/:id/documents/:doc_id` (cf. ARCHITECTURE.md §7.3).
+
+Une image recto ou verso de plus de 8000 px de côté reçoit `422 INVALID_DOCUMENT`. Le nom d'origine d'un document est réduit à son nom de base, sans caractère de contrôle, à 255 caractères au plus, et devient `document` s'il ne reste rien.
 
 ```json
 // Response 201
@@ -1252,11 +1289,10 @@ Supprime définitivement le bien et ses photos. Response `204`, sans corps. La l
 
 L'ancienne cover est rétrogradée et la nouvelle promue dans une seule transaction, sous le verrou du listing. Désigner la cover actuelle répond aussi `200`, sans écriture.
 
-Écart connu : le corps de cette route est lu par l'extracteur `Json` d'axum, pas par `AppJson`. Un corps invalide est donc rejeté avant le handler, sans l'enveloppe `error` : `400` (JSON mal formé), `415` (`Content-Type` absent) ou `422` (`media_id` absent ou UUID invalide), en texte brut. Les autres routes à corps JSON des biens et des photos passent par `AppJson`.
-
 | Code    | Cas                                                                                  |
 | ------- | ------------------------------------------------------------------------------------ |
 | `200` | Cover changée                                                                         |
+| `400` | `BAD_REQUEST` : corps illisible (JSON mal formé, `Content-Type` absent, `media_id` absent ou UUID invalide) |
 | `401` | Jeton absent ou invalide                                                              |
 | `403` | Appelant seeker ou admin                                                              |
 | `404` | `LISTING_NOT_FOUND` (bien inconnu ou d'un autre owner) ou `MEDIA_NOT_FOUND` (photo absente de ce bien) |
@@ -1348,7 +1384,7 @@ Content-Type: multipart/form-data
 Body: { listing_id: uuid, file: <binary> }
 ```
 
-Contraintes : formats JPEG / PNG / WebP validés par **magic bytes** (crate `infer`, pas par extension ni `Content-Type` déclaré), taille max 5 MB, max 5 photos par listing. Le nom de fichier stocké est toujours généré côté serveur (UUID) — jamais dérivé du nom fourni par le client.
+Contraintes : formats JPEG / PNG / WebP validés par **magic bytes** (crate `infer`, pas par extension ni `Content-Type` déclaré), taille max 5 MB, max 5 photos par listing. Le nom de fichier stocké est toujours généré côté serveur (UUID) — jamais dérivé du nom fourni par le client. La photo est ré-encodée avant stockage (cf. §3.1) : l'extension de l'URL renvoyée suit le format ré-encodé (`jpg` ou `png`), et une image de plus de 8000 px de côté reçoit `422 INVALID_FILE`.
 
 **Sélection automatique de la cover :** la première photo uploadée sur un listing (`listing_media` vide pour ce `listing_id`) est automatiquement marquée `is_cover = true`. Les uploads suivants sont `is_cover = false` par défaut. L'owner peut ensuite désigner une autre photo existante comme cover via `PATCH /listings/:id/cover` (§4.3) — aucune action manuelle n'est requise pour qu'un listing ait une cover dès sa première photo.
 La cover ne peut pas être supprimée sans en avoir désigné une autre au préalable.
@@ -1675,143 +1711,49 @@ Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mo
 
 ## 7. Infrastructure Docker
 
+Les fichiers du dépôt font foi. Cette section ne les recopie pas : elle fixe les règles qu'ils doivent respecter.
+
 ### 7.1 `backend/Dockerfile`
 
-```dockerfile
-# ── Stage 1 : Build ──────────────────────────────────────────
-FROM rust:1.78-slim AS builder
-WORKDIR /app
-
-# Cache des dépendances Cargo
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-RUN rm src/main.rs
-
-# Build final
-COPY src ./src
-RUN touch src/main.rs && cargo build --release
-
-# ── Stage 2 : Runtime ────────────────────────────────────────
-FROM debian:bookworm-slim
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends libssl3 ca-certificates curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /app/target/release/myhouse-backend /usr/local/bin/myhouse-backend
-EXPOSE 3000
-CMD ["myhouse-backend"]
-```
+- Build en plusieurs étapes : `rust:1.97-slim-bookworm` compile le binaire contre le cache `.sqlx/` (`SQLX_OFFLINE=true`), sans base de données.
+- Runtime `debian:bookworm-slim`, épinglé par digest, sous l'utilisateur système `backend` (non root).
+- L'image fixe `APP_ENV=production` : démarrée sans autre valeur, elle ne passe jamais en mode développement.
+- Healthcheck sur `GET /health`.
 
 ### 7.2 `frontend/Dockerfile`
 
-```dockerfile
-# ── Stage 1 : Build ──────────────────────────────────────────
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
-
-COPY . .
-RUN yarn build
-
-# ── Stage 2 : Serve ──────────────────────────────────────────
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-```
+- Build `node:22.23-alpine` (`npm ci` puis `npm run build`). `src/shared/api/types.ts` doit déjà être généré dans le contexte de build.
+- Runtime `nginxinc/nginx-unprivileged`, épinglé par digest : nginx tourne sous l'utilisateur `nginx` et écoute sur 8080.
+- Healthcheck sur `http://127.0.0.1:8080/`. Dans le conteneur, `localhost` se résout en `::1`, où nginx n'écoute pas.
 
 ### 7.3 `frontend/nginx.conf`
 
-```nginx
-server {
-    listen 80;
+En production, nginx est le seul point d'entrée. Il sert le build du frontend, `/media/avatars/` et `/media/listings/` depuis le volume `storage_data` monté en lecture seule, et proxifie `/api/` et `/health` vers `backend-prod:3000`.
 
-    # SPA fallback
-    location / {
-        root  /usr/share/nginx/html;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-    }
+| Règle | Valeur |
+| ----- | ------ |
+| Médias | Un `alias` par préfixe public. Le volume contient aussi `owner-requests/*`, donc sa racine n'est jamais aliasée |
+| Taille de corps | `client_max_body_size 11m` sur `/api/`, au-dessus de la plus grande limite backend (demande owner, deux documents de 5 MiB). Le backend applique ensuite la limite de chaque route |
+| Version | `server_tokens off` |
+| En-têtes | Déclarés au niveau `server` avec `always`, donc présents aussi sur les erreurs : `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `Strict-Transport-Security: max-age=31536000`. Une `location` qui déclare son propre `add_header` les perd tous |
+| CSP | `default-src 'self'`. Google Fonts est autorisé (`fonts.googleapis.com` pour la feuille de style, `fonts.gstatic.com` pour les polices). Images `'self' data: blob:` pour les aperçus d'upload. `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'` |
 
-    # Fichiers publics (listings, avatars) — lecture directe, jamais via le backend
-    # owner-requests/* n'est jamais monté ici : pas de location = pas d'exposition
-    location /media/ {
-        alias /usr/share/nginx/storage/;
-        add_header Cache-Control "public, max-age=86400";
-    }
-
-    # Proxy vers le backend
-    location /api {
-        proxy_pass         http://backend:3000;
-        proxy_set_header   Host             $host;
-        proxy_set_header   X-Real-IP        $remote_addr;
-        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
-        client_max_body_size 10M;           # Upload photos
-    }
-}
-```
+TLS n'est pas terminé dans le conteneur : un reverse proxy ou un load balancer en amont s'en charge. La production l'exige, car le cookie `refresh_token` est `Secure`. Le navigateur ignore un en-tête HSTS reçu en HTTP ; il prend effet dès que le site est servi en HTTPS. `includeSubDomains` n'est pas posé tant que les sous-domaines ne sont pas connus.
 
 ### 7.4 `docker-compose.yml`
 
-```yaml
-version: '3.9'
+Le fichier racine inclut `backend/compose-backend.yml` et `frontend/compose-frontend.yml`. Le profil `dev` démarre `backend-dev`, `frontend-dev`, `adminer` et `mailhog` ; le profil `prod` démarre `backend-prod` et `frontend-prod`. `db` n'a pas de profil.
 
-services:
+| Service | Port publié | Raison |
+| ------- | ----------- | ------ |
+| `db` | `127.0.0.1:5432` | Joignable par un `cargo run` sur l'hôte, pas par les autres machines |
+| `adminer`, `mailhog` | `127.0.0.1:8081`, `127.0.0.1:8025`, `127.0.0.1:1025` | Mailhog affiche les codes OTP : ouvert sur le réseau, il donnerait accès à tous les comptes de dev |
+| `backend-dev` | `127.0.0.1`, port aléatoire | `frontend-dev` le joint par le réseau compose |
+| `frontend-dev` | `127.0.0.1:5173` | Serveur Vite |
+| `backend-prod` | aucun | nginx le joint par le réseau compose. Publié, il contournerait nginx et ses en-têtes |
+| `frontend-prod` | `80` vers `8080` | Seul point d'entrée |
 
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB:       myhouse
-      POSTGRES_USER:     myhouse
-      POSTGRES_PASSWORD: myhouse
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myhouse"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    env_file: ./backend/.env
-    volumes:
-      - storage_data:/app/storage          # RW — LocalFsStorage écrit ici
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    volumes:
-      - storage_data:/usr/share/nginx/storage:ro  # RO — nginx sert /media/* directement
-    depends_on:
-      backend:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
-  storage_data:
-```
+`postgres` est épinglé par tag et digest, `adminer` et `mailhog` par tag de version. Chaque mois, Dependabot (`.github/dependabot.yml`) propose la mise à jour des images et des actions CI, épinglées par SHA.
 
 ---
 
@@ -1822,7 +1764,7 @@ Fichier de référence : `backend/.env.example`
 ```bash
 # ── Application ──────────────────────────────────────────────
 APP_PORT=3000
-APP_ENV=development           # development | staging | production
+APP_ENV=development           # obligatoire : development | staging | production
 RUST_LOG=info
 
 # ── Base de données ──────────────────────────────────────────
@@ -1839,9 +1781,8 @@ OTP_MAX_ATTEMPTS=3
 OTP_RATE_LIMIT_SECONDS=60     # 1 demande OTP / 60s par email
 
 # ── Storage ──────────────────────────────────────────────────
-STORAGE_PROVIDER=local         # LocalFsStorage au MVP ; trait StorageProvider permet de brancher
-                                # un autre provider object storage (ex. MinIO, AWS S3) en V2 sans
-                                # changer le code métier — s3 (V2, non implémenté au MVP)
+STORAGE_PROVIDER=local         # seule valeur acceptée au MVP, s3 est refusé au démarrage ;
+                                # le trait StorageProvider permettra de brancher MinIO ou S3 en V2
 LOCAL_STORAGE_PATH=/app/storage
 PUBLIC_MEDIA_BASE_URL=/media   # chemin relatif à l'origine — préfixe des URLs publiques générées (listings, avatars)
 
@@ -1877,12 +1818,15 @@ ADMIN_BOOTSTRAP_ON_STARTUP=true # si true, crée l'admin au boot, ou lui pose un
 RATE_LIMIT_MAX_REQUESTS=100     # obligatoire, > 0 ; requêtes par IP et par fenêtre (distinct de OTP_RATE_LIMIT_SECONDS)
 RATE_LIMIT_WINDOW_SECONDS=60    # obligatoire, > 0
 TRUSTED_PROXIES=                # obligatoire, même vide ; IP/CIDR dont X-Forwarded-For est cru ; vide = IP du pair (cargo run en local)
-                                # en staging/prod : la plage la plus étroite couvrant nginx seul
+                                # en staging/prod : la plage la plus étroite couvrant nginx seul ;
+                                # backend-prod n'est pas publié, nginx est son seul client (cf. §7.4)
 
 # ── Révélation du contact ────────────────────────────────────
 CONTACT_REVEAL_MAX_PER_WINDOW=30      # obligatoire, > 0 ; biens distincts révélés par utilisateur et par fenêtre (cf. §4.6)
 CONTACT_REVEAL_WINDOW_SECONDS=28800   # obligatoire, > 0 ; 8 heures
 ```
+
+`APP_ENV` n'a pas de valeur par défaut : sans elle, le backend refuse de démarrer. `cargo run` et `cargo test` reçoivent `development` par `backend/.cargo/config.toml`, et l'image runtime fixe `production`. Swagger UI et `/api/docs/openapi.json` ne sont servis qu'en `development`.
 
 La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-têtes `Authorization` et `Content-Type`, et les credentials (cookie `refresh_token`). Seules les origines d'`ALLOWED_ORIGINS` sont acceptées.
 
@@ -1920,3 +1864,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.4     | Novembre 2026 | MH-71, livraison de l'EP-11 (Contact). §1.1/§1.2 : module `contact` et `features/contact/` tels que construits, `useLoginPath` et `returnTo` (MH-70). §4.6 : réponse avec `phone` et `secondary_phone` et origine de ce dernier, conditions de révélation, cas 401, 403, 404 et 429 `CONTACT_RATE_LIMITED` avec `Retry-After`, plafond par utilisateur. §8 : `CONTACT_REVEAL_MAX_PER_WINDOW` et `CONTACT_REVEAL_WINDOW_SECONDS` |
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §1.1 : `contact::service` lit d'abord, compte ensuite. §4.6 : 30 biens distincts par 8 h, fenêtre ouverte par la première révélation comptée, un bien déjà révélé ne compte pas et reste accessible au plafond, un `404` n'ouvre pas de fenêtre. §8 : description de `CONTACT_REVEAL_MAX_PER_WINDOW` |
 | 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §1.1 : routes admin dans `listings` et `users`, `admin` limité aux demandes owner. §1.2 : pages et hooks admin dans `features/admin/`, redirection du compte suspendu, helpers déplacés vers `shared/`. §2.2 : renvoi à la règle de visibilité. §4.1 : `ACCOUNT_SUSPENDED` sur `/auth/otp/verify` et `/auth/refresh`. §4.3, §4.4 et §4.6 : la visibilité publique exige un owner actif au rôle `owner`. §4.7 : contrat complet des sept routes de modération (filtres, valeurs de `visibility`, `ADMIN_ACCOUNT_PROTECTED`, `NOT_AN_OWNER`) et des quatre routes de demandes owner. §4.2bis : rôles réellement admis pour `POST /owner-requests`. §9 : signalement d'un bien en V2 |
+| 1.7     | Novembre 2026 | MH-77, corrections de l'audit de sécurité du 12 novembre 2026. §1.1 : `middleware/timeout.rs`, `shared/image_processing.rs`, `shared/pii.rs`, `AppPath`, nouvelles migrations, `/health/storage` retiré, Swagger UI en `development` seulement. §2.2 et §2.3 : contrainte `users_email_canonical`, rétention et index de `refresh_tokens`. §3.1 : `local` seule valeur de `STORAGE_PROVIDER`, ré-encodage des images publiques, remplacement d'avatar sous verrou. §3bis.1 : e-mails envoyés en tâche de fond, adresse masquée dans les logs. §4 : erreurs communes, délais du serveur, caractères de contrôle. §4.1 : normalisation de l'e-mail, `422` sur `/auth/otp/request`, délai OTP croissant. §4.2 et §4.5 : extension des images ré-encodées. §4.2bis : dimensions des images et nom d'origine des pièces d'identité. §4.3 : la route cover renvoie l'enveloppe `error`. §7 : renvoi aux fichiers du dépôt, règles nginx (en-têtes, CSP, `11m`, non root), ports publiés, TLS en amont. §8 : `APP_ENV` obligatoire, `s3` refusé, `TRUSTED_PROXIES` en production |

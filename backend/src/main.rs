@@ -8,8 +8,8 @@ use backend_my_house::{
     config::{AppConfig, AppEnv},
     infra::cache::{
         build_auth_challenge_cache, build_cache_provider, build_contact_reveal_rate_limit_cache,
-        build_ip_rate_limit_cache, build_otp_rate_limit_cache, build_refresh_replay_cache,
-        AppCache,
+        build_ip_rate_limit_cache, build_otp_attempt_cache, build_otp_rate_limit_cache,
+        build_refresh_replay_cache, AppCache,
     },
     infra::db,
     infra::mailer::Mailer,
@@ -25,11 +25,12 @@ async fn main() {
     // APP_ENV must be set by the OS / Docker / CI before the process
     // starts.  It is the ONLY variable that is never loaded from a .env file.
     //
-    //   APP_ENV=development      → developer machine  (loads .env)
-    //   APP_ENV=staging  → staging server      (no .env)
-    //   APP_ENV=prod     → production          (no .env)
+    //   APP_ENV=development  → developer machine  (loads .env)
+    //   APP_ENV=staging      → staging server      (no .env)
+    //   APP_ENV=production   → production          (no .env)
     //
-    // Absence defaults to `dev` so `cargo run` works without any extra setup.
+    // Absence is fatal. `cargo run` on the host gets `development` from
+    // `.cargo/config.toml`; the runtime image defaults to `production`.
     let app_env = AppEnv::from_real_env().unwrap_or_else(|err| {
         eprintln!("FATAL — APP_ENV: {err}");
         std::process::exit(1);
@@ -115,6 +116,7 @@ async fn main() {
         build_refresh_replay_cache(),
         build_auth_challenge_cache(Duration::from_secs(config.auth.otp_ttl_seconds)),
         build_otp_rate_limit_cache(Duration::from_secs(config.auth.otp_rate_limit_seconds)),
+        build_otp_attempt_cache(),
         build_ip_rate_limit_cache(Duration::from_secs(config.rate_limit.window_seconds)),
         build_contact_reveal_rate_limit_cache(Duration::from_secs(
             config.rate_limit.contact_reveal_window_seconds,

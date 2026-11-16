@@ -10,21 +10,16 @@ pub use provider::StorageProvider;
 
 use std::sync::Arc;
 
-use provider::UnimplementedStorage;
-
 use crate::config::{AppConfig, StorageProvider as StorageProviderKind};
 
 /// Selects and constructs the `StorageProvider` implementation configured via
-/// `STORAGE_PROVIDER`. Invalid values are already rejected at startup by
-/// `AppConfig::from_env` — this function only has to handle the values the
-/// config layer accepts (`local`, `s3`).
+/// `STORAGE_PROVIDER`. Unknown or unimplemented values are rejected at startup
+/// by `AppConfig::from_env`, so only implemented providers reach this match.
 pub fn build_storage_provider(config: &AppConfig) -> Arc<dyn StorageProvider> {
     match config.storage.provider {
         StorageProviderKind::Local => Arc::new(LocalFsStorage::new(
             config.storage.local_path.clone(),
             config.storage.public_media_base_url.clone(),
         )),
-        // Reserved for V2 — not implemented at MVP.
-        StorageProviderKind::S3 => Arc::new(UnimplementedStorage),
     }
 }

@@ -1,8 +1,8 @@
 [advisories]
 version = 2
 ignore = [
-    # No fixed upgrade available yet (transitive via sqlx-mysql, not reachable
-    # at runtime since only the "postgres" sqlx feature is enabled).
+    # `rsa` via jsonwebtoken `rust_crypto` (Marvin attack, no fixed release).
+    # Tokens are HS256-only; revisit if an RSA key is ever configured.
     "RUSTSEC-2023-0071",
     # `crypto-bigint` 0.5 (via jsonwebtoken `rust_crypto` -> p256/p384): only the
     # ECDSA path is affected, tokens are HS256-only. Revisit when jsonwebtoken

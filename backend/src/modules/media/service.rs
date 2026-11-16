@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::infra::storage::StorageProvider;
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
+use crate::shared::image_processing::reencode_public_image;
 use crate::shared::media_order::display_order_key;
 use crate::shared::storage_key::listing_media_key;
 use crate::shared::types::ListingId;
@@ -76,8 +77,12 @@ pub async fn upload(
     check_upload_slot(&mut precheck_tx, listing_id, caller_id).await?;
     precheck_tx.rollback().await.map_err(db_err)?;
 
-    let key = listing_media_key(ListingId::new(listing_id), validated.extension);
-    let url = storage.upload(&key, bytes, validated.content_type).await?;
+    // After the ownership and quota checks, so a refused upload costs no decode.
+    let image = reencode_public_image(bytes, &validated).await?;
+    let key = listing_media_key(ListingId::new(listing_id), image.extension);
+    let url = storage
+        .upload(&key, image.bytes, image.content_type)
+        .await?;
 
     match persist_media(pool, listing_id, caller_id, &key, &url).await {
         Ok(row) => Ok(row),

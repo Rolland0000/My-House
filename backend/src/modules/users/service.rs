@@ -8,7 +8,9 @@ use crate::infra::storage::{delete_storage_objects, StorageProvider};
 use crate::shared::crypto;
 use crate::shared::errors::AppError;
 use crate::shared::file_validation::{validate_image, MAX_IMAGE_SIZE_BYTES};
+use crate::shared::image_processing::reencode_public_image;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
+use crate::shared::pii::masked_email;
 use crate::shared::rbac::Role;
 use crate::shared::storage_key::{avatar_key, avatar_key_from_url};
 use crate::shared::types::UserId;
@@ -50,15 +52,21 @@ pub async fn bootstrap_admin(pool: &PgPool, config: &AppConfig) -> Result<(), Ap
 
     if !admin_exists {
         if repository::upsert_admin(pool, email, &password_hash).await? {
-            tracing::info!(email, "admin account bootstrapped");
+            tracing::info!(email = %masked_email(email), "admin account bootstrapped");
         } else {
-            tracing::warn!(email, "existing account promoted to admin by bootstrap");
+            tracing::warn!(
+                email = %masked_email(email),
+                "existing account promoted to admin by bootstrap"
+            );
         }
         return Ok(());
     }
 
     for updated_email in repository::set_missing_admin_passwords(pool, &password_hash).await? {
-        tracing::info!(email = %updated_email, "password set on existing admin account");
+        tracing::info!(
+            email = %masked_email(&updated_email),
+            "password set on existing admin account"
+        );
     }
     Ok(())
 }
@@ -105,35 +113,45 @@ pub async fn replace_avatar(
     bytes: Bytes,
 ) -> Result<UserRow, AppError> {
     let validated = validate_image(&bytes, MAX_IMAGE_SIZE_BYTES)?;
+    let image = reencode_public_image(bytes, &validated).await?;
 
-    let previous_avatar_url = repository::find_by_id(pool, user_id)
-        .await?
-        .ok_or(AppError::UserNotFound)?
-        .avatar_url;
+    let key = avatar_key(UserId::new(user_id), image.extension);
+    let avatar_url = storage
+        .upload(&key, image.bytes, image.content_type)
+        .await?;
 
-    let key = avatar_key(UserId::new(user_id), validated.extension);
-    let avatar_url = storage.upload(&key, bytes, validated.content_type).await?;
-
-    let updated = repository::update_avatar_url(pool, user_id, &avatar_url)
-        .await?
-        .ok_or(AppError::UserNotFound)?;
+    // The new file is referenced by no row until the swap commits: if the
+    // account is gone or the write fails, it is removed rather than orphaned.
+    let swapped = repository::swap_avatar_url(pool, user_id, &avatar_url).await;
+    let (updated, previous_avatar_url) = match swapped {
+        Ok(Some(swapped)) => swapped,
+        Ok(None) => {
+            delete_storage_objects(storage, std::slice::from_ref(&key)).await;
+            return Err(AppError::UserNotFound);
+        }
+        Err(error) => {
+            delete_storage_objects(storage, std::slice::from_ref(&key)).await;
+            return Err(error);
+        }
+    };
 
     delete_previous_avatar(storage, previous_avatar_url.as_deref(), user_id).await;
 
     Ok(updated)
 }
 
-/// Deletes the caller's account.
+/// Deletes the caller's account. Dropping the cached `is_active` makes the
+/// next request with the same token a 401 instead of a write against a
+/// deleted user.
 pub async fn delete_account(
     pool: &PgPool,
     storage: &dyn StorageProvider,
+    is_active_cache: &dyn AppCacheProvider<Uuid, bool>,
     user_id: Uuid,
 ) -> Result<(), AppError> {
-    let user = repository::find_by_id(pool, user_id)
-        .await?
-        .ok_or(AppError::UserNotFound)?;
-
-    delete_user_and_files(pool, storage, &user).await
+    delete_user_and_files(pool, storage, user_id).await?;
+    is_active_cache.invalidate(&user_id).await;
+    Ok(())
 }
 
 /// Backs `GET /admin/users`.
@@ -173,7 +191,7 @@ pub async fn delete_for_admin(
         .ok_or(AppError::UserNotFound)?;
     ensure_not_admin(user.role)?;
 
-    delete_user_and_files(pool, storage, &user).await?;
+    delete_user_and_files(pool, storage, user_id).await?;
     is_active_cache.invalidate(&user_id).await;
     Ok(())
 }
@@ -239,31 +257,42 @@ fn parse_is_active(request: UpdateAccountStateDto) -> Result<bool, AppError> {
     is_active.ok_or(AppError::Internal)
 }
 
-/// Deletes the files before the rows that reference them. After a partial
-/// failure, a retry re-enumerates whatever remains.
+/// Deletes the files, then the rows, in one transaction that first locks the
+/// account and its listings so no upload slips in between. The connection is
+/// held during the storage deletes; a retry re-enumerates whatever remains.
 async fn delete_user_and_files(
     pool: &PgPool,
     storage: &dyn StorageProvider,
-    user: &UserRow,
+    user_id: Uuid,
 ) -> Result<(), AppError> {
-    let user_id = user.id;
+    let mut tx = pool.begin().await.map_err(db_err)?;
+
+    let avatar_url = repository::lock_account_for_deletion(&mut tx, user_id)
+        .await?
+        .ok_or(AppError::UserNotFound)?;
+
     let mut keys = Vec::new();
-    if let Some(url) = user.avatar_url.as_deref() {
+    if let Some(url) = avatar_url.as_deref() {
         match avatar_key_from_url(url, UserId::new(user_id)) {
             Some(key) => keys.push(key),
             None => tracing::warn!(%user_id, "avatar URL yields no storage key; skipping delete"),
         }
     }
-    keys.extend(repository::list_listing_media_keys_for_owner(pool, user_id).await?);
-    keys.extend(repository::list_owner_request_document_keys(pool, user_id).await?);
+    keys.extend(repository::list_listing_media_keys_for_owner(&mut *tx, user_id).await?);
+    keys.extend(repository::list_owner_request_document_keys(&mut *tx, user_id).await?);
 
     delete_storage_objects(storage, &keys).await;
 
-    if !repository::delete_by_id(pool, user_id).await? {
+    if !repository::delete_by_id(&mut *tx, user_id).await? {
         return Err(AppError::UserNotFound);
     }
 
+    tx.commit().await.map_err(db_err)?;
     Ok(())
+}
+
+fn db_err(error: sqlx::Error) -> AppError {
+    AppError::Database(error.to_string())
 }
 
 /// The admin routes never act on an admin account, the caller's own included.

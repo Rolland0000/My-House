@@ -9,6 +9,7 @@ use crate::shared::errors::AppError;
 use crate::shared::file_validation::{
     validate_image, validate_pdf, MAX_IMAGE_SIZE_BYTES, MAX_PDF_SIZE_BYTES,
 };
+use crate::shared::image_processing::check_image_dimensions;
 use crate::shared::pagination::{PaginatedResponse, PaginationMeta};
 use crate::shared::storage_key::owner_request_document_key;
 use crate::shared::types::OwnerRequestId;
@@ -311,7 +312,7 @@ fn classify_documents(
             let validated = validate_pdf(&doc.bytes, MAX_PDF_SIZE_BYTES).map_err(as_shape_error)?;
             Ok(vec![ClassifiedDocument {
                 bytes: doc.bytes,
-                original_filename: doc.original_filename,
+                original_filename: display_filename(&doc.original_filename),
                 extension: validated.extension,
                 content_type: validated.content_type,
                 side: None,
@@ -323,9 +324,12 @@ fn classify_documents(
             .map(|(side, doc)| {
                 let validated =
                     validate_image(&doc.bytes, MAX_IMAGE_SIZE_BYTES).map_err(as_shape_error)?;
+                // Original bytes are kept for legibility; only an oversized
+                // image, a hazard for the admin's browser, is refused.
+                check_image_dimensions(&doc.bytes, &validated).map_err(as_shape_error)?;
                 Ok(ClassifiedDocument {
                     bytes: doc.bytes,
-                    original_filename: doc.original_filename,
+                    original_filename: display_filename(&doc.original_filename),
                     extension: validated.extension,
                     content_type: validated.content_type,
                     side: Some(side),
@@ -334,6 +338,24 @@ fn classify_documents(
             .collect(),
         _ => Err(AppError::InvalidDocument),
     }
+}
+
+/// Longest uploader-supplied filename kept for display to the admin.
+const MAX_ORIGINAL_FILENAME_LENGTH: usize = 255;
+/// Shown when the browser sent no usable filename.
+const DEFAULT_ORIGINAL_FILENAME: &str = "document";
+
+/// The uploader's filename as shown to the admin: base name only, control
+/// characters removed (JSONB refuses NUL), cut to a bounded length. It never
+/// reaches a storage key.
+fn display_filename(raw: &str) -> String {
+    let base_name = raw.rsplit(['/', '\\']).next().unwrap_or_default();
+    let printable: String = base_name.chars().filter(|c| !c.is_control()).collect();
+    let trimmed = printable.trim();
+    if trimmed.is_empty() {
+        return DEFAULT_ORIGINAL_FILENAME.to_string();
+    }
+    trimmed.chars().take(MAX_ORIGINAL_FILENAME_LENGTH).collect()
 }
 
 /// A format mismatch means the wrong kind of file was sent for this shape;
@@ -367,6 +389,32 @@ mod tests {
     const JPEG: &[u8] = &[0xFF, 0xD8, 0xFF, 0xE0];
     const PDF: &[u8] = b"%PDF-1.7\n1 0 obj\n";
 
+    #[test]
+    fn display_filename_keeps_the_base_name_without_control_characters() {
+        assert_eq!(display_filename("C:\\scans\\recto.jpg"), "recto.jpg");
+        assert_eq!(display_filename("../../id\0card.pdf"), "idcard.pdf");
+        assert_eq!(display_filename(" \n "), DEFAULT_ORIGINAL_FILENAME);
+    }
+
+    #[test]
+    fn display_filename_is_bounded() {
+        let long = format!("{}.pdf", "a".repeat(100_000));
+        assert_eq!(
+            display_filename(&long).chars().count(),
+            MAX_ORIGINAL_FILENAME_LENGTH
+        );
+    }
+
+    /// A real 2×2 JPEG: an image slot now reads the dimensions from the
+    /// header, which the 4-byte magic-number stub above does not have.
+    fn decodable_jpeg() -> Vec<u8> {
+        let mut bytes = Vec::new();
+        image::codecs::jpeg::JpegEncoder::new(&mut bytes)
+            .encode_image(&image::RgbImage::new(2, 2))
+            .unwrap();
+        bytes
+    }
+
     fn doc(bytes: &[u8]) -> UploadedDocument {
         UploadedDocument {
             bytes: Bytes::from(bytes.to_vec()),
@@ -376,7 +424,8 @@ mod tests {
 
     #[test]
     fn accepts_two_images_as_front_and_back() {
-        let classified = classify_documents(vec![doc(JPEG), doc(JPEG)]).unwrap();
+        let image = decodable_jpeg();
+        let classified = classify_documents(vec![doc(&image), doc(&image)]).unwrap();
         assert_eq!(classified[0].side, Some("front"));
         assert_eq!(classified[1].side, Some("back"));
     }

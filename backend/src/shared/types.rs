@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::fmt;
-use std::sync::{Mutex, PoisonError};
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
@@ -104,16 +104,21 @@ define_id_type!(
 /// A pending OTP challenge, cached by email. `is_new` is resolved once at
 /// creation so verification can trust the stored value instead of
 /// re-querying.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct PendingOtp {
     pub code_hash: String,
     pub is_new: bool,
-    pub attempts: u32,
+    /// Set once at issue: a wrong attempt never extends the code's life.
+    pub expires_at: Instant,
+    /// The email's attempt count, shared by every code issued to it.
+    pub attempt_window: Arc<OtpAttemptWindow>,
+    /// `attempt_window`'s count when this code was issued.
+    pub attempts_at_issue: u32,
 }
 
 /// The two short-lived auth challenges, sharing one cache store; the key
 /// namespaces ([`otp_key`] / [`registration_key`]) keep them apart.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum AuthChallenge {
     PendingOtp(PendingOtp),
     PendingRegistration { email: String },
@@ -127,6 +132,52 @@ pub fn otp_key(email: &str) -> String {
 /// Cache key for the single-use registration ticket `ticket`.
 pub fn registration_key(ticket: &str) -> String {
     format!("reg:{ticket}")
+}
+
+/// OTP verification attempts on one email since its last successful sign-in,
+/// counted across every code it is issued so a new code never resets them,
+/// and when its last code was issued.
+#[derive(Debug, Default)]
+pub struct OtpAttemptWindow {
+    state: Mutex<OtpAttemptState>,
+}
+
+#[derive(Debug, Default)]
+struct OtpAttemptState {
+    attempts: u32,
+    last_code_issued_at: Option<Instant>,
+}
+
+impl OtpAttemptWindow {
+    // A panicking holder cannot leave the state half-written, so poison is ignored.
+    fn state(&self) -> std::sync::MutexGuard<'_, OtpAttemptState> {
+        self.state.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Counts one attempt before the code is compared and returns the total,
+    /// so concurrent guesses can never exceed a code's budget.
+    pub fn reserve_attempt(&self) -> u32 {
+        let mut state = self.state();
+        state.attempts = state.attempts.saturating_add(1);
+        state.attempts
+    }
+
+    pub fn attempts(&self) -> u32 {
+        self.state().attempts
+    }
+
+    pub fn record_code_issued(&self, at: Instant) {
+        self.state().last_code_issued_at = Some(at);
+    }
+
+    pub fn last_code_issued_at(&self) -> Option<Instant> {
+        self.state().last_code_issued_at
+    }
+
+    /// Clears the attempts and the last issue time after a successful sign-in.
+    pub fn reset(&self) {
+        *self.state() = OtpAttemptState::default();
+    }
 }
 
 /// The distinct listings one user revealed in the current fixed window.
@@ -164,6 +215,19 @@ impl RevealWindow {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn otp_attempt_window_counts_reservations_and_resets() {
+        let window = OtpAttemptWindow::default();
+
+        assert_eq!(window.reserve_attempt(), 1);
+        assert_eq!(window.reserve_attempt(), 2);
+        assert_eq!(window.attempts(), 2);
+        window.record_code_issued(Instant::now());
+        window.reset();
+        assert_eq!(window.attempts(), 0);
+        assert_eq!(window.last_code_issued_at(), None);
+    }
 
     #[test]
     fn reveal_window_admits_distinct_listings_up_to_the_max() {

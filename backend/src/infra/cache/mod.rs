@@ -12,10 +12,14 @@ use uuid::Uuid;
 
 use moka::MokaStore;
 
-use crate::shared::types::{AuthChallenge, RefreshTokenId, RevealWindow};
+use crate::shared::types::{AuthChallenge, OtpAttemptWindow, RefreshTokenId, RevealWindow};
 
 /// Staleness bound on an admin suspension taking effect (MH-32).
 const IS_ACTIVE_STATUS_TTL: Duration = Duration::from_secs(8);
+
+/// How long an email's failed OTP attempts are remembered, counted from the
+/// first attempt. Long enough that requesting new codes never resets them.
+const OTP_ATTEMPT_WINDOW: Duration = Duration::from_secs(24 * 60 * 60);
 
 /// Grace window for concurrent double-refresh (MH-36) — a cache hit means
 /// the reuse is within the window, by construction of the TTL.
@@ -38,6 +42,10 @@ const AUTH_CHALLENGE_MAX_ENTRIES: u64 = 50_000;
 
 /// Same key space as [`AUTH_CHALLENGE_MAX_ENTRIES`], over a shorter window.
 const OTP_RATE_LIMIT_MAX_ENTRIES: u64 = 50_000;
+
+/// Same key space as [`AUTH_CHALLENGE_MAX_ENTRIES`]; frequently targeted
+/// emails are the entries moka keeps longest.
+const OTP_ATTEMPT_MAX_ENTRIES: u64 = 50_000;
 
 /// Distinct client IPs seen within one rate-limit window (MH-39).
 const IP_RATE_LIMIT_MAX_ENTRIES: u64 = 100_000;
@@ -83,6 +91,13 @@ pub fn build_otp_rate_limit_cache(ttl: Duration) -> Arc<dyn AppCacheProvider<Str
     Arc::new(MokaStore::new(ttl, OTP_RATE_LIMIT_MAX_ENTRIES))
 }
 
+/// Per-email OTP attempt windows, kept for [`OTP_ATTEMPT_WINDOW`]. Separate
+/// from [`build_otp_rate_limit_cache`], which `/contact/messages` also uses
+/// with its fixed cooldown.
+pub fn build_otp_attempt_cache() -> Arc<dyn AppCacheProvider<String, Arc<OtpAttemptWindow>>> {
+    Arc::new(MokaStore::new(OTP_ATTEMPT_WINDOW, OTP_ATTEMPT_MAX_ENTRIES))
+}
+
 /// Generic per-IP request counters (MH-39) — kept separate from
 /// [`build_otp_rate_limit_cache`], which is the OTP business rule keyed by
 /// email. The value is a shared atomic so concurrent requests increment the
@@ -110,6 +125,7 @@ pub struct AppCache {
     refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
     auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
     otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
+    otp_attempts: Arc<dyn AppCacheProvider<String, Arc<OtpAttemptWindow>>>,
     ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
     contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>>,
 }
@@ -120,6 +136,7 @@ impl AppCache {
         refresh_replay: Arc<dyn AppCacheProvider<RefreshTokenId, String>>,
         auth_challenge: Arc<dyn AppCacheProvider<String, AuthChallenge>>,
         otp_rate_limit: Arc<dyn AppCacheProvider<String, ()>>,
+        otp_attempts: Arc<dyn AppCacheProvider<String, Arc<OtpAttemptWindow>>>,
         ip_rate_limit: Arc<dyn AppCacheProvider<IpAddr, Arc<AtomicU32>>>,
         contact_reveal_rate_limit: Arc<dyn AppCacheProvider<Uuid, Arc<RevealWindow>>>,
     ) -> Self {
@@ -128,6 +145,7 @@ impl AppCache {
             refresh_replay,
             auth_challenge,
             otp_rate_limit,
+            otp_attempts,
             ip_rate_limit,
             contact_reveal_rate_limit,
         }
@@ -149,6 +167,11 @@ impl AppCache {
     /// signal, so the value carries nothing.
     pub fn otp_rate_limit(&self) -> Arc<dyn AppCacheProvider<String, ()>> {
         Arc::clone(&self.otp_rate_limit)
+    }
+
+    /// Per-email OTP attempt windows.
+    pub fn otp_attempts(&self) -> Arc<dyn AppCacheProvider<String, Arc<OtpAttemptWindow>>> {
+        Arc::clone(&self.otp_attempts)
     }
 
     /// Per-IP request counters backing the generic rate-limit middleware.

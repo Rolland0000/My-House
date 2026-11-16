@@ -5,19 +5,19 @@ use super::env_reader::{require, require_parsed};
 
 /// `STORAGE_PROVIDER` — selects the storage backend.
 ///
-/// Only `local` is implemented in the MVP; `s3` is reserved for V2.
+/// Only `local` exists in the MVP. `s3` is refused at startup rather than
+/// accepted and left to fail on the first upload.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StorageProvider {
     Local,
-    S3,
 }
 
 impl StorageProvider {
     fn parse(raw: &str) -> Result<Self, String> {
         match raw {
             "local" => Ok(StorageProvider::Local),
-            "s3" => Ok(StorageProvider::S3),
-            other => Err(format!("expected \"local\" or \"s3\", got \"{other}\"")),
+            "s3" => Err("\"s3\" is reserved for V2 and not implemented, use \"local\"".to_string()),
+            other => Err(format!("expected \"local\", got \"{other}\"")),
         }
     }
 }
@@ -60,9 +60,17 @@ mod tests {
     }
 
     #[test]
-    fn parses_both_known_providers() {
+    fn parses_local_provider() {
         assert_eq!(StorageProvider::parse("local"), Ok(StorageProvider::Local));
-        assert_eq!(StorageProvider::parse("s3"), Ok(StorageProvider::S3));
+    }
+
+    #[test]
+    fn rejects_unimplemented_s3_provider() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        set_valid_env();
+        env::set_var("STORAGE_PROVIDER", "s3");
+        let err = StorageConfig::from_env().expect_err("s3 must fail at startup");
+        assert!(matches!(err, ConfigError::Invalid { key, .. } if key == "STORAGE_PROVIDER"));
     }
 
     #[test]

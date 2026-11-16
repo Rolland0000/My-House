@@ -41,14 +41,21 @@ impl AppEnv {
     }
     /// Read `APP_ENV` directly from the **real** process environment,
     /// bypassing dotenvy.  Call this as the very first step in `main`.
+    ///
+    /// An absent value is an error rather than a silent `development`, which
+    /// would expose Swagger and drop the production SMTP checks.
     pub fn from_real_env() -> Result<Self, ConfigError> {
-        match env::var("APP_ENV") {
-            Err(_) => Ok(AppEnv::Development),
-            Ok(raw) => Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
+        let raw = env::var("APP_ENV").map_err(|error| match error {
+            env::VarError::NotPresent => ConfigError::Missing("APP_ENV".to_string()),
+            env::VarError::NotUnicode(_) => ConfigError::Invalid {
                 key: "APP_ENV".to_string(),
-                reason,
-            }),
-        }
+                reason: "must be valid UTF-8".to_string(),
+            },
+        })?;
+        Self::parse(&raw).map_err(|reason| ConfigError::Invalid {
+            key: "APP_ENV".to_string(),
+            reason,
+        })
     }
 }
 
@@ -238,10 +245,11 @@ mod tests {
     }
 
     #[test]
-    fn app_env_defaults_to_development_when_absent() {
+    fn rejects_missing_app_env() {
         let _guard = ENV_LOCK.lock().unwrap();
         env::remove_var("APP_ENV");
-        assert_eq!(AppEnv::from_real_env().unwrap(), AppEnv::Development);
+        let err = AppEnv::from_real_env().expect_err("an absent APP_ENV must fail startup");
+        assert!(matches!(err, ConfigError::Missing(key) if key == "APP_ENV"));
     }
 
     #[test]

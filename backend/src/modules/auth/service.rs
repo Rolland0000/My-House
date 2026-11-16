@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -7,11 +8,13 @@ use crate::infra::cache::AppCacheProvider;
 use crate::infra::mailer::Mailer;
 use crate::modules::notifications;
 use crate::shared::crypto;
-use crate::shared::errors::AppError;
+use crate::shared::errors::{AppError, FieldError};
 use crate::shared::rbac::Role;
 use crate::shared::token_decoder::TokenClaims;
-use crate::shared::types::{otp_key, registration_key, AuthChallenge, PendingOtp, RefreshTokenId};
-use crate::shared::validation::{optional_name, required_name, required_phone};
+use crate::shared::types::{
+    otp_key, registration_key, AuthChallenge, OtpAttemptWindow, PendingOtp, RefreshTokenId,
+};
+use crate::shared::validation::{normalize_email, optional_name, required_name, required_phone};
 
 use super::model::{NewAccount, RefreshTokenLookup};
 use super::repository;
@@ -80,6 +83,7 @@ pub(in crate::modules::auth) async fn refresh(
     {
         Some(_new_id) => {
             grace_cache.insert(row_id, new_raw_token.clone()).await;
+            purge_stale_tokens(pool, row.user_id).await;
             Ok(SessionOutcome {
                 access_token: mint(
                     row.user_id,
@@ -108,6 +112,19 @@ pub(in crate::modules::auth) async fn refresh(
     }
 }
 
+/// Days an expired refresh token is kept before being purged.
+const REFRESH_TOKEN_RETENTION_DAYS: i32 = 30;
+
+/// Opportunistic cleanup on each rotation. Best-effort: a failure leaves
+/// stale rows for the next rotation and never fails the refresh.
+async fn purge_stale_tokens(pool: &PgPool, user_id: Uuid) {
+    if let Err(error) =
+        repository::purge_stale_tokens(pool, user_id, REFRESH_TOKEN_RETENTION_DAYS).await
+    {
+        tracing::warn!(%user_id, error = %error, "refresh: purge of expired tokens failed");
+    }
+}
+
 /// Refuses a suspended account before the revoked and expired checks: all its
 /// tokens get the same answer, and the grace window reissues nothing.
 async fn find_active_row(pool: &PgPool, token_hash: &str) -> Result<RefreshTokenLookup, AppError> {
@@ -130,6 +147,11 @@ async fn handle_revoked(
 ) -> Result<SessionOutcome, AppError> {
     let row_id = RefreshTokenId::new(row.id);
     if let Some(raw_replacement) = grace_cache.get(&row_id).await {
+        // A logout or a family revocation after the rotation ends the grace:
+        // replaying the old token must not hand out a fresh access token.
+        if row.replacement_revoked {
+            return Err(AppError::RefreshTokenInvalid);
+        }
         return Ok(SessionOutcome {
             access_token: mint(row.user_id, row.role, jwt_secret, jwt_access_ttl_seconds)?,
             raw_refresh_token: raw_replacement,
@@ -151,21 +173,80 @@ fn mint(user_id: Uuid, role: Role, secret: &[u8], ttl_seconds: u64) -> Result<St
     crypto::issue_access_token(TokenClaims { user_id, role }, secret, ttl_seconds)
 }
 
+/// Longest wait imposed between two codes for one email, however many
+/// attempts failed. Bounds how long a third party can delay a sign-in.
+const OTP_MAX_REQUEST_COOLDOWN: Duration = Duration::from_secs(5 * 60);
+
+/// Minimum gap between two codes: the base cooldown, doubled for every full
+/// `max_attempts` attempts already spent, capped at [`OTP_MAX_REQUEST_COOLDOWN`].
+fn request_cooldown(base_seconds: u64, attempts: u32, max_attempts: u32) -> Duration {
+    let exhausted_codes = attempts / max_attempts.max(1);
+    let factor = 1u64.checked_shl(exhausted_codes).unwrap_or(u64::MAX);
+    let base = Duration::from_secs(base_seconds);
+    Duration::from_secs(base_seconds.saturating_mul(factor))
+        .min(OTP_MAX_REQUEST_COOLDOWN)
+        .max(base)
+}
+
+/// Whole seconds, rounded up and at least 1, for a `Retry-After` header.
+fn retry_after_seconds(remaining: Duration) -> u64 {
+    (remaining.as_secs() + u64::from(remaining.subsec_nanos() > 0)).max(1)
+}
+
+pub struct OtpRequestConfig {
+    pub otp_ttl_seconds: u64,
+    pub otp_rate_limit_seconds: u64,
+    pub otp_max_attempts: u32,
+}
+
 /// Entry point wired by the handler. Never reveals to the caller whether
 /// `email` is already registered — every branch returns the same `Ok(())`.
 pub async fn otp_request(
     pool: &PgPool,
     challenge_cache: &dyn AppCacheProvider<String, AuthChallenge>,
     rate_limit_cache: &dyn AppCacheProvider<String, ()>,
+    attempt_cache: &dyn AppCacheProvider<String, Arc<OtpAttemptWindow>>,
     mailer: &Mailer,
-    otp_ttl_seconds: u64,
-    otp_rate_limit_seconds: u64,
+    config: &OtpRequestConfig,
     email: &str,
 ) -> Result<(), AppError> {
+    let email = normalize_email(email).ok_or_else(|| {
+        AppError::Validation(vec![FieldError {
+            field: "email",
+            message: "email is not a valid address.".to_string(),
+        }])
+    })?;
+    let email = email.as_str();
+
     if rate_limit_cache.get(&email.to_string()).await.is_some() {
         return Err(AppError::OtpRateLimited {
-            retry_after_seconds: otp_rate_limit_seconds,
+            retry_after_seconds: config.otp_rate_limit_seconds,
         });
+    }
+    let attempt_window = attempt_cache
+        .get_or_insert(email.to_string(), Arc::default())
+        .await;
+    // Failed attempts survive a new code, so each spent code makes the next
+    // one wait longer: guessing stays bounded without ever locking the account.
+    let now = Instant::now();
+    let attempts_at_issue = attempt_window.attempts();
+    if let Some(last_issued_at) = attempt_window.last_code_issued_at() {
+        let cooldown = request_cooldown(
+            config.otp_rate_limit_seconds,
+            attempts_at_issue,
+            config.otp_max_attempts,
+        );
+        let remaining = (last_issued_at + cooldown).saturating_duration_since(now);
+        if !remaining.is_zero() {
+            tracing::warn!(
+                attempts = attempts_at_issue,
+                retry_after_seconds = remaining.as_secs(),
+                "otp: code withheld after repeated failed attempts"
+            );
+            return Err(AppError::OtpRateLimited {
+                retry_after_seconds: retry_after_seconds(remaining),
+            });
+        }
     }
 
     let existing = repository::find_user_by_email(pool, email).await?;
@@ -178,19 +259,23 @@ pub async fn otp_request(
     let raw_code = crypto::generate_otp_code();
     let code_hash = crypto::hash_otp_code(&raw_code);
 
+    attempt_window.record_code_issued(now);
     challenge_cache
         .insert(
             otp_key(email),
             AuthChallenge::PendingOtp(PendingOtp {
                 code_hash,
                 is_new,
-                attempts: 0,
+                expires_at: now + Duration::from_secs(config.otp_ttl_seconds),
+                attempt_window,
+                attempts_at_issue,
             }),
         )
         .await;
     rate_limit_cache.insert(email.to_string(), ()).await;
 
-    notifications::service::send_otp_email(mailer, email, &raw_code, otp_ttl_seconds / 60).await;
+    notifications::service::send_otp_email(mailer, email, &raw_code, config.otp_ttl_seconds / 60)
+        .await;
 
     Ok(())
 }
@@ -238,6 +323,9 @@ pub(in crate::modules::auth) async fn verify_otp(
     email: &str,
     code: &str,
 ) -> Result<VerifyOutcome, AppError> {
+    // No OTP can have been issued for an address `otp_request` would refuse.
+    let email = normalize_email(email).ok_or(AppError::OtpInvalid)?;
+    let email = email.as_str();
     let key = otp_key(email);
     let AuthChallenge::PendingOtp(entry) = challenge_cache
         .get(&key)
@@ -247,23 +335,29 @@ pub(in crate::modules::auth) async fn verify_otp(
         return Err(AppError::OtpInvalid);
     };
 
-    // Constant-time-ish comparison isn't the point here — both sides are
-    // already SHA-256 digests, so a length/prefix leak reveals nothing about
-    // the raw code.
+    if Instant::now() >= entry.expires_at {
+        challenge_cache.invalidate(&key).await;
+        return Err(AppError::OtpInvalid);
+    }
+
+    // Counted before the comparison: concurrent guesses each take their own
+    // slot, so no code is ever compared more than `otp_max_attempts` times.
+    let used = entry
+        .attempt_window
+        .reserve_attempt()
+        .saturating_sub(entry.attempts_at_issue);
+    if used > config.otp_max_attempts {
+        challenge_cache.invalidate(&key).await;
+        return Err(AppError::OtpInvalid);
+    }
+
+    // Timing is not the defence here: both sides are SHA-256 digests, and the
+    // attempt budget above is what bounds guessing.
     if crypto::hash_otp_code(code) != entry.code_hash {
-        let attempts = entry.attempts + 1;
-        if attempts >= config.otp_max_attempts {
-            // 3rd (or config-configured Nth) mismatch permanently
-            // invalidates the code — deleting the entry, not just marking it
-            // exhausted, so a later correct-code retry also fails (AUTH-06).
+        if used == config.otp_max_attempts {
+            // The last allowed mismatch deletes the code, so a later
+            // correct-code retry also fails (AUTH-06).
             challenge_cache.invalidate(&key).await;
-        } else {
-            challenge_cache
-                .insert(
-                    key,
-                    AuthChallenge::PendingOtp(PendingOtp { attempts, ..entry }),
-                )
-                .await;
         }
         return Err(AppError::OtpInvalid);
     }
@@ -272,6 +366,7 @@ pub(in crate::modules::auth) async fn verify_otp(
     // happens, so a replayed second call with the same code can never
     // succeed twice.
     challenge_cache.invalidate(&key).await;
+    entry.attempt_window.reset();
 
     if entry.is_new {
         let registration_ticket = Uuid::new_v4().to_string();
@@ -395,7 +490,6 @@ pub(in crate::modules::auth) async fn register(
 const ADMIN_LOGIN_MAX_ATTEMPTS: i32 = 5;
 /// How long the admin account stays locked once the limit is reached.
 const ADMIN_LOGIN_LOCK_MINUTES: i32 = 15;
-const ADMIN_EMAIL_MAX_LENGTH: usize = 255;
 const ADMIN_PASSWORD_MAX_LENGTH: usize = 1024;
 
 /// Entry point wired by the handler. Unknown email, non-admin account, account
@@ -408,16 +502,14 @@ pub(in crate::modules::auth) async fn admin_login(
     email: &str,
     password: &str,
 ) -> Result<SessionOutcome, AppError> {
-    let email = email.trim();
-    if email.is_empty()
-        || email.len() > ADMIN_EMAIL_MAX_LENGTH
-        || password.is_empty()
-        || password.len() > ADMIN_PASSWORD_MAX_LENGTH
-    {
+    let Some(email) = normalize_email(email) else {
+        return Err(AppError::InvalidCredentials);
+    };
+    if password.is_empty() || password.len() > ADMIN_PASSWORD_MAX_LENGTH {
         return Err(AppError::InvalidCredentials);
     }
 
-    let admin = match repository::find_admin_for_login(pool, email).await? {
+    let admin = match repository::find_admin_for_login(pool, &email).await? {
         Some(admin) if admin.password_hash.is_some() => admin,
         _ => {
             run_blocking(|password| crypto::verify_against_dummy(&password), password).await?;
@@ -494,4 +586,131 @@ where
             tracing::error!(%error, "password task failed");
             AppError::Internal
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::infra::cache::build_auth_challenge_cache;
+
+    const MAX_ATTEMPTS: u32 = 3;
+    const EMAIL: &str = "ada@example.cm";
+    const CODE: &str = "123456";
+
+    fn verify_config() -> OtpVerifyConfig {
+        OtpVerifyConfig::new(Arc::from(&[7u8; 32][..]), 900, 30, MAX_ATTEMPTS)
+    }
+
+    /// Only the wrong-code and expiry paths run: none of them reaches the pool.
+    fn unused_pool() -> PgPool {
+        PgPool::connect_lazy("postgres://localhost/unused").unwrap()
+    }
+
+    async fn issue(
+        cache: &dyn AppCacheProvider<String, AuthChallenge>,
+        window: &Arc<OtpAttemptWindow>,
+        expires_at: Instant,
+    ) {
+        let pending = PendingOtp {
+            code_hash: crypto::hash_otp_code(CODE),
+            is_new: true,
+            expires_at,
+            attempt_window: Arc::clone(window),
+            attempts_at_issue: window.attempts(),
+        };
+        cache
+            .insert(otp_key(EMAIL), AuthChallenge::PendingOtp(pending))
+            .await;
+    }
+
+    #[test]
+    fn request_cooldown_doubles_per_spent_code_and_caps() {
+        let secs = |attempts| request_cooldown(60, attempts, MAX_ATTEMPTS).as_secs();
+        assert_eq!(secs(0), 60);
+        assert_eq!(secs(2), 60);
+        assert_eq!(secs(3), 120);
+        assert_eq!(secs(6), 240);
+        assert_eq!(secs(9), OTP_MAX_REQUEST_COOLDOWN.as_secs());
+        assert_eq!(secs(u32::MAX), OTP_MAX_REQUEST_COOLDOWN.as_secs());
+    }
+
+    #[tokio::test]
+    async fn the_right_code_fails_once_the_budget_is_spent() {
+        let cache = build_auth_challenge_cache(Duration::from_secs(600));
+        let window = Arc::new(OtpAttemptWindow::default());
+        issue(
+            cache.as_ref(),
+            &window,
+            Instant::now() + Duration::from_secs(600),
+        )
+        .await;
+        let (pool, config) = (unused_pool(), verify_config());
+
+        for _ in 0..MAX_ATTEMPTS {
+            let wrong = verify_otp(&pool, cache.as_ref(), &config, EMAIL, "000000").await;
+            assert!(matches!(wrong, Err(AppError::OtpInvalid)));
+        }
+        let right = verify_otp(&pool, cache.as_ref(), &config, EMAIL, CODE).await;
+        assert!(matches!(right, Err(AppError::OtpInvalid)));
+    }
+
+    #[tokio::test]
+    async fn a_new_code_does_not_reset_the_attempt_count() {
+        let cache = build_auth_challenge_cache(Duration::from_secs(600));
+        let window = Arc::new(OtpAttemptWindow::default());
+        let (pool, config) = (unused_pool(), verify_config());
+        let later = Instant::now() + Duration::from_secs(600);
+
+        issue(cache.as_ref(), &window, later).await;
+        for _ in 0..MAX_ATTEMPTS {
+            let _ = verify_otp(&pool, cache.as_ref(), &config, EMAIL, "000000").await;
+        }
+        issue(cache.as_ref(), &window, later).await;
+        let _ = verify_otp(&pool, cache.as_ref(), &config, EMAIL, "000000").await;
+
+        assert_eq!(window.attempts(), MAX_ATTEMPTS + 1);
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrent_guesses_never_exceed_the_budget() {
+        let cache = build_auth_challenge_cache(Duration::from_secs(600));
+        let window = Arc::new(OtpAttemptWindow::default());
+        issue(
+            cache.as_ref(),
+            &window,
+            Instant::now() + Duration::from_secs(600),
+        )
+        .await;
+        let pool = unused_pool();
+
+        let mut guesses = tokio::task::JoinSet::new();
+        for _ in 0..20 {
+            let (cache, pool) = (Arc::clone(&cache), pool.clone());
+            guesses.spawn(async move {
+                let _ = verify_otp(&pool, cache.as_ref(), &verify_config(), EMAIL, "000000").await;
+            });
+        }
+        guesses.join_all().await;
+
+        let right = verify_otp(&pool, cache.as_ref(), &verify_config(), EMAIL, CODE).await;
+        assert!(matches!(right, Err(AppError::OtpInvalid)));
+    }
+
+    #[tokio::test]
+    async fn an_expired_code_is_refused_even_when_right() {
+        let cache = build_auth_challenge_cache(Duration::from_secs(600));
+        let window = Arc::new(OtpAttemptWindow::default());
+        issue(cache.as_ref(), &window, Instant::now()).await;
+
+        let result = verify_otp(
+            &unused_pool(),
+            cache.as_ref(),
+            &verify_config(),
+            EMAIL,
+            CODE,
+        )
+        .await;
+        assert!(matches!(result, Err(AppError::OtpInvalid)));
+        assert!(cache.get(&otp_key(EMAIL)).await.is_none());
+    }
 }

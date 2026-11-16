@@ -1,12 +1,12 @@
 use std::time::Duration;
 
-use axum::extract::{Path, State};
+use axum::extract::State;
 use axum::Json;
 use uuid::Uuid;
 
 use crate::app_state::AppState;
 use crate::shared::errors::AppError;
-use crate::shared::extractors::{AppJson, AuthUser};
+use crate::shared::extractors::{AppJson, AppPath, AuthUser};
 use crate::shared::rbac::Role;
 
 use super::dto::{ContactMessageAck, ContactMessageDto, ContactMessageResponse, ContactResponse};
@@ -37,7 +37,7 @@ const CONTACT_ROLES: &[Role] = &[Role::Seeker, Role::Owner];
 pub async fn get_owner_contact(
     State(state): State<AppState>,
     user: AuthUser,
-    Path(id): Path<Uuid>,
+    AppPath(id): AppPath<Uuid>,
 ) -> Result<Json<ContactResponse>, AppError> {
     user.require_role(CONTACT_ROLES)?;
 
