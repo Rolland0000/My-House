@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ── Builder ───────────────────────────────────────────────────────────────────
-FROM rust:1.97-slim-bookworm AS builder
+FROM rust:1.100-slim-bookworm AS builder
 
 # ca-certificates + curl: utoipa-swagger-ui's build.rs downloads the Swagger UI
 # release archive over HTTPS via the `curl` system binary at compile time.
@@ -60,7 +60,7 @@ CMD ["./backend-my-house"]
 # Toolchain only — no source is copied in. docker-compose bind-mounts the
 # backend/ directory over /app in the dev profile; cargo-watch rebuilds and
 # restarts the server on every save.
-FROM rust:1.97-slim-bookworm AS dev
+FROM rust:1.100-slim-bookworm AS dev
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential pkg-config curl \
