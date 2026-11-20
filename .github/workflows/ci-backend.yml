@@ -209,8 +209,18 @@ jobs:
             backend/target
           key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
-      - name: cargo test --features integration
-        run: cargo test --features integration
+      - name: Cache cargo-nextest
+        id: cache-nextest
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cargo/bin/cargo-nextest
+          key: ${{ runner.os }}-cargo-nextest-v1
+      - name: Install cargo-nextest
+        if: steps.cache-nextest.outputs.cache-hit != 'true'
+        run: cargo install cargo-nextest --locked
+      # Integration binary only: the unit tests already run in `backend_coverage`.
+      - name: cargo nextest (integration)
+        run: cargo nextest run --features integration --test integration
 
   backend_openapi:
     name: Backend OpenAPI Drift Check

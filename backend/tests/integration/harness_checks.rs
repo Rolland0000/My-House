@@ -47,6 +47,7 @@ async fn user_fixtures_satisfy_the_schema_and_carry_their_state(pool: PgPool) {
             .fetch_all(&pool)
             .await
             .unwrap();
+    assert_eq!(active.len(), 3);
     for (id, is_active) in active {
         assert_eq!(is_active, id != suspended.id);
     }
