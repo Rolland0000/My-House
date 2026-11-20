@@ -46,4 +46,4 @@ MyHouse uses `sqlx` directly against PostgreSQL — no ORM (Prisma/Supabase were
 
 ## Testing
 
-- Repository tests run against a real test DB inside a transaction that's rolled back (`#[cfg(test)]`, feature flag `integration` — see TECHNICAL_SPEC_MVP.md §6.1). Never mock the DB layer in repository tests; mocking belongs at the service layer (repository trait mocked).
+- Integration tests run against a real database that `#[sqlx::test]` creates and migrates for each test (feature flag `integration`, suite in `backend/tests/integration/` — see TECHNICAL_SPEC_MVP.md §6.1). A rolled-back wrapping transaction cannot work: the application code commits its own transactions. Never mock the DB layer in repository tests; mocking belongs at the service layer (repository trait mocked).

@@ -1,6 +1,6 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.7
+> **Version :** 1.8
 > **Statut :** En validation
 > **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.7 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
@@ -1684,14 +1684,14 @@ L'approbation passe aussi le compte de `seeker` à `owner`, dans la même transa
 
 ### 6.1 Règle Générale
 
-Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` et opèrent dans une transaction rollbackée.
+Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` dans `backend/tests/integration/`. Chaque test reçoit sa propre base, créée et migrée par `#[sqlx::test]` : le code applicatif committe ses propres transactions, qu'une transaction englobante rollbackée ne pourrait pas contenir. Le rôle de `DATABASE_URL` doit pouvoir créer des bases.
 
 ### 6.2 Ce qu'on Teste par Couche
 
 | Couche            | Périmètre                                         | Approche                          |
 | ----------------- | --------------------------------------------------- | --------------------------------- |
 | `service.rs`    | Logique métier, règles de validation, cas limites | Repository mocké via trait       |
-| `repository.rs` | Requêtes SQL, mapping des résultats               | DB de test (transaction rollback) |
+| `repository.rs` | Requêtes SQL, mapping des résultats               | DB de test (`#[sqlx::test]`)      |
 | `handler.rs`    | Codes HTTP retournés, format JSON                  | `axum::test` helpers            |
 | `dto.rs`        | Sérialisation / désérialisation                  | Tests unitaires directs           |
 
@@ -1865,3 +1865,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §1.1 : `contact::service` lit d'abord, compte ensuite. §4.6 : 30 biens distincts par 8 h, fenêtre ouverte par la première révélation comptée, un bien déjà révélé ne compte pas et reste accessible au plafond, un `404` n'ouvre pas de fenêtre. §8 : description de `CONTACT_REVEAL_MAX_PER_WINDOW` |
 | 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §1.1 : routes admin dans `listings` et `users`, `admin` limité aux demandes owner. §1.2 : pages et hooks admin dans `features/admin/`, redirection du compte suspendu, helpers déplacés vers `shared/`. §2.2 : renvoi à la règle de visibilité. §4.1 : `ACCOUNT_SUSPENDED` sur `/auth/otp/verify` et `/auth/refresh`. §4.3, §4.4 et §4.6 : la visibilité publique exige un owner actif au rôle `owner`. §4.7 : contrat complet des sept routes de modération (filtres, valeurs de `visibility`, `ADMIN_ACCOUNT_PROTECTED`, `NOT_AN_OWNER`) et des quatre routes de demandes owner. §4.2bis : rôles réellement admis pour `POST /owner-requests`. §9 : signalement d'un bien en V2 |
 | 1.7     | Novembre 2026 | MH-77, corrections de l'audit de sécurité du 12 novembre 2026. §1.1 : `middleware/timeout.rs`, `shared/image_processing.rs`, `shared/pii.rs`, `AppPath`, nouvelles migrations, `/health/storage` retiré, Swagger UI en `development` seulement. §2.2 et §2.3 : contrainte `users_email_canonical`, rétention et index de `refresh_tokens`. §3.1 : `local` seule valeur de `STORAGE_PROVIDER`, ré-encodage des images publiques, remplacement d'avatar sous verrou. §3bis.1 : e-mails envoyés en tâche de fond, adresse masquée dans les logs. §4 : erreurs communes, délais du serveur, caractères de contrôle. §4.1 : normalisation de l'e-mail, `422` sur `/auth/otp/request`, délai OTP croissant. §4.2 et §4.5 : extension des images ré-encodées. §4.2bis : dimensions des images et nom d'origine des pièces d'identité. §4.3 : la route cover renvoie l'enveloppe `error`. §7 : renvoi aux fichiers du dépôt, règles nginx (en-têtes, CSP, `11m`, non root), ports publiés, TLS en amont. §8 : `APP_ENV` obligatoire, `s3` refusé, `TRUSTED_PROXIES` en production |
+| 1.8     | Novembre 2026 | MH-78, harnais de tests d'intégration. §6.1 et §6.2 : une base par test via `#[sqlx::test]` au lieu d'une transaction rollbackée |
