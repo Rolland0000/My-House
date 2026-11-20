@@ -40,5 +40,10 @@ infer = "0.22"
 argon2 = "0.5"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 
+[features]
+# Compiles the `tests/integration` suite, which needs a reachable PostgreSQL
+# (`DATABASE_URL`, role allowed to create databases).
+integration = []
 
 [dev-dependencies]
+tempfile = "3"

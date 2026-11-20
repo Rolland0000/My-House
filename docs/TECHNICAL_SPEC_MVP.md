@@ -1684,14 +1684,14 @@ L'approbation passe aussi le compte de `seeker` à `owner`, dans la même transa
 
 ### 6.1 Règle Générale
 
-Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` et opèrent dans une transaction rollbackée.
+Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` dans `backend/tests/integration/`. Chaque test reçoit sa propre base, créée et migrée par `#[sqlx::test]` : le code applicatif committe ses propres transactions, qu'une transaction englobante rollbackée ne pourrait pas contenir. Le rôle de `DATABASE_URL` doit pouvoir créer des bases.
 
 ### 6.2 Ce qu'on Teste par Couche
 
 | Couche            | Périmètre                                         | Approche                          |
 | ----------------- | --------------------------------------------------- | --------------------------------- |
 | `service.rs`    | Logique métier, règles de validation, cas limites | Repository mocké via trait       |
-| `repository.rs` | Requêtes SQL, mapping des résultats               | DB de test (transaction rollback) |
+| `repository.rs` | Requêtes SQL, mapping des résultats               | DB de test (`#[sqlx::test]`)      |
 | `handler.rs`    | Codes HTTP retournés, format JSON                  | `axum::test` helpers            |
 | `dto.rs`        | Sérialisation / désérialisation                  | Tests unitaires directs           |
 
