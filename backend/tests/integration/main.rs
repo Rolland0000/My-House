@@ -3,6 +3,7 @@
 //! databases. Run with `cargo test --features integration`.
 #![cfg(feature = "integration")]
 
+mod auth_session;
 mod harness;
 mod harness_checks;
 mod health;

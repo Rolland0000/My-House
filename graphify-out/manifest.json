@@ -666,9 +666,9 @@
     "semantic_hash": "9378bd03d56baaf78bd738ab3848f142"
   },
   ".github/workflows/ci-backend.yml": {
-    "mtime": 1795210396.7188463,
-    "seen": 1795210442.6322591,
-    "ast_hash": "d8026195d508b2ec4d6b927f269b3951",
+    "mtime": 1795212203.61165,
+    "seen": 1795218096.588036,
+    "ast_hash": "b71392c0a180b1c7efc3847d94ea3794",
     "semantic_hash": ""
   },
   ".github/workflows/ci-frontend.yml": {
@@ -948,8 +948,8 @@
     "semantic_hash": "1bf062ce509a6e16f79d3309c71e5b85"
   },
   "backend/src/infra/cache/mod.rs": {
-    "mtime": 1794743840.1536326,
-    "seen": 1794744992.6087182,
+    "mtime": 1795217562.444567,
+    "seen": 1795218096.5868201,
     "ast_hash": "4bcb0937fe13f6256fe5877e1cb54784",
     "semantic_hash": ""
   },
@@ -1032,8 +1032,8 @@
     "semantic_hash": ""
   },
   "backend/src/modules/auth/service.rs": {
-    "mtime": 1794747792.959861,
-    "seen": 1794754683.258394,
+    "mtime": 1795217562.440477,
+    "seen": 1795218096.5870059,
     "ast_hash": "7a9fcaf7f08a0458ed28e5e529b8a7ba",
     "semantic_hash": ""
   },
@@ -2364,9 +2364,9 @@
     "semantic_hash": ""
   },
   "docs/TECHNICAL_SPEC_MVP.md": {
-    "mtime": 1795210385.8795683,
-    "seen": 1795210442.6323872,
-    "ast_hash": "e1f5d77b3bad7b82d376b7850f2ab7d2",
+    "mtime": 1795210907.2029777,
+    "seen": 1795218096.588077,
+    "ast_hash": "695a865dcf8c7254218f4317cf9eb345",
     "semantic_hash": ""
   },
   "backend/src/modules/contact/dto.rs": {
@@ -3054,9 +3054,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/harness_checks.rs": {
-    "mtime": 1795210099.4374435,
-    "seen": 1795210442.625234,
-    "ast_hash": "a8237cb455262ae5130c8857bef0773e",
+    "mtime": 1795212202.8088198,
+    "seen": 1795218096.587229,
+    "ast_hash": "c3573446691f3030be7138c3f1690a6b",
     "semantic_hash": ""
   },
   "backend/tests/integration/health.rs": {
@@ -3066,15 +3066,21 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795209901.339057,
-    "seen": 1795210442.625243,
-    "ast_hash": "268faec77f58f56e880b87131020c9ef",
+    "mtime": 1795216951.70218,
+    "seen": 1795218096.587234,
+    "ast_hash": "e6223c50b0ae8394fa36c6a5815be4d5",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
     "mtime": 1795064357.8661876,
     "seen": 1795210442.631975,
     "ast_hash": "900c95589bdd09562779447993fc3999",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/auth_session.rs": {
+    "mtime": 1795217049.9127786,
+    "seen": 1795218096.587211,
+    "ast_hash": "60f9bb0052e46579a0499e73ce9762cd",
     "semantic_hash": ""
   }
 }
