@@ -1380,8 +1380,8 @@
     "semantic_hash": "1940611529c0dffa9bb18e8c619d3be3"
   },
   "backend/src/modules/owner_requests/repository.rs": {
-    "mtime": 1794680057.4241183,
-    "seen": 1794681515.310945,
+    "mtime": 1795372981.8832774,
+    "seen": 1795373067.249058,
     "ast_hash": "05ef800a5ad6e79665b01aa0d3301008",
     "semantic_hash": ""
   },
@@ -1620,8 +1620,8 @@
     "semantic_hash": "477a0f61d57b876ddd4fad1ac403d44e"
   },
   "backend/src/modules/admin/handler.rs": {
-    "mtime": 1794745798.3613884,
-    "seen": 1794746572.468472,
+    "mtime": 1795372981.882109,
+    "seen": 1795373067.248925,
     "ast_hash": "40ee1e4090cfefb41077349daf752b4b",
     "semantic_hash": ""
   },
@@ -3024,9 +3024,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/app.rs": {
-    "mtime": 1795210099.4272718,
-    "seen": 1795210442.6252081,
-    "ast_hash": "d51e1c8942252de8309b2377c93d9e3d",
+    "mtime": 1795372445.861501,
+    "seen": 1795373067.2491698,
+    "ast_hash": "a7f483751106d96c022348b48ff1139c",
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/cache.rs": {
@@ -3036,9 +3036,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/fixtures.rs": {
-    "mtime": 1795210230.2873926,
-    "seen": 1795210442.625219,
-    "ast_hash": "36c30c96d1c31289d2888a135d0c5b2d",
+    "mtime": 1795372461.581467,
+    "seen": 1795373067.249177,
+    "ast_hash": "d0abb6fd65db61186b291fa585187de6",
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/images.rs": {
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795216951.70218,
-    "seen": 1795218096.587234,
-    "ast_hash": "e6223c50b0ae8394fa36c6a5815be4d5",
+    "mtime": 1795372525.6723905,
+    "seen": 1795373067.249193,
+    "ast_hash": "b7f18c23bfeace12e560a8442cd354a1",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
@@ -3078,9 +3078,15 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/auth_session.rs": {
-    "mtime": 1795217049.9127786,
-    "seen": 1795218096.587211,
-    "ast_hash": "60f9bb0052e46579a0499e73ce9762cd",
+    "mtime": 1795372463.0486379,
+    "seen": 1795373067.249166,
+    "ast_hash": "34a3d610f9c59e372b4a9b135596f2b9",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/owner_onboarding.rs": {
+    "mtime": 1795373493.6593146,
+    "seen": 1795373609.532372,
+    "ast_hash": "96ac0fa09f54f5919dddf3ae166cd0d8",
     "semantic_hash": ""
   }
 }
