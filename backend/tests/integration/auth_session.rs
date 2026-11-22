@@ -12,7 +12,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::harness::app::TestResponse;
-use crate::harness::fixtures::{self, token_for, TestUser, ADMIN_PASSWORD};
+use crate::harness::fixtures::{self, sign_in, token_for, ADMIN_PASSWORD};
 use crate::harness::{TestApp, TestAppOptions, TestRequest};
 
 const OTP_CODE: &str = "482913";
@@ -72,18 +72,6 @@ async fn admin_login(app: &TestApp, email: &str, password: &str) -> TestResponse
             .json(json!({ "email": email, "password": password })),
     )
     .await
-}
-
-/// Opens a session through OTP verify; returns `(access token, raw refresh token)`.
-async fn sign_in(app: &TestApp, user: &TestUser) -> (String, String) {
-    fixtures::seed_otp(app, &user.email, OTP_CODE).await;
-    let verified = verify(app, &user.email, OTP_CODE).await;
-    assert_eq!(verified.status, StatusCode::OK);
-    let access_token = verified.body["data"]["access_token"]
-        .as_str()
-        .expect("the session carries an access token")
-        .to_string();
-    (access_token, refresh_cookie(&verified))
 }
 
 /// `(id, replaced_by_id, is_revoked)` of the row holding `raw_refresh_token`.

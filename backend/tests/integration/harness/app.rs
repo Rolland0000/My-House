@@ -19,6 +19,7 @@ use backend_my_house::infra::mailer::Mailer;
 use backend_my_house::infra::storage::{LocalFsStorage, StorageProvider};
 use backend_my_house::route::build_router;
 use backend_my_house::shared::session_cookie::REFRESH_TOKEN_COOKIE;
+use bytes::Bytes;
 use serde_json::Value;
 use sqlx::PgPool;
 use tempfile::TempDir;
@@ -118,6 +119,7 @@ impl TestApp {
             status,
             headers,
             body,
+            raw_body: raw,
         }
     }
 }
@@ -312,6 +314,8 @@ pub struct TestResponse {
     pub headers: HeaderMap,
     /// Parsed JSON body, or `Value::Null` when the body is empty or not JSON.
     pub body: Value,
+    /// The body bytes as received, for non-JSON responses such as file downloads.
+    pub raw_body: Bytes,
 }
 
 impl TestResponse {
