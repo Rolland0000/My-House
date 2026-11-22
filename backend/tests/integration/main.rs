@@ -7,4 +7,5 @@ mod auth_session;
 mod harness;
 mod harness_checks;
 mod health;
+mod listing_lifecycle;
 mod owner_onboarding;
