@@ -3,20 +3,24 @@
 use std::sync::{Arc, LazyLock};
 use std::time::{Duration, Instant};
 
+use axum::http::StatusCode;
 use backend_my_house::shared::crypto::{hash_otp_code, hash_password, issue_access_token};
 use backend_my_house::shared::rbac::Role;
+use backend_my_house::shared::session_cookie::REFRESH_TOKEN_COOKIE;
 use backend_my_house::shared::storage_key::listing_media_key;
 use backend_my_house::shared::token_decoder::TokenClaims;
 use backend_my_house::shared::types::{otp_key, AuthChallenge, ListingId, PendingOtp};
 use backend_my_house::shared::validation::normalize_email;
 use bytes::Bytes;
+use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::app::{TestApp, TEST_ACCESS_TTL_SECONDS, TEST_JWT_SECRET};
+use super::app::{TestApp, TestRequest, TEST_ACCESS_TTL_SECONDS, TEST_JWT_SECRET};
 use super::images;
 
 pub const ADMIN_PASSWORD: &str = "integration-admin-password";
+const SIGN_IN_OTP_CODE: &str = "482913";
 const COVER_PHOTO_SIDE: u32 = 32;
 
 /// Argon2 is slow by design: hashed once, shared by every admin fixture in the binary.
@@ -115,6 +119,26 @@ pub fn token_for(user: &TestUser) -> String {
         TEST_ACCESS_TTL_SECONDS,
     )
     .expect("sign the access token")
+}
+
+/// Opens a session through OTP verify; returns `(access token, raw refresh token)`.
+pub async fn sign_in(app: &TestApp, user: &TestUser) -> (String, String) {
+    seed_otp(app, &user.email, SIGN_IN_OTP_CODE).await;
+    let verified = app
+        .send(
+            TestRequest::post("/api/v1/auth/otp/verify")
+                .json(json!({ "email": user.email, "code": SIGN_IN_OTP_CODE })),
+        )
+        .await;
+    assert_eq!(verified.status, StatusCode::OK);
+    let access_token = verified.body["data"]["access_token"]
+        .as_str()
+        .expect("the session carries an access token")
+        .to_string();
+    let raw_refresh_token = verified
+        .set_cookie(REFRESH_TOKEN_COOKIE)
+        .expect("the session sets the refresh cookie");
+    (access_token, raw_refresh_token)
 }
 
 /// Stores the OTP `code` for `email` as `POST /auth/otp/request` would, without sending it.
