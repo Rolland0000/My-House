@@ -228,3 +228,9 @@ pub async fn draft_listing(pool: &PgPool, owner: &TestUser) -> TestListing {
     let id = insert_listing(pool, owner, false).await;
     TestListing { id, cover: None }
 }
+
+/// A published listing with no photo, so not publicly visible.
+pub async fn photoless_listing(pool: &PgPool, owner: &TestUser) -> TestListing {
+    let id = insert_listing(pool, owner, true).await;
+    TestListing { id, cover: None }
+}
