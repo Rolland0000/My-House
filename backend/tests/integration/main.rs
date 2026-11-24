@@ -4,6 +4,7 @@
 #![cfg(feature = "integration")]
 
 mod auth_session;
+mod discovery;
 mod harness;
 mod harness_checks;
 mod health;
