@@ -42,7 +42,8 @@ const TEST_REFRESH_TTL_DAYS: u64 = 30;
 /// High enough that no flow test trips the generic per-IP limit by accident.
 const TEST_RATE_LIMIT_MAX_REQUESTS: u32 = 100_000;
 const TEST_RATE_LIMIT_WINDOW_SECONDS: u64 = 60;
-const TEST_CONTACT_REVEAL_MAX_PER_WINDOW: u32 = 30;
+/// Low so the contact-reveal suite reaches the cap in a few requests.
+const TEST_CONTACT_REVEAL_MAX_PER_WINDOW: u32 = 3;
 const TEST_CONTACT_REVEAL_WINDOW_SECONDS: u64 = 28_800;
 const MULTIPART_BOUNDARY: &str = "myhouse-integration-boundary";
 
