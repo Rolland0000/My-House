@@ -2382,8 +2382,8 @@
     "semantic_hash": ""
   },
   "backend/src/modules/contact/repository.rs": {
-    "mtime": 1794121500.3085122,
-    "seen": 1794124610.541087,
+    "mtime": 1795552909.198148,
+    "seen": 1795552989.714257,
     "ast_hash": "8e0581e270b8aab6b601364803608496",
     "semantic_hash": ""
   },
@@ -2394,8 +2394,8 @@
     "semantic_hash": ""
   },
   "backend/src/modules/contact/service.rs": {
-    "mtime": 1794680499.586268,
-    "seen": 1794681515.310736,
+    "mtime": 1795552951.504259,
+    "seen": 1795552989.7142642,
     "ast_hash": "cb9e5cb70c3d9e618f375436169fb0bf",
     "semantic_hash": ""
   },
@@ -3024,9 +3024,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/app.rs": {
-    "mtime": 1795372445.861501,
-    "seen": 1795373067.2491698,
-    "ast_hash": "a7f483751106d96c022348b48ff1139c",
+    "mtime": 1795552641.450925,
+    "seen": 1795552989.7145228,
+    "ast_hash": "52f8e3fc8851dd5da17919ac0e7d1908",
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/cache.rs": {
@@ -3036,9 +3036,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/fixtures.rs": {
-    "mtime": 1795372461.581467,
-    "seen": 1795373067.249177,
-    "ast_hash": "d0abb6fd65db61186b291fa585187de6",
+    "mtime": 1795552641.4512963,
+    "seen": 1795552989.7145479,
+    "ast_hash": "6eb801e2934cff092057655b9997e9bb",
     "semantic_hash": ""
   },
   "backend/tests/integration/harness/images.rs": {
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795385901.088841,
-    "seen": 1795386385.9794219,
-    "ast_hash": "e974b8735aedaa12989dd368fc893f86",
+    "mtime": 1795552641.451622,
+    "seen": 1795552989.714578,
+    "ast_hash": "7bbab81e0574075e32c143a286cf473b",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
@@ -3099,6 +3099,12 @@
     "mtime": 1795385910.045513,
     "seen": 1795386385.979396,
     "ast_hash": "984668ad0888f50a6735dd27689d72e0",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/contact_reveal.rs": {
+    "mtime": 1795552585.5260546,
+    "seen": 1795552989.7145112,
+    "ast_hash": "c7072e2d4d94a342925dd3f97605795e",
     "semantic_hash": ""
   }
 }
