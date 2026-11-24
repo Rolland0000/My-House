@@ -792,14 +792,14 @@
     "semantic_hash": ""
   },
   "backend/src/modules/listings/repository.rs": {
-    "mtime": 1794726041.324587,
-    "seen": 1794739408.420532,
+    "mtime": 1795380358.099954,
+    "seen": 1795380872.930778,
     "ast_hash": "ff660502af54f843576bdb2858edfc8f",
     "semantic_hash": ""
   },
   "backend/src/modules/listings/service.rs": {
-    "mtime": 1794680044.1138046,
-    "seen": 1794681515.3107991,
+    "mtime": 1795380358.1007411,
+    "seen": 1795380872.930791,
     "ast_hash": "76b4f152eeeda5a8422d8e271a1b78a5",
     "semantic_hash": ""
   },
@@ -1734,14 +1734,14 @@
     "semantic_hash": ""
   },
   "backend/src/modules/media/repository.rs": {
-    "mtime": 1791719359.199175,
-    "seen": 1794124610.541121,
+    "mtime": 1795380458.2048645,
+    "seen": 1795380872.9308212,
     "ast_hash": "dea45dc08fd9db2eedf1d57be53cc35e",
     "semantic_hash": ""
   },
   "backend/src/modules/media/service.rs": {
-    "mtime": 1794754083.3126636,
-    "seen": 1794754683.258571,
+    "mtime": 1795380535.717648,
+    "seen": 1795380872.9308329,
     "ast_hash": "31592acc59e60a2bf7258a4fee79818b",
     "semantic_hash": ""
   },
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795372525.6723905,
-    "seen": 1795373067.249193,
-    "ast_hash": "b7f18c23bfeace12e560a8442cd354a1",
+    "mtime": 1795379973.8435113,
+    "seen": 1795380872.931124,
+    "ast_hash": "88227e2558cffd998a41f0f6f036be21",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
@@ -3087,6 +3087,12 @@
     "mtime": 1795373493.6593146,
     "seen": 1795373609.532372,
     "ast_hash": "96ac0fa09f54f5919dddf3ae166cd0d8",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/listing_lifecycle.rs": {
+    "mtime": 1795379978.975264,
+    "seen": 1795380872.931118,
+    "ast_hash": "665d8f58d6ed5212924da5ab8aa4f0ce",
     "semantic_hash": ""
   }
 }
