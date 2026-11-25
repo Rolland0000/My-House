@@ -966,8 +966,8 @@
     "semantic_hash": ""
   },
   "backend/src/modules/users/repository.rs": {
-    "mtime": 1794761728.3150084,
-    "seen": 1795210442.625064,
+    "mtime": 1795555343.7905629,
+    "seen": 1795555758.2383559,
     "ast_hash": "852a9ecfd454e9c4fe0cfd4a987f1bb1",
     "semantic_hash": ""
   },
@@ -1080,8 +1080,8 @@
     "semantic_hash": "39e49fb198371fd2ea70b9c12dbba31a"
   },
   "backend/src/modules/users/service.rs": {
-    "mtime": 1794761728.317322,
-    "seen": 1795210442.625076,
+    "mtime": 1795555444.7150323,
+    "seen": 1795555758.238362,
     "ast_hash": "0da0524f2618f9befa9718eba19d9eab",
     "semantic_hash": ""
   },
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795552641.451622,
-    "seen": 1795552989.714578,
-    "ast_hash": "7bbab81e0574075e32c143a286cf473b",
+    "mtime": 1795555082.5055907,
+    "seen": 1795555758.2384598,
+    "ast_hash": "ce60b6b51506189db805037bcb81c6af",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
@@ -3105,6 +3105,12 @@
     "mtime": 1795552585.5260546,
     "seen": 1795552989.7145112,
     "ast_hash": "c7072e2d4d94a342925dd3f97605795e",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/admin_moderation.rs": {
+    "mtime": 1795555131.3657734,
+    "seen": 1795555758.238424,
+    "ast_hash": "cca3250d84f23acb673d0a9a84b7747b",
     "semantic_hash": ""
   }
 }
