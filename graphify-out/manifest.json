@@ -492,9 +492,9 @@
     "semantic_hash": "9b31786b637be3c13978bec4c2330752"
   },
   ".claude/rules/database.md": {
-    "mtime": 1795210385.8803694,
-    "seen": 1795210442.6319842,
-    "ast_hash": "552cdd1b2fe562d282b53483a07139f2",
+    "mtime": 1795641105.7980058,
+    "seen": 1795641129.9194639,
+    "ast_hash": "8593ab8d33373189a856a133dbbf5e07",
     "semantic_hash": ""
   },
   ".claude/rules/general-coding.md": {
@@ -666,9 +666,9 @@
     "semantic_hash": "9378bd03d56baaf78bd738ab3848f142"
   },
   ".github/workflows/ci-backend.yml": {
-    "mtime": 1795212203.61165,
-    "seen": 1795218096.588036,
-    "ast_hash": "b71392c0a180b1c7efc3847d94ea3794",
+    "mtime": 1795640901.1392572,
+    "seen": 1795641129.919538,
+    "ast_hash": "04fc74fd5cb078975504bfdebd22f293",
     "semantic_hash": ""
   },
   ".github/workflows/ci-frontend.yml": {
@@ -702,10 +702,10 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1782646914.0992856,
-    "seen": 1794124610.54201,
-    "ast_hash": "a9b7d0aa70321b0889e66163b4f4a6cb",
-    "semantic_hash": "a9b7d0aa70321b0889e66163b4f4a6cb"
+    "mtime": 1795641110.975989,
+    "seen": 1795641129.919553,
+    "ast_hash": "32eba7368fbe8cc5e3220ed249bcddbe",
+    "semantic_hash": ""
   },
   "docker-compose.yml": {
     "mtime": 1794756972.7937667,
@@ -2358,15 +2358,15 @@
     "semantic_hash": ""
   },
   "docs/ARCHITECTURE.md": {
-    "mtime": 1794761428.9183297,
-    "seen": 1795210442.63238,
-    "ast_hash": "656e5b83c987f738a544b3e6d44b0702",
+    "mtime": 1795641094.7221193,
+    "seen": 1795641129.9195762,
+    "ast_hash": "09b16dde36303411942a10a995f3a325",
     "semantic_hash": ""
   },
   "docs/TECHNICAL_SPEC_MVP.md": {
-    "mtime": 1795210907.2029777,
-    "seen": 1795218096.588077,
-    "ast_hash": "695a865dcf8c7254218f4317cf9eb345",
+    "mtime": 1795641083.8721476,
+    "seen": 1795641129.919578,
+    "ast_hash": "a1eb48f326a3b4467530db03f1a19c4a",
     "semantic_hash": ""
   },
   "backend/src/modules/contact/dto.rs": {
@@ -3066,9 +3066,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/main.rs": {
-    "mtime": 1795555082.5055907,
-    "seen": 1795555758.2384598,
-    "ast_hash": "ce60b6b51506189db805037bcb81c6af",
+    "mtime": 1795640379.0771673,
+    "seen": 1795641129.918852,
+    "ast_hash": "fae4b4a6989084ee3d725171d65b1e59",
     "semantic_hash": ""
   },
   ".claude/commands/implement-ticket.md": {
@@ -3078,9 +3078,9 @@
     "semantic_hash": ""
   },
   "backend/tests/integration/auth_session.rs": {
-    "mtime": 1795372463.0486379,
-    "seen": 1795373067.249166,
-    "ast_hash": "34a3d610f9c59e372b4a9b135596f2b9",
+    "mtime": 1795640387.648723,
+    "seen": 1795641129.9188218,
+    "ast_hash": "00ded5ba7950510a5113327287190757",
     "semantic_hash": ""
   },
   "backend/tests/integration/owner_onboarding.rs": {
@@ -3111,6 +3111,12 @@
     "mtime": 1795555131.3657734,
     "seen": 1795555758.238424,
     "ast_hash": "cca3250d84f23acb673d0a9a84b7747b",
+    "semantic_hash": ""
+  },
+  "backend/tests/integration/user_profile.rs": {
+    "mtime": 1795640378.9418638,
+    "seen": 1795641129.9188569,
+    "ast_hash": "8c4bab4bd032cbf610e2eb82434ab41a",
     "semantic_hash": ""
   }
 }
