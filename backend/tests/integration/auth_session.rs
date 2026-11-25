@@ -4,7 +4,10 @@
 use std::time::Duration;
 
 use axum::http::{header, StatusCode};
+use backend_my_house::modules::auth::model::NewAccount;
+use backend_my_house::modules::auth::repository as auth_repository;
 use backend_my_house::shared::crypto::hash_refresh_token;
+use backend_my_house::shared::errors::AppError;
 use backend_my_house::shared::session_cookie::REFRESH_TOKEN_COOKIE;
 use backend_my_house::shared::types::{otp_key, RefreshTokenId};
 use serde_json::json;
@@ -22,6 +25,9 @@ const WRONG_ADMIN_PASSWORD: &str = "not-the-admin-password";
 const ADMIN_LOGIN_MAX_ATTEMPTS: usize = 5;
 /// Expired refresh tokens older than this are purged on rotation.
 const REFRESH_TOKEN_RETENTION_DAYS: i32 = 30;
+const NEW_ACCOUNT_REFRESH_TTL_DAYS: i32 = 30;
+/// Width of the `refresh_tokens.token_hash` column.
+const TOKEN_HASH_MAX_LENGTH: usize = 255;
 /// TTL of the production `is_active` cache.
 const IS_ACTIVE_CACHE_TTL: Duration = Duration::from_secs(8);
 const NEW_USER_EMAIL: &str = "ada@test.myhouse.app";
@@ -199,6 +205,33 @@ async fn register_refuses_an_email_differing_only_in_case_or_spaces(pool: PgPool
         users_with_email(&app.pool, &variant).await,
         vec![NEW_USER_EMAIL.to_string()]
     );
+}
+
+#[sqlx::test]
+async fn a_failing_refresh_token_insert_rolls_the_new_user_back(pool: PgPool) {
+    // Too long for `refresh_tokens.token_hash`, so only the second insert fails.
+    let oversized_token_hash = "h".repeat(TOKEN_HASH_MAX_LENGTH + 1);
+
+    let created = auth_repository::create_account(
+        &pool,
+        NewAccount {
+            email: NEW_USER_EMAIL,
+            first_name: Some("Ada"),
+            last_name: "Lovelace",
+            phone: "+237690000000",
+            refresh_token_hash: &oversized_token_hash,
+            refresh_ttl_days: NEW_ACCOUNT_REFRESH_TTL_DAYS,
+        },
+    )
+    .await;
+
+    assert!(matches!(created, Err(AppError::Database(_))), "{created:?}");
+    assert!(users_with_email(&pool, NEW_USER_EMAIL).await.is_empty());
+    let token_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM refresh_tokens")
+        .fetch_one(&pool)
+        .await
+        .expect("count the refresh tokens");
+    assert_eq!(token_count, 0);
 }
 
 #[sqlx::test]

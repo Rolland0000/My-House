@@ -1,7 +1,7 @@
 # My House — Software Architecture Document
 
 > **Standard :** arc42 (adapté)
-> **Version :** 1.7
+> **Version :** 1.8
 > **Statut :** Validé
 > **Dernière mise à jour :** Novembre 2026
 
@@ -704,12 +704,20 @@ Qualité Système
 │   └── Feed < 2s (cover photo + pagination)
 ├── Maintenabilité
 │   ├── Frontières de modules respectées
-│   ├── Tests unitaires par module
+│   ├── Tests unitaires et d'intégration, couverture ≥ 90 % des lignes
 │   └── Contrat API typé (utoipa)
 └── Évolutivité
     ├── Extraction microservice possible sans refactoring
     └── Swap Redis / moka via trait
 ```
+
+### 10.3 Stratégie de Tests
+
+Les tests unitaires vivent dans chaque fichier backend et couvrent la logique qui ne touche pas la base. Aucun repository n'est mocké : ce sont des fonctions sur `PgPool`, sans trait, et ce qui dépend de la base se teste en intégration.
+
+Les tests d'intégration (`backend/tests/integration/`, feature `integration`) passent par le vrai router avec une base PostgreSQL propre à chaque test, créée et migrée par `#[sqlx::test]`. Une transaction rollbackée ne pourrait pas isoler les tests, car le code applicatif committe ses propres transactions. Chaque ticket de flux de l'EP-14 a livré un fichier de test.
+
+La CI mesure les deux niveaux ensemble et échoue sous 90 % de lignes couvertes. Le détail par couche, les cas critiques et leurs fichiers de test, et la procédure locale sont dans TECHNICAL_SPEC §6.
 
 ---
 
@@ -764,3 +772,4 @@ Qualité Système
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §5.2 : module `contact` livré. §6.3 : lecture en base avant le comptage. §8.8 : 30 biens distincts par 8 h, un bien déjà révélé ne compte pas, un 404 n'ouvre pas de fenêtre, balayage d'ids accepté. §11 : R-12 reformulé |
 | 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §5.2 : le module `admin` ne porte que les demandes owner, routes de modération dans `listings` et `users`. §5.3 : tables partagées mises à jour, dépendances réelles de `contact`, écarts complétés. §6.3 : visibilité publique avec owner éligible. §8.1 : cache `is_active`, suspension (connexion, refresh, sessions ouvertes, biens) et retrait du rôle owner (rôle, biens, nouvelle demande), suppression d'un compte par l'admin. §9 : ADR-13 (routes admin dans le module qui possède les données), ADR-12 renvoie à la règle de visibilité. §11 : R-14 (délai du retrait de rôle) ajouté, R-11 complété |
 | 1.7     | Novembre 2026 | MH-77, corrections de l'audit de sécurité du 12 novembre 2026. §7.1 et §7.2 : ports de dev en loopback, nginx seul point d'entrée en production, TLS en amont. §7.3 : `STORAGE_PROVIDER=s3` refusé au démarrage. §8.1 : délai OTP croissant, limite IPv6 par /64, purge des refresh tokens expirés, suppression de compte sous verrou, invalidation du cache `is_active` sur `DELETE /users/me`. §8.2 : enveloppe d'erreur pour les rejets d'extracteurs. §8.4 : e-mails masqués, `X-Request-Id` borné. §8.6 : Swagger UI en `development` seulement. §8.7 : délais du serveur et arrêt borné à 30 s. §10.1 : scénario brute-force OTP |
+| 1.8     | Novembre 2026 | MH-85, stratégie de tests alignée sur la suite livrée par l'EP-14. §10.2 : tests unitaires et d'intégration, seuil de couverture à 90 % des lignes. §10.3 : stratégie de tests ajoutée (pas de repository mocké, une base par test d'intégration, seuil appliqué en CI) |

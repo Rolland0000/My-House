@@ -117,8 +117,8 @@ jobs:
       - name: cargo doc
         run: cargo doc --no-deps --verbose
 
-  backend_coverage:
-    name: Backend Coverage
+  backend_unit_tests:
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
     needs: [backend_build]
     defaults:
@@ -156,21 +156,17 @@ jobs:
         run: cargo install cargo-nextest --locked
       - name: Clean coverage artifacts
         run: cargo llvm-cov clean --workspace
-      - name: Run tests with coverage instrumentation
+      - name: Run unit tests with coverage instrumentation
         run: cargo llvm-cov --no-report nextest --verbose
       - name: Run doc tests
         run: cargo test --doc --verbose
-      - name: Generate HTML coverage report
-        # Seuil cible : 50% — le fail-under-lines sera activé quand la couverture sera établie.
-        run: cargo llvm-cov report --html --output-dir target/coverage/html
-      - name: Upload coverage report
+      - name: Export unit test coverage
+        run: cargo llvm-cov report --lcov --output-path target/coverage/unit.lcov
+      - name: Upload unit test coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: coverage-report-backend
-          path: |
-            backend/target/coverage/html/**/*.html
-            backend/target/coverage/html/**/*.css
-            backend/target/coverage/html/**/*.js
+          name: coverage-lcov-unit
+          path: backend/target/coverage/unit.lcov
           retention-days: 3
 
   backend_integration:
@@ -209,6 +205,15 @@ jobs:
             backend/target
           key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
+      - name: Cache cargo-llvm-cov
+        id: cache-llvm-cov
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cargo/bin/cargo-llvm-cov
+          key: ${{ runner.os }}-cargo-llvm-cov-v1
+      - name: Install cargo-llvm-cov
+        if: steps.cache-llvm-cov.outputs.cache-hit != 'true'
+        run: cargo install cargo-llvm-cov --locked
       - name: Cache cargo-nextest
         id: cache-nextest
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -218,9 +223,63 @@ jobs:
       - name: Install cargo-nextest
         if: steps.cache-nextest.outputs.cache-hit != 'true'
         run: cargo install cargo-nextest --locked
-      # Integration binary only: the unit tests already run in `backend_coverage`.
-      - name: cargo nextest (integration)
-        run: cargo nextest run --features integration --test integration
+      - name: Clean coverage artifacts
+        run: cargo llvm-cov clean --workspace
+      # Integration binary only: the unit tests run in `backend_unit_tests`.
+      - name: Run integration tests with coverage instrumentation
+        run: cargo llvm-cov --no-report nextest --features integration --test integration
+      - name: Export integration test coverage
+        run: cargo llvm-cov report --lcov --output-path target/coverage/integration.lcov
+      - name: Upload integration test coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-lcov-integration
+          path: backend/target/coverage/integration.lcov
+          retention-days: 3
+
+  backend_coverage:
+    name: Backend Coverage
+    runs-on: ubuntu-latest
+    needs: [backend_unit_tests, backend_integration]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # Measured line coverage (unit + integration, lcov count) rounded down to the nearest 5 %.
+      COVERAGE_MIN_LINES: "90"
+    steps:
+      # genhtml reads the sources; the lcov paths match this checkout's location.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install lcov
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lcov
+      - name: Download coverage data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: coverage-lcov-*
+          path: backend/target/coverage
+          merge-multiple: true
+      - name: Merge unit and integration coverage
+        run: |
+          lcov -a target/coverage/unit.lcov -a target/coverage/integration.lcov \
+            -o target/coverage/merged.lcov
+      - name: Enforce the line coverage threshold
+        run: |
+          lines_percent=$(lcov --summary target/coverage/merged.lcov 2>&1 \
+            | awk '/lines\.+:/ { sub("%", "", $2); print $2 }')
+          echo "Line coverage: ${lines_percent}% (minimum ${COVERAGE_MIN_LINES}%)"
+          awk -v actual="$lines_percent" -v minimum="$COVERAGE_MIN_LINES" \
+            'BEGIN { exit !(actual != "" && actual + 0 >= minimum + 0) }' \
+            || { echo "::error::Line coverage ${lines_percent:-unknown}% is below ${COVERAGE_MIN_LINES}%"; exit 1; }
+      - name: Generate HTML coverage report
+        if: ${{ !cancelled() }}
+        run: genhtml target/coverage/merged.lcov --output-directory target/coverage/html
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-report-backend
+          path: backend/target/coverage/html/
+          retention-days: 3
 
   backend_openapi:
     name: Backend OpenAPI Drift Check
