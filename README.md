@@ -24,6 +24,15 @@ My House is a real estate platform connecting seekers and owners. This repositor
    cargo run
    ```
 
+### Backend Tests
+The integration suite needs PostgreSQL, and the `DATABASE_URL` role must be allowed to create databases (one per test):
+```bash
+docker compose up -d db
+cd backend
+cargo test --features integration
+```
+Without `--features integration`, only the unit tests run. Coverage, CI setup and the case-to-test mapping are in [TECHNICAL_SPEC_MVP.md §6](docs/TECHNICAL_SPEC_MVP.md#6-stratégie-de-tests).
+
 ### Frontend Setup
 1. Navigate to the frontend directory:
    ```bash

@@ -12,3 +12,4 @@ mod harness_checks;
 mod health;
 mod listing_lifecycle;
 mod owner_onboarding;
+mod user_profile;

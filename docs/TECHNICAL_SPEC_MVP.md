@@ -1,8 +1,8 @@
 # My House — Technical Specification MVP
 
-> **Version :** 1.7
+> **Version :** 1.8
 > **Statut :** En validation
-> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.7 — validé
+> **Prérequis :** [`ARCHITECTURE.md`](./ARCHITECTURE.md) v1.8 — validé
 > **Scope :** Spécifications d'implémentation complètes pour le périmètre MVP
 
 ---
@@ -1684,28 +1684,75 @@ L'approbation passe aussi le compte de `seeker` à `owner`, dans la même transa
 
 ### 6.1 Règle Générale
 
-Les tests unitaires de chaque fichier backend sont dans un bloc `#[cfg(test)] mod tests` en fin de fichier, sans fichier `tests.rs` séparé. Les tests d'intégration (accès DB) sont isolés via feature flag `integration` dans `backend/tests/integration/`. Chaque test reçoit sa propre base, créée et migrée par `#[sqlx::test]` : le code applicatif committe ses propres transactions, qu'une transaction englobante rollbackée ne pourrait pas contenir. Le rôle de `DATABASE_URL` doit pouvoir créer des bases.
+Le backend a deux niveaux de tests.
+
+- Tests unitaires : dans un bloc `#[cfg(test)] mod tests` en fin de chaque fichier, sans fichier `tests.rs` séparé. Ils couvrent la logique qui ne touche pas la base : règles métier, validation, parsing, configuration. Le stockage y est remplacé par `infra/storage/test_support.rs`. Aucun repository n'est mocké : les repositories sont des fonctions libres sur `&PgPool`, sans trait. Une règle qui dépend de la base se teste donc au niveau intégration.
+- Tests d'intégration : dans `backend/tests/integration/`, compilés seulement avec la feature `integration`. Chaque test a sa propre base, créée et migrée par `#[sqlx::test]`, et passe par `harness::TestApp` : le vrai router en mémoire, un répertoire de stockage temporaire et des caches de test. Un cas que l'API ne peut pas provoquer appelle directement le repository, comme le rollback de `create_account`. Une transaction englobante rollbackée ne conviendrait pas, car le code applicatif committe ses propres transactions.
+
+Chaque ticket de flux de l'EP-14 a livré un fichier de test :
+
+| Fichier                  | Ticket | Parcours couvert                                                     |
+| ------------------------ | ------ | -------------------------------------------------------------------- |
+| `auth_session.rs`      | MH-79  | OTP, inscription, refresh, déconnexion, suspension, connexion admin |
+| `owner_onboarding.rs`  | MH-80  | Demande owner, revue admin, téléchargement des pièces              |
+| `listing_lifecycle.rs` | MH-81  | Brouillon, photos, cover, ordre, publication, suppression          |
+| `discovery.rs`         | MH-82  | Visibilité publique, feed, filtres, recherche                      |
+| `contact_reveal.rs`    | MH-83  | Révélation du contact et son plafond                                |
+| `admin_moderation.rs`  | MH-84  | Modération admin, suppression de compte et nettoyage du stockage    |
+| `user_profile.rs`      | MH-85  | Remplacement de l'avatar                                             |
+
+`harness_checks.rs` et `health.rs` vérifient le harness lui-même (fixtures, jetons, caches, images générées).
 
 ### 6.2 Ce qu'on Teste par Couche
 
-| Couche            | Périmètre                                         | Approche                          |
-| ----------------- | --------------------------------------------------- | --------------------------------- |
-| `service.rs`    | Logique métier, règles de validation, cas limites | Repository mocké via trait       |
-| `repository.rs` | Requêtes SQL, mapping des résultats               | DB de test (`#[sqlx::test]`)      |
-| `handler.rs`    | Codes HTTP retournés, format JSON                  | `axum::test` helpers            |
-| `dto.rs`        | Sérialisation / désérialisation                  | Tests unitaires directs           |
+| Couche                             | Périmètre                                        | Approche                                         |
+| ---------------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| `service.rs`                     | Règles métier, validation, cas limites          | Tests unitaires sur la logique pure, sans base  |
+| `repository.rs`                  | Requêtes SQL, contraintes, transactions          | Tests d'intégration sur une base réelle          |
+| `handler.rs`                     | Codes HTTP, enveloppe JSON, extracteurs          | Tests d'intégration via `TestApp`              |
+| `dto.rs`, `shared/`, `config/` | Sérialisation, parsing, validation des entrées   | Tests unitaires directs                          |
+
+En CI, `backend_unit_tests` et `backend_integration` mesurent chacun la couverture de leurs tests et l'exportent au format lcov. `backend_coverage` attend les deux jobs, fusionne les deux fichiers avec `lcov`, publie le rapport HTML et échoue sous 90 % de lignes couvertes. Ce seuil est la couverture fusionnée mesurée à la livraison de MH-85 (91,3 %), arrondie aux 5 % inférieurs.
 
 ### 6.3 Cas à Couvrir par Module
 
-| Module       | Cas critiques à tester                                                                          |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| `auth`     | OTP expiré, OTP invalide, dépassement tentatives, is_new_user correct, rotation refresh token, réutilisation d'un token révoqué → révocation de la famille, compte `is_active=false` rejeté sur route protégée, `/auth/otp/verify` sur email inconnu → aucune ligne `users`, ticket d'inscription à usage unique, transaction `create_account` (rollback si l'insert refresh_tokens échoue), 409 `EMAIL_ALREADY_EXISTS` |
-| `users`    | Cascade search_vector sur changement de nom, suppression de compte → cleanup storage (listings, avatar, pièces d'identité) effectué avant le DELETE SQL, remplacement d'avatar → ancien fichier supprimé |
-| `owner_requests` | Double owner-request pending rejeté, échec upload document → aucun état persisté (atomicité), forme des pièces (1 PDF ou 2 images) |
-| `listings` | Owner ne peut modifier que ses propres biens, publication refusée sans photo. Recherche (`GET /search`) : `q` vide retourne le feed complet, filtres combinés cohérents, pagination correcte, bornes de prix rejetées si négatives ou inversées |
-| `media`    | Quota 5 photos respecté, formats invalides rejetés par magic bytes (extension trompeuse), suppression cover bloquée, 1ère photo d'un listing marquée `is_cover=true` automatiquement, uploads suivants `is_cover=false` |
-| `contact`  | Téléphone non exposé sans JWT, listing inactif retourne 404                                   |
-| `admin`    | Routes inaccessibles sans rôle admin (403), lecture document identité refusée hors rôle admin |
+Les chemins des fichiers d'intégration sont relatifs à `backend/tests/integration/`, et ceux des tests unitaires à `backend/src/`.
+
+| Module             | Cas critique                                                                   | Test                                                         |
+| ------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `auth`           | OTP expiré                                                                     | `modules/auth/service.rs` (unitaire)                       |
+| `auth`           | OTP invalide, dépassement des tentatives                                      | `auth_session.rs`                                          |
+| `auth`           | `is_new_user` correct, email inconnu sur `/auth/otp/verify` → aucune ligne `users` | `auth_session.rs`                                    |
+| `auth`           | Ticket d'inscription à usage unique, 409 `EMAIL_ALREADY_EXISTS`              | `auth_session.rs`                                          |
+| `auth`           | Transaction `create_account` (rollback si l'insert `refresh_tokens` échoue) | `auth_session.rs`                                          |
+| `auth`           | Rotation du refresh token, réutilisation d'un token révoqué → révocation de la famille | `auth_session.rs`                                |
+| `auth`           | Compte `is_active=false` rejeté sur route protégée                          | `auth_session.rs`                                          |
+| `users`          | Cascade `search_vector` sur changement de nom                               | `discovery.rs`                                             |
+| `users`          | Suppression de compte → nettoyage du stockage (biens, avatar, pièces d'identité) avant le `DELETE` SQL | `admin_moderation.rs`        |
+| `users`          | Remplacement d'avatar → ancien fichier supprimé                              | `user_profile.rs`, `modules/users/service.rs` (unitaire) |
+| `owner_requests` | Double demande pending rejetée, forme des pièces (1 PDF ou 2 images)         | `owner_onboarding.rs`                                      |
+| `owner_requests` | Pièce refusée → aucune ligne ni aucun fichier persisté                       | `owner_onboarding.rs`                                      |
+| `listings`       | Un owner ne modifie que ses propres biens, publication refusée sans photo    | `listing_lifecycle.rs`                                     |
+| `listings`       | `GET /search` : `q` vide → feed complet, filtres combinés, pagination, bornes de prix négatives ou inversées rejetées | `discovery.rs` |
+| `media`          | Quota de 5 photos, 1re photo en cover et suivantes `is_cover=false`, suppression de la cover bloquée | `listing_lifecycle.rs`       |
+| `media`          | Format invalide rejeté par magic bytes (extension trompeuse)                 | `listing_lifecycle.rs`, `shared/file_validation.rs` (unitaire) |
+| `contact`        | Téléphone non exposé sans JWT, bien hors visibilité publique → 404            | `contact_reveal.rs`                                        |
+| `admin`          | Routes inaccessibles sans rôle admin (403)                                    | `admin_moderation.rs`                                      |
+| `admin`          | Lecture d'une pièce d'identité refusée hors rôle admin                        | `owner_onboarding.rs`                                      |
+
+### 6.4 Lancer la Suite en Local
+
+La suite d'intégration a besoin d'un PostgreSQL joignable. Le rôle de `DATABASE_URL` doit pouvoir créer des bases, car `#[sqlx::test]` en crée une par test. Le conteneur `db` de `docker-compose.yml` convient, avec le `DATABASE_URL` de `backend/.env`.
+
+```bash
+docker compose up -d db
+cd backend
+cargo test                                   # tests unitaires seuls
+cargo test --features integration            # tests unitaires et d'intégration
+cargo llvm-cov nextest --features integration --summary-only   # couverture des deux niveaux
+```
+
+La dernière commande demande `cargo-llvm-cov` et `cargo-nextest`. Elle compte les lignes à la manière de llvm-cov, qui en retient un peu plus que lcov : le pourcentage local peut s'écarter de quelques dixièmes de celui de la CI (90,6 % contre 91,3 % à MH-85). En CI, `SQLX_OFFLINE=true` fait vérifier les macros `query!` contre le cache `.sqlx/` commité. En local, elles sont vérifiées contre la base de `DATABASE_URL`, qui doit donc être migrée.
 
 ---
 
@@ -1865,3 +1912,4 @@ La CORS autorise les méthodes `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, les en-t
 | 1.5     | Novembre 2026 | MH-71 (#208), plafond de révélations aligné sur la règle retenue. §1.1 : `contact::service` lit d'abord, compte ensuite. §4.6 : 30 biens distincts par 8 h, fenêtre ouverte par la première révélation comptée, un bien déjà révélé ne compte pas et reste accessible au plafond, un `404` n'ouvre pas de fenêtre. §8 : description de `CONTACT_REVEAL_MAX_PER_WINDOW` |
 | 1.6     | Novembre 2026 | MH-76, livraison de l'EP-12 (modération admin). §1.1 : routes admin dans `listings` et `users`, `admin` limité aux demandes owner. §1.2 : pages et hooks admin dans `features/admin/`, redirection du compte suspendu, helpers déplacés vers `shared/`. §2.2 : renvoi à la règle de visibilité. §4.1 : `ACCOUNT_SUSPENDED` sur `/auth/otp/verify` et `/auth/refresh`. §4.3, §4.4 et §4.6 : la visibilité publique exige un owner actif au rôle `owner`. §4.7 : contrat complet des sept routes de modération (filtres, valeurs de `visibility`, `ADMIN_ACCOUNT_PROTECTED`, `NOT_AN_OWNER`) et des quatre routes de demandes owner. §4.2bis : rôles réellement admis pour `POST /owner-requests`. §9 : signalement d'un bien en V2 |
 | 1.7     | Novembre 2026 | MH-77, corrections de l'audit de sécurité du 12 novembre 2026. §1.1 : `middleware/timeout.rs`, `shared/image_processing.rs`, `shared/pii.rs`, `AppPath`, nouvelles migrations, `/health/storage` retiré, Swagger UI en `development` seulement. §2.2 et §2.3 : contrainte `users_email_canonical`, rétention et index de `refresh_tokens`. §3.1 : `local` seule valeur de `STORAGE_PROVIDER`, ré-encodage des images publiques, remplacement d'avatar sous verrou. §3bis.1 : e-mails envoyés en tâche de fond, adresse masquée dans les logs. §4 : erreurs communes, délais du serveur, caractères de contrôle. §4.1 : normalisation de l'e-mail, `422` sur `/auth/otp/request`, délai OTP croissant. §4.2 et §4.5 : extension des images ré-encodées. §4.2bis : dimensions des images et nom d'origine des pièces d'identité. §4.3 : la route cover renvoie l'enveloppe `error`. §7 : renvoi aux fichiers du dépôt, règles nginx (en-têtes, CSP, `11m`, non root), ports publiés, TLS en amont. §8 : `APP_ENV` obligatoire, `s3` refusé, `TRUSTED_PROXIES` en production |
+| 1.8     | Novembre 2026 | MH-85, stratégie de tests alignée sur la suite livrée par l'EP-14. §6.1 : tests unitaires sans repository mocké, tests d'intégration derrière la feature `integration` avec une base par test, fichier de test par ticket de flux. §6.2 : lignes « repository mocké via trait » et `axum::test` remplacées, seuil de couverture à 90 % de lignes. §6.3 : chaque cas critique renvoie à son fichier de test. §6.4 : lancer la suite en local |

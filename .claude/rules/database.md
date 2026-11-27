@@ -46,4 +46,6 @@ MyHouse uses `sqlx` directly against PostgreSQL — no ORM (Prisma/Supabase were
 
 ## Testing
 
-- Integration tests run against a real database that `#[sqlx::test]` creates and migrates for each test (feature flag `integration`, suite in `backend/tests/integration/` — see TECHNICAL_SPEC_MVP.md §6.1). A rolled-back wrapping transaction cannot work: the application code commits its own transactions. Never mock the DB layer in repository tests; mocking belongs at the service layer (repository trait mocked).
+- Unit tests sit in a `#[cfg(test)] mod tests` block at the end of each file and cover logic that does not touch the database. Repositories are free functions over `&PgPool` with no trait, so nothing mocks them: logic that depends on the database is tested at integration level.
+- Integration tests live in `backend/tests/integration/` behind the `integration` feature, one file per flow ticket. Each test gets its own database, created and migrated by `#[sqlx::test]`. A rolled-back wrapping transaction cannot isolate tests, because the application code commits its own transactions. The role behind `DATABASE_URL` must be allowed to create databases.
+- CI measures unit and integration tests together and fails under 90 % line coverage. Case-to-file mapping and the local run command: TECHNICAL_SPEC_MVP.md §6.
